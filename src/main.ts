@@ -8,6 +8,9 @@ import { BoardView } from './game/BoardView';
 import { Choreographer } from './game/Choreographer';
 import { Game } from './game/Game';
 import { Hud } from './ui/Hud';
+import { Lobby } from './ui/Lobby';
+import { onlineFromEnv } from './net/online';
+import { OnlineSession } from './net/session';
 
 const hud = new Hud();
 const stage = new Stage(document.getElementById('scene')!);
@@ -26,6 +29,8 @@ try {
   const debris = new Debris(stage.scene, () => view.pieces.values());
   const choreo = new Choreographer(view, fx, debris, stage);
   const game = new Game(stage, view, choreo, hud);
+  const online = onlineFromEnv();
+  const session = online ? new OnlineSession(online, game, hud, new Lobby()) : null;
   if (import.meta.env.DEV) {
     // Dev helper: step the simulation without requestAnimationFrame (hidden tabs, tests).
     Object.assign(window, {
@@ -33,6 +38,7 @@ try {
         stage,
         view,
         game,
+        session,
         animator,
         async step(seconds: number, fps = 30) {
           for (let i = 0; i < Math.round(seconds * fps); i++) {
@@ -44,6 +50,7 @@ try {
     });
   }
   await game.start();
+  await session?.boot();
 } catch (err) {
   console.error(err);
   hud.showError(`Could not load the chess set: ${(err as Error).message}`);

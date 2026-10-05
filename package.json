@@ -7,14 +7,18 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/rules.test.ts",
+    "test:e2e": "node --test --test-concurrency=1 tests/online.e2e.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "chess.js": "^1.4.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/three": "^0.186.0",
+    "supabase": "^2.119.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.2"
   }

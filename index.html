@@ -20,6 +20,10 @@
       <nav class="actions">
         <button data-action="new" title="New game (N)">New game</button>
         <button data-action="undo" title="Undo (U)">Undo</button>
+        <button data-action="online" title="Play a friend over the internet" hidden>Play online</button>
+        <button data-action="draw" title="Offer your opponent a draw" hidden>Offer draw</button>
+        <button data-action="resign" title="Resign this game" hidden>Resign</button>
+        <button data-action="leave" title="Leave the online game and play locally" hidden>Leave game</button>
         <button data-action="flip" title="Rotate view to the other side (F)">Flip view</button>
         <button data-action="autoflip" aria-pressed="false" title="Turn the camera to the side to move">Auto-turn</button>
         <button data-action="sound" aria-pressed="true" title="Sound on/off (M)">Sound</button>
@@ -72,6 +76,58 @@
         </div>
       </div>
     </div>
+
+    <div class="modal lobby" hidden>
+      <div class="card">
+        <h2>Play online</h2>
+
+        <form class="lobby-step" data-step="create">
+          <p>Create a game and send the link to a friend.</p>
+          <label class="field">
+            <span>Your name</span>
+            <input name="name" maxlength="24" autocomplete="nickname" placeholder="Anonymous" />
+          </label>
+          <div class="seg" role="radiogroup" aria-label="Play as">
+            <button type="button" role="radio" data-color="w">♔ White</button>
+            <button type="button" role="radio" data-color="random" aria-checked="true">Random</button>
+            <button type="button" role="radio" data-color="b">♚ Black</button>
+          </div>
+          <div class="go-actions">
+            <button type="button" data-lobby="cancel">Cancel</button>
+            <button type="submit" class="primary">Create game</button>
+          </div>
+        </form>
+
+        <div class="lobby-step" data-step="invite">
+          <p>Send this link to your opponent.<br />The game starts as soon as they open it.</p>
+          <div class="invite-row">
+            <input class="invite-link" readonly aria-label="Invite link" />
+            <button type="button" data-lobby="copy">Copy</button>
+          </div>
+          <p class="waiting">Waiting for your opponent…</p>
+          <div class="go-actions">
+            <button type="button" data-lobby="hide">Look at the board</button>
+            <button type="button" data-lobby="cancel">Cancel game</button>
+          </div>
+        </div>
+
+        <form class="lobby-step" data-step="join">
+          <p class="join-text">You have been invited to a game.</p>
+          <label class="field">
+            <span>Your name</span>
+            <input name="name" maxlength="24" autocomplete="nickname" placeholder="Anonymous" />
+          </label>
+          <div class="go-actions">
+            <button type="button" data-lobby="cancel">Play locally</button>
+            <button type="submit" class="primary">Join game</button>
+          </div>
+        </form>
+
+        <p class="lobby-error" role="alert"></p>
+      </div>
+    </div>
+
+    <div class="toasts" aria-live="polite"></div>
 
     <div class="loader">
       <div class="loader-title">Wizard Chess</div>

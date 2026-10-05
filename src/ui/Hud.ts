@@ -8,7 +8,37 @@ const GLYPH: Record<Side, Record<PieceSymbol, string>> = {
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 const NAME: Record<PieceSymbol, string> = { q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight', p: 'Pawn', k: 'King' };
 
-export type HudAction = 'new' | 'undo' | 'flip' | 'autoflip' | 'sound';
+export type HudAction =
+  | 'new'
+  | 'undo'
+  | 'flip'
+  | 'autoflip'
+  | 'sound'
+  | 'online'
+  | 'leave'
+  | 'resign'
+  | 'draw';
+
+export interface Player {
+  name: string;
+  you: boolean;
+  /** connected right now (undefined = unknown) */
+  present?: boolean;
+}
+
+/** Names for an online game; null in local (hotseat) play. */
+export interface Players {
+  w: Player | null;
+  b: Player | null;
+  /** waiting for the second player */
+  waiting: boolean;
+}
+
+export interface ToastAction {
+  label: string;
+  primary?: boolean;
+  run: () => void;
+}
 
 const $ = <T extends Element>(sel: string) => document.querySelector<T>(sel)!;
 
@@ -21,6 +51,9 @@ export class Hud {
   private readonly gameOver = $<HTMLElement>('.modal.gameover');
   private readonly hint = $<HTMLElement>('.hint');
   private readonly loader = $<HTMLElement>('.loader');
+  private readonly toasts = $<HTMLElement>('.toasts');
+  private players: Players | null = null;
+  private last: { chess: Chess; status: string } | null = null;
 
   onAction: (action: HudAction) => void = () => {};
 
@@ -55,6 +88,67 @@ export class Hud {
     $<HTMLButtonElement>(`button[data-action="${action}"]`).setAttribute('aria-pressed', String(on));
   }
 
+  /** Show which buttons apply: local play, or an online game (seated or spectating). */
+  setMode(mode: { online: boolean; seated?: boolean; active?: boolean }): void {
+    const show = (action: HudAction, on: boolean) => {
+      $<HTMLButtonElement>(`.actions button[data-action="${action}"]`).hidden = !on;
+    };
+    show('new', !mode.online);
+    show('undo', !mode.online);
+    show('online', !mode.online && this.onlineAvailable);
+    show('leave', mode.online);
+    show('resign', mode.online && !!mode.seated && !!mode.active);
+    show('draw', mode.online && !!mode.seated && !!mode.active);
+    $<HTMLButtonElement>('.go-actions button[data-action="new"]').textContent =
+      mode.online ? (mode.seated ? 'Rematch' : 'Leave') : 'Play again';
+  }
+
+  onlineAvailable = false;
+
+  setDrawOffered(offered: boolean): void {
+    const btn = $<HTMLButtonElement>('.actions button[data-action="draw"]');
+    btn.disabled = offered;
+    btn.textContent = offered ? 'Draw offered' : 'Offer draw';
+  }
+
+  setPlayers(players: Players | null): void {
+    this.players = players;
+    if (this.last) this.update(this.last.chess, this.last.status);
+  }
+
+  /** "You", the player's name online, or the team name locally. */
+  sideName(side: Side): string {
+    const p = this.players?.[side];
+    if (!p) return TEAMS[side].name;
+    return p.you ? 'You' : p.name;
+  }
+
+  /** A small message at the bottom of the screen, optionally with buttons. Returns a dismiss function. */
+  toast(message: string, actions: ToastAction[] = [], seconds = actions.length ? 0 : 4): () => void {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    const text = document.createElement('span');
+    text.textContent = message;
+    el.append(text);
+    const dismiss = () => {
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 300);
+    };
+    for (const a of actions) {
+      const btn = document.createElement('button');
+      btn.textContent = a.label;
+      if (a.primary) btn.className = 'primary';
+      btn.addEventListener('click', () => {
+        dismiss();
+        a.run();
+      });
+      el.append(btn);
+    }
+    this.toasts.append(el);
+    if (seconds) setTimeout(dismiss, seconds * 1000);
+    return dismiss;
+  }
+
   setBusy(busy: boolean, canUndo: boolean): void {
     $<HTMLButtonElement>('.actions button[data-action="undo"]').disabled = busy || !canUndo;
     $<HTMLButtonElement>('.actions button[data-action="new"]').disabled = busy;
@@ -66,9 +160,17 @@ export class Hud {
 
   /** Refresh turn banner, captured pieces and move list from the game state. */
   update(chess: Chess, status = ''): void {
+    this.last = { chess, status };
     const side = chess.turn();
+    const players = this.players;
     this.turn.dataset.side = side;
-    this.turnText.textContent = chess.isGameOver() ? 'Game over' : `${TEAMS[side].name} to move`;
+    this.turnText.textContent = chess.isGameOver()
+      ? 'Game over'
+      : players?.waiting
+        ? 'Waiting for an opponent…'
+        : players?.[side]?.you
+          ? 'Your move'
+          : `${players?.[side]?.name ?? TEAMS[side].name} to move`;
     this.turnStatus.textContent = status;
     if (status) {
       this.turn.classList.remove('flash');
@@ -84,6 +186,12 @@ export class Hud {
     const score = (s: Side) => taken[s].reduce((sum, p) => sum + VALUE[p], 0);
     for (const s of ['w', 'b'] as Side[]) {
       const row = $<HTMLElement>(`.cap-row[data-side="${s}"]`);
+      const p = players?.[s];
+      const label = row.querySelector<HTMLElement>('.cap-label')!;
+      label.textContent = p ? (p.you ? `${p.name} (you)` : p.name) : players ? '…' : TEAMS[s].name;
+      label.title = label.textContent;
+      label.dataset.present = p?.present === undefined ? '' : String(p.present);
+      row.classList.toggle('named', !!players);
       const enemy: Side = s === 'w' ? 'b' : 'w';
       const sorted = [...taken[s]].sort((a, b) => VALUE[b] - VALUE[a]);
       row.querySelector('.cap-pieces')!.textContent = sorted.map((p) => GLYPH[enemy][p]).join('');
