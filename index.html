@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wizard Chess 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="scene"></div>
+    <div class="vignette"></div>
+
+    <header class="topbar">
+      <div class="brand">Wizard Chess</div>
+      <nav class="actions">
+        <button data-action="new" title="New game (N)">New game</button>
+        <button data-action="undo" title="Undo (U)">Undo</button>
+        <button data-action="flip" title="Rotate view to the other side (F)">Flip view</button>
+        <button data-action="autoflip" aria-pressed="false" title="Turn the camera to the side to move">Auto-turn</button>
+        <button data-action="sound" aria-pressed="true" title="Sound on/off (M)">Sound</button>
+      </nav>
+    </header>
+
+    <div class="turn" aria-live="polite">
+      <span class="turn-chip"></span>
+      <span class="turn-text">White to move</span>
+      <span class="turn-status"></span>
+    </div>
+
+    <aside class="side-panel">
+      <section class="captures">
+        <div class="cap-row" data-side="w">
+          <span class="cap-label">White</span>
+          <span class="cap-pieces"></span>
+          <span class="cap-adv"></span>
+        </div>
+        <div class="cap-row" data-side="b">
+          <span class="cap-label">Black</span>
+          <span class="cap-pieces"></span>
+          <span class="cap-adv"></span>
+        </div>
+      </section>
+      <section class="history">
+        <h2>Moves</h2>
+        <ol class="move-list"></ol>
+      </section>
+    </aside>
+
+    <div class="hint">
+      <b>Click</b> a piece, then a glowing square · <b>Left-drag</b> orbit · <b>Right-drag</b> pan · <b>Wheel</b> zoom
+    </div>
+
+    <div class="modal promotion" hidden>
+      <div class="card">
+        <h2>Promote your pawn</h2>
+        <div class="promo-options"></div>
+      </div>
+    </div>
+
+    <div class="modal gameover" hidden>
+      <div class="card">
+        <h2 class="go-title">Checkmate</h2>
+        <p class="go-text">White wins</p>
+        <div class="go-actions">
+          <button data-action="new" class="primary">Play again</button>
+          <button data-action="close">Look at the board</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loader">
+      <div class="loader-title">Wizard Chess</div>
+      <div class="loader-bar"><span></span></div>
+      <div class="loader-text">Summoning the pieces…</div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
