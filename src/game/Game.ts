@@ -9,7 +9,14 @@ import type { BoardView } from './BoardView';
 import type { Choreographer } from './Choreographer';
 import type { Piece } from './Piece';
 
-const CHECK_RED = new THREE.Color(1.0, 0.12, 0.05);
+/** The rook's starting square for a castling move, otherwise null. */
+function castlingRook(m: Move): Square | null {
+  if (m.isKingsideCastle()) return `h${m.from[1]}` as Square;
+  if (m.isQueensideCastle()) return `a${m.from[1]}` as Square;
+  return null;
+}
+
+const CHECK_RED =new THREE.Color(1.0, 0.12, 0.05);
 
 /**
  * Game controller: owns the rules (chess.js), turns clicks into moves and
@@ -98,7 +105,9 @@ export class Game {
       return;
     }
     const piece = this.chess.get(sq);
-    const interesting = (piece && piece.color === this.chess.turn()) || this.targets.some((m) => m.to === sq);
+    const interesting =
+      (piece && piece.color === this.chess.turn()) ||
+      this.targets.some((m) => m.to === sq || castlingRook(m) === sq);
     this.view.setHover(interesting ? sq : null);
     el.style.cursor = interesting ? 'pointer' : '';
   }
@@ -108,7 +117,8 @@ export class Game {
     if (!sq) return this.deselect();
 
     if (this.selected) {
-      const candidates = this.targets.filter((m) => m.to === sq);
+      // Castling: click the king's target square, or simply the rook to castle with.
+      const candidates = this.targets.filter((m) => m.to === sq || castlingRook(m) === sq);
       if (candidates.length) {
         void this.commit(candidates);
         return;
