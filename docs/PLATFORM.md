@@ -63,11 +63,13 @@ modules and a "More" sheet.
 | Play | 🟡 | Start games in every mode. |
 | Puzzles | ⏸ | Roadmap of 100 puzzle levels. |
 | Learn | ⏸ | Tutorials: basics, tactics, openings. |
-| Community | 🟡 | Find players, friend requests, view profiles. |
-| Shop | 🟡 | Spend coins on cosmetics. |
-| Profile | 🟡 | Rank, history, awards, equipped cosmetics. |
-| Messages | 🟡 | Chat with friends. |
-| Settings | 🟡 | Language, email, password, sound. |
+| Community | 🔜 | Find players, friend requests, view profiles. |
+| Shop | 🔜 | Spend coins on cosmetics. |
+| Profile | 🔜 | Rank, history, awards, equipped cosmetics. |
+| Messages | 🔜 | Chat with friends. |
+| Settings | 🔜 | Language, email, password, sound. |
+
+Modules marked 🔜 currently show a placeholder page listing their planned features.
 
 The top of the sidebar shows the logo; the bottom shows the signed-in player (icon,
 username, rank) and the coin balance.
@@ -81,7 +83,7 @@ username, rank) and the coin balance.
 | Casual | 🟡 | Matchmaking against any online player. Pays coins, no MMR. |
 | Ranked | 🟡 | Matchmaking against players of similar MMR. Changes MMR and pays coins. |
 | Tournaments | ⏸ | Coin entry fee, brackets. Later. |
-| Play a friend | 🟡 | Invite from the friends list, play on one device, or create a link anyone can open (the link mode is ✅ live today). |
+| Play a friend | 🟡 | Invite from the friends list (🟡 demo list), play on one device (✅), or create a link anyone can open (✅ live online). |
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
 | Play for coins | 🟡 | Both players stake the same amount; the winner takes the pot minus a fee. |
 
@@ -320,10 +322,12 @@ The 3D board fills the screen. Around it:
   messages, shop, matchmaking, games). A **mock implementation** (browser storage, fake
   latency) makes the whole UI usable now; a **Supabase implementation** replaces it module
   by module without UI changes.
-- **AI opponent:** a small alpha-beta engine in a Web Worker (difficulty levels). The same
-  worker estimates accuracy for the result screen until server-side analysis exists.
-- **i18n-ready:** all user-facing text goes through one dictionary, so adding languages
-  is a translation task.
+- **AI opponent:** a small alpha-beta engine in a Web Worker (5 levels, move generator
+  verified with perft). The same worker estimates accuracy for the result screen until
+  server-side analysis exists. On the mock back-end, matchmade opponents are played by this
+  engine and marked "Demo".
+- **Languages:** planned together with Settings (M2): user-facing text moves into one
+  dictionary per language, so adding a language becomes a translation task.
 
 ### 8.2 Back-end (Supabase)
 
@@ -364,7 +368,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 
 | Milestone | Content | Status |
 | --- | --- | --- |
-| M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | in progress |
+| M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
 | M2 Social | Profile, Community, Messages, Settings screens | 🔜 |
 | M3 Shop | Shop catalogue, buy and equip, loadout in games | 🔜 |
 | M4 Back-end: accounts | Supabase Auth (email, Apple, Google), profiles, onboarding, usernames | 🔜 |
