@@ -4,10 +4,10 @@ import { animator, ease, lerp } from '../core/animator';
 import { TEAMS, layout, other } from '../core/layout';
 import { sfx } from '../audio/sfx';
 import type { Stage } from '../scene/Stage';
-import type { Hud, HudAction } from '../ui/Hud';
 import type { BoardView } from './BoardView';
 import type { Choreographer } from './Choreographer';
 import type { Piece } from './Piece';
+import type { GameEnd, GameUi } from './ui';
 
 /** The rook's starting square for a castling move, otherwise null. */
 function castlingRook(m: Move): Square | null {
@@ -28,9 +28,8 @@ export interface Seat {
   send(move: Move): void;
 }
 
-interface Ending {
-  title: string;
-  text: string;
+interface Ending extends GameEnd {
+  /** short text for the turn banner */
   status: string;
 }
 
@@ -52,33 +51,62 @@ export class Game {
   private seat: Seat | null = null;
   /** board work runs strictly in order: moves, remote updates and resets never interleave */
   private queue: Promise<void> = Promise.resolve();
-
-  /** HUD actions that belong to the online session (play online, resign, draw, leave, rematch). */
-  onOnlineAction: (action: HudAction) => void = () => {};
+  private introduced = false;
+  /** keyboard shortcuts only apply while the game screen is showing */
+  active = false;
 
   constructor(
     private readonly stage: Stage,
     private readonly view: BoardView,
     private readonly choreo: Choreographer,
-    private readonly hud: Hud,
+    private readonly ui: GameUi,
   ) {
     this.bindInput();
-    hud.onAction = (a) => this.onAction(a);
   }
 
-  start(): Promise<void> {
-    return this.run(() => this.intro());
+  /**
+   * Start a game: local hotseat with a null seat, otherwise a seat that sends
+   * this player's moves somewhere (server, AI). The first game plays the intro.
+   */
+  begin(seat: Seat | null, moves: string[] = []): Promise<void> {
+    this.setBusy(true);
+    return this.run(async () => {
+      this.seat = seat;
+      const side = seat?.side ?? 'w';
+      if (this.introduced) return this.resetBoard(moves, side);
+      this.introduced = true;
+      await this.intro(moves, side);
+    });
   }
 
-  private async intro(): Promise<void> {
+  /** Moves so far in UCI notation ("e2e4", "e7e8q"). */
+  get history(): string[] {
+    return this.chess.history({ verbose: true }).map((m) => m.lan);
+  }
+
+  get fen(): string {
+    return this.chess.fen();
+  }
+
+  get isOver(): boolean {
+    return this.over;
+  }
+
+  /** Resolves once all queued board work (moves, animations, resets) has finished. */
+  idle(): Promise<void> {
+    return this.queue;
+  }
+
+  private async intro(moves: string[], side: Side): Promise<void> {
+    this.clearBoardState();
+    this.replay(moves);
     const pieces = this.view.rebuild(this.chess);
     for (const p of pieces) p.dissolve.uDissolve.value = 1.1;
-    this.hud.update(this.chess);
+    this.ui.update(this.chess);
     this.setBusy(true);
     await this.stage.renderer.compileAsync(this.stage.scene, this.stage.camera);
-    this.hud.hideLoader();
-    await Promise.all([this.introCamera(), animator.wait(0.5).then(() => this.choreo.materialize(pieces))]);
-    this.setBusy(false);
+    await Promise.all([this.introCamera(side), animator.wait(0.5).then(() => this.choreo.materialize(pieces))]);
+    this.settle();
   }
 
   // ---------------------------------------------------------------- input
@@ -104,14 +132,12 @@ export class Game {
     el.addEventListener('pointerleave', () => this.view.setHover(null));
 
     window.addEventListener('keydown', (e) => {
-      if (e.target instanceof HTMLInputElement) return;
+      if (!this.active || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const key = e.key.toLowerCase();
       if (key === 'escape') this.deselect();
-      else if (key === 'f') this.onAction('flip');
+      else if (key === 'f') this.flip();
       else if (this.seat) return;
-      else if (key === 'u' || (key === 'z' && (e.ctrlKey || e.metaKey))) this.onAction('undo');
-      else if (key === 'n') this.onAction('new');
-      else if (key === 'm') this.onAction('sound');
+      else if (key === 'u' || (key === 'z' && (e.ctrlKey || e.metaKey))) this.undo();
     });
   }
 
@@ -163,35 +189,16 @@ export class Game {
     this.deselect();
   }
 
-  private onAction(action: HudAction): void {
+  /** Turn the camera to the other side of the board. */
+  flip(): void {
     sfx.unlock();
-    switch (action) {
-      case 'new':
-        if (this.seat) this.onOnlineAction(action);
-        else void this.newGame();
-        break;
-      case 'undo':
-        if (!this.seat) this.undo();
-        break;
-      case 'online':
-      case 'leave':
-      case 'resign':
-      case 'draw':
-        this.onOnlineAction(action);
-        break;
-      case 'flip':
-        if (!this.busy) void this.orbitTo(this.cameraTheta() + Math.PI);
-        break;
-      case 'autoflip':
-        this.autoFlip = !this.autoFlip;
-        this.hud.setToggle('autoflip', this.autoFlip);
-        if (this.autoFlip && !this.busy) void this.faceSide(this.chess.turn());
-        break;
-      case 'sound':
-        sfx.muted = !sfx.muted;
-        this.hud.setToggle('sound', !sfx.muted);
-        break;
-    }
+    if (!this.busy) void this.orbitTo(this.cameraTheta() + Math.PI);
+  }
+
+  /** Keep the camera on the side to move (handy for two players on one device). */
+  setAutoFlip(on: boolean): void {
+    this.autoFlip = on;
+    if (on && !this.busy) void this.faceSide(this.chess.turn());
   }
 
   private isMyTurn(): boolean {
@@ -208,16 +215,7 @@ export class Game {
     return next;
   }
 
-  // ---------------------------------------------------------------- online
-
-  /** Switch to an online game (or back to local play with a null seat), replaying its moves. */
-  enterOnline(seat: Seat | null, moves: string[] = []): Promise<void> {
-    this.setBusy(true);
-    return this.run(async () => {
-      this.seat = seat;
-      await this.resetBoard(moves, seat?.side ?? 'w');
-    });
-  }
+  // ---------------------------------------------------------------- remote moves
 
   /** Bring the board to the server's move list: animate a single new move, rebuild on anything else. */
   sync(moves: string[]): Promise<void> {
@@ -240,13 +238,14 @@ export class Game {
     });
   }
 
-  /** The online game ended off the board (resignation, agreed draw). */
-  finish(title: string, text: string): Promise<void> {
+  /** The game ended off the board (resignation, agreed draw, timeout). */
+  finish(end: GameEnd): Promise<void> {
     return this.run(async () => {
       if (this.over) return;
+      this.deselect();
       this.clearCheck();
-      this.hud.update(this.chess, title);
-      this.endGame(title, text);
+      this.ui.update(this.chess, end.title);
+      this.endGame(end);
     });
   }
 
@@ -300,7 +299,7 @@ export class Game {
   private async commit(candidates: Move[]): Promise<void> {
     this.setBusy(true);
     let promotion: PieceSymbol | undefined;
-    if (candidates[0].isPromotion()) promotion = await this.hud.askPromotion(this.chess.turn());
+    if (candidates[0].isPromotion()) promotion = await this.ui.askPromotion(this.chess.turn());
     const choice = candidates.find((m) => m.promotion === promotion) ?? candidates[0];
     await this.play(choice, (move) => this.seat?.send(move));
   }
@@ -319,11 +318,10 @@ export class Game {
     this.view.setHover(null);
     this.view.setLastMove(null, null);
     this.clearCheck();
-    this.hud.hideHint();
 
     const move = this.chess.move({ from: choice.from, to: choice.to, promotion: choice.promotion });
     onApplied?.(move);
-    this.hud.update(this.chess);
+    this.ui.update(this.chess);
     this.setBusy(true);
 
     await this.choreo.play(move);
@@ -333,14 +331,17 @@ export class Game {
 
   /** "White wins" locally, "You win" / "Alice wins" online. */
   winText(side: Side): string {
-    const name = this.hud.sideName(side);
+    const name = this.ui.sideName(side);
     return name === 'You' ? 'You win' : `${name} wins`;
   }
 
   /** How the current position ends the game, if it does. */
   private ending(): Ending | null {
     const c = this.chess;
-    if (c.isCheckmate()) return { title: 'Checkmate', text: this.winText(other(c.turn())), status: 'Checkmate!' };
+    if (c.isCheckmate()) {
+      const winner = other(c.turn());
+      return { winner, reason: 'checkmate', title: 'Checkmate', text: this.winText(winner), status: 'Checkmate!' };
+    }
     if (!c.isDraw()) return null;
     const reason = c.isStalemate()
       ? 'Stalemate'
@@ -349,14 +350,14 @@ export class Game {
         : c.isThreefoldRepetition()
           ? 'Threefold repetition'
           : 'Fifty-move rule';
-    return { title: 'Draw', text: reason, status: 'Draw' };
+    return { winner: null, reason: reason.toLowerCase(), title: 'Draw', text: reason, status: 'Draw' };
   }
 
   private async afterMove(): Promise<void> {
     const c = this.chess;
     const end = this.ending();
     if (end) {
-      this.hud.update(c, end.status);
+      this.ui.update(c, end.status);
       if (c.isCheckmate()) {
         const king = this.view.findKing(c.turn());
         if (king) {
@@ -366,7 +367,7 @@ export class Game {
         }
         sfx.fanfare();
       }
-      this.endGame(end.title, end.text);
+      this.endGame(end);
       return;
     }
 
@@ -379,7 +380,7 @@ export class Game {
     this.clearCheck();
     const c = this.chess;
     if (!c.inCheck()) {
-      this.hud.update(c);
+      this.ui.update(c);
       return;
     }
     const king = this.view.findKing(c.turn());
@@ -388,7 +389,7 @@ export class Game {
       this.stopCheck = this.pulseCheck(king);
     }
     if (withSound) sfx.check();
-    this.hud.update(c, 'Check!');
+    this.ui.update(c, 'Check!');
   }
 
   private pulseCheck(king: Piece): () => void {
@@ -411,24 +412,25 @@ export class Game {
     this.view.setCheck(null);
   }
 
-  private endGame(title: string, text: string): void {
+  private endGame(end: GameEnd): void {
     this.over = true;
     this.setBusy(false);
     this.stage.controls.autoRotate = true;
     this.stage.controls.autoRotateSpeed = 0.6;
     setTimeout(() => {
-      if (this.over) this.hud.showGameOver(title, text);
+      if (this.over) this.ui.gameOver(end);
     }, 1400);
   }
 
-  private undo(): void {
+  /** Take back the last move (local games only). */
+  undo(): void {
     if (this.busy || this.seat || this.chess.history().length === 0) return;
     this.deselect();
     this.clearCheck();
     this.chess.undo();
     this.over = false;
     this.stage.controls.autoRotate = false;
-    this.hud.hideGameOver();
+    this.ui.hideGameOver();
     this.view.rebuild(this.chess);
     const last = this.chess.history({ verbose: true }).at(-1);
     this.view.setLastMove(last?.from ?? null, last?.to ?? null);
@@ -436,7 +438,8 @@ export class Game {
     this.setBusy(false);
   }
 
-  private newGame(): Promise<void> {
+  /** Start over (local games only). */
+  newGame(): Promise<void> {
     if (this.busy) return Promise.resolve();
     this.setBusy(true);
     return this.run(() => this.resetBoard([], 'w'));
@@ -452,7 +455,7 @@ export class Game {
     this.clearCheck();
     this.over = false;
     this.stage.controls.autoRotate = false;
-    this.hud.hideGameOver();
+    this.ui.hideGameOver();
     this.view.setLastMove(null, null);
   }
 
@@ -463,8 +466,8 @@ export class Game {
     this.showCheckState(false);
     const end = this.ending();
     if (end) {
-      this.hud.update(this.chess, end.status);
-      this.endGame(end.title, end.text);
+      this.ui.update(this.chess, end.status);
+      this.endGame(end);
     } else {
       this.setBusy(false);
     }
@@ -478,7 +481,7 @@ export class Game {
     this.replay(moves);
     const pieces = this.view.rebuild(this.chess);
     for (const p of pieces) p.dissolve.uDissolve.value = 1.1;
-    this.hud.update(this.chess);
+    this.ui.update(this.chess);
     await Promise.all([this.faceSide(side), this.choreo.materialize(pieces)]);
     this.settle();
   }
@@ -488,13 +491,13 @@ export class Game {
     this.clearBoardState();
     this.replay(moves);
     this.view.rebuild(this.chess);
-    this.hud.update(this.chess);
+    this.ui.update(this.chess);
     this.settle();
   }
 
   private setBusy(busy: boolean): void {
     this.busy = busy;
-    this.hud.setBusy(busy, this.chess.history().length > 0);
+    this.ui.setBusy(busy, this.chess.history().length > 0);
     if (busy) this.stage.renderer.domElement.style.cursor = '';
   }
 
@@ -529,9 +532,10 @@ export class Game {
     controls.autoRotate = wasRotating;
   }
 
-  private async introCamera(): Promise<void> {
+  private async introCamera(side: Side): Promise<void> {
     const { camera, controls } = this.stage;
     const end = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    if (side === 'b') end.theta += Math.PI;
     const start = new THREE.Spherical(end.radius * 1.7, 0.35, end.theta - 1.4);
     const s = new THREE.Spherical();
     const off = new THREE.Vector3();

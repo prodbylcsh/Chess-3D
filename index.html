@@ -2,139 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wizard Chess 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0b10" />
+    <title>Wizard Chess</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <div id="scene"></div>
-    <div class="vignette"></div>
-
-    <header class="topbar">
-      <div class="brand">Wizard Chess</div>
-      <nav class="actions">
-        <button data-action="new" title="New game (N)">New game</button>
-        <button data-action="undo" title="Undo (U)">Undo</button>
-        <button data-action="online" title="Play a friend over the internet" hidden>Play online</button>
-        <button data-action="draw" title="Offer your opponent a draw" hidden>Offer draw</button>
-        <button data-action="resign" title="Resign this game" hidden>Resign</button>
-        <button data-action="leave" title="Leave the online game and play locally" hidden>Leave game</button>
-        <button data-action="flip" title="Rotate view to the other side (F)">Flip view</button>
-        <button data-action="autoflip" aria-pressed="false" title="Turn the camera to the side to move">Auto-turn</button>
-        <button data-action="sound" aria-pressed="true" title="Sound on/off (M)">Sound</button>
-      </nav>
-    </header>
-
-    <div class="turn" aria-live="polite">
-      <span class="turn-chip"></span>
-      <span class="turn-text">White to move</span>
-      <span class="turn-status"></span>
-    </div>
-
-    <aside class="side-panel">
-      <section class="captures">
-        <div class="cap-row" data-side="w">
-          <span class="cap-label">White</span>
-          <span class="cap-pieces"></span>
-          <span class="cap-adv"></span>
-        </div>
-        <div class="cap-row" data-side="b">
-          <span class="cap-label">Black</span>
-          <span class="cap-pieces"></span>
-          <span class="cap-adv"></span>
-        </div>
-      </section>
-      <section class="history">
-        <h2>Moves</h2>
-        <ol class="move-list"></ol>
-      </section>
-    </aside>
-
-    <div class="hint">
-      <b>Click</b> a piece, then a glowing square · <b>Left-drag</b> orbit · <b>Right-drag</b> pan · <b>Wheel</b> zoom
-    </div>
-
-    <div class="modal promotion" hidden>
-      <div class="card">
-        <h2>Promote your pawn</h2>
-        <div class="promo-options"></div>
-      </div>
-    </div>
-
-    <div class="modal gameover" hidden>
-      <div class="card">
-        <h2 class="go-title">Checkmate</h2>
-        <p class="go-text">White wins</p>
-        <div class="go-actions">
-          <button data-action="new" class="primary">Play again</button>
-          <button data-action="close">Look at the board</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal lobby" hidden>
-      <div class="card">
-        <h2>Play online</h2>
-
-        <form class="lobby-step" data-step="create">
-          <p>Create a game and send the link to a friend.</p>
-          <label class="field">
-            <span>Your name</span>
-            <input name="name" maxlength="24" autocomplete="nickname" placeholder="Anonymous" />
-          </label>
-          <div class="seg" role="radiogroup" aria-label="Play as">
-            <button type="button" role="radio" data-color="w">♔ White</button>
-            <button type="button" role="radio" data-color="random" aria-checked="true">Random</button>
-            <button type="button" role="radio" data-color="b">♚ Black</button>
-          </div>
-          <div class="go-actions">
-            <button type="button" data-lobby="cancel">Cancel</button>
-            <button type="submit" class="primary">Create game</button>
-          </div>
-        </form>
-
-        <div class="lobby-step" data-step="invite">
-          <p>Send this link to your opponent.<br />The game starts as soon as they open it.</p>
-          <div class="invite-row">
-            <input class="invite-link" readonly aria-label="Invite link" />
-            <button type="button" data-lobby="copy">Copy</button>
-          </div>
-          <p class="waiting">Waiting for your opponent…</p>
-          <div class="go-actions">
-            <button type="button" data-lobby="hide">Look at the board</button>
-            <button type="button" data-lobby="cancel">Cancel game</button>
-          </div>
-        </div>
-
-        <form class="lobby-step" data-step="join">
-          <p class="join-text">You have been invited to a game.</p>
-          <label class="field">
-            <span>Your name</span>
-            <input name="name" maxlength="24" autocomplete="nickname" placeholder="Anonymous" />
-          </label>
-          <div class="go-actions">
-            <button type="button" data-lobby="cancel">Play locally</button>
-            <button type="submit" class="primary">Join game</button>
-          </div>
-        </form>
-
-        <p class="lobby-error" role="alert"></p>
-      </div>
-    </div>
-
-    <div class="toasts" aria-live="polite"></div>
-
-    <div class="loader">
-      <div class="loader-title">Wizard Chess</div>
-      <div class="loader-bar"><span></span></div>
-      <div class="loader-text">Summoning the pieces…</div>
-    </div>
-
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

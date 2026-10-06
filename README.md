@@ -1,14 +1,36 @@
 # Wizard Chess 3D
 
-A two-player 3D chess game in the browser (same screen, or online with an invite link), with "wizard chess" style animations:
-pieces glide across the board, hop over anything in their way, and destroy each other
-with cinematic, physics-driven shattering.
+An online chess platform built around a cinematic 3D board with "wizard chess" style
+animations: pieces glide across the board, hop over anything in their way, and destroy each
+other with physics-driven shattering.
+
+The platform plan (modules, ranked MMR, coins, shop, architecture, roadmap) lives in
+**[docs/PLATFORM.md](docs/PLATFORM.md)**.
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check + production bundle in dist/
+npm test         # rules, rating/coin and AI unit tests
 ```
+
+## What's in the app today (milestone 1)
+
+- **Accounts**: sign in / sign up with email and password, Apple or Google, and a 4-step
+  onboarding (username with live availability check, one of six profile icons).
+- **Sidebar** with the eight modules; Puzzles and Learn are marked "Soon", Community, Shop,
+  Profile, Messages and Settings show what is coming in the next milestones.
+- **Play hub**: Ranked (with your rank emblem and division progress), Casual, Play a friend
+  (friends list, invite link, same device), Play vs AI (5 levels), Play for coins (3 stakes),
+  Tournaments ("Soon").
+- **Redesigned game screen** around the unchanged 3D board: player cards with rank and
+  captures, move list, actions, promotion picker, invite card, and a result screen with the
+  MMR change and its breakdown, rank progress, coins and accuracy.
+
+Accounts, friends, matchmaking and results currently run on an **in-browser mock back-end**
+(`src/api/mock`, data in localStorage) that applies the real MMR and coin rules. Matchmade
+opponents are played by the AI and marked "Demo". Invite-link games are fully online already
+(Supabase). See the roadmap in docs/PLATFORM.md for the back-end milestones.
 
 ## Controls
 
@@ -17,14 +39,12 @@ npm run build    # type-check + production bundle in dist/
 | Click a piece, then a glowing square | Move |
 | Left-drag / Right-drag / Wheel | Orbit / Pan / Zoom |
 | `F` | Flip the view to the other side |
-| `U` or `Ctrl+Z` | Undo (local games) |
-| `N` | New game (local games) |
-| `M` | Sound on/off |
+| `U` or `Ctrl+Z` | Undo (same-device games) |
 | `Esc` | Deselect |
 
-## Online multiplayer
+## Online games by invite link
 
-Click **Play online**, pick a name and colour, and send the invite link to a friend. The game
+In **Play → Play a friend → Create an invite link**, pick a colour and send the link to a friend. The game
 starts when they open it. Online games support resigning, draw offers, rematches (colours swap),
 spectators (anyone who opens a full game's link), presence (a dot shows whether your opponent
 is connected) and resuming after a reload: the link always brings you back to your game.
@@ -96,18 +116,25 @@ slow motion, camera shake, sparks, dust and a light flash.
 
 ```
 src/
-  core/      layout (square <-> world), Animator (single game clock, tweens, bullet time)
-  scene/     Stage (renderer, camera, lights, post-processing), GLB loading
-  fx/        particles, effects (sparks, dust, shockwave, bolt), shatter physics, dissolve shader
-  game/      Piece, BoardView (pieces, markers, picking), Choreographer (move animations), Game (controller)
-  ui/        HUD (turn, captures, move list, dialogs, toasts), Lobby (online game dialog)
-  net/       Online (Supabase client: auth, game actions, realtime), OnlineSession (online game flow)
+  app/        App (routes, guards), session state, sidebar layout
+  features/   auth, onboarding, play (hub, matchmaking, sheets), game (game screen, modes,
+              result card, join page), placeholders for upcoming modules
+  api/        typed service contracts (types.ts) and the in-browser mock back-end (mock/)
+  ui/         design-system components (kit.tsx), profile icons and rank emblems (art/)
+  ai/         chess engine for Play vs AI: 0x88 board, alpha-beta search, Web Worker
+  net/        Supabase client for online games
+  core/       layout (square <-> world), Animator (single game clock, tweens, bullet time)
+  scene/      Stage (renderer, camera, lights, post-processing), GLB loading
+  fx/         particles, effects (sparks, dust, shockwave, bolt), shatter physics, dissolve shader
+  game/       Piece, BoardView, Choreographer (move animations), Game (controller), GameUi contract
+  audio/      procedural sound effects
 supabase/
   migrations/         games table, row-level security, realtime
   functions/game/     Edge Function that validates and applies every online action
-  functions/_shared/  pure game rules, shared with the unit tests
-tests/       rules unit tests, end-to-end test against a running Supabase stack
-  audio/     procedural sound effects
+  functions/_shared/  pure rules shared by the app, the server and the tests:
+                      game rules, MMR/ranks (rating.ts), coins (economy.ts)
+docs/PLATFORM.md      the platform concept and roadmap
+tests/                unit tests (rules, rating, AI) and an end-to-end online test
 ```
 
 In dev builds, `window.__chess.step(seconds)` advances the game clock without

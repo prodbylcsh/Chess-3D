@@ -1,0 +1,49 @@
+.coming {
+  display: flex;
+  gap: 24px;
+  padding: 32px;
+}
+
+.coming-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.coming-body h2 {
+  margin: 12px 0 14px;
+  font-size: 20px;
+}
+
+.coming-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text-2);
+}
+
+.coming-body li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coming-body li svg {
+  color: var(--gold);
+  flex: none;
+}
+
+@media (max-width: 600px) {
+  .coming {
+    flex-direction: column;
+    padding: 22px;
+  }
+}

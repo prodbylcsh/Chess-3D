@@ -91,10 +91,22 @@ export class Stage {
 
   start(update: (dt: number) => void): void {
     this.update = update;
-    this.renderer.setAnimationLoop((timestamp: number) => {
+    this.loop = (timestamp: number) => {
       this.timer.update(timestamp);
       this.frame(Math.min(this.timer.getDelta(), 1 / 20));
-    });
+    };
+    this.renderer.setAnimationLoop(this.loop);
+  }
+
+  private loop: ((timestamp: number) => void) | null = null;
+
+  /** Stop rendering while the board is not on screen (saves GPU and battery). */
+  pause(): void {
+    this.renderer.setAnimationLoop(null);
+  }
+
+  resume(): void {
+    if (this.loop) this.renderer.setAnimationLoop(this.loop);
   }
 
   private update: (dt: number) => void = () => {};
