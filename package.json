@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/rules.test.ts",
+    "test": "node --test tests/rules.test.ts tests/rating.test.ts",
     "test:e2e": "node --test --test-concurrency=1 tests/online.e2e.ts"
   },
   "dependencies": {
