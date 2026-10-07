@@ -1,5 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
-import type { Profile } from '../../../api';
+import type { Color as Side } from 'chess.js';
+import type { Loadout, Profile } from '../../../api';
+import { looksFor } from '../../../cosmetics/looks';
 import type { Engine } from '../engine';
 import type { GameState, PlayerView } from '../store';
 import { rankOf } from '#shared/rating.ts';
@@ -47,5 +49,15 @@ export function playerFromProfile(profile: Profile | null, fallbackName = 'You')
     you: true,
   };
 }
+
+/**
+ * Dress the next game: each side in its player's items, board and background
+ * picked from one of them (`seed` makes the pick the same for both players).
+ */
+export function dressGame(engine: Engine, loadouts: Partial<Record<Side, Loadout | null>>, seed: string): void {
+  engine.wardrobe.apply(looksFor(loadouts.w ?? null, loadouts.b ?? null, seed));
+}
+
+export const randomSeed = () => Math.random().toString(36).slice(2);
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

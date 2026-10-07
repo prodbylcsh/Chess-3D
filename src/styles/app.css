@@ -10,3 +10,24 @@
   color: var(--gold);
   animation: fade-in 0.4s ease-out;
 }
+
+/* ---------------------------------------------------------------- chips */
+
+.chip {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    border-color 0.16s;
+}
+
+.chip:hover {
+  background: var(--gold-soft);
+  border-color: var(--gold-line);
+}

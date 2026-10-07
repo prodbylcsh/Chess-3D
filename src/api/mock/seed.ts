@@ -1,14 +1,9 @@
 // Demo players for the mock back-end: matchmaking opponents, friends, search results.
 import { MMR } from '#shared/rating.ts';
+import { DEFAULT_LOADOUT as SHARED_DEFAULT, ITEMS } from '#shared/shop.ts';
 import type { Loadout, Stats } from '../types';
 
-export const DEFAULT_LOADOUT: Loadout = {
-  pieces: 'classic-marble',
-  board: 'classic-marble',
-  background: 'candlelit-study',
-  moveAnimation: 'glide',
-  destruction: 'shatter',
-};
+export const DEFAULT_LOADOUT: Loadout = { ...SHARED_DEFAULT };
 
 export interface SeedPlayer {
   id: string;
@@ -17,6 +12,7 @@ export interface SeedPlayer {
   mmr: number;
   online: boolean;
   stats: Stats;
+  loadout: Loadout;
   createdAt: string;
 }
 
@@ -68,9 +64,22 @@ export const SEED_PLAYERS: SeedPlayer[] = NAMES.map(([username, iconId, mmr], i)
       rankedStreak: Math.floor(seeded(i + 3) * 4),
       bestStreak: 3 + Math.floor(seeded(i + 5) * 9),
     },
+    loadout: seedLoadout(i, mmr),
     createdAt: new Date(Date.UTC(2026, 0, 1) + seeded(i + 11) * 2.5e10).toISOString(),
   };
 });
+
+/** Demo players show off shop items: stronger players own more of them. */
+function seedLoadout(i: number, mmr: number): Loadout {
+  const loadout: Loadout = { ...DEFAULT_LOADOUT };
+  const keys = Object.keys(loadout) as Array<keyof Loadout>;
+  keys.forEach((category, k) => {
+    if (seeded(i * 7 + k + 50) > Math.min(0.85, mmr / 2600)) return;
+    const paid = ITEMS.filter((x) => x.category === category && x.price > 0);
+    loadout[category] = paid[Math.floor(seeded(i * 13 + k + 90) * paid.length)].id;
+  });
+  return loadout;
+}
 
 /** demo friends of every new account */
 export const SEED_FRIENDS = ['seed-5', 'seed-2', 'seed-9', 'seed-14', 'seed-11'];

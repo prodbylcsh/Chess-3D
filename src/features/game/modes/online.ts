@@ -6,7 +6,7 @@ import { inviteUrl, online } from '../../../net/client';
 import { confirmDialog, toast } from '../../../ui/kit';
 import type { GameState, PlayerView } from '../store';
 import type { Mode, ModeAction, ModeContext } from './types';
-import { playerFromProfile } from './types';
+import { dressGame, playerFromProfile } from './types';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
 
@@ -57,6 +57,9 @@ export class OnlineMode implements Mode {
     this.seat.side = this.side;
     this.seat.active = row.status === 'active';
     this.refresh();
+    // the opponent's items arrive with the back-end (M6); until then they use the standard set
+    if (this.side) dressGame(this.ctx.engine, { [this.side]: this.ctx.profile?.loadout ?? null }, row.id);
+    else dressGame(this.ctx.engine, {}, row.id);
     void game.begin(this.side ? this.seat : { side: null, active: false, send: () => {} }, row.moves);
     this.stopWatch = online!.watch(row.id, { onRow: (r) => this.onRow(r), onPresence: (ids) => this.onPresence(ids) });
     this.react(null, row);

@@ -4,8 +4,9 @@ import { Flag, Handshake, Undo2 } from 'lucide-react';
 import { ai } from '../../../ai/client';
 import type { GameEnd } from '../../../game/ui';
 import { confirmDialog, toast } from '../../../ui/kit';
+import type { Loadout } from '../../../api';
 import type { GameState, PlayerView } from '../store';
-import { playerFromProfile, sleep, type EndAction, type Mode, type ModeAction, type ModeContext } from './types';
+import { dressGame, playerFromProfile, randomSeed, sleep, type EndAction, type Mode, type ModeAction, type ModeContext } from './types';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
 
@@ -25,6 +26,10 @@ export abstract class BotGame implements Mode {
     protected readonly human: Side,
     protected readonly level: number,
     protected readonly opponent: PlayerView,
+    /** the opponent's shop items (null: the standard set) */
+    protected readonly opponentLoadout: Loadout | null = null,
+    /** board and background pick, shared with the opponent */
+    protected readonly seed = randomSeed(),
   ) {}
 
   protected get bot(): Side {
@@ -41,6 +46,7 @@ export abstract class BotGame implements Mode {
       mySide: this.human,
     });
     store.onGameOver = (end) => this.onGameOver(end);
+    dressGame(this.ctx.engine, { [this.human]: this.ctx.profile?.loadout ?? null, [this.bot]: this.opponentLoadout }, this.seed);
     void game.begin({ side: this.human, active: true, send: (m) => this.onHumanMove(m) }).then(() => {
       if (game.fen.split(' ')[1] === this.bot) void this.think();
     });
@@ -84,7 +90,7 @@ export abstract class BotGame implements Mode {
       winner: this.bot,
       reason: 'resignation',
       title: t('Resignation'),
-      text: `You resigned. ${this.opponent.name} wins`,
+      text: t('You resigned. {name} wins', { name: this.opponent.name }),
     });
   }
 

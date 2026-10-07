@@ -1,7 +1,7 @@
 import { t } from '../../../i18n';
 import { RefreshCw, RotateCcw, Undo2 } from 'lucide-react';
 import { getPrefs } from '../../../app/prefs';
-import type { Mode, ModeContext } from './types';
+import { dressGame, randomSeed, type Mode, type ModeContext } from './types';
 
 /** Two players sharing one device. */
 export class LocalMode implements Mode {
@@ -13,6 +13,9 @@ export class LocalMode implements Mode {
   start(): void {
     const { store, game } = this.ctx.engine;
     store.reset();
+    // both sides wear your items (each in its own colour)
+    const mine = this.ctx.profile?.loadout ?? null;
+    dressGame(this.ctx.engine, { w: mine, b: mine }, randomSeed());
     void game.begin(null).then(() => game.setAutoFlip(this.autoFlip));
   }
 

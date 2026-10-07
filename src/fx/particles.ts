@@ -236,16 +236,18 @@ const MOTES_VERT = /* glsl */ `
 attribute float aSeed;
 uniform float uTime;
 uniform float uScale;
+uniform float uRise;
+uniform float uSize;
 varying float vAlpha;
 void main() {
   vec3 p = position;
   float t = uTime * (0.15 + aSeed * 0.1);
   p.x += sin(t + aSeed * 31.0) * 0.6;
   p.z += cos(t * 0.8 + aSeed * 17.0) * 0.6;
-  p.y = mod(p.y + uTime * (0.05 + aSeed * 0.08), 6.0) + 0.3;
+  p.y = mod(p.y + uTime * (0.05 + aSeed * 0.08) * uRise, 6.0) + 0.3;
   vAlpha = smoothstep(0.3, 1.2, p.y) * (1.0 - smoothstep(4.5, 6.3, p.y)) * (0.4 + 0.6 * sin(uTime * 2.0 + aSeed * 50.0) * sin(uTime * 2.0 + aSeed * 50.0));
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_PointSize = (0.035 + aSeed * 0.04) * uScale / -mv.z;
+  gl_PointSize = (0.035 + aSeed * 0.04) * uSize * uScale / -mv.z;
   gl_Position = projectionMatrix * mv;
 }
 `;
@@ -265,8 +267,10 @@ void main() {
 export class AmbientMotes {
   readonly points: THREE.Points;
   private readonly material: THREE.ShaderMaterial;
+  private readonly capacity: number;
 
-  constructor(count = 260) {
+  constructor(count = 400) {
+    this.capacity = count;
     const pos = new Float32Array(count * 3);
     const seed = new Float32Array(count);
     for (let i = 0; i < count; i++) {
@@ -283,13 +287,29 @@ export class AmbientMotes {
     this.material = new THREE.ShaderMaterial({
       vertexShader: MOTES_VERT,
       fragmentShader: MOTES_FRAG,
-      uniforms: { uTime: { value: 0 }, uScale: { value: 500 }, uColor: { value: new THREE.Color(1.6, 1.1, 0.6) } },
+      uniforms: {
+        uTime: { value: 0 },
+        uScale: { value: 500 },
+        uRise: { value: 1 },
+        uSize: { value: 1 },
+        uColor: { value: new THREE.Color(1.6, 1.1, 0.6) },
+      },
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
     this.points = new THREE.Points(g, this.material);
     this.points.frustumCulled = false;
+    this.configure({ color: [1.6, 1.1, 0.6], count: 260, rise: 1, size: 1 });
+  }
+
+  /** Colour (linear HDR), how many motes are drawn, and speed/size multipliers. */
+  configure(o: { color: [number, number, number]; count: number; rise: number; size: number }): void {
+    const u = this.material.uniforms;
+    (u.uColor.value as THREE.Color).setRGB(...o.color);
+    u.uRise.value = o.rise;
+    u.uSize.value = o.size;
+    this.points.geometry.setDrawRange(0, Math.min(o.count, this.capacity));
   }
 
   setViewport(pixelHeight: number, fovDeg: number): void {

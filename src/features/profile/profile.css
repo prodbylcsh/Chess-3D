@@ -236,48 +236,52 @@
   gap: 8px;
 }
 
-.loadout li {
+.loadout-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid transparent;
   border-radius: var(--radius);
   background: var(--surface);
+  text-align: left;
 }
 
-.loadout li > span:last-child {
+button.loadout-item {
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+button.loadout-item:hover {
+  border-color: var(--gold-line);
+  background: var(--surface-hover);
+}
+
+.loadout-art {
+  flex: none;
+  width: 64px;
+  height: 40px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #0d0e14;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.loadout-text {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  min-width: 0;
   font-size: 12px;
 }
 
-.loadout strong {
+.loadout-text strong {
   font-size: 14px;
 }
 
-.loadout-swatch {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  background: linear-gradient(135deg, #ece5d8, #3a3550);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-}
-
-.loadout-swatch[data-cat='board'] {
-  background: repeating-conic-gradient(#e9e4dc 0% 25%, #2a2a33 0% 50%) 50% / 14px 14px;
-}
-
-.loadout-swatch[data-cat='background'] {
-  background: radial-gradient(circle at 30% 30%, #6b4a2c, #120e0b 70%);
-}
-
-.loadout-swatch[data-cat='moveAnimation'] {
-  background: linear-gradient(135deg, #8fb6ff, #3a3f8f);
-}
-
-.loadout-swatch[data-cat='destruction'] {
-  background: radial-gradient(circle, #ffd28a, #c0572b 55%, #2a1208);
+.loadout-edit {
+  color: var(--text-3);
 }
 
 /* ---------------------------------------------------------------- games */

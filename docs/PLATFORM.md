@@ -140,10 +140,11 @@ Coins earned by playing are spent here. Categories:
 | Destruction effects | how your captures look | both players (per side) |
 | Profile icons | your avatar | everyone |
 
-Owned items can be equipped ("Used") from the Shop or the Profile. Later: real-money coin
-packs and temporary coin boosts (e.g. +50% coins for 24 h), and a 3D viewer for items.
+Owned items can be equipped ("Used") from the Shop or from the Profile ("In use" → your
+items). Later: real-money coin packs and temporary coin boosts (e.g. +50% coins for 24 h),
+and a 3D viewer for items.
 
-Suggested price ranges (to be tuned once real reward data exists):
+Price ranges per category (enforced by `tests/shop.test.ts`):
 
 | Item | Coins |
 | --- | --- |
@@ -155,6 +156,44 @@ Suggested price ranges (to be tuned once real reward data exists):
 
 At roughly 10 games a day this means a new icon every 2–3 days and a piece set every few
 weeks, which keeps the shop meaningful without feeling out of reach.
+
+**Catalogue (M3).** Every category has one free standard item that everyone owns; profile
+icons have six free starters.
+
+| Category | Items (price, rarity) |
+| --- | --- |
+| Piece sets | Classic Marble (free) · Onyx & Gold 15,000 rare · Frostbound 22,000 epic · Emberforged 28,000 epic · Celestial 40,000 legendary |
+| Boards | Classic Marble (free) · Walnut 10,000 common · Moonstone 14,000 rare · Jade Palace 18,000 epic · Royal Court 25,000 legendary |
+| Backgrounds | Candlelit Study (free) · Moonlit Hall 5,000 common · Emerald Grove 7,000 rare · Arcane Void 9,500 epic · Volcanic Forge 12,000 legendary |
+| Move animations | Glide (free) · Levitate 8,000 rare · Blink 14,000 epic · Comet 20,000 legendary |
+| Destruction effects | Shatter (free) · Embers 9,000 rare · Frostbite 14,000 epic · Implode 20,000 legendary |
+| Profile icons | 6 starters (free) · Ember Rook / Frost Knight 1,500 · Jade Bishop / Storm Pawn 2,000 · Void Queen 2,500 · Sun King 3,000 |
+
+Season reward icons ("Season 2 · Gold & Platinum") are icons too, but are never for sale.
+
+**In games.** Each side shows its owner's piece set (light or dark variant by colour), move
+animation and destruction effect. Board and background come from one of the two players;
+when they differ, the pick is random but derived from the game id, so both players see
+the same. Same-device games use your items for both sides; AI opponents use the standard
+items; matchmade demo opponents show their own items. Online friend games show your items
+on your side; the opponent's arrive with the back-end (M6).
+
+**Assets.** The current looks are placeholders made from the classic set: piece sets and
+boards recolour the marble textures with a shader, backgrounds change sky, table, lights
+and floating particles, and the effects reuse the existing particle and shatter systems.
+Real assets replace them item by item without changing the shop or the API. Each look
+already has an `assets` slot; loading GLBs and textures from it is added in the engine
+together with the first delivered assets. Preview images work today.
+
+| Category | Asset to provide | Where it goes |
+| --- | --- | --- |
+| Piece set | GLB with nodes `piece_<pawn…king>_<white\|black>`, same scale as `chess-set.glb` | `public/models/sets/<id>.glb`, referenced from `assets.model` in `src/cosmetics/looks.ts` |
+| Board | GLB with a `board` node, or a replacement diffuse texture | `public/models/boards/<id>.glb` |
+| Background | equirectangular image or a scene GLB | `public/backgrounds/<id>.*` |
+| Any item | preview image, 16:10, ~640×400, WebP/PNG | `public/shop/<id>.webp`, listed in `PREVIEW_IMAGES` (`src/features/shop/previews.tsx`) |
+
+Move animations and destruction effects are code (`src/game/Choreographer.ts`); new ones
+need a short description or reference video.
 
 ### 4.6 Profile
 
@@ -385,6 +424,11 @@ The 3D board fills the screen. Around it:
   verified with perft). The same worker estimates accuracy for the result screen until
   server-side analysis exists. On the mock back-end, matchmade opponents are played by this
   engine and marked "Demo".
+- **Cosmetics:** `src/cosmetics/looks.ts` describes how every item looks (plain data, shared
+  by the 3D engine and the 2D shop previews). `src/game/Wardrobe.ts` applies a game's
+  looks: board and background directly, piece sets as each piece is created, and tells
+  the Choreographer which move and capture style each side uses. Prices and purchase
+  rules live in `supabase/functions/_shared/shop.ts` for the server.
 - **Languages:** English (default) and Czech, switched in Settings. Code keeps English
   text wrapped in `t()`; `src/i18n/<lang>.ts` maps it to the translation, with English as
   the fallback. `tn()` handles counts (Czech has a separate 2–4 form). `tests/i18n.test.ts`
@@ -431,7 +475,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | --- | --- | --- |
 | M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
-| M3 Shop | Shop catalogue, buy and equip, loadout in games | 🔜 |
+| M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
 | M4 Back-end: accounts | Supabase Auth (email, Apple, Google), profiles, onboarding, usernames | 🔜 |
 | M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
 | M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |

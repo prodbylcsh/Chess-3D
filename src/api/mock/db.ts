@@ -3,7 +3,7 @@ import { t } from '../../i18n';
 // helpers shared by the mock services.
 import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
-import { ApiError, type Account, type ApiEvent, type AuthProviderId, type GameRecord, type MatchKind, type Message, type Profile, type PublicProfile, type RankInfo, type StakeId } from '../types';
+import { ApiError, type Account, type ApiEvent, type AuthProviderId, type GameRecord, type Loadout, type MatchKind, type Message, type Profile, type PublicProfile, type RankInfo, type StakeId } from '../types';
 import { DEFAULT_LOADOUT, NEW_PLAYER_STATS, SEED_FRIENDS, SEED_PLAYERS, START_MMR, type SeedPlayer } from './seed';
 
 export interface StoredAccount extends Account {
@@ -43,6 +43,8 @@ export interface Db {
   matches: Record<string, PendingMatch>;
   social: Record<string, Social>;
   conversations: Record<string, StoredConversation>;
+  /** per player: highest MMR reached in each season ("2" → mmr) */
+  seasonPeak: Record<string, Record<string, number>>;
   sessionId: string | null;
 }
 
@@ -65,12 +67,30 @@ function load(): Db {
     matches: {},
     social: {},
     conversations: {},
+    seasonPeak: {},
     sessionId: null,
     ...data,
   };
 }
 
-export const db = load();
+/** Item ids before the shop existed (M1/M2): one id served two categories. */
+const RENAMED: Record<string, Partial<Record<keyof Loadout, string>>> = {
+  'classic-marble': { pieces: 'marble-set', board: 'marble-board' },
+};
+
+/** Bring profiles stored by older versions up to date. */
+function migrate(data: Db): Db {
+  for (const p of Object.values(data.profiles)) {
+    p.inventory ??= [];
+    for (const key of Object.keys(p.loadout) as Array<keyof Loadout>) {
+      const renamed = RENAMED[p.loadout[key]]?.[key];
+      if (renamed) p.loadout[key] = renamed;
+    }
+  }
+  return data;
+}
+
+export const db = migrate(load());
 
 export function save(): void {
   try {
@@ -111,7 +131,7 @@ export function publicSeed(p: SeedPlayer): PublicProfile {
     iconId: p.iconId,
     rank: rankInfo(p.mmr),
     stats: p.stats,
-    loadout: DEFAULT_LOADOUT,
+    loadout: p.loadout,
     createdAt: p.createdAt,
     online: p.online,
   };
@@ -169,6 +189,7 @@ export function createAccount(email: string, provider: AuthProviderId, password:
     mmr: START_MMR,
     stats: { ...NEW_PLAYER_STATS },
     loadout: { ...DEFAULT_LOADOUT },
+    inventory: [],
     createdAt: now(),
     usernameChangedAt: null,
   };

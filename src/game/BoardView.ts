@@ -127,6 +127,8 @@ export class BoardView {
   private readonly hoverMarker: Marker;
   private hoverSquare: Square | null = null;
   private readonly plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  /** called for every new piece (the Wardrobe gives it its set) */
+  dress: (piece: Piece) => void = () => {};
 
   constructor(
     private readonly scene: THREE.Scene,
@@ -151,6 +153,7 @@ export class BoardView {
     const template = this.assets.templates.get(`${color}${type}`);
     if (!template) throw new Error(`Missing model for ${color}${type}`);
     const piece = new Piece(type, color, square, template);
+    this.dress(piece);
     this.scene.add(piece.root);
     this.pieces.set(square, piece);
     return piece;

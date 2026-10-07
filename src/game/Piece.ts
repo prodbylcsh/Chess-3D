@@ -3,6 +3,7 @@ import type { Color as Side, PieceSymbol, Square } from 'chess.js';
 import { TEAMS, squareCenter } from '../core/layout';
 import type { PieceTemplate } from '../scene/assets';
 import { applyDissolve, createDissolveDepthMaterial, createDissolveUniforms, type DissolveUniforms } from '../fx/dissolve';
+import type { RecolorUniforms } from '../fx/recolor';
 
 let nextId = 1;
 
@@ -19,6 +20,8 @@ export class Piece {
   readonly height: number;
   readonly radius: number;
   readonly meshes: THREE.Mesh[] = [];
+  /** set by the Wardrobe: the piece set's recolouring (debris reuses it) */
+  recolor: RecolorUniforms | null = null;
   private readonly depthMaterial: THREE.MeshDepthMaterial;
 
   constructor(

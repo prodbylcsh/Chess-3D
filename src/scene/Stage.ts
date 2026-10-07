@@ -5,6 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import type { BackgroundLook } from '../cosmetics/looks';
 
 const BG = new THREE.Color(0x07080b);
 
@@ -24,6 +25,15 @@ export class Stage {
   private readonly resizeHandlers: Array<(w: number, h: number) => void> = [];
   private trauma = 0;
   private readonly shakeOffset = new THREE.Vector3();
+  private readonly lights: {
+    key: THREE.SpotLight;
+    rim: THREE.DirectionalLight;
+    fill: THREE.PointLight;
+    hemisphere: THREE.HemisphereLight;
+  };
+  private readonly tableCanvas = document.createElement('canvas');
+  private readonly tableTexture: THREE.CanvasTexture;
+  private backdrop: BackgroundLook | null = null;
 
   constructor(private readonly container: HTMLElement) {
     const { clientWidth: w, clientHeight: h } = container;
@@ -59,8 +69,8 @@ export class Stage {
     this.scene.environmentIntensity = 0.32;
     pmrem.dispose();
 
-    this.addLights();
-    this.addTable();
+    this.lights = this.addLights();
+    this.tableTexture = this.addTable();
 
     const target = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: 4 });
     this.composer = new EffectComposer(this.renderer, target);
@@ -144,7 +154,23 @@ export class Stage {
     t.y = THREE.MathUtils.clamp(t.y, -0.5, 3);
   }
 
-  private addLights(): void {
+  /** Sky, fog, table and light colours of a background. */
+  setBackdrop(look: BackgroundLook): void {
+    if (this.backdrop === look) return;
+    this.backdrop = look;
+    const sky = new THREE.Color(look.sky);
+    this.scene.background = sky;
+    this.scene.fog = new THREE.FogExp2(sky, look.fog);
+    this.lights.key.color.set(look.keyLight);
+    this.lights.rim.color.set(look.rim);
+    this.lights.fill.color.set(look.fill.color);
+    this.lights.fill.intensity = look.fill.intensity;
+    this.lights.hemisphere.color.set(look.hemisphere[0]);
+    this.lights.hemisphere.groundColor.set(look.hemisphere[1]);
+    this.paintTable(look.table);
+  }
+
+  private addLights() {
     // High and slightly to the side so its mirror highlight on the polished
     // marble does not point at either player's default camera.
     const key = new THREE.SpotLight(0xfff0dc, 850, 0, 0.6, 0.65, 2);
@@ -164,22 +190,24 @@ export class Stage {
     rim.position.set(-4, 12, -8);
     this.scene.add(rim);
 
-    const warm = new THREE.PointLight(0xff9a4a, 14, 0, 2);
-    warm.position.set(-8, 5, 6);
-    this.scene.add(warm);
+    const fill = new THREE.PointLight(0xff9a4a, 14, 0, 2);
+    fill.position.set(-8, 5, 6);
+    this.scene.add(fill);
 
-    this.scene.add(new THREE.HemisphereLight(0x8a9cc0, 0x1a1410, 0.55));
+    const hemisphere = new THREE.HemisphereLight(0x8a9cc0, 0x1a1410, 0.55);
+    this.scene.add(hemisphere);
+    return { key, rim, fill, hemisphere };
   }
 
-  private addTable(): void {
+  private paintTable(colors: readonly [string, string, string]): void {
     const size = 512;
-    const canvas = document.createElement('canvas');
+    const canvas = this.tableCanvas;
     canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    g.addColorStop(0, '#3a2c22');
-    g.addColorStop(0.35, '#2a1f18');
-    g.addColorStop(1, '#0a0909');
+    g.addColorStop(0, colors[0]);
+    g.addColorStop(0.35, colors[1]);
+    g.addColorStop(1, colors[2]);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
     // fine grain so the table does not look like plastic
@@ -191,7 +219,12 @@ export class Stage {
       img.data[i + 2] += n;
     }
     ctx.putImageData(img, 0, 0);
-    const tex = new THREE.CanvasTexture(canvas);
+    if (this.tableTexture) this.tableTexture.needsUpdate = true;
+  }
+
+  private addTable(): THREE.CanvasTexture {
+    this.paintTable(['#3a2c22', '#2a1f18', '#0a0909']);
+    const tex = new THREE.CanvasTexture(this.tableCanvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
     const table = new THREE.Mesh(
@@ -202,6 +235,7 @@ export class Stage {
     table.position.y = -0.002;
     table.receiveShadow = true;
     this.scene.add(table);
+    return tex;
   }
 
   private resize(): void {

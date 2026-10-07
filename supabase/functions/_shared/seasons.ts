@@ -4,6 +4,27 @@ import { MMR, type TierId } from './rating.ts';
 
 export const SEASON_MONTHS = 3;
 
+/** Season 1 started on this day (UTC); seasons follow back to back. */
+export const FIRST_SEASON_START = { year: 2026, month: 7 } as const;
+
+export interface SeasonDates {
+  number: number;
+  start: Date;
+  end: Date;
+}
+
+/** Which season `date` falls in, with its first and last moment (end is exclusive). */
+export function seasonAt(date: Date): SeasonDates {
+  const months = (date.getUTCFullYear() - FIRST_SEASON_START.year) * 12 + date.getUTCMonth() + 1 - FIRST_SEASON_START.month;
+  const number = Math.max(1, Math.floor(months / SEASON_MONTHS) + 1);
+  const first = (number - 1) * SEASON_MONTHS + FIRST_SEASON_START.month - 1;
+  return {
+    number,
+    start: new Date(Date.UTC(FIRST_SEASON_START.year, first, 1)),
+    end: new Date(Date.UTC(FIRST_SEASON_START.year, first + SEASON_MONTHS, 1)),
+  };
+}
+
 /**
  * Share of the distance to 1,000 MMR removed when `season` ends (seasons are
  * numbered from 1): every 12th season resets everyone to 1,000, every 4th
@@ -114,4 +135,17 @@ export function pickSeasonRewards(season: number, pool: RewardCandidate[], previ
     coins: b.coins,
     item: picks[i],
   }));
+}
+
+/**
+ * Rewards of seasons 1..`season`, each picked with the earlier ones as history.
+ * The server will store them once picked; recomputing gives the same result
+ * as long as the pool does not change.
+ */
+export function rewardHistory(season: number, pool: RewardCandidate[]): SeasonReward[][] {
+  const all: SeasonReward[][] = [];
+  for (let s = 1; s <= season; s++) {
+    all.push(pickSeasonRewards(s, pool, all.map((r) => r.map((x) => x.item).filter((x): x is string => !!x))));
+  }
+  return all;
 }

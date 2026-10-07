@@ -3,6 +3,7 @@ import { animator, clamp, ease, rand } from '../core/animator';
 import { layout } from '../core/layout';
 import type { Piece } from '../game/Piece';
 import { applyDissolve, createDissolveDepthMaterial, createDissolveUniforms, type DissolveUniforms } from './dissolve';
+import { applyRecolor } from './recolor';
 import { randomUnit } from './effects';
 
 export interface ShatterOptions {
@@ -74,6 +75,7 @@ export class Debris {
     const material = piece.material.clone();
     material.emissiveIntensity = piece.glow;
     applyDissolve(material, uniforms);
+    if (piece.recolor) applyRecolor(material, piece.recolor);
     const depth = createDissolveDepthMaterial(uniforms);
 
     const group: DebrisGroup = { fragments: [], material, depth, uniforms, geometries: [], age: 0 };

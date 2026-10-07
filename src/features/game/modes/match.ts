@@ -35,7 +35,7 @@ export class MatchMode extends BotGame {
       rank: match.opponent.rank,
       tag: match.demo ? t('Demo') : undefined,
       present: true,
-    });
+    }, match.opponent.loadout, match.matchId);
     this.label =
       match.kind === 'ranked' ? t('Ranked') : match.kind === 'casual' ? t('Casual') : `${t('For coins')} · ${STAKES[match.stake ?? 'low'].amount}`;
   }

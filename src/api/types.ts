@@ -4,8 +4,10 @@
 import type { Color as Side } from 'chess.js';
 import type { MmrChange, Outcome, TierId } from '#shared/rating.ts';
 import type { CoinReward, GameKind, StakeId } from '#shared/economy.ts';
+import type { ItemCategory, Rarity } from '#shared/shop.ts';
+import type { SeasonReward } from '#shared/seasons.ts';
 
-export type { Side, Outcome, GameKind, StakeId, TierId };
+export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward };
 
 // ------------------------------------------------------------------ accounts and profiles
 
@@ -49,6 +51,8 @@ export interface Profile {
   mmr: number;
   stats: Stats;
   loadout: Loadout;
+  /** items bought or won; free items are owned by everyone and not listed */
+  inventory: string[];
   createdAt: string;
   /** last time the username was changed after onboarding (changes are limited) */
   usernameChangedAt: string | null;
@@ -160,6 +164,36 @@ export interface GameRecord {
   coinsDelta: number;
 }
 
+// ------------------------------------------------------------------ shop and seasons
+
+export interface ShopItem {
+  id: string;
+  category: ItemCategory;
+  price: number;
+  rarity: Rarity;
+  /** false for season rewards */
+  forSale: boolean;
+  /** English text; the UI translates it */
+  name: string;
+  description: string;
+  owned: boolean;
+  equipped: boolean;
+}
+
+export interface SeasonInfo {
+  number: number;
+  start: string;
+  end: string;
+  /** highest rank reached this season: the rewards depend on it */
+  peak: RankInfo;
+  /** reward bracket of the peak rank */
+  bracket: string;
+  /** what each bracket receives when the season ends, lowest bracket first */
+  rewards: SeasonReward[];
+  /** share of the distance to 1,000 MMR removed when this season ends */
+  resetShare: number;
+}
+
 // ------------------------------------------------------------------ service contracts
 
 export interface AuthService {
@@ -207,6 +241,18 @@ export interface MessagesService {
   markRead(conversationId: string): Promise<void>;
 }
 
+export interface ShopService {
+  /** every item with the signed-in player's ownership */
+  items(): Promise<ShopItem[]>;
+  buy(itemId: string): Promise<Profile>;
+  /** use an owned item (profile icons included) */
+  equip(itemId: string): Promise<Profile>;
+}
+
+export interface SeasonsService {
+  current(): Promise<SeasonInfo>;
+}
+
 export interface AccountService {
   changeEmail(newEmail: string, password: string): Promise<Account>;
   changePassword(current: string, next: string): Promise<void>;
@@ -244,6 +290,8 @@ export interface Api {
   account: AccountService;
   events: EventsService;
   matchmaking: MatchmakingService;
+  shop: ShopService;
+  seasons: SeasonsService;
   /** true while the data comes from the in-browser mock */
   mock: boolean;
 }

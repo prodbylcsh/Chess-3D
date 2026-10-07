@@ -8,9 +8,13 @@ import type { Debris } from '../fx/shatter';
 import type { Stage } from '../scene/Stage';
 import type { BoardView } from './BoardView';
 import type { Piece } from './Piece';
+import type { Wardrobe } from './Wardrobe';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const tmpAxis = new THREE.Vector3();
+const ICE = new THREE.Color(0.35, 0.8, 1.6);
+const EMBER = new THREE.Color(1.6, 0.55, 0.12);
+const WHITE_HOT = new THREE.Color(1, 0.9, 0.75);
 
 type CaptureStyle = 'melee' | 'crush' | 'spell';
 
@@ -49,6 +53,7 @@ export class Choreographer {
     private readonly fx: Effects,
     private readonly debris: Debris,
     private readonly stage: Stage,
+    private readonly wardrobe: Wardrobe,
   ) {}
 
   async play(move: Move): Promise<void> {
@@ -92,6 +97,14 @@ export class Choreographer {
     if (dist < 1e-3 && Math.abs(start.y - dest.y) < 1e-3) return;
 
     const obstacle = this.obstacleHeight(start, dest, piece);
+    switch (this.wardrobe.move(piece.color)) {
+      case 'levitate':
+        return this.levitate(piece, dest, obstacle);
+      case 'blink':
+        return this.blink(piece, dest);
+      case 'comet':
+        return this.comet(piece, dest, obstacle);
+    }
     const hop = opts.hop || obstacle > 0 || piece.type === 'n';
     const height = opts.height ?? (obstacle > 0 ? obstacle + 0.5 : hop ? 1.0 : 0);
     const duration = hop ? 0.5 + dist * 0.08 + height * 0.08 : 0.28 + dist * 0.12;
@@ -122,6 +135,94 @@ export class Choreographer {
     } else {
       this.fx.dustPuff(dest, 6, 0.3, 0.5);
     }
+  }
+
+  /** Rise, float across the board, settle down softly. */
+  private async levitate(piece: Piece, dest: THREE.Vector3, obstacle: number): Promise<void> {
+    const start = piece.root.position.clone();
+    const dir = flatDir(start, dest);
+    const lift = Math.max(0.6, obstacle > 0 ? obstacle + 0.35 : 0);
+    const glow = TEAMS[piece.color].glow;
+    const p = piece.root.position;
+    sfx.whoosh(0.5);
+    this.fx.gather(start.clone().setY(layout.boardTop + 0.05), glow, 0.3, 14);
+    await animator.tween(0.24, (k) => {
+      p.y = start.y + lift * k;
+      piece.glow = 0.35 * k;
+    }, ease.outCubic);
+    await animator.tween(0.26 + flatDist(start, dest) * 0.1, (k, raw) => {
+      p.x = lerp(start.x, dest.x, k);
+      p.z = lerp(start.z, dest.z, k);
+      p.y = lerp(start.y, dest.y, k) + lift + 0.08 * Math.sin(Math.PI * raw);
+      lean(piece, dir, 0.08 * Math.sin(2 * Math.PI * raw));
+    }, ease.inOutSine);
+    piece.root.quaternion.identity();
+    await animator.tween(0.24, (k) => {
+      p.y = dest.y + lift * (1 - k);
+      piece.glow = 0.35 * (1 - k);
+    }, ease.inOutQuad);
+    p.copy(dest);
+    piece.glow = 0;
+    this.fx.dustPuff(dest, 8, 0.35, 0.6);
+    this.fx.sparkBurst(dest.clone().setY(layout.boardTop + 0.05), glow, 18, 1.2, { up: 0.3 });
+  }
+
+  /** Vanish in a swirl of magic and reappear on the target square. */
+  private async blink(piece: Piece, dest: THREE.Vector3): Promise<void> {
+    const start = piece.root.position.clone();
+    const glow = TEAMS[piece.color].glow;
+    const d = piece.dissolve;
+    const p = piece.root.position;
+    const mid = (v: THREE.Vector3) => v.clone().setY(layout.boardTop + piece.height * 0.5);
+    sfx.magic(0.45, 620);
+    this.fx.gather(mid(start), glow, 0.3, 26);
+    await animator.tween(0.3, (k) => {
+      d.uDissolve.value = 1.05 * k;
+      piece.glow = 0.8 * k;
+      p.y = start.y + 0.15 * k;
+    }, ease.inQuad);
+    this.fx.sparkBurst(mid(start), glow, 36, 2.4);
+    p.copy(dest).setY(dest.y + 0.15);
+    this.fx.sparkBurst(mid(dest), glow, 36, 2.4, { up: 0.5 });
+    this.fx.flash(mid(dest), glow, 2.2, 0.35);
+    await animator.tween(0.32, (k) => {
+      d.uDissolve.value = 1.05 * (1 - k);
+      piece.glow = 0.8 * (1 - k);
+      p.y = dest.y + 0.15 * (1 - k);
+    }, ease.outCubic);
+    d.uDissolve.value = 0;
+    piece.glow = 0;
+    p.copy(dest);
+  }
+
+  /** Streak across the board in a fast arc, trailing sparks. */
+  private async comet(piece: Piece, dest: THREE.Vector3, obstacle: number): Promise<void> {
+    const start = piece.root.position.clone();
+    const dist = flatDist(start, dest);
+    const dir = flatDir(start, dest);
+    const height = Math.max(1.0, obstacle > 0 ? obstacle + 0.6 : 0);
+    const glow = TEAMS[piece.color].glow;
+    const duration = 0.4 + dist * 0.06;
+    const p = piece.root.position;
+    const trail = new THREE.Vector3();
+    sfx.whoosh(duration);
+    this.fx.dustPuff(new THREE.Vector3(start.x, layout.boardTop, start.z), 10, 0.3, 0.7);
+    await animator.tween(duration, (k, raw) => {
+      p.x = lerp(start.x, dest.x, k);
+      p.z = lerp(start.z, dest.z, k);
+      p.y = lerp(start.y, dest.y, k) + height * 4 * raw * (1 - raw);
+      lean(piece, dir, 0.32 * Math.sin(Math.PI * raw));
+      piece.glow = 0.9 * Math.sin(Math.PI * raw);
+      this.fx.sparkBurst(trail.copy(p).setY(p.y + piece.height * 0.45), glow, 4, 0.5);
+    }, ease.inOutSine);
+    p.copy(dest);
+    piece.root.quaternion.identity();
+    piece.glow = 0;
+    sfx.thud(0.7);
+    this.fx.shockwave(dest, glow, 1.5, 0.45);
+    this.fx.sparkBurst(dest.clone().setY(layout.boardTop + 0.1), glow, 50, 3, { up: 0.8 });
+    this.stage.shake(0.14);
+    await this.settleBounce(piece, 0.1);
   }
 
   /** Tallest piece whose square the straight path from a to b crosses (0 = clear). */
@@ -374,7 +475,12 @@ export class Choreographer {
       shake?: number;
     },
   ): void {
-    const glow = TEAMS[attacker.color].glow;
+    const style = this.wardrobe.destruction(attacker.color);
+    if (style === 'embers') return void this.burn(victim, o.shake ?? 0.55);
+    if (style === 'implode') return void this.implode(victim, TEAMS[attacker.color].glow, o.shake ?? 0.55);
+
+    const glow = style === 'frostbite' ? ICE : TEAMS[attacker.color].glow;
+    if (style === 'frostbite') this.freeze(victim);
     const base = victim.root.position.clone().setY(layout.boardTop);
     this.debris.shatter(victim, {
       impact: point,
@@ -389,13 +495,77 @@ export class Choreographer {
     victim.dispose();
 
     this.fx.sparkBurst(point, glow, o.sparks ?? 120, 7, { dir: o.direction });
-    this.fx.sparkBurst(point, new THREE.Color(1, 0.9, 0.75), 40, 5);
+    this.fx.sparkBurst(point, style === 'frostbite' ? new THREE.Color(1.2, 1.4, 1.6) : WHITE_HOT, 40, 5);
     this.fx.dustPuff(base, 30, 0.7, 1.3);
     this.fx.shockwave(base, glow, o.ring ?? 2.4);
     this.fx.flash(point.clone().add(new THREE.Vector3(0, 0.5, 0)), glow, 5, 0.6);
     this.stage.shake(o.shake ?? 0.55);
     animator.bulletTime(0.16, 0.32, 0.7);
     sfx.shatter();
+  }
+
+  /** Frostbite: the victim turns to ice before it breaks. */
+  private freeze(victim: Piece): void {
+    const u = victim.recolor;
+    if (u) {
+      u.uRcOn.value = 1;
+      u.uRcLight.value.set('#d8f2ff');
+      u.uRcDark.value.set('#d8f2ff');
+      u.uRcVein.value.set('#ffffff');
+      u.uRcVeinAmount.value = 0.6;
+      u.uRcGlow.value.copy(ICE).multiplyScalar(0.6);
+    }
+    victim.material.roughness = 0.12;
+    victim.material.emissive.copy(ICE);
+    victim.glow = 0.5;
+  }
+
+  /** Embers: the victim burns away from the bottom up into rising sparks. */
+  private async burn(victim: Piece, shake: number): Promise<void> {
+    const base = victim.root.position.clone().setY(layout.boardTop);
+    const d = victim.dissolve;
+    victim.material.emissive.copy(EMBER);
+    d.uEdgeColor.value.copy(EMBER).multiplyScalar(9);
+    d.uEdgeWidth.value = 0.14;
+    sfx.magic(0.7, 200);
+    this.fx.flash(base.clone().setY(base.y + victim.height * 0.6), EMBER, 4, 0.6);
+    this.fx.sparkBurst(base.clone().setY(base.y + victim.height * 0.5), EMBER, 60, 3, { up: 1 });
+    this.stage.shake(shake * 0.5);
+    animator.bulletTime(0.3, 0.2, 0.5);
+    const spot = new THREE.Vector3();
+    await animator.tween(0.95, (k) => {
+      d.uDissolve.value = 1.05 * k;
+      victim.glow = 0.9 - 0.5 * k;
+      spot.set(base.x + rand(-1, 1) * victim.radius, base.y + victim.height * (0.2 + 0.8 * k), base.z + rand(-1, 1) * victim.radius);
+      this.fx.sparkBurst(spot, EMBER, 4, 1.4, { up: 1.2 });
+    }, ease.inQuad);
+    this.fx.dustPuff(base, 18, 0.5, 0.8);
+    victim.dispose();
+  }
+
+  /** Implode: the victim collapses into a tiny star and vanishes in a flash. */
+  private async implode(victim: Piece, glow: THREE.Color, shake: number): Promise<void> {
+    const base = victim.root.position.clone();
+    const center = base.clone().setY(layout.boardTop + victim.height * 0.5);
+    sfx.magic(0.6, 880);
+    this.fx.vortex(base, glow, victim.height + 0.8, 0.7);
+    this.fx.gather(center, glow, 0.5, 90);
+    victim.material.emissive.copy(glow);
+    const spin = victim.model.rotation.y;
+    await animator.tween(0.5, (k) => {
+      victim.root.scale.setScalar(1 - 0.94 * k);
+      victim.root.position.y = base.y + victim.height * 0.45 * k;
+      victim.model.rotation.y = spin + k * k * 9;
+      victim.glow = 1.6 * k;
+    }, ease.inCubic);
+    victim.dispose();
+    sfx.zap();
+    this.fx.flash(center, glow, 9, 0.45);
+    this.fx.sparkBurst(center, WHITE_HOT, 120, 8);
+    this.fx.sparkBurst(center, glow, 160, 5);
+    this.fx.shockwave(base.setY(layout.boardTop), glow, 3.4, 0.6);
+    this.stage.shake(shake);
+    animator.bulletTime(0.2, 0.25, 0.6);
   }
 
   /** Make a piece shiver until the returned function is called. */

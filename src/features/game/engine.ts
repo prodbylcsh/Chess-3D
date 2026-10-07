@@ -8,6 +8,7 @@ import { Debris } from '../../fx/shatter';
 import { BoardView } from '../../game/BoardView';
 import { Choreographer } from '../../game/Choreographer';
 import { Game } from '../../game/Game';
+import { Wardrobe } from '../../game/Wardrobe';
 import { GameStore } from './store';
 import { MODEL_URL } from './model';
 
@@ -16,6 +17,8 @@ export interface Engine {
   stage: Stage;
   game: Game;
   store: GameStore;
+  /** dress the next game in the players' shop items */
+  wardrobe: Wardrobe;
 }
 
 let loading: Promise<Engine> | null = null;
@@ -42,10 +45,12 @@ export function loadEngine(container: HTMLElement, onProgress: (fraction: number
     progressListener(1);
     const view = new BoardView(stage.scene, assets);
     const debris = new Debris(stage.scene, () => view.pieces.values());
-    const choreo = new Choreographer(view, fx, debris, stage);
+    const wardrobe = new Wardrobe(stage, fx, assets);
+    view.dress = (piece) => wardrobe.dress(piece);
+    const choreo = new Choreographer(view, fx, debris, stage, wardrobe);
     const game = new Game(stage, view, choreo, store);
 
-    const engine = { host, stage, game, store };
+    const engine = { host, stage, game, store, wardrobe };
     if (import.meta.env.DEV) {
       // Dev helper: step the simulation without requestAnimationFrame (hidden tabs, tests).
       Object.assign(window, {

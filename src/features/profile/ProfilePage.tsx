@@ -5,11 +5,13 @@ import { Crown, Flame, Gem, Pencil, Settings, Swords, Target, Trophy, Zap, type 
 import { TIERS } from '#shared/rating.ts';
 import { api, type GameRecord, type PublicProfile } from '../../api';
 import { awardsFor, type AwardIcon } from '../../api/awards';
-import { CATEGORY_NAMES, itemFor, type ItemCategory } from '../../api/catalog';
+import { CATEGORY_NAMES, LOADOUT_CATEGORIES, itemName, type ItemCategory } from '../../api/catalog';
+import { Locker } from '../shop/Locker';
+import { ItemPreview } from '../shop/previews';
 import { Page } from '../../app/AppLayout';
 import { useSession } from '../../app/session';
-import { ProfileIcon, RankEmblem, STARTER_ICONS } from '../../ui/art/art';
-import { Badge, Button, Card, Coins, EmptyState, Modal, ProgressBar, Segmented, Spinner, cx, useToast } from '../../ui/kit';
+import { ProfileIcon, RankEmblem } from '../../ui/art/art';
+import { Badge, Button, Card, Coins, EmptyState, ProgressBar, Segmented, Spinner, cx } from '../../ui/kit';
 import { memberSince, timeAgo, winRate } from '../../ui/format';
 import { ChallengeButton, FriendButton, MessageButton } from '../social/social';
 import './profile.css';
@@ -63,7 +65,7 @@ export function ProfilePage() {
 function ProfileView({ player, history, own }: { player: PublicProfile; history: GameRecord[] | null; own: boolean }) {
   const { profile } = useSession();
   const [tab, setTab] = useState<'overview' | 'games'>('overview');
-  const [editIcon, setEditIcon] = useState(false);
+  const [locker, setLocker] = useState<ItemCategory | null>(null);
   const { wins, losses, draws, bestStreak, winStreak } = player.stats;
   const games = wins + losses + draws;
   const rate = winRate(wins, losses, draws);
@@ -78,7 +80,7 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
         <div className="profile-avatar">
           <ProfileIcon icon={player.iconId} size={116} ring={tier.color} />
           {own && (
-            <button type="button" className="profile-avatar-edit" onClick={() => setEditIcon(true)} aria-label={t('Change profile icon')}>
+            <button type="button" className="profile-avatar-edit" onClick={() => setLocker('icon')} aria-label={t('Change profile icon')}>
               <Pencil size={15} />
             </button>
           )}
@@ -92,7 +94,7 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
           <div className="profile-actions">
             {own ? (
               <>
-                <Button size="sm" variant="secondary" icon={<Pencil size={15} />} onClick={() => setEditIcon(true)}>
+                <Button size="sm" variant="secondary" icon={<Pencil size={15} />} onClick={() => setLocker('icon')}>
                   {t('Change icon')}
                 </Button>
                 <Link to="/settings" className="btn btn-sm btn-ghost">
@@ -175,18 +177,36 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
           <Card className="profile-card">
             <header>
               <h2>{t('In use')}</h2>
-              {own && <span className="faint">{t('More in the Shop soon')}</span>}
+              {own && (
+                <button type="button" className="link-btn" onClick={() => setLocker('pieces')}>
+                  {t('Change')}
+                </button>
+              )}
             </header>
             <ul className="loadout">
-              {(Object.keys(CATEGORY_NAMES) as ItemCategory[]).map((cat) => {
-                const item = itemFor(cat, player.loadout[cat]);
+              {LOADOUT_CATEGORIES.map((cat) => {
+                const id = player.loadout[cat];
+                const body = (
+                  <>
+                    <span className="loadout-art">
+                      <ItemPreview id={id} />
+                    </span>
+                    <span className="loadout-text">
+                      <span className="faint">{t(CATEGORY_NAMES[cat])}</span>
+                      <strong>{itemName(id)}</strong>
+                    </span>
+                  </>
+                );
                 return (
                   <li key={cat}>
-                    <span className="loadout-swatch" data-cat={cat} />
-                    <span>
-                      <span className="faint">{t(CATEGORY_NAMES[cat])}</span>
-                      <strong>{t(item.name)}</strong>
-                    </span>
+                    {own ? (
+                      <button type="button" className="loadout-item" onClick={() => setLocker(cat)}>
+                        {body}
+                        <Pencil size={14} className="loadout-edit" />
+                      </button>
+                    ) : (
+                      <div className="loadout-item">{body}</div>
+                    )}
                   </li>
                 );
               })}
@@ -197,7 +217,7 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
         <GameList history={history} own={own} />
       )}
 
-      {own && profile && <IconPicker open={editIcon} onClose={() => setEditIcon(false)} current={profile.iconId ?? 'knight'} />}
+      {own && <Locker key={locker ?? 'closed'} open={!!locker} initial={locker ?? 'pieces'} onClose={() => setLocker(null)} />}
     </div>
   );
 }
@@ -258,46 +278,3 @@ function GameList({ history, own }: { history: GameRecord[] | null; own: boolean
     </Card>
   );
 }
-
-function IconPicker({ open, onClose, current }: { open: boolean; onClose: () => void; current: string }) {
-  const { setProfile } = useSession();
-  const toast = useToast();
-  const [icon, setIcon] = useState(current);
-  const [busy, setBusy] = useState(false);
-  useEffect(() => setIcon(current), [current, open]);
-
-  async function save() {
-    setBusy(true);
-    try {
-      setProfile(await api.profiles.update({ iconId: icon }));
-      toast(t('Profile icon updated.'), { tone: 'success' });
-      onClose();
-    } catch (err) {
-      toast((err as Error).message, { tone: 'danger' });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Modal open={open} onClose={onClose} title={t('Change profile icon')} subtitle={t('More icons will be available in the Shop.')} width={460}>
-      <div className="icon-grid" role="radiogroup" aria-label={t('Profile icon')}>
-        {STARTER_ICONS.map((i) => (
-          <button key={i.id} type="button" role="radio" aria-checked={i.id === icon} className={cx('icon-choice', i.id === icon && 'is-selected')} onClick={() => setIcon(i.id)}>
-            <ProfileIcon icon={i.id} size={64} />
-            <span>{t(i.name)}</span>
-          </button>
-        ))}
-      </div>
-      <div className="confirm-actions">
-        <Button variant="ghost" onClick={onClose}>
-          {t('Cancel')}
-        </Button>
-        <Button variant="primary" onClick={() => void save()} loading={busy} disabled={icon === current}>
-          {t('Save')}
-        </Button>
-      </div>
-    </Modal>
-  );
-}
-

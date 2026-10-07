@@ -1,4 +1,4 @@
-import { t } from '../i18n';
+import { locale, t } from '../i18n';
 import {
   createContext,
   useCallback,
@@ -145,7 +145,7 @@ export function CoinIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-export const formatNumber = (n: number) => n.toLocaleString('en-US');
+export const formatNumber = (n: number) => n.toLocaleString(locale());
 
 export function Coins({ amount, signed, size = 16 }: { amount: number; signed?: boolean; size?: number }) {
   return (

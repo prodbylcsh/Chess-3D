@@ -9,6 +9,7 @@ import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } fr
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
 import { SEED_PLAYERS, type SeedPlayer } from './seed';
 import { account, friends, messages, profileLookups } from './social';
+import { notePeak, owns, seasons, shop } from './shop';
 
 function pickOpponent(kind: MatchKind, mmr: number): SeedPlayer {
   const pool = SEED_PLAYERS.filter((p) => p.online);
@@ -101,6 +102,7 @@ export function createMockApi(): Api {
           if (next) throw new ApiError('cooldown', t('You can change your username again on {date}.', { date: next.toLocaleDateString() }));
           profile.usernameChangedAt = new Date().toISOString();
         }
+        if (patch.iconId != null && !owns(profile, patch.iconId)) throw new ApiError('not_owned', t('You do not own this item.'));
         Object.assign(profile, patch);
         save();
         emit({ type: 'profile' });
@@ -118,6 +120,8 @@ export function createMockApi(): Api {
     friends,
     messages,
     account,
+    shop,
+    seasons,
     events: { subscribe },
 
     matchmaking: {
@@ -184,6 +188,7 @@ export function createMockApi(): Api {
           mmr = mmrChange({ outcome, mmr: profile.mmr, opponentMmr: opponent.mmr, accuracy, winStreak: profile.stats.rankedStreak });
           profile.mmr = mmr.mmrAfter;
           profile.stats.rankedStreak = mmr.winStreakAfter;
+          notePeak(profile);
         }
         if (match.kind === 'wager') {
           wager = wagerNet(STAKES[match.stake ?? 'low'].amount, outcome);

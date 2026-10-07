@@ -3,7 +3,7 @@ import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import { AuthPage } from '../features/auth/AuthPage';
 import { Onboarding } from '../features/onboarding/Onboarding';
 import { PlayHub } from '../features/play/PlayHub';
-import { ComingNext } from '../features/placeholders/ComingNext';
+import { ShopPage } from '../features/shop/ShopPage';
 import { CommunityPage } from '../features/community/CommunityPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
@@ -63,7 +63,7 @@ function Routed() {
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/play" element={<PlayHub />} />
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/shop" element={<ComingNext module="shop" />} />
+          <Route path="/shop" element={<ShopPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/u/:username" element={<ProfilePage />} />
           <Route path="/messages/:conversationId?" element={<MessagesPage />} />
