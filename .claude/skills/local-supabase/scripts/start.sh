@@ -33,11 +33,19 @@ fi
 
 # 3. The stack, without the services the app doesn't use. Images come from Docker Hub.
 #    </dev/null: some supabase commands wait for stdin otherwise.
+#    The first boot often fails with StatusDbNotReadyError while the database is still
+#    starting; running it again finishes the job.
 if ! curl -s -o /dev/null http://127.0.0.1:54321/rest/v1/; then
   step "supabase start (first run pulls images: several minutes)"
-  SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io npx supabase start \
-    -x studio,imgproxy,storage-api,logflare,vector,supavisor,mailpit,postgres-meta </dev/null >"$LOGS/start.log" 2>&1 \
-    || { tail -20 "$LOGS/start.log"; exit 1; }
+  for attempt in 1 2 3; do
+    if SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io npx supabase start \
+      -x studio,imgproxy,storage-api,logflare,vector,supavisor,mailpit,postgres-meta </dev/null >"$LOGS/start.log" 2>&1; then
+      break
+    fi
+    if [ "$attempt" = 3 ]; then tail -20 "$LOGS/start.log"; exit 1; fi
+    step "supabase start failed (attempt $attempt), retrying"
+    sleep 10
+  done
 fi
 
 # 4. Patch the edge-runtime image once: trust the agent proxy's CA and use the mirror.

@@ -23,6 +23,7 @@ The first run pulls images and takes several minutes, so start it with
    the Edge Function container can't reach npm through the agent proxy itself;
 3. runs `supabase start` with the images from Docker Hub
    (`SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`), skipping services the app doesn't use;
+   The first boot often fails with `StatusDbNotReadyError`, so it retries up to 3 times;
 4. patches the `supabase/edge-runtime` image once: it trusts the proxy CA
    (`/root/.ccr/ca-bundle.crt`) and uses the mirror via the Docker network gateway. The
    original stays tagged `<tag>-orig`;
@@ -37,6 +38,10 @@ Logs: `/tmp/supabase-local/*.log`. After a container restart, run the script aga
 ```bash
 SUPABASE_ANON_KEY=<printed key> npm run test:e2e     # tests/online.e2e.ts
 ```
+
+Right after a fresh start, the first test can time out while realtime and the function
+warm up ("two players play a game to checkmate…"). Run the suite again before treating
+it as a failure. A second failure is real.
 
 For the app against the local stack, run Vite with
 `VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_ANON_KEY=<key>`. Online games
