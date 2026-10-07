@@ -1,3 +1,4 @@
+import { rankText, t } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { Color as Side, PieceSymbol } from 'chess.js';
 import { ArrowLeft, Copy, Link2, RefreshCcw, Share2, Volume2, VolumeX } from 'lucide-react';
@@ -23,7 +24,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
   return (
     <>
       <div className="gs-top">
-        <IconButton label="Leave game" onClick={() => mode.act('exit')}>
+        <IconButton label={t('Leave game')} onClick={() => mode.act('exit')}>
           <ArrowLeft size={19} />
         </IconButton>
         <span className="gs-mode">{mode.label}</span>
@@ -43,7 +44,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
                 className={cx('gs-action', a.tone === 'danger' && 'is-danger', a.pressed && 'is-pressed')}
                 disabled={a.disabled}
                 aria-pressed={a.pressed}
-                title={a.id === 'draw' ? 'Offer a draw' : a.label}
+                title={a.id === 'draw' ? t('Offer a draw') : a.label}
                 onClick={() => {
                   sfx.unlock();
                   mode.act(a.id);
@@ -53,9 +54,9 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
                 <span>{a.label}</span>
               </button>
             ))}
-            <button type="button" className="gs-action" onClick={() => engine.game.flip()} title="Flip view (F)">
+            <button type="button" className="gs-action" onClick={() => engine.game.flip()} title={t('Flip view (F)')}>
               <RefreshCcw size={18} />
-              <span>Flip</span>
+              <span>{t('Flip')}</span>
             </button>
             <button
               type="button"
@@ -69,7 +70,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
               }}
             >
               {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              <span>{muted ? 'Muted' : 'Sound'}</span>
+              <span>{muted ? t('Muted') : t('Sound')}</span>
             </button>
           </div>
         </section>
@@ -78,14 +79,14 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
 
       {s.invite && <InviteCard url={s.invite} onCancel={() => mode.act('exit')} />}
 
-      <Modal open={!!s.promotion} dismissable={false} title="Promote your pawn" subtitle="Choose the piece it becomes." width={420}>
+      <Modal open={!!s.promotion} dismissable={false} title={t('Promote your pawn')} subtitle={t('Choose the piece it becomes.')} width={420}>
         <div className="promo">
           {(['q', 'r', 'b', 'n'] as PieceSymbol[]).map((p) => (
             <button key={p} type="button" className="promo-btn" onClick={() => engine.store.choosePromotion(p)}>
               <svg viewBox="0 0 100 100" width="54" height="54">
                 <PieceGlyph piece={PIECE_ID[p]} fill={s.promotion === 'b' ? '#2a2638' : '#f4eee3'} />
               </svg>
-              <span>{PIECE_ID[p][0].toUpperCase() + PIECE_ID[p].slice(1)}</span>
+              <span>{t(PIECE_ID[p][0].toUpperCase() + PIECE_ID[p].slice(1))}</span>
             </button>
           ))}
         </div>
@@ -94,7 +95,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
       {s.end && s.showEnd && <ResultCard s={s} mode={mode} onHide={() => engine.store.set({ showEnd: false })} />}
       {s.end && !s.showEnd && (
         <button type="button" className="gs-show-result" onClick={() => engine.store.set({ showEnd: true })}>
-          Show result
+          {t('Show result')}
         </button>
       )}
     </>
@@ -103,7 +104,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
 
 function TurnPill({ s }: { s: GameState }) {
   const p = s.players[s.turn];
-  const text = s.end ? 'Game over' : s.invite ? 'Waiting for an opponent…' : s.mySide ? (s.turn === s.mySide ? 'Your move' : `${p.name} to move`) : `${p.name} to move`;
+  const text = s.end ? t('Game over') : s.invite ? t('Waiting for an opponent…') : s.mySide && s.turn === s.mySide ? t('Your move') : t('{name} to move', { name: p.name });
   return (
     <div className="gs-turn" data-side={s.turn} aria-live="polite">
       <div className="gs-turn-pill">
@@ -111,7 +112,7 @@ function TurnPill({ s }: { s: GameState }) {
         <span>{text}</span>
         {s.status && (
           <span key={s.status + s.moves.length} className="gs-turn-status">
-            {s.status}
+            {t(s.status)}
           </span>
         )}
       </div>
@@ -127,28 +128,28 @@ function PlayerCard({ side, player, s }: { side: Side; player: PlayerView; s: Ga
     <div className={cx('player', toMove && 'is-to-move')} data-side={side}>
       <div className="player-avatar">
         <ProfileIcon icon={player.iconId} size={46} />
-        {player.present !== undefined && <span className={cx('presence', player.present && 'is-on')} title={player.present ? 'Connected' : 'Disconnected'} />}
+        {player.present !== undefined && <span className={cx('presence', player.present && 'is-on')} title={player.present ? t('Connected') : t('Disconnected')} />}
       </div>
       <div className="player-info">
         <div className="player-name">
           <strong>{player.name}</strong>
-          {player.you && s.mySide && <Badge tone="gold">You</Badge>}
+          {player.you && s.mySide && <Badge tone="gold">{t('You')}</Badge>}
           {player.tag && <Badge tone="violet">{player.tag}</Badge>}
         </div>
         <div className="player-meta">
           {player.rank ? (
             <>
               <RankEmblem tier={player.rank.tier} division={player.rank.division} size={18} />
-              <span>{player.rank.label}</span>
+              <span>{rankText(player.rank.label)}</span>
             </>
           ) : (
             <span className="player-color">
-              <span className={`swatch swatch-${side}`} /> {side === 'w' ? 'White' : 'Black'}
+              <span className={`swatch swatch-${side}`} /> {side === 'w' ? t('White') : t('Black')}
             </span>
           )}
         </div>
       </div>
-      <div className="player-captures" aria-label="Captured pieces">
+      <div className="player-captures" aria-label={t('Captured pieces')}>
         <span className="captured">
           {s.captured[side].map((p, i) => (
             <svg key={i} viewBox="0 0 100 100" width="17" height="17">
@@ -171,9 +172,9 @@ function MoveList({ moves }: { moves: string[] }) {
   for (let i = 0; i < moves.length; i += 2) rows.push([moves[i], moves[i + 1]]);
   return (
     <div className="moves">
-      <h2>Moves</h2>
+      <h2>{t('Moves')}</h2>
       {moves.length === 0 ? (
-        <p className="moves-empty faint">Click a piece, then a glowing square. Drag to orbit, right-drag to pan, scroll to zoom.</p>
+        <p className="moves-empty faint">{t('Click a piece, then a glowing square. Drag to orbit, right-drag to pan, scroll to zoom.')}</p>
       ) : (
         <ol ref={list}>
           {rows.map(([w, b], i) => (
@@ -206,24 +207,24 @@ function InviteCard({ url, onCancel }: { url: string; onCancel: () => void }) {
       <div className="invite-icon">
         <Link2 size={24} />
       </div>
-      <h2>Invite your opponent</h2>
-      <p className="muted">Send this link to a friend. The game starts as soon as they open it.</p>
+      <h2>{t('Invite your opponent')}</h2>
+      <p className="muted">{t('Send this link to a friend. The game starts as soon as they open it.')}</p>
       <div className="invite-link">
-        <input readOnly value={url} onFocus={(e) => e.target.select()} aria-label="Invite link" />
+        <input readOnly value={url} onFocus={(e) => e.target.select()} aria-label={t('Invite link')} />
         <Button size="sm" variant="primary" icon={<Copy size={15} />} onClick={() => void copy()}>
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? t('Copied!') : t('Copy')}
         </Button>
       </div>
       <div className="invite-foot">
-        <span className="invite-waiting">Waiting for your opponent…</span>
+        <span className="invite-waiting">{t('Waiting for your opponent…')}</span>
         <div>
           {canShare && (
-            <Button size="sm" variant="ghost" icon={<Share2 size={15} />} onClick={() => void navigator.share({ title: 'Wizard Chess', text: 'Play chess with me!', url })}>
-              Share
+            <Button size="sm" variant="ghost" icon={<Share2 size={15} />} onClick={() => void navigator.share({ title: 'Wizard Chess', text: t('Play chess with me!'), url })}>
+              {t('Share')}
             </Button>
           )}
           <Button size="sm" variant="ghost" onClick={onCancel}>
-            Cancel
+            {t('Cancel')}
           </Button>
         </div>
       </div>

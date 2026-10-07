@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { rankText, t, tk } from '../../i18n';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, AtSign, Check, Coins as CoinsIcon, Crown, Swords, X } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
@@ -10,7 +11,7 @@ import { ProfileIcon, RankEmblem, STARTER_ICONS } from '../../ui/art/art';
 import { Button, Coins, Field, Spinner, cx } from '../../ui/kit';
 import './onboarding.css';
 
-const STEPS = ['Welcome', 'Username', 'Profile icon', 'Ready'];
+const STEPS = [tk('Welcome'), tk('Username'), tk('Profile icon'), tk('Ready')];
 
 export function Onboarding() {
   const { profile, setProfile, signOut } = useSession();
@@ -38,7 +39,7 @@ export function Onboarding() {
       if (next != null) go(next);
       return true;
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save. Please try again.');
+      setError(err instanceof ApiError ? t(err.message) : t('Could not save. Please try again.'));
       return false;
     } finally {
       setSaving(false);
@@ -54,12 +55,12 @@ export function Onboarding() {
       <header className="ob-top">
         <Wordmark />
         <button type="button" className="link-btn ob-signout" onClick={() => void signOut()}>
-          Sign out
+          {t('Sign out')}
         </button>
       </header>
 
       <div className="ob-card">
-        <div className="ob-progress" aria-label={`Step ${step + 1} of ${STEPS.length}`}>
+        <div className="ob-progress" aria-label={t('Step {n} of {total}', { n: step + 1, total: STEPS.length })}>
           <div className="ob-progress-track">
             <span style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
@@ -67,7 +68,7 @@ export function Onboarding() {
             {STEPS.map((label, i) => (
               <li key={label} className={cx(i < step && 'is-done', i === step && 'is-current')}>
                 <span className="ob-dot">{i < step ? <Check size={12} strokeWidth={3} /> : i + 1}</span>
-                <span className="ob-label">{label}</span>
+                <span className="ob-label">{t(label)}</span>
               </li>
             ))}
           </ol>
@@ -113,7 +114,7 @@ function StepNav({ onBack, next }: { onBack?: () => void; next: ReactNode }) {
     <div className="ob-nav">
       {onBack ? (
         <Button variant="ghost" icon={<ArrowLeft size={17} />} onClick={onBack}>
-          Back
+          {t('Back')}
         </Button>
       ) : (
         <span />
@@ -132,13 +133,13 @@ function Welcome({ onNext, saving }: { onNext: () => void; saving: boolean }) {
             <ProfileIcon key={i.id} icon={i.id} size={n === 1 ? 84 : 64} />
           ))}
         </div>
-        <h1>Welcome to Wizard Chess</h1>
-        <p className="muted">Let's set up your profile. It only takes a moment: pick a username and an icon, and you're ready to play.</p>
+        <h1>{t('Welcome to Wizard Chess')}</h1>
+        <p className="muted">{t("Let's set up your profile. It only takes a moment: pick a username and an icon, and you're ready to play.")}</p>
       </div>
       <StepNav
         next={
           <Button variant="primary" size="lg" onClick={onNext} loading={saving}>
-            Let's go
+            {t("Let's go")}
           </Button>
         }
       />
@@ -190,11 +191,11 @@ function UsernameStep({
       <Spinner size={16} />
     ) : check === 'available' ? (
       <span className="ob-check ok">
-        <Check size={15} strokeWidth={3} /> Available
+        <Check size={15} strokeWidth={3} /> {t('Available')}
       </span>
     ) : check === 'taken' ? (
       <span className="ob-check bad">
-        <X size={15} strokeWidth={3} /> Taken
+        <X size={15} strokeWidth={3} /> {t('Taken')}
       </span>
     ) : null;
 
@@ -206,12 +207,12 @@ function UsernameStep({
   return (
     <form onSubmit={submit}>
       <div className="ob-head">
-        <h1>Choose a username</h1>
-        <p className="muted">This is how other players will see you. You can change it later.</p>
+        <h1>{t('Choose a username')}</h1>
+        <p className="muted">{t('This is how other players will see you. You can change it later.')}</p>
       </div>
       <Field
-        label="Username"
-        placeholder="e.g. KnightRider"
+        label={t('Username')}
+        placeholder={t('e.g. KnightRider')}
         autoFocus
         autoComplete="off"
         spellCheck={false}
@@ -221,11 +222,11 @@ function UsernameStep({
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/\s/g, ''))}
         error={problem}
-        hint={`3–${USERNAME_MAX} characters: letters, numbers and _`}
+        hint={t('3–{max} characters: letters, numbers and _', { max: USERNAME_MAX })}
       />
       {ideas.length > 0 && (
         <div className="ob-ideas">
-          <span className="faint">Try:</span>
+          <span className="faint">{t('Try:')}</span>
           {ideas.map((s) => (
             <button key={s} type="button" className="chip" onClick={() => onChange(s)}>
               {s}
@@ -237,7 +238,7 @@ function UsernameStep({
         onBack={onBack}
         next={
           <Button type="submit" variant="primary" size="lg" disabled={check !== 'available'} loading={saving}>
-            Continue
+            {t('Continue')}
           </Button>
         }
       />
@@ -263,29 +264,29 @@ function IconStep({
   return (
     <>
       <div className="ob-head">
-        <h1>Pick your profile icon</h1>
-        <p className="muted">Shown next to your name in games, chats and leaderboards. More icons are available in the Shop.</p>
+        <h1>{t('Pick your profile icon')}</h1>
+        <p className="muted">{t('Shown next to your name in games, chats and leaderboards. More icons are available in the Shop.')}</p>
       </div>
       <div className="ob-preview">
         <ProfileIcon key={iconId} icon={iconId} size={72} className="ob-preview-icon" />
         <div>
           <strong>{username}</strong>
-          <span className="faint">{STARTER_ICONS.find((i) => i.id === iconId)?.name}</span>
+          <span className="faint">{t(STARTER_ICONS.find((i) => i.id === iconId)?.name ?? '')}</span>
         </div>
       </div>
-      <div className="ob-icons" role="radiogroup" aria-label="Profile icon">
+      <div className="ob-icons" role="radiogroup" aria-label={t('Profile icon')}>
         {STARTER_ICONS.map((icon) => (
           <button
             key={icon.id}
             type="button"
             role="radio"
             aria-checked={icon.id === iconId}
-            aria-label={icon.name}
+            aria-label={t(icon.name)}
             className={cx('ob-icon', icon.id === iconId && 'is-selected')}
             onClick={() => onChange(icon.id)}
           >
             <ProfileIcon icon={icon.id} size={76} />
-            <span>{icon.name}</span>
+            <span>{t(icon.name)}</span>
             {icon.id === iconId && (
               <span className="ob-icon-check">
                 <Check size={13} strokeWidth={3} />
@@ -298,7 +299,7 @@ function IconStep({
         onBack={onBack}
         next={
           <Button variant="primary" size="lg" onClick={onNext} loading={saving}>
-            Continue
+            {t('Continue')}
           </Button>
         }
       />
@@ -329,14 +330,14 @@ function Ready({
       <div className="ob-ready">
         <div className="ob-ready-glow" />
         <ProfileIcon icon={iconId} size={104} ring="rgba(242,194,122,.8)" />
-        <h1>You're all set, {username}!</h1>
-        <p className="muted">Here's what you start with.</p>
+        <h1>{t("You're all set, {name}!", { name: username })}</h1>
+        <p className="muted">{t("Here's what you start with.")}</p>
         <div className="ob-perks">
           <div className="ob-perk">
             <RankEmblem tier={rank.tier.id} division={rank.division} size={44} />
             <div>
-              <strong>{rank.label}</strong>
-              <span className="faint">Starting rank</span>
+              <strong>{rankText(rank.label)}</strong>
+              <span className="faint">{t('Starting rank')}</span>
             </div>
           </div>
           <div className="ob-perk">
@@ -345,16 +346,16 @@ function Ready({
             </span>
             <div>
               <Coins amount={coins} />
-              <span className="faint">Welcome coins</span>
+              <span className="faint">{t('Welcome coins')}</span>
             </div>
           </div>
         </div>
         <ul className="ob-tips">
           <li>
-            <Swords size={16} /> Win ranked games to climb from {rank.tier.name} towards Challenger.
+            <Swords size={16} /> {t('Win ranked games to climb from {tier} towards Challenger.', { tier: t(rank.tier.name) })}
           </li>
           <li>
-            <Crown size={16} /> Every casual and ranked game earns coins for the Shop.
+            <Crown size={16} /> {t('Every casual and ranked game earns coins for the Shop.')}
           </li>
         </ul>
       </div>
@@ -362,7 +363,7 @@ function Ready({
         onBack={onBack}
         next={
           <Button variant="primary" size="lg" onClick={onFinish} loading={saving}>
-            Start playing
+            {t('Start playing')}
           </Button>
         }
       />

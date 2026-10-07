@@ -1,3 +1,4 @@
+import { rankText, t, tk } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { Eye, Sparkles, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
@@ -6,14 +7,14 @@ import type { Mode } from './modes/types';
 import type { GameState } from './store';
 
 const REASON: Record<string, string> = {
-  checkmate: 'by checkmate',
-  resignation: 'by resignation',
-  agreement: 'by agreement',
-  stalemate: 'by stalemate',
-  'insufficient material': 'by insufficient material',
-  'threefold repetition': 'by threefold repetition',
-  'fifty-move rule': 'by the fifty-move rule',
-  abandoned: 'by abandonment',
+  checkmate: tk('by checkmate'),
+  resignation: tk('by resignation'),
+  agreement: tk('by agreement'),
+  stalemate: tk('by stalemate'),
+  'insufficient material': tk('by insufficient material'),
+  'threefold repetition': tk('by threefold repetition'),
+  'fifty-move rule': tk('by the fifty-move rule'),
+  abandoned: tk('by abandonment'),
 };
 
 function signed(n: number): string {
@@ -24,8 +25,8 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
   const end = s.end!;
   const me = s.mySide;
   const outcome = !me ? null : end.winner === null ? 'draw' : end.winner === me ? 'win' : 'loss';
-  const title = outcome === 'win' ? 'Victory' : outcome === 'loss' ? 'Defeat' : outcome === 'draw' ? 'Draw' : end.winner ? `${s.players[end.winner].name} wins` : 'Draw';
-  const sub = REASON[end.reason] ?? end.text;
+  const title = outcome === 'win' ? t('Victory') : outcome === 'loss' ? t('Defeat') : outcome === 'draw' ? t('Draw') : end.winner ? t('{name} wins', { name: s.players[end.winner].name }) : t('Draw');
+  const sub = REASON[end.reason] ? t(REASON[end.reason]) : end.text;
   const opp = me ? s.players[me === 'w' ? 'b' : 'w'] : null;
   const result = s.result;
   const data = result?.data;
@@ -46,7 +47,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
               <ProfileIcon icon={s.players[me].iconId} size={52} />
               <span>{s.players[me].name}</span>
             </div>
-            <span className="result-vs-label">vs</span>
+            <span className="result-vs-label">{t('vs')}</span>
             <div className={cx('result-player', outcome === 'loss' && 'is-winner')}>
               <ProfileIcon icon={opp.iconId} size={52} />
               <span>{opp.name}</span>
@@ -56,7 +57,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
 
         {result?.loading && (
           <div className="result-loading">
-            <Spinner size={18} /> Calculating your results…
+            <Spinner size={18} /> {t('Calculating your results…')}
           </div>
         )}
         {result?.error && <p className="form-error">{result.error}</p>}
@@ -66,15 +67,15 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
         {data && (data.coins || data.wager !== null) && (
           <section className="result-block">
             <div className="result-row">
-              <span className="result-label">Coins</span>
+              <span className="result-label">{t('Coins')}</span>
               <Coins amount={data.wager ?? data.coins!.total} signed size={20} />
             </div>
             {data.coins && (
               <div className="result-chips">
-                <span>Base {signed(data.coins.baseline)}</span>
-                {data.coins.performance !== 0 && <span>Performance {signed(data.coins.performance)}</span>}
-                {data.coins.difference !== 0 && <span>Opponent {signed(data.coins.difference)}</span>}
-                {data.coins.streak !== 0 && <span>Streak {signed(data.coins.streak)}</span>}
+                <span>{t('Base')} {signed(data.coins.baseline)}</span>
+                {data.coins.performance !== 0 && <span>{t('Performance')} {signed(data.coins.performance)}</span>}
+                {data.coins.difference !== 0 && <span>{t('Opponent')} {signed(data.coins.difference)}</span>}
+                {data.coins.streak !== 0 && <span>{t('Streak')} {signed(data.coins.streak)}</span>}
               </div>
             )}
           </section>
@@ -83,7 +84,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
         {result && !result.loading && result.accuracy != null && (
           <section className="result-block result-accuracy">
             <Target size={18} />
-            <span className="result-label">Your accuracy</span>
+            <span className="result-label">{t('Your accuracy')}</span>
             <strong>{Math.round(result.accuracy)}%</strong>
             <ProgressBar value={result.accuracy / 100} tone={result.accuracy >= 70 ? 'success' : 'gold'} />
           </section>
@@ -96,7 +97,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
             </Button>
           ))}
           <Button variant="ghost" icon={<Eye size={16} />} onClick={onHide}>
-            View board
+            {t('View board')}
           </Button>
         </footer>
       </div>
@@ -113,28 +114,28 @@ function MmrBlock({ data }: { data: NonNullable<GameState['result']>['data'] & o
   // animate the bar from where it was to where it is
   const [progress, setProgress] = useState(before.progress);
   useEffect(() => {
-    const t = setTimeout(() => setProgress(promoted ? 1 : demoted ? 0 : after.progress), 350);
+    const t1 = setTimeout(() => setProgress(promoted ? 1 : demoted ? 0 : after.progress), 350);
     const t2 = promoted || demoted ? setTimeout(() => setProgress(after.progress), 1200) : undefined;
     return () => {
-      clearTimeout(t);
+      clearTimeout(t1);
       clearTimeout(t2);
     };
   }, [after.progress, promoted, demoted]);
 
   const rows: Array<[string, number]> = [
-    ['Base', mmr.baseline],
-    ['Rating difference', mmr.difference],
-    ['Performance', mmr.performance],
-    ['Win streak', mmr.streak],
+    [t('Base'), mmr.baseline],
+    [t('Rating difference'), mmr.difference],
+    [t('Performance'), mmr.performance],
+    [t('Win streak'), mmr.streak],
   ];
 
   return (
     <section className="result-block">
       <div className="result-row">
-        <span className="result-label">Ranked</span>
+        <span className="result-label">{t('Ranked')}</span>
         <span className={cx('result-mmr', mmr.total >= 0 ? 'up' : 'down')}>
           {mmr.total >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-          {signed(mmr.total)} MMR
+          {t('{n} MMR', { n: signed(mmr.total) })}
         </span>
       </div>
       <div className="result-breakdown">
@@ -150,16 +151,16 @@ function MmrBlock({ data }: { data: NonNullable<GameState['result']>['data'] & o
       <div className="result-rank">
         <RankEmblem tier={(promoted || demoted ? after : before).tier} division={(promoted || demoted ? after : before).division} size={44} />
         <div>
-          <strong>{after.label}</strong>
+          <strong>{rankText(after.label)}</strong>
           <ProgressBar value={progress} />
         </div>
       </div>
       {promoted && (
         <div className="result-promoted">
-          <Sparkles size={16} /> Promoted to {after.label}!
+          <Sparkles size={16} /> {t('Promoted to {rank}!', { rank: rankText(after.label) })}
         </div>
       )}
-      {demoted && <div className="result-demoted">Dropped to {after.label}</div>}
+      {demoted && <div className="result-demoted">{t('Dropped to {rank}', { rank: rankText(after.label) })}</div>}
     </section>
   );
 }

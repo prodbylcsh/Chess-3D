@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useState } from 'react';
 import { STAKES, wagerNet } from '#shared/economy.ts';
 import type { StakeId } from '../../api';
@@ -12,15 +13,15 @@ export function StakePicker({ open, onClose, onPick }: { open: boolean; onClose:
     <Modal
       open={open}
       onClose={onClose}
-      title="Play for coins"
+      title={t('Play for coins')}
       subtitle={
         <>
-          Both players stake the same amount; the winner takes the pot minus a 10% fee. Your balance: <Coins amount={profile.coins} />
+          {t('Both players stake the same amount; the winner takes the pot minus a 10% fee. Your balance:')} <Coins amount={profile.coins} />
         </>
       }
       width={480}
     >
-      <div className="stakes" role="radiogroup" aria-label="Stake">
+      <div className="stakes" role="radiogroup" aria-label={t('Stake')}>
         {(Object.keys(STAKES) as StakeId[]).map((id) => (
           <button
             key={id}
@@ -31,15 +32,15 @@ export function StakePicker({ open, onClose, onPick }: { open: boolean; onClose:
             className={cx('stake', id === stake && 'is-selected')}
             onClick={() => setStake(id)}
           >
-            <span className="stake-name">{STAKES[id].name}</span>
+            <span className="stake-name">{t(STAKES[id].name)}</span>
             <Coins amount={STAKES[id].amount} size={20} />
-            <span className="stake-win">Win +{wagerNet(STAKES[id].amount, 'win')}</span>
-            {!affordable(id) && <span className="stake-lock">Need {STAKES[id].amount}</span>}
+            <span className="stake-win">{t('Win +{n}', { n: wagerNet(STAKES[id].amount, 'win') })}</span>
+            {!affordable(id) && <span className="stake-lock">{t('Need {n}', { n: STAKES[id].amount })}</span>}
           </button>
         ))}
       </div>
       <Button variant="primary" size="lg" block disabled={!affordable(stake)} onClick={() => onPick(stake)}>
-        Find opponent
+        {t('Find opponent')}
       </Button>
     </Modal>
   );

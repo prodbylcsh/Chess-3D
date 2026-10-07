@@ -1,3 +1,4 @@
+import { rankText, t } from '../../i18n';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Check, MessageCircle, Swords, UserCheck, UserMinus, UserPlus, X } from 'lucide-react';
@@ -15,13 +16,13 @@ export function PlayerLine({ player, sub, size = 44 }: { player: PublicProfile; 
     <Link to={`/u/${player.username}`} className="player-line">
       <span className="player-line-avatar">
         <ProfileIcon icon={player.iconId} size={size} />
-        <span className={cx('presence-dot', player.online && 'is-on')} title={player.online ? 'Online' : 'Offline'} />
+        <span className={cx('presence-dot', player.online && 'is-on')} title={player.online ? t('Online') : t('Offline')} />
       </span>
       <span className="player-line-text">
         <strong>{player.username}</strong>
         <span className="player-line-sub">
           <RankEmblem tier={player.rank.tier} division={player.rank.division} size={15} />
-          {player.rank.label}
+          {rankText(player.rank.label)}
           {sub}
         </span>
       </span>
@@ -46,7 +47,7 @@ export function FriendButton({ playerId, compact, iconOnly }: { playerId: string
       setRelation(next);
       if (message) toast(message, { tone: 'success' });
     } catch (err) {
-      toast(err instanceof ApiError ? err.message : 'Something went wrong.', { tone: 'danger' });
+      toast(err instanceof ApiError ? err.message : t('Something went wrong.'), { tone: 'danger' });
     } finally {
       setBusy(false);
     }
@@ -61,32 +62,32 @@ export function FriendButton({ playerId, compact, iconOnly }: { playerId: string
         variant="secondary"
         icon={<UserCheck size={16} />}
         loading={busy}
-        title="Remove friend"
+        title={t('Remove friend')}
         onClick={async () => {
-          if (await confirmDialog({ title: 'Remove this friend?', confirmLabel: 'Remove', tone: 'danger' })) {
+          if (await confirmDialog({ title: t('Remove this friend?'), confirmLabel: t('Remove'), tone: 'danger' })) {
             void run(() => api.friends.remove(playerId), 'none');
           }
         }}
       >
-        Friends
+        {t('Friends')}
       </Button>
     );
   }
   if (relation === 'outgoing') {
     return (
-      <Button size={size} variant="secondary" icon={<X size={16} />} loading={busy} title="Cancel request" aria-label="Cancel request" onClick={() => void run(() => api.friends.cancel(playerId), 'none')}>
-        {iconOnly ? null : 'Cancel request'}
+      <Button size={size} variant="secondary" icon={<X size={16} />} loading={busy} title={t('Cancel request')} aria-label={t('Cancel request')} onClick={() => void run(() => api.friends.cancel(playerId), 'none')}>
+        {iconOnly ? null : t('Cancel request')}
       </Button>
     );
   }
   if (relation === 'incoming') {
     return (
       <span className="btn-pair">
-        <Button size={size} variant="primary" icon={<Check size={16} />} loading={busy} onClick={() => void run(() => api.friends.accept(playerId), 'friend', 'Friend added.')}>
-          Accept
+        <Button size={size} variant="primary" icon={<Check size={16} />} loading={busy} onClick={() => void run(() => api.friends.accept(playerId), 'friend', t('Friend added.'))}>
+          {t('Accept')}
         </Button>
         <Button size={size} variant="ghost" icon={<UserMinus size={16} />} disabled={busy} onClick={() => void run(() => api.friends.decline(playerId), 'none')}>
-          Decline
+          {t('Decline')}
         </Button>
       </span>
     );
@@ -97,11 +98,11 @@ export function FriendButton({ playerId, compact, iconOnly }: { playerId: string
       variant="primary"
       icon={<UserPlus size={16} />}
       loading={busy}
-      title="Add friend"
-      aria-label="Add friend"
-      onClick={() => void run(() => api.friends.request(playerId), 'outgoing', 'Friend request sent.')}
+      title={t('Add friend')}
+      aria-label={t('Add friend')}
+      onClick={() => void run(() => api.friends.request(playerId), 'outgoing', t('Friend request sent.'))}
     >
-      {iconOnly ? null : 'Add friend'}
+      {iconOnly ? null : t('Add friend')}
     </Button>
   );
 }
@@ -112,12 +113,12 @@ export function useChallenge() {
   const navigate = useNavigate();
   return async (player: PublicProfile) => {
     try {
-      if (!online) throw new Error('Online play is not configured in this build.');
+      if (!online) throw new Error(t('Online play is not configured in this build.'));
       await online.signIn();
       const row = await online.create(profile.username ?? 'Player', 'random');
       const conversation = await api.messages.open(player.id);
-      await api.messages.send(conversation.id, `Let's play! ♟️`, { gameId: row.id });
-      toast(`Challenge sent to ${player.username}.`, { tone: 'success' });
+      await api.messages.send(conversation.id, t("Let's play! ♟️"), { gameId: row.id });
+      toast(t('Challenge sent to {name}.', { name: player.username }), { tone: 'success' });
       navigate(`/game/online/${row.id}`);
     } catch (err) {
       toast((err as Error).message, { tone: 'danger' });
@@ -134,7 +135,7 @@ export function MessageButton({ player, compact }: { player: PublicProfile; comp
       icon={<MessageCircle size={16} />}
       onClick={async () => navigate(`/messages/${(await api.messages.open(player.id)).id}`)}
     >
-      {compact ? null : 'Message'}
+      {compact ? null : t('Message')}
     </Button>
   );
 }
@@ -149,18 +150,18 @@ export function ChallengeButton({ player, compact }: { player: PublicProfile; co
       icon={<Swords size={16} />}
       loading={busy}
       disabled={!online}
-      title={online ? 'Challenge to a game' : 'Online play is not configured'}
+      title={online ? t('Challenge to a game') : t('Online play is not configured.')}
       onClick={async () => {
         setBusy(true);
         await challenge(player);
         setBusy(false);
       }}
     >
-      {compact ? null : 'Challenge'}
+      {compact ? null : t('Challenge')}
     </Button>
   );
 }
 
 export function OnlineBadge({ online: on }: { online: boolean }) {
-  return on ? <Badge tone="success">Online</Badge> : <Badge>Offline</Badge>;
+  return on ? <Badge tone="success">{t('Online')}</Badge> : <Badge>{t('Offline')}</Badge>;
 }

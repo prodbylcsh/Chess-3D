@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import type { Color as Side } from 'chess.js';
@@ -98,7 +99,7 @@ export default function GamePage() {
           <LogoMark size={52} />
           <div className="game-loader-title display">Wizard Chess</div>
           <ProgressBar value={progress} className="game-loader-bar" />
-          <div className="faint">{error ?? 'Summoning the pieces…'}</div>
+          <div className="faint">{error ?? t('Summoning the pieces…')}</div>
         </div>
       )}
     </div>

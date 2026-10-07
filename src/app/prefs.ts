@@ -47,4 +47,7 @@ export function usePrefs(): Prefs {
 }
 
 /** Languages the interface is available in; more are added as translations arrive. */
-export const LANGUAGES = [{ id: 'en', name: 'English' }];
+export const LANGUAGES = [
+  { id: 'en', name: 'English' },
+  { id: 'cs', name: 'Čeština' },
+];

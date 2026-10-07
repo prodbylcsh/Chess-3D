@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 // In-browser stand-in for the back-end. Data lives in localStorage; every call
 // waits a little so loading states are visible. The rules for MMR and coins are
 // the real shared ones, so results look exactly like they will in production.
@@ -34,7 +35,7 @@ export function createMockApi(): Api {
         const problem = emailProblem(email) ?? passwordProblem(password);
         if (problem) throw new ApiError('invalid', problem);
         if (db.accounts.some((a) => a.email === email.trim().toLowerCase())) {
-          throw new ApiError('email_taken', 'An account with this email already exists. Sign in instead.');
+          throw new ApiError('email_taken', t('An account with this email already exists. Sign in instead.'));
         }
         const account = createAccount(email, 'email', password);
         db.sessionId = account.id;
@@ -46,7 +47,7 @@ export function createMockApi(): Api {
         await wait();
         const account = db.accounts.find((a) => a.email === email.trim().toLowerCase());
         if (!account || account.password !== password) {
-          throw new ApiError('bad_credentials', 'Wrong email or password.');
+          throw new ApiError('bad_credentials', t('Wrong email or password.'));
         }
         db.sessionId = account.id;
         save();
@@ -93,11 +94,11 @@ export function createMockApi(): Api {
         if (patch.username != null) {
           const problem = usernameProblem(patch.username);
           if (problem) throw new ApiError('invalid', problem);
-          if (isTaken(patch.username, profile.id)) throw new ApiError('username_taken', 'That username is taken.');
+          if (isTaken(patch.username, profile.id)) throw new ApiError('username_taken', t('That username is taken.'));
         }
         if (patch.username != null && profile.onboarded && patch.username !== profile.username) {
           const next = nextUsernameChange(profile.usernameChangedAt ?? null);
-          if (next) throw new ApiError('cooldown', `You can change your username again on ${next.toLocaleDateString()}.`);
+          if (next) throw new ApiError('cooldown', t('You can change your username again on {date}.', { date: next.toLocaleDateString() }));
           profile.usernameChangedAt = new Date().toISOString();
         }
         Object.assign(profile, patch);
@@ -130,7 +131,7 @@ export function createMockApi(): Api {
           if (kind === 'wager') {
             const amount = STAKES[stake ?? 'low'].amount;
             if (profile.coins < amount) {
-              rej(new ApiError('insufficient_coins', `You need ${amount} coins for this stake.`));
+              rej(new ApiError('insufficient_coins', t('You need {amount} coins for this stake.', { amount })));
               return;
             }
           }
@@ -157,7 +158,7 @@ export function createMockApi(): Api {
           cancel() {
             cancelled = true;
             clearTimeout(timer);
-            reject(new ApiError('cancelled', 'Search cancelled.'));
+            reject(new ApiError('cancelled', t('Search cancelled.')));
           },
         };
       },
@@ -170,8 +171,8 @@ export function createMockApi(): Api {
         await wait(400, 900);
         const { profile } = session();
         const match = db.matches[matchId];
-        if (!match || match.playerId !== profile.id) throw new ApiError('not_found', 'Match not found.');
-        if (match.reported) throw new ApiError('already_reported', 'This result was already recorded.');
+        if (!match || match.playerId !== profile.id) throw new ApiError('not_found', t('Match not found.'));
+        if (match.reported) throw new ApiError('already_reported', t('This result was already recorded.'));
         const opponent = SEED_PLAYERS.find((p) => p.id === match.opponentId)!;
         const rankBefore = rankInfo(profile.mmr);
         const { outcome, accuracy } = report;

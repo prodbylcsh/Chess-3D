@@ -385,8 +385,10 @@ The 3D board fills the screen. Around it:
   verified with perft). The same worker estimates accuracy for the result screen until
   server-side analysis exists. On the mock back-end, matchmade opponents are played by this
   engine and marked "Demo".
-- **Languages:** planned together with Settings (M2): user-facing text moves into one
-  dictionary per language, so adding a language becomes a translation task.
+- **Languages:** English (default) and Czech, switched in Settings. Code keeps English
+  text wrapped in `t()`; `src/i18n/<lang>.ts` maps it to the translation, with English as
+  the fallback. `tn()` handles counts (Czech has a separate 2–4 form). `tests/i18n.test.ts`
+  fails when a string has no Czech entry, so adding a language is a translation task.
 
 ### 8.2 Back-end (Supabase)
 

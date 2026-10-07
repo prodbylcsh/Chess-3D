@@ -14,6 +14,7 @@ import {
 import { rankOf } from '#shared/rating.ts';
 import { LogoMark, ProfileIcon, RankEmblem } from '../ui/art/art';
 import { Badge, Coins, cx } from '../ui/kit';
+import { rankText, tk, useT } from '../i18n';
 import { useBadges } from './notifications';
 import { useProfile } from './session';
 import './layout.css';
@@ -28,14 +29,14 @@ interface NavItem {
 }
 
 export const NAV: NavItem[] = [
-  { to: '/play', label: 'Play', icon: Swords, mobile: true },
-  { to: '/puzzles', label: 'Puzzles', icon: Puzzle, soon: true },
-  { to: '/learn', label: 'Learn', icon: GraduationCap, soon: true },
-  { to: '/community', label: 'Community', icon: Users, mobile: true },
-  { to: '/shop', label: 'Shop', icon: Store, mobile: true },
-  { to: '/profile', label: 'Profile', icon: UserRound, mobile: true },
-  { to: '/messages', label: 'Messages', icon: MessageCircle, mobile: true },
-  { to: '/settings', label: 'Settings', icon: Settings },
+  { to: '/play', label: tk('Play'), icon: Swords, mobile: true },
+  { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle, soon: true },
+  { to: '/learn', label: tk('Learn'), icon: GraduationCap, soon: true },
+  { to: '/community', label: tk('Community'), icon: Users, mobile: true },
+  { to: '/shop', label: tk('Shop'), icon: Store, mobile: true },
+  { to: '/profile', label: tk('Profile'), icon: UserRound, mobile: true },
+  { to: '/messages', label: tk('Messages'), icon: MessageCircle, mobile: true },
+  { to: '/settings', label: tk('Settings'), icon: Settings },
 ];
 
 export function Wordmark() {
@@ -51,6 +52,7 @@ export function AppLayout() {
   const profile = useProfile();
   const rank = rankOf(profile.mmr);
   const badges = useBadges();
+  const t = useT();
   const count = (to: string) => (to === '/messages' ? badges.unreadMessages : to === '/community' ? badges.friendRequests : 0);
 
   return (
@@ -58,18 +60,18 @@ export function AppLayout() {
       <aside className="sidebar">
         <Wordmark />
 
-        <nav className="nav" aria-label="Main">
+        <nav className="nav" aria-label={t('Main')}>
           {NAV.map((item) =>
             item.soon ? (
-              <span key={item.to} className="nav-item is-soon" aria-disabled title="Coming soon">
+              <span key={item.to} className="nav-item is-soon" aria-disabled title={t('Coming soon')}>
                 <item.icon size={19} strokeWidth={1.9} />
-                <span>{item.label}</span>
-                <Badge>Soon</Badge>
+                <span>{t(item.label)}</span>
+                <Badge>{t('Soon')}</Badge>
               </span>
             ) : (
               <NavLink key={item.to} to={item.to} className={({ isActive }) => cx('nav-item', isActive && 'is-active')}>
                 <item.icon size={19} strokeWidth={1.9} />
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
                 {count(item.to) > 0 && <span className="nav-count">{count(item.to)}</span>}
               </NavLink>
             ),
@@ -78,7 +80,7 @@ export function AppLayout() {
 
         <div className="sidebar-foot">
           <div className="balance">
-            <span className="faint">Balance</span>
+            <span className="faint">{t('Balance')}</span>
             <Coins amount={profile.coins} />
           </div>
           <NavLink to="/profile" className="me-chip">
@@ -87,7 +89,7 @@ export function AppLayout() {
               <strong>{profile.username}</strong>
               <span className="me-rank">
                 <RankEmblem tier={rank.tier.id} division={rank.division} size={16} />
-                {rank.label}
+                {rankText(rank.label)}
               </span>
             </span>
           </NavLink>
@@ -98,14 +100,14 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      <nav className="tabbar" aria-label="Main">
+      <nav className="tabbar" aria-label={t('Main')}>
         {NAV.filter((i) => i.mobile).map((item) => (
           <NavLink key={item.to} to={item.to} className={({ isActive }) => cx('tab', isActive && 'is-active')}>
             <span className="tab-icon">
               <item.icon size={21} strokeWidth={1.9} />
               {count(item.to) > 0 && <span className="tab-dot" />}
             </span>
-            <span>{item.label}</span>
+            <span>{t(item.label)}</span>
           </NavLink>
         ))}
       </nav>

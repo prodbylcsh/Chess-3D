@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { Swords, UserRound } from 'lucide-react';
@@ -22,14 +23,14 @@ export default function JoinPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!online) return setProblem('Online play is not available in this build.');
+    if (!online) return setProblem(t('Online play is not available in this build.'));
     let live = true;
     void (async () => {
       try {
         await online.signIn();
         const r = await online.fetch(gameId);
         if (!live) return;
-        if (!r) return setProblem('This invite is no longer valid.');
+        if (!r) return setProblem(t('This invite is no longer valid.'));
         // already playing in it, or it is full: go straight to the board
         if (online.sideOf(r) || r.status !== 'waiting') return navigate(`/game/online/${r.id}`, { replace: true });
         setRow(r);
@@ -47,7 +48,7 @@ export default function JoinPage() {
   async function join(e: FormEvent) {
     e.preventDefault();
     if (!online || !row) return;
-    const joinName = signedIn ? profile!.username! : name.trim() || 'Guest';
+    const joinName = signedIn ? profile!.username! : name.trim() || t('Guest');
     if (!signedIn) localStorage.setItem(GUEST_NAME_KEY, joinName);
     setBusy(true);
     try {
@@ -59,8 +60,8 @@ export default function JoinPage() {
     }
   }
 
-  const host = row ? (row.white_name ?? row.black_name ?? 'A friend') : '';
-  const youPlay = row ? (row.white_id ? 'Black' : 'White') : '';
+  const host = row ? (row.white_name ?? row.black_name ?? t('A friend')) : '';
+  const youPlay = row ? (row.white_id ? t('Black') : t('White')) : '';
 
   return (
     <div className="join">
@@ -68,15 +69,15 @@ export default function JoinPage() {
       <div className="join-card">
         {problem ? (
           <>
-            <h1>Can't join this game</h1>
+            <h1>{t("Can't join this game")}</h1>
             <p className="muted">{problem}</p>
             <Button variant="primary" onClick={() => navigate('/play')}>
-              Go to Wizard Chess
+              {t('Go to Wizard Chess')}
             </Button>
           </>
         ) : !row ? (
           <div className="join-loading">
-            <Spinner /> Opening the invitation…
+            <Spinner /> {t('Opening the invitation…')}
           </div>
         ) : (
           <form onSubmit={join}>
@@ -86,22 +87,22 @@ export default function JoinPage() {
               <ProfileIcon icon={signedIn ? profile!.iconId : 'guest'} size={64} />
             </div>
             <h1>
-              <span className="gold">{host}</span> invites you to a game
+              <span className="gold">{host}</span> {t('invites you to a game')}
             </h1>
-            <p className="muted">You'll play {youPlay}. The game starts as soon as you join.</p>
+            <p className="muted">{t("You'll play {color}. The game starts as soon as you join.", { color: youPlay })}</p>
             {signedIn ? (
               <p className="join-as">
-                Joining as <strong>{profile!.username}</strong>
+                {t('Joining as')} <strong>{profile!.username}</strong>
               </p>
             ) : (
-              <Field label="Your name" placeholder="Guest" maxLength={24} leading={<UserRound size={18} />} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+              <Field label={t('Your name')} placeholder={t('Guest')} maxLength={24} leading={<UserRound size={18} />} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
             )}
             <Button type="submit" variant="primary" size="lg" block loading={busy}>
-              Join game
+              {t('Join game')}
             </Button>
             {!signedIn && (
               <p className="faint join-foot">
-                Have an account? <Link to="/auth" state={{ from: `/join/${gameId}` }}>Sign in</Link> to play under your username.
+                {t('Have an account?')} <Link to="/auth" state={{ from: `/join/${gameId}` }}>{t('Sign in')}</Link> {t('to play under your username.')}
               </p>
             )}
           </form>

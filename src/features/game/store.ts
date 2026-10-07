@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
@@ -51,10 +52,6 @@ export interface GameState {
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 
-const DEFAULT_PLAYERS: Record<Side, PlayerView> = {
-  w: { name: 'White', iconId: 'white' },
-  b: { name: 'Black', iconId: 'black' },
-};
 
 export function initialState(): GameState {
   return {
@@ -65,7 +62,7 @@ export function initialState(): GameState {
     advantage: { w: 0, b: 0 },
     busy: true,
     canUndo: false,
-    players: DEFAULT_PLAYERS,
+    players: { w: { name: t('White'), iconId: 'white' }, b: { name: t('Black'), iconId: 'black' } },
     bottom: 'w',
     mySide: null,
     promotion: null,

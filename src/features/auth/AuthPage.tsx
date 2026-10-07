@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { tk, useT } from '../../i18n';
 import { Eye, EyeOff, Lock, Mail, Sparkles, Swords, Trophy } from 'lucide-react';
 import { api, ApiError } from '../../api';
 import { emailProblem, passwordProblem, passwordStrength } from '../../api/validation';
@@ -32,10 +33,11 @@ function GoogleLogo() {
   );
 }
 
-const STRENGTH = ['Too weak', 'Weak', 'Good', 'Strong'];
+const STRENGTH = [tk('Too weak'), tk('Weak'), tk('Good'), tk('Strong')];
 
 export function AuthPage() {
   const { signedIn } = useSession();
+  const t = useT();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +48,7 @@ export function AuthPage() {
   const [resetOpen, setResetOpen] = useState(false);
 
   const emailError = touched ? emailProblem(email) : null;
-  const passwordError = touched && mode === 'signup' ? passwordProblem(password) : touched && !password ? 'Enter your password' : null;
+  const passwordError = touched && mode === 'signup' ? passwordProblem(password) : touched && !password ? t('Enter your password') : null;
   const strength = passwordStrength(password);
 
   async function submit(e: FormEvent) {
@@ -59,7 +61,7 @@ export function AuthPage() {
       const account = mode === 'signup' ? await api.auth.signUp(email, password) : await api.auth.signIn(email, password);
       await signedIn(account);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      setError(err instanceof ApiError ? t(err.message) : t('Something went wrong. Please try again.'));
       setBusy(null);
     }
   }
@@ -70,7 +72,7 @@ export function AuthPage() {
     try {
       await signedIn(await api.auth.signInWith(provider));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Sign-in was not completed.');
+      setError(err instanceof ApiError ? t(err.message) : t('Sign-in was not completed.'));
       setBusy(null);
     }
   }
@@ -105,16 +107,16 @@ export function AuthPage() {
         </svg>
         <div className="auth-hero-copy">
           <Wordmark />
-          <h1 className="display">Chess, with a little magic.</h1>
+          <h1 className="display">{t('Chess, with a little magic.')}</h1>
           <ul>
             <li>
-              <Swords size={18} /> Ranked leagues from Iron to Challenger
+              <Swords size={18} /> {t('Ranked leagues from Iron to Challenger')}
             </li>
             <li>
-              <Sparkles size={18} /> Cinematic 3D battles on every capture
+              <Sparkles size={18} /> {t('Cinematic 3D battles on every capture')}
             </li>
             <li>
-              <Trophy size={18} /> Earn coins, unlock sets, boards and effects
+              <Trophy size={18} /> {t('Earn coins, unlock sets, boards and effects')}
             </li>
           </ul>
         </div>
@@ -125,69 +127,69 @@ export function AuthPage() {
           <div className="auth-mobile-brand">
             <Wordmark />
           </div>
-          <h2>{mode === 'signin' ? 'Welcome back' : 'Create your account'}</h2>
-          <p className="muted">{mode === 'signin' ? 'Sign in to continue your climb.' : 'It takes less than a minute.'}</p>
+          <h2>{mode === 'signin' ? t('Welcome back') : t('Create your account')}</h2>
+          <p className="muted">{mode === 'signin' ? t('Sign in to continue your climb.') : t('It takes less than a minute.')}</p>
 
           <Segmented
-            label="Sign in or sign up"
+            label={t('Sign in or sign up')}
             value={mode}
             onChange={switchMode}
             options={[
-              { value: 'signin', label: 'Sign in' },
-              { value: 'signup', label: 'Create account' },
+              { value: 'signin', label: t('Sign in') },
+              { value: 'signup', label: t('Create account') },
             ]}
           />
 
           <div className="auth-social">
             <Button className="btn-apple" size="lg" block icon={<AppleLogo />} loading={busy === 'apple'} disabled={!!busy} onClick={() => void social('apple')}>
-              Continue with Apple
+              {t('Continue with Apple')}
             </Button>
             <Button className="btn-google" size="lg" block icon={<GoogleLogo />} loading={busy === 'google'} disabled={!!busy} onClick={() => void social('google')}>
-              Continue with Google
+              {t('Continue with Google')}
             </Button>
           </div>
 
           <div className="auth-divider">
-            <span>or with email</span>
+            <span>{t('or with email')}</span>
           </div>
 
           <form className="auth-form" onSubmit={submit} noValidate>
             <Field
-              label="Email"
+              label={t('Email')}
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
               leading={<Mail size={18} />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              error={emailError}
+              error={emailError && t(emailError)}
             />
             <Field
-              label="Password"
+              label={t('Password')}
               type={showPassword ? 'text' : 'password'}
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'}
+              placeholder={mode === 'signup' ? t('At least 8 characters') : t('Your password')}
               leading={<Lock size={18} />}
               trailing={
-                <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? t('Hide password') : t('Show password')}>
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               }
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              error={passwordError}
+              error={passwordError && t(passwordError)}
             />
             {mode === 'signup' && password && (
               <div className={cx('strength', `strength-${strength}`)}>
                 <span />
                 <span />
                 <span />
-                <em>{STRENGTH[strength]}</em>
+                <em>{t(STRENGTH[strength])}</em>
               </div>
             )}
             {mode === 'signin' && (
               <button type="button" className="link-btn auth-forgot" onClick={() => setResetOpen(true)}>
-                Forgot password?
+                {t('Forgot password?')}
               </button>
             )}
             {error && (
@@ -196,13 +198,13 @@ export function AuthPage() {
               </p>
             )}
             <Button type="submit" variant="primary" size="lg" block loading={busy === 'email'} disabled={!!busy}>
-              {mode === 'signin' ? 'Sign in' : 'Create account'}
+              {mode === 'signin' ? t('Sign in') : t('Create account')}
             </Button>
           </form>
 
           <p className="auth-foot faint">
-            By continuing you agree to the Terms of Service and Privacy Policy.
-            {api.mock && <> Demo mode: accounts are stored only in this browser.</>}
+            {t('By continuing you agree to the Terms of Service and Privacy Policy.')}
+            {api.mock && <> {t('Demo mode: accounts are stored only in this browser.')}</>}
           </p>
         </div>
       </section>
@@ -215,19 +217,20 @@ export function AuthPage() {
 function ResetPassword({ open, onClose, initialEmail }: { open: boolean; onClose: () => void; initialEmail: string }) {
   const [email, setEmail] = useState(initialEmail);
   const [sent, setSent] = useState(false);
+  const t = useT();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     const problem = emailProblem(email);
-    if (problem) return setError(problem);
+    if (problem) return setError(t(problem));
     setBusy(true);
     try {
       await api.auth.requestPasswordReset(email);
       setSent(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+      setError(err instanceof ApiError ? t(err.message) : t('Something went wrong.'));
     } finally {
       setBusy(false);
     }
@@ -239,16 +242,16 @@ function ResetPassword({ open, onClose, initialEmail }: { open: boolean; onClose
   };
 
   return (
-    <Modal open={open} onClose={close} title={sent ? 'Check your inbox' : 'Reset your password'} subtitle={sent ? `If an account exists for ${email}, we sent a link to set a new password.` : "Enter your email and we'll send you a reset link."}>
+    <Modal open={open} onClose={close} title={sent ? t('Check your inbox') : t('Reset your password')} subtitle={sent ? t('If an account exists for {email}, we sent a link to set a new password.', { email }) : t("Enter your email and we'll send you a reset link.")}>
       {sent ? (
         <Button variant="primary" block onClick={close}>
-          Back to sign in
+          {t('Back to sign in')}
         </Button>
       ) : (
         <form onSubmit={submit} className="auth-form" noValidate>
-          <Field label="Email" type="email" leading={<Mail size={18} />} value={email} onChange={(e) => setEmail(e.target.value)} error={error} autoFocus />
+          <Field label={t('Email')} type="email" leading={<Mail size={18} />} value={email} onChange={(e) => setEmail(e.target.value)} error={error} autoFocus />
           <Button type="submit" variant="primary" block loading={busy}>
-            Send reset link
+            {t('Send reset link')}
           </Button>
         </form>
       )}

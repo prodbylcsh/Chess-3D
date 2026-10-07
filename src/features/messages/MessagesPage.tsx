@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ArrowLeft, MessageCirclePlus, MessagesSquare, Search, SendHorizontal, Swords } from 'lucide-react';
@@ -29,20 +30,20 @@ export function MessagesPage() {
     <div className={cx('chat', conversationId && 'has-thread')}>
       <aside className="chat-list">
         <header className="chat-list-head">
-          <h1 className="page-title">Messages</h1>
-          <IconButton label="New message" onClick={() => setPicking(true)}>
+          <h1 className="page-title">{t('Messages')}</h1>
+          <IconButton label={t('New message')} onClick={() => setPicking(true)}>
             <MessageCirclePlus size={19} />
           </IconButton>
         </header>
         <div className="chat-search">
-          <Field placeholder="Search conversations" leading={<Search size={17} />} value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Search conversations" />
+          <Field placeholder={t('Search conversations')} leading={<Search size={17} />} value={filter} onChange={(e) => setFilter(e.target.value)} aria-label={t('Search conversations')} />
         </div>
         {!list ? (
           <div className="chat-loading">
             <Spinner />
           </div>
         ) : shown.length === 0 ? (
-          <p className="faint chat-none">{list.length ? 'No conversations match.' : 'No conversations yet.'}</p>
+          <p className="faint chat-none">{list.length ? t('No conversations match.') : t('No conversations yet.')}</p>
         ) : (
           <ul>
             {shown.map((c) => (
@@ -58,7 +59,7 @@ export function MessagesPage() {
                       {c.last && <span className="faint">{timeAgo(c.last.at)}</span>}
                     </span>
                     <span className="chat-item-last">
-                      {c.last ? (c.last.kind === 'invite' ? '♟ Game invite' : c.last.body) : 'Say hello 👋'}
+                      {c.last ? (c.last.kind === 'invite' ? t('♟ Game invite') : c.last.body) : t('Say hello 👋')}
                       {c.unread > 0 && <Badge tone="gold">{c.unread}</Badge>}
                     </span>
                   </span>
@@ -73,13 +74,13 @@ export function MessagesPage() {
         {current ? (
           <Thread key={current.id} conversation={current} onBack={() => navigate('/messages')} />
         ) : conversationId && list ? (
-          <EmptyState title="Conversation not found" />
+          <EmptyState title={t('Conversation not found')} />
         ) : (
-          <EmptyState icon={<MessagesSquare size={28} />} title="Your messages">
-            Pick a conversation, or start a new one with a friend.
+          <EmptyState icon={<MessagesSquare size={28} />} title={t('Your messages')}>
+            {t('Pick a conversation, or start a new one with a friend.')}
             <div style={{ marginTop: 16 }}>
               <Button variant="primary" icon={<MessageCirclePlus size={17} />} onClick={() => setPicking(true)}>
-                New message
+                {t('New message')}
               </Button>
             </div>
           </EmptyState>
@@ -148,10 +149,10 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
   return (
     <>
       <header className="thread-head">
-        <IconButton label="Back to conversations" className="thread-back" onClick={onBack}>
+        <IconButton label={t('Back to conversations')} className="thread-back" onClick={onBack}>
           <ArrowLeft size={18} />
         </IconButton>
-        <PlayerLine player={conversation.with} sub={<> · {conversation.with.online ? 'Online' : 'Offline'}</>} />
+        <PlayerLine player={conversation.with} sub={<> · {conversation.with.online ? t('Online') : t('Offline')}</>} />
         <ChallengeButton player={conversation.with} />
       </header>
 
@@ -161,7 +162,7 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
             <Spinner />
           </div>
         ) : messages.length === 0 ? (
-          <p className="thread-empty faint">This is the start of your conversation with {conversation.with.username}.</p>
+          <p className="thread-empty faint">{t('This is the start of your conversation with {name}.', { name: conversation.with.username })}</p>
         ) : (
           rows.map(({ m, first }) => {
             const mine = m.from === me.id;
@@ -174,11 +175,11 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
                       <Swords size={18} />
                     </span>
                     <div>
-                      <strong>{mine ? 'You sent a challenge' : `${conversation.with.username} challenges you`}</strong>
+                      <strong>{mine ? t('You sent a challenge') : t('{name} challenges you', { name: conversation.with.username })}</strong>
                       <span className="faint">{m.body}</span>
                     </div>
                     <Button size="sm" variant="primary" onClick={() => navigate(mine ? `/game/online/${m.gameId}` : `/join/${m.gameId}`)}>
-                      {mine ? 'Open' : 'Join'}
+                      {mine ? t('Open') : t('Join')}
                     </Button>
                   </div>
                 ) : (
@@ -194,8 +195,8 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
       </div>
 
       <form className="composer" onSubmit={send}>
-        <textarea rows={1} placeholder={`Message ${conversation.with.username}`} value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey} maxLength={1000} aria-label="Message" />
-        <IconButton label="Send" type="submit" className="composer-send" disabled={!draft.trim() || sending}>
+        <textarea rows={1} placeholder={t('Message {name}', { name: conversation.with.username })} value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={onKey} maxLength={1000} aria-label={t('Message')} />
+        <IconButton label={t('Send')} type="submit" className="composer-send" disabled={!draft.trim() || sending}>
           <SendHorizontal size={18} />
         </IconButton>
       </form>
@@ -209,13 +210,13 @@ function FriendPicker({ open, onClose, onPick }: { open: boolean; onClose: () =>
     if (open) void api.friends.list().then(setFriends);
   }, [open]);
   return (
-    <Modal open={open} onClose={onClose} title="New message" subtitle="Choose a friend to write to." width={440}>
+    <Modal open={open} onClose={onClose} title={t('New message')} subtitle={t('Choose a friend to write to.')} width={440}>
       {!friends ? (
         <div className="chat-loading">
           <Spinner />
         </div>
       ) : friends.length === 0 ? (
-        <p className="faint">Add friends in Community to message them.</p>
+        <p className="faint">{t('Add friends in Community to message them.')}</p>
       ) : (
         <ul className="picker">
           {friends.map((f) => (

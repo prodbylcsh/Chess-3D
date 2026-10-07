@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import type { Color as Side } from 'chess.js';
 import { LEVELS } from '../../../ai/client';
 import type { GameEnd } from '../../../game/ui';
@@ -12,8 +13,8 @@ export class AiMode extends BotGame {
 
   constructor(ctx: ModeContext, human: Side, level: number) {
     const def = LEVELS.find((l) => l.id === level) ?? LEVELS[2];
-    super(ctx, human, def.id, { name: 'Wizard Bot', iconId: 'bot', tag: def.name });
-    this.label = `vs AI · ${def.name}`;
+    super(ctx, human, def.id, { name: t('Wizard Bot'), iconId: 'bot', tag: t(def.name) });
+    this.label = `${t('vs AI')} · ${t(def.name)}`;
   }
 
   protected onGameOver(_end: GameEnd): void {
@@ -31,9 +32,9 @@ export class AiMode extends BotGame {
 
   endActions() {
     return [
-      { id: 'rematch', label: 'Rematch', primary: true },
-      { id: 'swap', label: 'Rematch with other colour' },
-      { id: 'exit', label: 'Back to Play' },
+      { id: 'rematch', label: t('Rematch'), primary: true },
+      { id: 'swap', label: t('Rematch with other colour') },
+      { id: 'exit', label: t('Back to Play') },
     ];
   }
 

@@ -1,3 +1,4 @@
+import { t, tk } from '../../i18n';
 // Mock friends, messages, player lookups and account changes. Demo players react
 // on their own (accept friend requests, reply to chats) so the screens can be tried.
 import { rankOf } from '#shared/rating.ts';
@@ -21,7 +22,7 @@ const isSeed = (id: string) => id.startsWith('seed-');
 
 function player(id: string): PublicProfile {
   const p = findPlayer(id);
-  if (!p) throw new ApiError('not_found', 'Player not found.');
+  if (!p) throw new ApiError('not_found', t('Player not found.'));
   return p;
 }
 
@@ -169,7 +170,7 @@ export const friends: FriendsService = {
         if (relationTo(me, userId) !== 'outgoing') return;
         befriend(me, userId);
         save();
-        emit({ type: 'friends', text: `${target.username} accepted your friend request.` });
+        emit({ type: 'friends', text: t('{name} accepted your friend request.', { name: target.username }) });
       }, 3000, 6000);
     }
   },
@@ -177,7 +178,7 @@ export const friends: FriendsService = {
   async accept(userId) {
     await wait();
     const me = session().profile.id;
-    if (relationTo(me, userId) !== 'incoming') throw new ApiError('no_request', 'That request is no longer there.');
+    if (relationTo(me, userId) !== 'incoming') throw new ApiError('no_request', t('That request is no longer there.'));
     befriend(me, userId);
     save();
     emit({ type: 'friends' });
@@ -214,13 +215,13 @@ export const friends: FriendsService = {
 // ------------------------------------------------------------------ messages
 
 const REPLIES = [
-  'Haha, nice one!',
-  'Sure, give me five minutes ♟️',
-  'That last game was wild. The queen sacrifice!',
-  "I'm practising the Sicilian, watch out.",
-  'gg! Rematch tomorrow?',
-  "Can't right now, but later for sure.",
-  'Did you see my new rank? 😄',
+  tk('Haha, nice one!'),
+  tk('Sure, give me five minutes ♟️'),
+  tk('That last game was wild. The queen sacrifice!'),
+  tk("I'm practising the Sicilian, watch out."),
+  tk('gg! Rematch tomorrow?'),
+  tk("Can't right now, but later for sure."),
+  tk('Did you see my new rank? 😄'),
 ];
 
 function otherMember(c: StoredConversation, me: string): string {
@@ -240,7 +241,7 @@ function view(c: StoredConversation, me: string): Conversation {
 function mine(conversationId: string): StoredConversation {
   const me = session().profile.id;
   const c = db.conversations[conversationId];
-  if (!c || !c.members.includes(me)) throw new ApiError('not_found', 'Conversation not found.');
+  if (!c || !c.members.includes(me)) throw new ApiError('not_found', t('Conversation not found.'));
   return c;
 }
 
@@ -277,7 +278,7 @@ export const messages: MessagesService = {
     const me = session().profile.id;
     const c = mine(conversationId);
     const text = body.trim().slice(0, 1000);
-    if (!text && !invite) throw new ApiError('empty', 'Write a message first.');
+    if (!text && !invite) throw new ApiError('empty', t('Write a message first.'));
     const msg: Message = { id: newId('msg'), conversationId, from: me, body: text, at: now(), kind: invite ? 'invite' : 'text', gameId: invite?.gameId };
     c.messages.push(msg);
     c.readAt[me] = msg.at;
@@ -293,7 +294,7 @@ export const messages: MessagesService = {
           id: newId('msg'),
           conversationId,
           from: other,
-          body: invite ? 'Joining now! (demo: send them the link to really play)' : REPLIES[Math.floor(Math.random() * REPLIES.length)],
+          body: invite ? t('Joining now! (demo: send them the link to really play)') : t(REPLIES[Math.floor(Math.random() * REPLIES.length)]),
           at: now(),
           kind: 'text',
         };
@@ -320,12 +321,12 @@ export const account: AccountService = {
   async changeEmail(newEmail, password) {
     await wait();
     const { account: acc } = session();
-    if (acc.provider !== 'email') throw new ApiError('provider', `Your email is managed by ${acc.provider === 'apple' ? 'Apple' : 'Google'}.`);
+    if (acc.provider !== 'email') throw new ApiError('provider', t('Your email is managed by {provider}.', { provider: acc.provider === 'apple' ? 'Apple' : 'Google' }));
     const problem = emailProblem(newEmail);
     if (problem) throw new ApiError('invalid', problem);
-    if (acc.password !== password) throw new ApiError('bad_password', 'Your password is not correct.');
+    if (acc.password !== password) throw new ApiError('bad_password', t('Your password is not correct.'));
     const email = newEmail.trim().toLowerCase();
-    if (db.accounts.some((a) => a.email === email && a.id !== acc.id)) throw new ApiError('email_taken', 'That email is already used by another account.');
+    if (db.accounts.some((a) => a.email === email && a.id !== acc.id)) throw new ApiError('email_taken', t('That email is already used by another account.'));
     acc.email = email;
     save();
     return strip(acc);
@@ -334,8 +335,8 @@ export const account: AccountService = {
   async changePassword(current, next) {
     await wait();
     const { account: acc } = session();
-    if (acc.provider !== 'email') throw new ApiError('provider', 'You sign in with Apple or Google, so there is no password to change.');
-    if (acc.password !== current) throw new ApiError('bad_password', 'Your current password is not correct.');
+    if (acc.provider !== 'email') throw new ApiError('provider', t('You sign in with Apple or Google, so there is no password to change.'));
+    if (acc.password !== current) throw new ApiError('bad_password', t('Your current password is not correct.'));
     const problem = passwordProblem(next);
     if (problem) throw new ApiError('invalid', problem);
     acc.password = next;
@@ -345,7 +346,7 @@ export const account: AccountService = {
   async deleteAccount(username) {
     await wait(400, 800);
     const { account: acc, profile } = session();
-    if (username !== profile.username) throw new ApiError('confirm', 'Type your username exactly to confirm.');
+    if (username !== profile.username) throw new ApiError('confirm', t('Type your username exactly to confirm.'));
     db.accounts = db.accounts.filter((a) => a.id !== acc.id);
     delete db.profiles[acc.id];
     delete db.history[acc.id];

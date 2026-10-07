@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import { api, ApiError, type MatchFound } from '../../../api';
 import { STAKES } from '#shared/economy.ts';
 import { ai } from '../../../ai/client';
@@ -32,11 +33,11 @@ export class MatchMode extends BotGame {
       name: match.opponent.username,
       iconId: match.opponent.iconId,
       rank: match.opponent.rank,
-      tag: match.demo ? 'Demo' : undefined,
+      tag: match.demo ? t('Demo') : undefined,
       present: true,
     });
     this.label =
-      match.kind === 'ranked' ? 'Ranked' : match.kind === 'casual' ? 'Casual' : `For coins · ${STAKES[match.stake ?? 'low'].amount}`;
+      match.kind === 'ranked' ? t('Ranked') : match.kind === 'casual' ? t('Casual') : `${t('For coins')} · ${STAKES[match.stake ?? 'low'].amount}`;
   }
 
   protected onGameOver(end: GameEnd): void {
@@ -61,7 +62,7 @@ export class MatchMode extends BotGame {
       await this.ctx.refreshProfile();
     } catch (err) {
       if (!this.disposed) {
-        store.set({ result: { loading: false, data: null, accuracy: null, error: err instanceof ApiError ? err.message : 'Could not save the result.' } });
+        store.set({ result: { loading: false, data: null, accuracy: null, error: err instanceof ApiError ? t(err.message) : t('Could not save the result.') } });
       }
     }
   }
@@ -72,8 +73,8 @@ export class MatchMode extends BotGame {
 
   endActions() {
     return [
-      { id: 'again', label: 'Find another game', primary: true },
-      { id: 'exit', label: 'Back to Play' },
+      { id: 'again', label: t('Find another game'), primary: true },
+      { id: 'exit', label: t('Back to Play') },
     ];
   }
 
@@ -87,9 +88,9 @@ export class MatchMode extends BotGame {
   private async leave(): Promise<void> {
     const { game } = this.ctx.engine;
     if (!game.isOver && game.history.length > 0) {
-      const ok = await confirmDialog({ title: 'Leave this game?', text: 'Leaving a running game counts as a loss.', confirmLabel: 'Leave', tone: 'danger' });
+      const ok = await confirmDialog({ title: t('Leave this game?'), text: t('Leaving a running game counts as a loss.'), confirmLabel: t('Leave'), tone: 'danger' });
       if (!ok) return;
-      void this.report({ winner: this.bot, reason: 'abandoned', title: 'Abandoned', text: 'You left the game' });
+      void this.report({ winner: this.bot, reason: 'abandoned', title: t('Abandoned'), text: t('You left the game') });
     }
     this.ctx.navigate('/play');
   }

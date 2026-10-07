@@ -1,3 +1,4 @@
+import { t } from '../../i18n';
 // The mock back-end's "database": one object persisted to localStorage, plus
 // helpers shared by the mock services.
 import { rankOf } from '#shared/rating.ts';
@@ -147,7 +148,7 @@ export const seedById = (id: string) => SEED_PLAYERS.find((p) => p.id === id) ??
 export function session(): { account: StoredAccount; profile: Profile } {
   const account = db.accounts.find((a) => a.id === db.sessionId);
   const profile = account && db.profiles[account.id];
-  if (!account || !profile) throw new ApiError('unauthorized', 'Please sign in again.');
+  if (!account || !profile) throw new ApiError('unauthorized', t('Please sign in again.'));
   return { account, profile };
 }
 
@@ -182,8 +183,8 @@ export function createAccount(email: string, provider: AuthProviderId, password:
   const conv: StoredConversation = { id: newId('conv'), members: [account.id, 'seed-5'], messages: [], readAt: {} };
   const at = (minutesAgo: number) => new Date(Date.now() - minutesAgo * 60_000).toISOString();
   conv.messages.push(
-    { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: 'Welcome to Wizard Chess! 👋', at: at(95), kind: 'text' },
-    { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: 'Fancy a game later? I still owe you a rematch.', at: at(94), kind: 'text' },
+    { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: t('Welcome to Wizard Chess! 👋'), at: at(95), kind: 'text' },
+    { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: t('Fancy a game later? I still owe you a rematch.'), at: at(94), kind: 'text' },
   );
   db.conversations[conv.id] = conv;
   return account;

@@ -1,3 +1,5 @@
+import { t, tk } from '../../i18n';
+import { shortDate } from '../../ui/format';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { AtSign, Check, Globe, KeyRound, LogOut, Mail, Trash2, UserRound, Volume2, X, RefreshCw } from 'lucide-react';
@@ -10,7 +12,7 @@ import { ProfileIcon } from '../../ui/art/art';
 import { Badge, Button, Card, Field, Modal, Spinner, Switch, useToast } from '../../ui/kit';
 import './settings.css';
 
-const PROVIDER: Record<string, string> = { email: 'Email and password', apple: 'Sign in with Apple', google: 'Sign in with Google' };
+const PROVIDER: Record<string, string> = { email: tk('Email and password'), apple: tk('Sign in with Apple'), google: tk('Sign in with Google') };
 
 export function SettingsPage() {
   const { account, profile, signOut } = useSession();
@@ -21,20 +23,20 @@ export function SettingsPage() {
   const nextChange = nextUsernameChange(profile.usernameChangedAt ?? null);
 
   return (
-    <Page title="Settings" subtitle="Your account, profile and preferences.">
+    <Page title={t('Settings')} subtitle={t('Your account, profile and preferences.')}>
       <div className="settings">
-        <Section title="Account">
-          <Row icon={<KeyRound size={18} />} title="Sign-in method" text={PROVIDER[account.provider]} />
+        <Section title={t('Account')}>
+          <Row icon={<KeyRound size={18} />} title={t('Sign-in method')} text={t(PROVIDER[account.provider])} />
           <Row
             icon={<Mail size={18} />}
-            title="Email"
+            title={t('Email')}
             text={account.email}
             action={
               social ? (
-                <Badge>Managed by {account.provider === 'apple' ? 'Apple' : 'Google'}</Badge>
+                <Badge>{t('Managed by {provider}', { provider: account.provider === 'apple' ? 'Apple' : 'Google' })}</Badge>
               ) : (
                 <Button size="sm" variant="secondary" onClick={() => setDialog('email')}>
-                  Change
+                  {t('Change')}
                 </Button>
               )
             }
@@ -42,62 +44,62 @@ export function SettingsPage() {
           {!social && (
             <Row
               icon={<KeyRound size={18} />}
-              title="Password"
+              title={t('Password')}
               text="••••••••••"
               action={
                 <Button size="sm" variant="secondary" onClick={() => setDialog('password')}>
-                  Change
+                  {t('Change')}
                 </Button>
               }
             />
           )}
         </Section>
 
-        <Section title="Profile">
+        <Section title={t('Profile')}>
           <Row
             icon={<AtSign size={18} />}
-            title="Username"
+            title={t('Username')}
             text={
               <>
                 {profile.username}
-                <span className="faint"> · {nextChange ? `next change on ${nextChange.toLocaleDateString()}` : `can be changed once every ${USERNAME_COOLDOWN_DAYS} days`}</span>
+                <span className="faint"> · {nextChange ? t('next change on {date}', { date: shortDate(nextChange) }) : t('can be changed once every {n} days', { n: USERNAME_COOLDOWN_DAYS })}</span>
               </>
             }
             action={
               <Button size="sm" variant="secondary" disabled={!!nextChange} onClick={() => setDialog('username')}>
-                Change
+                {t('Change')}
               </Button>
             }
           />
           <Row
             icon={<ProfileIcon icon={profile.iconId} size={30} />}
-            title="Profile icon"
-            text="Shown in games, chats and on your profile"
+            title={t('Profile icon')}
+            text={t('Shown in games, chats and on your profile')}
             action={
               <Link to="/profile" className="btn btn-sm btn-secondary">
-                <span>Edit on profile</span>
+                <span>{t('Edit on profile')}</span>
               </Link>
             }
           />
         </Section>
 
-        <Section title="Game">
-          <Row icon={<Volume2 size={18} />} title="Sound effects" text="Moves, captures and spells" action={<Switch label="Sound effects" checked={prefs.sound} onChange={(sound) => setPrefs({ sound })} />} />
+        <Section title={t('Game')}>
+          <Row icon={<Volume2 size={18} />} title={t('Sound effects')} text={t('Moves, captures and spells')} action={<Switch label={t('Sound effects')} checked={prefs.sound} onChange={(sound) => setPrefs({ sound })} />} />
           <Row
             icon={<RefreshCw size={18} />}
-            title="Turn the board for each player"
-            text="In same-device games, the camera turns to the side to move"
-            action={<Switch label="Turn the board for each player" checked={prefs.autoRotate} onChange={(autoRotate) => setPrefs({ autoRotate })} />}
+            title={t('Turn the board for each player')}
+            text={t('In same-device games, the camera turns to the side to move')}
+            action={<Switch label={t('Turn the board for each player')} checked={prefs.autoRotate} onChange={(autoRotate) => setPrefs({ autoRotate })} />}
           />
         </Section>
 
-        <Section title="Language">
+        <Section title={t('Language')}>
           <Row
             icon={<Globe size={18} />}
-            title="Interface language"
-            text="More languages are on the way."
+            title={t('Interface language')}
+            text={t('More languages are on the way.')}
             action={
-              <select className="select" value={prefs.language} onChange={(e) => setPrefs({ language: e.target.value })} aria-label="Interface language">
+              <select className="select" value={prefs.language} onChange={(e) => setPrefs({ language: e.target.value })} aria-label={t('Interface language')}>
                 {LANGUAGES.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
@@ -108,33 +110,33 @@ export function SettingsPage() {
           />
         </Section>
 
-        <Section title="Session">
+        <Section title={t('Session')}>
           <Row
             icon={<LogOut size={18} />}
-            title="Sign out"
-            text="Sign out of Wizard Chess on this device"
+            title={t('Sign out')}
+            text={t('Sign out of Wizard Chess on this device')}
             action={
               <Button size="sm" variant="secondary" onClick={() => void signOut()}>
-                Sign out
+                {t('Sign out')}
               </Button>
             }
           />
         </Section>
 
-        <Section title="Danger zone" danger>
+        <Section title={t('Danger zone')} danger>
           <Row
             icon={<Trash2 size={18} />}
-            title="Delete account"
-            text="Permanently deletes your profile, rank, coins, friends and messages"
+            title={t('Delete account')}
+            text={t('Permanently deletes your profile, rank, coins, friends and messages')}
             action={
               <Button size="sm" variant="danger" onClick={() => setDialog('delete')}>
-                Delete
+                {t('Delete')}
               </Button>
             }
           />
         </Section>
 
-        {api.mock && <p className="faint settings-note">Demo mode: account changes are stored only in this browser.</p>}
+        {api.mock && <p className="faint settings-note">{t('Demo mode: account changes are stored only in this browser.')}</p>}
       </div>
 
       <ChangeEmail open={dialog === 'email'} onClose={() => setDialog(null)} />
@@ -179,7 +181,7 @@ function useSubmit(onDone: () => void) {
       await fn();
       onDone();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong.');
+      setError(err instanceof ApiError ? err.message : t('Something went wrong.'));
     } finally {
       setBusy(false);
     }
@@ -193,7 +195,7 @@ function ChangeEmail({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { busy, error, setError, run } = useSubmit(() => {
-    toast('Email updated.', { tone: 'success' });
+    toast(t('Email updated.'), { tone: 'success' });
     onClose();
   });
   useEffect(() => {
@@ -210,13 +212,13 @@ function ChangeEmail({ open, onClose }: { open: boolean; onClose: () => void }) 
     void run(async () => signedIn(await api.account.changeEmail(email, password)));
   };
   return (
-    <Modal open={open} onClose={onClose} title="Change email" subtitle="We'll use the new address for sign-in and notifications." width={420}>
+    <Modal open={open} onClose={onClose} title={t('Change email')} subtitle={t("We'll use the new address for sign-in and notifications.")} width={420}>
       <form className="dialog-form" onSubmit={submit} noValidate>
-        <Field label="New email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Field label="Current password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Field label={t('New email')} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field label={t('Current password')} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && <p className="form-error">{error}</p>}
         <Button type="submit" variant="primary" block loading={busy}>
-          Save email
+          {t('Save email')}
         </Button>
       </form>
     </Modal>
@@ -228,7 +230,7 @@ function ChangePassword({ open, onClose }: { open: boolean; onClose: () => void 
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const { busy, error, setError, run } = useSubmit(() => {
-    toast('Password changed.', { tone: 'success' });
+    toast(t('Password changed.'), { tone: 'success' });
     onClose();
   });
   useEffect(() => {
@@ -241,17 +243,17 @@ function ChangePassword({ open, onClose }: { open: boolean; onClose: () => void 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const problem = passwordProblem(next);
-    if (problem) return setError(`New password: ${problem.toLowerCase()}`);
+    if (problem) return setError(t('New password: {problem}', { problem: problem.charAt(0).toLowerCase() + problem.slice(1) }));
     void run(() => api.account.changePassword(current, next));
   };
   return (
-    <Modal open={open} onClose={onClose} title="Change password" width={420}>
+    <Modal open={open} onClose={onClose} title={t('Change password')} width={420}>
       <form className="dialog-form" onSubmit={submit} noValidate>
-        <Field label="Current password" type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
-        <Field label="New password" type="password" autoComplete="new-password" hint="At least 8 characters, with a number" value={next} onChange={(e) => setNext(e.target.value)} />
+        <Field label={t('Current password')} type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
+        <Field label={t('New password')} type="password" autoComplete="new-password" hint={t('At least 8 characters, with a number')} value={next} onChange={(e) => setNext(e.target.value)} />
         {error && <p className="form-error">{error}</p>}
         <Button type="submit" variant="primary" block loading={busy}>
-          Change password
+          {t('Change password')}
         </Button>
       </form>
     </Modal>
@@ -264,7 +266,7 @@ function ChangeUsername({ open, onClose }: { open: boolean; onClose: () => void 
   const [name, setName] = useState('');
   const [check, setCheck] = useState<UsernameCheck | 'checking' | null>(null);
   const { busy, error, setError, run } = useSubmit(() => {
-    toast('Username changed.', { tone: 'success' });
+    toast(t('Username changed.'), { tone: 'success' });
     onClose();
   });
   const problem = name ? usernameProblem(name) : null;
@@ -280,18 +282,18 @@ function ChangeUsername({ open, onClose }: { open: boolean; onClose: () => void 
     if (!name || problem || name === profile?.username) return setCheck(null);
     setCheck('checking');
     let live = true;
-    const t = setTimeout(() => void api.profiles.checkUsername(name).then((r) => live && setCheck(r)), 350);
+    const timer = setTimeout(() => void api.profiles.checkUsername(name).then((r) => live && setCheck(r)), 350);
     return () => {
       live = false;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [name, problem, profile?.username]);
 
   const status =
-    check === 'checking' ? <Spinner size={16} /> : check === 'available' ? <span className="name-ok"><Check size={15} /> Available</span> : check === 'taken' ? <span className="name-bad"><X size={15} /> Taken</span> : null;
+    check === 'checking' ? <Spinner size={16} /> : check === 'available' ? <span className="name-ok"><Check size={15} /> {t('Available')}</span> : check === 'taken' ? <span className="name-bad"><X size={15} /> {t('Taken')}</span> : null;
 
   return (
-    <Modal open={open} onClose={onClose} title="Change username" subtitle={`You can change it once every ${USERNAME_COOLDOWN_DAYS} days. Your old name becomes available to others.`} width={440}>
+    <Modal open={open} onClose={onClose} title={t('Change username')} subtitle={t('You can change it once every {n} days. Your old name becomes available to others.', { n: USERNAME_COOLDOWN_DAYS })} width={440}>
       <form
         className="dialog-form"
         onSubmit={(e) => {
@@ -300,10 +302,10 @@ function ChangeUsername({ open, onClose }: { open: boolean; onClose: () => void 
         }}
         noValidate
       >
-        <Field label="New username" placeholder={profile?.username ?? ''} leading={<UserRound size={18} />} trailing={status} maxLength={USERNAME_MAX} value={name} onChange={(e) => setName(e.target.value.replace(/\s/g, ''))} error={problem} />
+        <Field label={t('New username')} placeholder={profile?.username ?? ''} leading={<UserRound size={18} />} trailing={status} maxLength={USERNAME_MAX} value={name} onChange={(e) => setName(e.target.value.replace(/\s/g, ''))} error={problem} />
         {error && <p className="form-error">{error}</p>}
         <Button type="submit" variant="primary" block loading={busy} disabled={check !== 'available'}>
-          Change username
+          {t('Change username')}
         </Button>
       </form>
     </Modal>
@@ -321,7 +323,7 @@ function DeleteAccount({ open, onClose }: { open: boolean; onClose: () => void }
     }
   }, [open, setError]);
   return (
-    <Modal open={open} onClose={onClose} title="Delete your account?" subtitle="This cannot be undone. Your rank, coins, items, friends and messages are deleted permanently." width={440}>
+    <Modal open={open} onClose={onClose} title={t('Delete your account?')} subtitle={t('This cannot be undone. Your rank, coins, items, friends and messages are deleted permanently.')} width={440}>
       <form
         className="dialog-form"
         onSubmit={(e) => {
@@ -329,10 +331,10 @@ function DeleteAccount({ open, onClose }: { open: boolean; onClose: () => void }
           void run(() => api.account.deleteAccount(typed));
         }}
       >
-        <Field label={`Type your username (${profile?.username}) to confirm`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+        <Field label={t('Type your username ({name}) to confirm', { name: profile?.username ?? '' })} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
         {error && <p className="form-error">{error}</p>}
         <Button type="submit" variant="danger" block loading={busy} disabled={typed !== profile?.username}>
-          Delete account permanently
+          {t('Delete account permanently')}
         </Button>
       </form>
     </Modal>

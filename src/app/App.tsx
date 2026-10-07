@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router';
 import { AuthPage } from '../features/auth/AuthPage';
 import { Onboarding } from '../features/onboarding/Onboarding';
@@ -12,6 +12,7 @@ import { LogoMark } from '../ui/art/art';
 import { ConfirmHost, Spinner, ToastProvider } from '../ui/kit';
 import { AppLayout } from './AppLayout';
 import { NotificationsProvider } from './notifications';
+import { usePrefs } from './prefs';
 import { SessionProvider, useSession } from './session';
 
 // the 3D game (three.js) is loaded only when a game starts
@@ -74,13 +75,22 @@ function Routed() {
   );
 }
 
+/** Re-mounts the screens when the language changes, so every text is redrawn. */
+function LanguageRoot() {
+  const { language } = usePrefs();
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+  return <Routed key={language} />;
+}
+
 export function App() {
   return (
     <SessionProvider>
       <ToastProvider>
         <HashRouter>
           <NotificationsProvider>
-            <Routed />
+            <LanguageRoot />
           </NotificationsProvider>
         </HashRouter>
         <ConfirmHost />

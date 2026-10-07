@@ -1,3 +1,4 @@
+import { rankText, t } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { Bot, ChevronRight, Coins as CoinsIcon, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
@@ -19,7 +20,7 @@ type Sheet = 'friend' | 'ai' | 'stake' | null;
 
 function greeting(): string {
   const h = new Date().getHours();
-  return h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  return h < 5 ? t('Good night') : h < 12 ? t('Good morning') : h < 18 ? t('Good afternoon') : t('Good evening');
 }
 
 export function PlayHub() {
@@ -44,10 +45,10 @@ export function PlayHub() {
 
   return (
     <Page
-      title="Play"
+      title={t('Play')}
       subtitle={
         <>
-          {greeting()}, {profile.username}. Ready for a game?
+          {t('{greeting}, {name}. Ready for a game?', { greeting: greeting(), name: profile.username ?? '' })}
         </>
       }
     >
@@ -58,27 +59,27 @@ export function PlayHub() {
         </div>
         <div className="ranked-copy">
           <Badge tone="gold">
-            <Trophy size={12} /> Ranked
+            <Trophy size={12} /> {t('Ranked')}
           </Badge>
-          <h2>{rank.label}</h2>
+          <h2>{rankText(rank.label)}</h2>
           <div className="ranked-progress">
             <ProgressBar value={rank.progress} />
-            <span className="faint">{rank.division ? `${Math.round(rank.progress * 100)}% to the next division` : 'Apex tier'}</span>
+            <span className="faint">{rank.division ? t('{n}% to the next division', { n: Math.round(rank.progress * 100) }) : t('Apex tier')}</span>
           </div>
           <p className="muted">
-            {wins}W · {losses}L · {draws}D
+            {t('{w}W · {l}L · {d}D', { w: wins, l: losses, d: draws })}
             {profile.stats.rankedStreak >= 2 && (
               <span className="streak">
-                <Zap size={13} /> {profile.stats.rankedStreak} win streak
+                <Zap size={13} /> {t('{n} win streak', { n: profile.stats.rankedStreak })}
               </span>
             )}
           </p>
         </div>
         <div className="ranked-cta">
           <Button variant="primary" size="lg" icon={<Swords size={18} />} onClick={() => setQueue({ kind: 'ranked' })}>
-            Find ranked match
+            {t('Find ranked match')}
           </Button>
-          <span className="faint">Opponents near your rank</span>
+          <span className="faint">{t('Opponents near your rank')}</span>
         </div>
       </section>
 
@@ -86,15 +87,15 @@ export function PlayHub() {
         <ModeCard
           icon={Zap}
           tone="blue"
-          title="Casual"
-          text="A quick game against anyone online. No rank on the line."
-          meta={`+${COINS.win} coins per win`}
+          title={t('Casual')}
+          text={t('A quick game against anyone online. No rank on the line.')}
+          meta={t('+{n} coins per win', { n: COINS.win })}
           onClick={() => setQueue({ kind: 'casual' })}
         />
-        <ModeCard icon={Users} tone="green" title="Play a friend" text="Invite a friend, share a link, or play on one device." meta="Link, friends list or same screen" onClick={() => setSheet('friend')} />
-        <ModeCard icon={Bot} tone="violet" title="Play vs AI" text="Five levels from Novice to Master. Practise without pressure." meta="No rank, no coins" onClick={() => setSheet('ai')} />
-        <ModeCard icon={CoinsIcon} tone="gold" title="Play for coins" text="Both players stake coins. The winner takes the pot." meta="Stakes from 100 to 2,000" onClick={() => setSheet('stake')} />
-        <ModeCard icon={Trophy} tone="red" title="Tournaments" text="Brackets with entry fees and big prizes." meta="Coming soon" disabled />
+        <ModeCard icon={Users} tone="green" title={t('Play a friend')} text={t('Invite a friend, share a link, or play on one device.')} meta={t('Link, friends list or same screen')} onClick={() => setSheet('friend')} />
+        <ModeCard icon={Bot} tone="violet" title={t('Play vs AI')} text={t('Five levels from Novice to Master. Practise without pressure.')} meta={t('No rank, no coins')} onClick={() => setSheet('ai')} />
+        <ModeCard icon={CoinsIcon} tone="gold" title={t('Play for coins')} text={t('Both players stake coins. The winner takes the pot.')} meta={t('Stakes from 100 to 2,000')} onClick={() => setSheet('stake')} />
+        <ModeCard icon={Trophy} tone="red" title={t('Tournaments')} text={t('Brackets with entry fees and big prizes.')} meta={t('Coming soon')} disabled />
       </div>
 
       <PlayFriend open={sheet === 'friend'} onClose={() => setSheet(null)} />
@@ -137,7 +138,7 @@ function ModeCard({
       <span className="mode-body">
         <span className="mode-title">
           {title}
-          {disabled && <Badge>Soon</Badge>}
+          {disabled && <Badge>{t('Soon')}</Badge>}
         </span>
         <span className="mode-text">{text}</span>
         <span className="mode-meta">{meta}</span>

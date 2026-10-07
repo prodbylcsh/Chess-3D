@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import type { Color as Side, Move } from 'chess.js';
 import { Flag, Handshake, Undo2 } from 'lucide-react';
 import { ai } from '../../../ai/client';
@@ -61,7 +62,7 @@ export abstract class BotGame implements Mode {
     try {
       await game.idle(); // let the human's move finish animating
       if (token !== this.token || game.isOver) return;
-      store.set({ note: `${this.opponent.name} is thinking…` });
+      store.set({ note: t('{name} is thinking…', { name: this.opponent.name }) });
       const started = performance.now();
       const uci = await ai.move(game.fen, this.level);
       await sleep(Math.max(0, 550 + Math.random() * 500 - (performance.now() - started)));
@@ -76,13 +77,13 @@ export abstract class BotGame implements Mode {
   }
 
   protected async resign(): Promise<void> {
-    const ok = await confirmDialog({ title: 'Resign this game?', text: 'Your opponent will be awarded the win.', confirmLabel: 'Resign', tone: 'danger' });
+    const ok = await confirmDialog({ title: t('Resign this game?'), text: t('Your opponent will be awarded the win.'), confirmLabel: t('Resign'), tone: 'danger' });
     if (!ok || this.ctx.engine.game.isOver) return;
     this.token++;
     void this.ctx.engine.game.finish({
       winner: this.bot,
       reason: 'resignation',
-      title: 'Resignation',
+      title: t('Resignation'),
       text: `You resigned. ${this.opponent.name} wins`,
     });
   }
@@ -95,9 +96,9 @@ export abstract class BotGame implements Mode {
     const longEven = s.moves.length >= 60 && s.advantage[this.human] === s.advantage[this.bot];
     if (behind || longEven) {
       this.token++;
-      void game.finish({ winner: null, reason: 'agreement', title: 'Draw', text: 'Draw agreed' });
+      void game.finish({ winner: null, reason: 'agreement', title: t('Draw'), text: t('Draw agreed') });
     } else {
-      toast(`${this.opponent.name} declined the draw.`);
+      toast(t('{name} declined the draw.', { name: this.opponent.name }));
     }
   }
 
@@ -121,10 +122,10 @@ export abstract class BotGame implements Mode {
   protected baseActions(s: GameState, opts: { takeback: boolean }): ModeAction[] {
     const live = !s.end;
     const list: ModeAction[] = [];
-    if (opts.takeback) list.push({ id: 'takeback', label: 'Takeback', icon: Undo2, disabled: !live || s.busy || !s.moves.length });
+    if (opts.takeback) list.push({ id: 'takeback', label: t('Takeback'), icon: Undo2, disabled: !live || s.busy || !s.moves.length });
     list.push(
-      { id: 'draw', label: 'Draw', icon: Handshake, disabled: !live || s.moves.length < 2 },
-      { id: 'resign', label: 'Resign', icon: Flag, tone: 'danger', disabled: !live },
+      { id: 'draw', label: t('Draw'), icon: Handshake, disabled: !live || s.moves.length < 2 },
+      { id: 'resign', label: t('Resign'), icon: Flag, tone: 'danger', disabled: !live },
     );
     return list;
   }

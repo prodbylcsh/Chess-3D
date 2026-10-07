@@ -1,3 +1,4 @@
+import { t, tn } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { Search, UserPlus, Users, X } from 'lucide-react';
 import { api, type FriendEntry, type FriendRequest, type PublicProfile } from '../../api';
@@ -16,21 +17,21 @@ export function CommunityPage() {
   const { friendRequests } = useBadges();
 
   return (
-    <Page title="Community" subtitle="Find players, make friends and challenge them.">
+    <Page title={t('Community')} subtitle={t('Find players, make friends and challenge them.')}>
       <div className="search-box">
         <Field
-          placeholder="Search players by username"
+          placeholder={t('Search players by username')}
           leading={<Search size={18} />}
           trailing={
             query && (
-              <button type="button" onClick={() => setQuery('')} aria-label="Clear search">
+              <button type="button" onClick={() => setQuery('')} aria-label={t('Clear search')}>
                 <X size={16} />
               </button>
             )
           }
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="Search players"
+          aria-label={t('Search players')}
         />
       </div>
 
@@ -41,16 +42,16 @@ export function CommunityPage() {
           <div>
             <div className="community-tabs">
               <Segmented
-                label="Friends or requests"
+                label={t('Friends or requests')}
                 value={tab}
                 onChange={setTab}
                 options={[
-                  { value: 'friends', label: 'Friends' },
+                  { value: 'friends', label: t('Friends') },
                   {
                     value: 'requests',
                     label: (
                       <>
-                        Requests {friendRequests > 0 && <Badge tone="gold">{friendRequests}</Badge>}
+                        {t('Requests')} {friendRequests > 0 && <Badge tone="gold">{friendRequests}</Badge>}
                       </>
                     ),
                   },
@@ -71,18 +72,18 @@ function SearchResults({ query }: { query: string }) {
   useEffect(() => {
     setResults(null);
     let live = true;
-    const t = setTimeout(() => void api.profiles.search(query).then((r) => live && setResults(r)), 250);
+    const timer = setTimeout(() => void api.profiles.search(query).then((r) => live && setResults(r)), 250);
     return () => {
       live = false;
-      clearTimeout(t);
+      clearTimeout(timer);
     };
   }, [query]);
 
   if (!results) return <Loading />;
   if (!results.length) {
     return (
-      <EmptyState icon={<Search size={26} />} title="No players found">
-        Nobody's username contains “{query}”.
+      <EmptyState icon={<Search size={26} />} title={t('No players found')}>
+        {t('Nobody\'s username contains “{query}”.', { query })}
       </EmptyState>
     );
   }
@@ -110,8 +111,8 @@ function Friends() {
   if (!friends) return <Loading />;
   if (!friends.length) {
     return (
-      <EmptyState icon={<Users size={26} />} title="No friends yet">
-        Search for players above, or add someone from the suggestions.
+      <EmptyState icon={<Users size={26} />} title={t('No friends yet')}>
+        {t('Search for players above, or add someone from the suggestions.')}
       </EmptyState>
     );
   }
@@ -119,11 +120,11 @@ function Friends() {
   return (
     <Card className="people">
       <p className="people-head faint">
-        {friends.length} friends · {onlineCount} online
+        {tn(friends.length, '{n} friend', '{n} friends')} · {t('{n} online', { n: onlineCount })}
       </p>
       {friends.map((f) => (
         <div key={f.profile.id} className="person">
-          <PlayerLine player={f.profile} sub={<> · {f.profile.online ? 'Online' : 'Offline'}</>} />
+          <PlayerLine player={f.profile} sub={<> · {f.profile.online ? t('Online') : t('Offline')}</>} />
           <div className="person-actions">
             <MessageButton player={f.profile} compact />
             <ChallengeButton player={f.profile} compact />
@@ -144,8 +145,8 @@ function Requests() {
   if (!data) return <Loading />;
   if (!data.incoming.length && !data.outgoing.length) {
     return (
-      <EmptyState icon={<UserPlus size={26} />} title="No pending requests">
-        Friend requests you send or receive appear here.
+      <EmptyState icon={<UserPlus size={26} />} title={t('No pending requests')}>
+        {t('Friend requests you send or receive appear here.')}
       </EmptyState>
     );
   }
@@ -153,7 +154,7 @@ function Requests() {
     <>
       {data.incoming.length > 0 && (
         <Card className="people">
-          <p className="people-head faint">Received</p>
+          <p className="people-head faint">{t('Received')}</p>
           {data.incoming.map((r) => (
             <div key={r.profile.id} className="person">
               <PlayerLine player={r.profile} sub={<> · {timeAgo(r.at)}</>} />
@@ -166,7 +167,7 @@ function Requests() {
       )}
       {data.outgoing.length > 0 && (
         <Card className="people">
-          <p className="people-head faint">Sent</p>
+          <p className="people-head faint">{t('Sent')}</p>
           {data.outgoing.map((r) => (
             <div key={r.profile.id} className="person">
               <PlayerLine player={r.profile} sub={<> · {timeAgo(r.at)}</>} />
@@ -190,12 +191,12 @@ function Suggestions() {
   return (
     <Card className="people suggestions">
       <p className="people-head">
-        <strong>Players near your rank</strong>
+        <strong>{t('Players near your rank')}</strong>
       </p>
       {!list ? (
         <Loading />
       ) : list.length === 0 ? (
-        <p className="faint people-empty">You know everyone already!</p>
+        <p className="faint people-empty">{t('You know everyone already!')}</p>
       ) : (
         list.map((p) => (
           <div key={p.id} className="person">

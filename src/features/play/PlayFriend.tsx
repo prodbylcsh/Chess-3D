@@ -1,3 +1,4 @@
+import { rankText, t } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ChevronLeft, ChevronRight, Link2, MonitorSmartphone, Send, UserPlus } from 'lucide-react';
@@ -15,12 +16,12 @@ export function PlayFriend({ open, onClose }: { open: boolean; onClose: () => vo
     onClose();
     setTimeout(() => setStep('menu'), 250);
   };
-  const titles: Record<Step, string> = { menu: 'Play a friend', friends: 'Invite a friend', link: 'Create an invite link' };
+  const titles: Record<Step, string> = { menu: t('Play a friend'), friends: t('Invite a friend'), link: t('Create an invite link') };
   return (
     <Modal open={open} onClose={close} title={titles[step]} width={480}>
       {step !== 'menu' && (
         <button type="button" className="link-btn sheet-back" onClick={() => setStep('menu')}>
-          <ChevronLeft size={15} /> Back
+          <ChevronLeft size={15} /> {t('Back')}
         </button>
       )}
       {step === 'menu' && <Menu onPick={setStep} />}
@@ -33,9 +34,9 @@ export function PlayFriend({ open, onClose }: { open: boolean; onClose: () => vo
 function Menu({ onPick }: { onPick: (s: Step) => void }) {
   const navigate = useNavigate();
   const rows = [
-    { id: 'friends', icon: UserPlus, title: 'Invite a friend', text: 'Pick someone from your friends list.', run: () => onPick('friends') },
-    { id: 'link', icon: Link2, title: 'Create an invite link', text: 'Anyone with the link can join, no account needed.', run: () => onPick('link'), disabled: !online },
-    { id: 'local', icon: MonitorSmartphone, title: 'Play on this device', text: 'Two players, one screen. Take turns.', run: () => navigate('/game/local') },
+    { id: 'friends', icon: UserPlus, title: t('Invite a friend'), text: t('Pick someone from your friends list.'), run: () => onPick('friends') },
+    { id: 'link', icon: Link2, title: t('Create an invite link'), text: t('Anyone with the link can join, no account needed.'), run: () => onPick('link'), disabled: !online },
+    { id: 'local', icon: MonitorSmartphone, title: t('Play on this device'), text: t('Two players, one screen. Take turns.'), run: () => navigate('/game/local') },
   ];
   return (
     <div className="options">
@@ -46,7 +47,7 @@ function Menu({ onPick }: { onPick: (s: Step) => void }) {
           </span>
           <span className="option-text">
             <strong>{r.title}</strong>
-            <span className="faint">{r.disabled ? 'Online play is not configured in this build.' : r.text}</span>
+            <span className="faint">{r.disabled ? t('Online play is not configured in this build.') : r.text}</span>
           </span>
           <ChevronRight size={18} className="option-arrow" />
         </button>
@@ -57,7 +58,7 @@ function Menu({ onPick }: { onPick: (s: Step) => void }) {
 
 /** Create a real online game (Supabase) and go to its waiting room. */
 async function createOnlineGame(name: string, color: 'w' | 'b' | 'random'): Promise<string> {
-  if (!online) throw new Error('Online play is not configured.');
+  if (!online) throw new Error(t('Online play is not configured.'));
   await online.signIn();
   const row = await online.create(name, color);
   return row.id;
@@ -80,7 +81,8 @@ function Friends() {
       const id = await createOnlineGame(profile.username ?? 'Player', 'random');
       toast(
         <>
-          Invite sent to <strong>{f.profile.username}</strong>.{api.mock && ' (Demo: share the link from the next screen to play for real.)'}
+          {t('Invite sent to {name}.', { name: f.profile.username })}
+          {api.mock && ` ${t('(Demo: share the link from the next screen to play for real.)')}`}
         </>,
         { tone: 'success', duration: 6 },
       );
@@ -100,8 +102,8 @@ function Friends() {
   }
   if (!friends.length) {
     return (
-      <EmptyState icon={<UserPlus size={28} />} title="No friends yet">
-        Find players in Community and send them a friend request.
+      <EmptyState icon={<UserPlus size={28} />} title={t('No friends yet')}>
+        {t('Find players in Community and send them a friend request.')}
       </EmptyState>
     );
   }
@@ -118,11 +120,11 @@ function Friends() {
             <strong>{f.profile.username}</strong>
             <span className="friend-rank">
               <RankEmblem tier={f.profile.rank.tier} division={f.profile.rank.division} size={16} />
-              {f.profile.rank.label} · {f.profile.online ? 'Online' : 'Offline'}
+              {rankText(f.profile.rank.label)} · {f.profile.online ? t('Online') : t('Offline')}
             </span>
           </div>
           <Button size="sm" variant={f.profile.online ? 'primary' : 'secondary'} icon={<Send size={14} />} disabled={!f.profile.online || !!busy || !online} loading={busy === f.profile.id} onClick={() => void invite(f)}>
-            Invite
+            {t('Invite')}
           </Button>
         </li>
       ))}
@@ -149,22 +151,22 @@ function CreateLink() {
 
   return (
     <>
-      <p className="muted sheet-intro">We'll create a game and give you a link to send. It starts as soon as your friend opens it.</p>
+      <p className="muted sheet-intro">{t("We'll create a game and give you a link to send. It starts as soon as your friend opens it.")}</p>
       <div className="sheet-row">
-        <span className="sheet-label">Play as</span>
+        <span className="sheet-label">{t('Play as')}</span>
         <Segmented
-          label="Your colour"
+          label={t('Your colour')}
           value={color}
           onChange={setColor}
           options={[
-            { value: 'w', label: 'White' },
-            { value: 'random', label: 'Random' },
-            { value: 'b', label: 'Black' },
+            { value: 'w', label: t('White') },
+            { value: 'random', label: t('Random') },
+            { value: 'b', label: t('Black') },
           ]}
         />
       </div>
       <Button variant="primary" size="lg" block icon={<Link2 size={18} />} loading={busy} onClick={() => void create()}>
-        Create game
+        {t('Create game')}
       </Button>
     </>
   );

@@ -1,3 +1,4 @@
+import { t as translate, tk } from '../../i18n';
 import { useId } from 'react';
 import type { TierId } from '#shared/rating.ts';
 import { TIERS } from '#shared/rating.ts';
@@ -16,17 +17,17 @@ export interface IconDef {
 }
 
 export const PROFILE_ICONS: IconDef[] = [
-  { id: 'king', name: 'King', piece: 'king', colors: ['#f7d59c', '#8a5a1c'], starter: true },
-  { id: 'queen', name: 'Queen', piece: 'queen', colors: ['#c3adff', '#4a2f9a'], starter: true },
-  { id: 'rook', name: 'Rook', piece: 'rook', colors: ['#7fe0d3', '#165a62'], starter: true },
-  { id: 'bishop', name: 'Bishop', piece: 'bishop', colors: ['#ff9a8f', '#7a1f2e'], starter: true },
-  { id: 'knight', name: 'Knight', piece: 'knight', colors: ['#9cc0ff', '#1f3b80'], starter: true },
-  { id: 'pawn', name: 'Pawn', piece: 'pawn', colors: ['#86e8b0', '#1b5e3e'], starter: true },
+  { id: 'king', name: tk('King'), piece: 'king', colors: ['#f7d59c', '#8a5a1c'], starter: true },
+  { id: 'queen', name: tk('Queen'), piece: 'queen', colors: ['#c3adff', '#4a2f9a'], starter: true },
+  { id: 'rook', name: tk('Rook'), piece: 'rook', colors: ['#7fe0d3', '#165a62'], starter: true },
+  { id: 'bishop', name: tk('Bishop'), piece: 'bishop', colors: ['#ff9a8f', '#7a1f2e'], starter: true },
+  { id: 'knight', name: tk('Knight'), piece: 'knight', colors: ['#9cc0ff', '#1f3b80'], starter: true },
+  { id: 'pawn', name: tk('Pawn'), piece: 'pawn', colors: ['#86e8b0', '#1b5e3e'], starter: true },
   // non-player icons
-  { id: 'bot', name: 'Wizard Bot', piece: 'knight', colors: ['#6b6f7d', '#1b1d26'] },
-  { id: 'guest', name: 'Guest', piece: 'pawn', colors: ['#8a8f9c', '#2b2e38'] },
-  { id: 'white', name: 'White', piece: 'king', colors: ['#f4efe6', '#9c958a'] },
-  { id: 'black', name: 'Black', piece: 'king', colors: ['#5d5873', '#16141f'] },
+  { id: 'bot', name: tk('Wizard Bot'), piece: 'knight', colors: ['#6b6f7d', '#1b1d26'] },
+  { id: 'guest', name: tk('Guest'), piece: 'pawn', colors: ['#8a8f9c', '#2b2e38'] },
+  { id: 'white', name: tk('White'), piece: 'king', colors: ['#f4efe6', '#9c958a'] },
+  { id: 'black', name: tk('Black'), piece: 'king', colors: ['#5d5873', '#16141f'] },
 ];
 
 export const STARTER_ICONS = PROFILE_ICONS.filter((i) => i.starter);
@@ -61,7 +62,7 @@ export function ProfileIcon({
       height={size}
       viewBox="0 0 100 100"
       role="img"
-      aria-label={def.name}
+      aria-label={translate(def.name)}
       style={{ flex: 'none', display: 'block' }}
     >
       <defs>
@@ -100,7 +101,7 @@ export function RankEmblem({ tier, division, size = 48 }: { tier: TierId; divisi
   const uid = useId().replace(/:/g, '');
   const apex = !t.divisions;
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={t.name} style={{ flex: 'none', display: 'block' }}>
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={translate(t.name)} style={{ flex: 'none', display: 'block' }}>
       <defs>
         <linearGradient id={`rk${uid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={shade(t.color, 0.35)} />

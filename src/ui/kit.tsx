@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import {
   createContext,
   useCallback,
@@ -105,7 +106,7 @@ export function Field({ label, hint, error, leading, trailing, className, id, ..
 // ------------------------------------------------------------------ small pieces
 
 export function Spinner({ size = 20 }: { size?: number }) {
-  return <span className="spinner" style={{ width: size, height: size }} aria-label="Loading" />;
+  return <span className="spinner" style={{ width: size, height: size }} aria-label={t('Loading')} />;
 }
 
 export function ProgressBar({ value, tone = 'gold', className }: { value: number; tone?: 'gold' | 'violet' | 'success'; className?: string }) {
@@ -232,7 +233,7 @@ export function Modal({
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && dismissable && onClose?.()}>
       <div className="modal-panel" ref={panel} style={{ maxWidth: width }} role="dialog" aria-modal tabIndex={-1}>
         {dismissable && onClose && (
-          <IconButton label="Close" className="modal-close" onClick={onClose}>
+          <IconButton label={t('Close')} className="modal-close" onClick={onClose}>
             <X size={18} />
           </IconButton>
         )}
@@ -368,10 +369,10 @@ export function ConfirmHost() {
     <Modal open={!!req} onClose={() => close(false)} title={req?.title} subtitle={req?.text} width={400}>
       <div className="confirm-actions">
         <Button variant="ghost" onClick={() => close(false)}>
-          {req?.cancelLabel ?? 'Cancel'}
+          {req?.cancelLabel ?? t('Cancel')}
         </Button>
         <Button variant={req?.tone === 'danger' ? 'danger' : 'primary'} onClick={() => close(true)}>
-          {req?.confirmLabel ?? 'Confirm'}
+          {req?.confirmLabel ?? t('Confirm')}
         </Button>
       </div>
     </Modal>

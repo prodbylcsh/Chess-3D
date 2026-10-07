@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import type { Color as Side, Move } from 'chess.js';
 import { Flag, Handshake } from 'lucide-react';
 import type { GameRow } from '../../../net/online';
@@ -14,7 +15,7 @@ const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
  * truth; our own moves are shown at once and rolled back if the server refuses them.
  */
 export class OnlineMode implements Mode {
-  readonly label = 'Friend · online';
+  readonly label = t('Friend · online');
   private row: GameRow | null = null;
   private side: Side | null = null;
   private seat = { side: null as Side | null, active: false, send: (m: Move) => void this.send(m) };
@@ -36,16 +37,16 @@ export class OnlineMode implements Mode {
   }
 
   private async open(): Promise<void> {
-    if (!online) throw new Error('Online play is not configured in this build.');
+    if (!online) throw new Error(t('Online play is not configured in this build.'));
     await online.signIn();
     const row = await online.fetch(this.gameId);
     if (this.disposed) return;
     if (!row) {
-      toast('That game link is not valid any more.', { tone: 'danger' });
+      toast(t('That game link is not valid any more.'), { tone: 'danger' });
       return this.ctx.navigate('/play');
     }
     if (!online.sideOf(row) && row.status === 'waiting') return this.ctx.navigate(`/join/${row.id}`);
-    if (!online.sideOf(row)) toast('This game already has two players. You are watching.');
+    if (!online.sideOf(row)) toast(t('This game already has two players. You are watching.'));
     this.enter(row);
   }
 
@@ -75,18 +76,18 @@ export class OnlineMode implements Mode {
     if (!this.side) return [];
     const live = this.row?.status === 'active' && !s.end;
     return [
-      { id: 'draw', label: s.drawOffered ? 'Offered' : 'Draw', icon: Handshake, disabled: !live || s.drawOffered },
-      { id: 'resign', label: 'Resign', icon: Flag, tone: 'danger', disabled: !live },
+      { id: 'draw', label: s.drawOffered ? t('Offered') : t('Draw'), icon: Handshake, disabled: !live || s.drawOffered },
+      { id: 'resign', label: t('Resign'), icon: Flag, tone: 'danger', disabled: !live },
     ];
   }
 
   endActions() {
     return this.side
       ? [
-          { id: 'rematch', label: 'Rematch', primary: true },
-          { id: 'exit', label: 'Back to Play' },
+          { id: 'rematch', label: t('Rematch'), primary: true },
+          { id: 'exit', label: t('Back to Play') },
         ]
-      : [{ id: 'exit', label: 'Back to Play', primary: true }];
+      : [{ id: 'exit', label: t('Back to Play'), primary: true }];
   }
 
   act(id: string): void {
@@ -95,7 +96,7 @@ export class OnlineMode implements Mode {
     if (id === 'exit') {
       void (async () => {
         if (row?.status === 'active' && this.side) {
-          const ok = await confirmDialog({ title: 'Leave this game?', text: 'The game stays open: use the same link to come back.', confirmLabel: 'Leave' });
+          const ok = await confirmDialog({ title: t('Leave this game?'), text: t('The game stays open: use the same link to come back.'), confirmLabel: t('Leave') });
           if (!ok) return;
         }
         this.ctx.navigate('/play');
@@ -103,12 +104,12 @@ export class OnlineMode implements Mode {
     } else if (!row || !online) {
       return;
     } else if (id === 'resign') {
-      void confirmDialog({ title: 'Resign this game?', text: 'Your opponent will be awarded the win.', confirmLabel: 'Resign', tone: 'danger' }).then(
+      void confirmDialog({ title: t('Resign this game?'), text: t('Your opponent will be awarded the win.'), confirmLabel: t('Resign'), tone: 'danger' }).then(
         (ok) => ok && run(online!.resign(row.id)),
       );
     } else if (id === 'draw') {
       run(online.offerDraw(row.id));
-      toast('Draw offered.');
+      toast(t('Draw offered.'));
     } else if (id === 'rematch') {
       void this.rematch().catch((e) => this.fail(e));
     }
@@ -155,7 +156,7 @@ export class OnlineMode implements Mode {
     this.seat.active = row.status === 'active';
     this.refresh();
     if (prev.status === 'waiting' && row.status === 'active' && this.side) {
-      toast(`${this.nameOf(row, other(this.side))} joined. You play ${this.side === 'w' ? 'White' : 'Black'}.`, { tone: 'success' });
+      toast(t('{name} joined. You play {color}.', { name: this.nameOf(row, other(this.side)), color: this.side === 'w' ? t('White') : t('Black') }), { tone: 'success' });
     }
     if (!this.pending) void this.ctx.engine.game.sync(row.moves);
     this.react(prev, row);
@@ -168,10 +169,10 @@ export class OnlineMode implements Mode {
 
     const offerToMe = !!me && row.status === 'active' && row.draw_offer === other(me);
     if (offerToMe && prev?.draw_offer !== row.draw_offer) {
-      this.dismiss.offer = toast(`${this.nameOf(row, other(me!))} offers a draw.`, {
+      this.dismiss.offer = toast(t('{name} offers a draw.', { name: this.nameOf(row, other(me!)) }), {
         actions: [
-          { label: 'Decline', run: () => void online!.declineDraw(row.id).then((r) => this.onRow(r), (e) => this.fail(e)) },
-          { label: 'Accept', primary: true, run: () => void online!.acceptDraw(row.id).then((r) => this.onRow(r), (e) => this.fail(e)) },
+          { label: t('Decline'), run: () => void online!.declineDraw(row.id).then((r) => this.onRow(r), (e) => this.fail(e)) },
+          { label: t('Accept'), primary: true, run: () => void online!.acceptDraw(row.id).then((r) => this.onRow(r), (e) => this.fail(e)) },
         ],
       });
     } else if (!offerToMe) {
@@ -179,25 +180,25 @@ export class OnlineMode implements Mode {
       this.dismiss.offer = null;
     }
     if (me && prev?.draw_offer === me && !row.draw_offer && row.status === 'active' && row.moves.length === prev.moves.length) {
-      toast('Draw offer declined.');
+      toast(t('Draw offer declined.'));
     }
     store.set({ drawOffered: !!me && row.draw_offer === me });
 
     if (row.status === 'finished' && prev?.status !== 'finished') {
       if (row.reason === 'resignation') {
         const loser: Side = row.result === '1-0' ? 'b' : 'w';
-        const text = loser === me ? 'You resigned' : `${this.nameOf(row, loser)} resigned. ${game.winText(other(loser))}`;
-        void game.finish({ winner: other(loser), reason: 'resignation', title: 'Resignation', text });
+        const text = loser === me ? t('You resigned') : `${t('{name} resigned.', { name: this.nameOf(row, loser) })} ${game.winText(other(loser))}`;
+        void game.finish({ winner: other(loser), reason: 'resignation', title: t('Resignation'), text });
       } else if (row.reason === 'agreement') {
-        void game.finish({ winner: null, reason: 'agreement', title: 'Draw', text: 'Agreed by both players' });
+        void game.finish({ winner: null, reason: 'agreement', title: t('Draw'), text: t('Agreed by both players') });
       }
     }
 
     if (me && row.rematch_id && !prev?.rematch_id) {
-      this.dismiss.rematch = toast(`${this.nameOf(row, other(me))} wants a rematch.`, {
+      this.dismiss.rematch = toast(t('{name} wants a rematch.', { name: this.nameOf(row, other(me)) }), {
         actions: [
-          { label: 'Not now', run: () => {} },
-          { label: 'Play', primary: true, run: () => void this.rematch().catch((e) => this.fail(e)) },
+          { label: t('Not now'), run: () => {} },
+          { label: t('Play'), primary: true, run: () => void this.rematch().catch((e) => this.fail(e)) },
         ],
       });
     }
@@ -211,8 +212,8 @@ export class OnlineMode implements Mode {
     if (opponent && this.present && row.status === 'active') {
       const was = this.present.has(opponent);
       const is = ids.has(opponent);
-      if (was && !is) toast(`${this.nameOf(row, other(me!))} disconnected.`);
-      if (!was && is) toast(`${this.nameOf(row, other(me!))} is back.`);
+      if (was && !is) toast(t('{name} disconnected.', { name: this.nameOf(row, other(me!)) }));
+      if (!was && is) toast(t('{name} is back.', { name: this.nameOf(row, other(me!)) }));
     }
     this.present = ids;
     this.refresh();
@@ -225,7 +226,7 @@ export class OnlineMode implements Mode {
     if (!row || !online) return;
     const player = (side: Side): PlayerView => {
       const id = side === 'w' ? row.white_id : row.black_id;
-      if (!id) return { name: 'Waiting…', iconId: 'guest' };
+      if (!id) return { name: t('Waiting…'), iconId: 'guest' };
       if (id === online!.userId) return { ...playerFromProfile(this.ctx.profile, this.nameOf(row, side)), name: this.nameOf(row, side) };
       return { name: this.nameOf(row, side), iconId: 'guest', present: this.present ? this.present.has(id) : undefined };
     };
@@ -238,11 +239,11 @@ export class OnlineMode implements Mode {
   }
 
   private nameOf(row: GameRow, side: Side): string {
-    return (side === 'w' ? row.white_name : row.black_name) ?? 'Your opponent';
+    return (side === 'w' ? row.white_name : row.black_name) ?? t('Your opponent');
   }
 
   private fail(err: unknown): void {
     console.error(err);
-    toast((err as Error).message || 'Something went wrong.', { tone: 'danger' });
+    toast(t((err as Error).message) || t('Something went wrong.'), { tone: 'danger' });
   }
 }

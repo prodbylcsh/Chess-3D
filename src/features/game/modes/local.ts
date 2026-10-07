@@ -1,10 +1,11 @@
+import { t } from '../../../i18n';
 import { RefreshCw, RotateCcw, Undo2 } from 'lucide-react';
 import { getPrefs } from '../../../app/prefs';
 import type { Mode, ModeContext } from './types';
 
 /** Two players sharing one device. */
 export class LocalMode implements Mode {
-  readonly label = 'Same device';
+  readonly label = t('Same device');
   private autoFlip = getPrefs().autoRotate;
 
   constructor(private readonly ctx: ModeContext) {}
@@ -21,16 +22,16 @@ export class LocalMode implements Mode {
 
   actions(s: Parameters<Mode['actions']>[0]) {
     return [
-      { id: 'undo', label: 'Undo', icon: Undo2, disabled: s.busy || !s.canUndo },
-      { id: 'new', label: 'New game', icon: RotateCcw, disabled: s.busy },
-      { id: 'autoflip', label: 'Auto-turn', icon: RefreshCw, pressed: this.autoFlip },
+      { id: 'undo', label: t('Undo'), icon: Undo2, disabled: s.busy || !s.canUndo },
+      { id: 'new', label: t('New game'), icon: RotateCcw, disabled: s.busy },
+      { id: 'autoflip', label: t('Auto-turn'), icon: RefreshCw, pressed: this.autoFlip },
     ];
   }
 
   endActions() {
     return [
-      { id: 'new', label: 'Play again', primary: true },
-      { id: 'exit', label: 'Back to Play' },
+      { id: 'new', label: t('Play again'), primary: true },
+      { id: 'exit', label: t('Back to Play') },
     ];
   }
 

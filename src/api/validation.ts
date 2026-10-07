@@ -1,3 +1,5 @@
+import { t } from '../i18n';
+
 // Input rules shared by forms (and later mirrored by database constraints).
 
 export const USERNAME_MIN = 3;
@@ -6,23 +8,23 @@ const USERNAME_RE = /^[A-Za-z0-9_]+$/;
 
 /** null when valid, otherwise a message for the user */
 export function usernameProblem(name: string): string | null {
-  if (name.length < USERNAME_MIN) return `At least ${USERNAME_MIN} characters`;
-  if (name.length > USERNAME_MAX) return `At most ${USERNAME_MAX} characters`;
-  if (!USERNAME_RE.test(name)) return 'Letters, numbers and _ only';
+  if (name.length < USERNAME_MIN) return t('At least {n} characters', { n: USERNAME_MIN });
+  if (name.length > USERNAME_MAX) return t('At most {n} characters', { n: USERNAME_MAX });
+  if (!USERNAME_RE.test(name)) return t('Letters, numbers and _ only');
   return null;
 }
 
 export function emailProblem(email: string): string | null {
-  if (!email.trim()) return 'Enter your email';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) return 'That email does not look right';
+  if (!email.trim()) return t('Enter your email');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) return t('That email does not look right');
   return null;
 }
 
 export const PASSWORD_MIN = 8;
 
 export function passwordProblem(password: string): string | null {
-  if (password.length < PASSWORD_MIN) return `At least ${PASSWORD_MIN} characters`;
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'Use letters and at least one number';
+  if (password.length < PASSWORD_MIN) return t('At least {n} characters', { n: PASSWORD_MIN });
+  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return t('Use letters and at least one number');
   return null;
 }
 

@@ -1,3 +1,4 @@
+import { rankText, t, tk } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router';
@@ -9,7 +10,7 @@ import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, formatNumber, useToast } from '../../ui/kit';
 import { rememberMatch } from '../game/matches';
 
-const TITLES: Record<MatchKind, string> = { ranked: 'Ranked', casual: 'Casual', wager: 'Play for coins' };
+const TITLES: Record<MatchKind, string> = { ranked: tk('Ranked'), casual: tk('Casual'), wager: tk('Play for coins') };
 
 /** Full-screen search: pulsing rings while searching, then a versus card and a countdown. */
 export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?: StakeId; onCancel: () => void }) {
@@ -34,7 +35,7 @@ export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?
       (m) => live && setMatch(m),
       (err) => {
         if (!live || (err instanceof ApiError && err.code === 'cancelled')) return;
-        toast(err instanceof ApiError ? err.message : 'Matchmaking failed. Please try again.', { tone: 'danger' });
+        toast(err instanceof ApiError ? t(err.message) : t('Matchmaking failed. Please try again.'), { tone: 'danger' });
         onCancelRef.current();
       },
     );
@@ -61,7 +62,7 @@ export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?
   const mm = String(Math.floor(elapsed / 60)).padStart(1, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
   const myRank = rankOf(profile.mmr);
-  const title = kind === 'wager' ? `${TITLES[kind]} · ${formatNumber(STAKES[stake ?? 'low'].amount)}` : TITLES[kind];
+  const title = kind === 'wager' ? `${t(TITLES[kind])} · ${formatNumber(STAKES[stake ?? 'low'].amount)}` : t(TITLES[kind]);
 
   return createPortal(
     <div className="mm">
@@ -74,13 +75,13 @@ export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?
             <span />
             <ProfileIcon icon={profile.iconId} size={96} />
           </div>
-          <h2>Searching for an opponent</h2>
+          <h2>{t('Searching for an opponent')}</h2>
           <p className="mm-time">
             {mm}:{ss}
           </p>
           <p className="faint">
-            {queueSize ? `${formatNumber(queueSize)} players searching` : ' '}
-            {kind === 'ranked' && ' · matching by rank'}
+            {queueSize ? t('{n} players searching', { n: formatNumber(queueSize) }) : ' '}
+            {kind === 'ranked' && ` · ${t('matching by rank')}`}
           </p>
           <Button
             variant="secondary"
@@ -89,35 +90,35 @@ export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?
               onCancel();
             }}
           >
-            Cancel
+            {t('Cancel')}
           </Button>
         </div>
       ) : (
         <div className="mm-found">
-          <span className="mm-kicker">Match found</span>
+          <span className="mm-kicker">{t('Match found')}</span>
           <div className="mm-vs">
             <div className="mm-player">
               <ProfileIcon icon={profile.iconId} size={88} />
               <strong>{profile.username}</strong>
               <span className="mm-rank">
-                <RankEmblem tier={myRank.tier.id} division={myRank.division} size={20} /> {myRank.label}
+                <RankEmblem tier={myRank.tier.id} division={myRank.division} size={20} /> {rankText(myRank.label)}
               </span>
             </div>
-            <span className="mm-vs-label display">VS</span>
+            <span className="mm-vs-label display">{t('VS')}</span>
             <div className="mm-player">
               <ProfileIcon icon={match.opponent.iconId} size={88} />
               <strong>{match.opponent.username}</strong>
               <span className="mm-rank">
-                <RankEmblem tier={match.opponent.rank.tier} division={match.opponent.rank.division} size={20} /> {match.opponent.rank.label}
+                <RankEmblem tier={match.opponent.rank.tier} division={match.opponent.rank.division} size={20} /> {rankText(match.opponent.rank.label)}
               </span>
             </div>
           </div>
           <p className="mm-count">
-            You play {match.color === 'w' ? 'White' : 'Black'} · starting in {Math.max(count, 1)}
+            {t('You play {color} · starting in {n}', { color: match.color === 'w' ? t('White') : t('Black'), n: Math.max(count, 1) })}
           </p>
           {match.demo && (
             <p className="mm-demo">
-              <Badge tone="violet">Demo</Badge> Matchmaking runs on demo data for now: this opponent's moves are played by the AI.
+              <Badge tone="violet">{t('Demo')}</Badge> {t("Matchmaking runs on demo data for now: this opponent's moves are played by the AI.")}
             </p>
           )}
         </div>

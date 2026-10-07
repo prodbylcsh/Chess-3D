@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import * as THREE from 'three';
 import { Chess, type Color as Side, type Move, type PieceSymbol, type Square } from 'chess.js';
 import { animator, ease, lerp } from '../core/animator';
@@ -332,7 +333,7 @@ export class Game {
   /** "White wins" locally, "You win" / "Alice wins" online. */
   winText(side: Side): string {
     const name = this.ui.sideName(side);
-    return name === 'You' ? 'You win' : `${name} wins`;
+    return name === 'You' ? t('You win') : t('{name} wins', { name });
   }
 
   /** How the current position ends the game, if it does. */
@@ -340,7 +341,7 @@ export class Game {
     const c = this.chess;
     if (c.isCheckmate()) {
       const winner = other(c.turn());
-      return { winner, reason: 'checkmate', title: 'Checkmate', text: this.winText(winner), status: 'Checkmate!' };
+      return { winner, reason: 'checkmate', title: t('Checkmate'), text: this.winText(winner), status: t('Checkmate!') };
     }
     if (!c.isDraw()) return null;
     const reason = c.isStalemate()
@@ -350,7 +351,7 @@ export class Game {
         : c.isThreefoldRepetition()
           ? 'Threefold repetition'
           : 'Fifty-move rule';
-    return { winner: null, reason: reason.toLowerCase(), title: 'Draw', text: reason, status: 'Draw' };
+    return { winner: null, reason: reason.toLowerCase(), title: t('Draw'), text: t(reason), status: t('Draw') };
   }
 
   private async afterMove(): Promise<void> {
@@ -389,7 +390,7 @@ export class Game {
       this.stopCheck = this.pulseCheck(king);
     }
     if (withSound) sfx.check();
-    this.ui.update(c, 'Check!');
+    this.ui.update(c, t('Check!'));
   }
 
   private pulseCheck(king: Piece): () => void {
