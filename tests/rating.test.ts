@@ -118,11 +118,3 @@ test('coins', () => {
   assert.equal(wagerNet(500, 'loss'), -500);
   assert.equal(wagerNet(500, 'draw'), 0);
 });
-
-import { seasonReset } from '../supabase/functions/_shared/rating.ts';
-
-test('season reset pulls MMR 25% of the way back to 1,000', () => {
-  assert.equal(seasonReset(1800), 1600);
-  assert.equal(seasonReset(600), 700);
-  assert.equal(seasonReset(1000), 1000);
-});

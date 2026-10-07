@@ -87,7 +87,7 @@ username, rank) and the coin balance.
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
 | Play for coins | 🟡 | Both players stake the same amount; the winner takes the pot minus a fee. |
 
-**Time controls (proposal).** The cinematic captures take 1–3 seconds to play out, so
+**Time controls (decided).** The cinematic captures take 1–3 seconds to play out, so
 very fast games (bullet) don't suit this game. The clock of the player to move only starts
 once the opponent's move has finished animating on the server-agreed duration, so animations
 never cost anyone time.
@@ -96,12 +96,12 @@ never cost anyone time.
 | --- | --- | --- |
 | 5 + 3 | Blitz | Ranked, Casual, Play for coins |
 | 10 + 5 | Rapid | Ranked, Casual, Play for coins (default) |
-| 15 + 10 | Classical | Casual, friends |
+| 15 + 10 | Classical | Ranked, Casual, Play for coins, friends |
 | 3 + 2 | Fast blitz | Casual only |
 | No clock | Unlimited | Friends, vs AI, same device |
 
 "10 + 5" means 10 minutes per player plus 5 seconds added after every move. Ranked uses one
-ladder (one MMR) for both Blitz and Rapid at first; separate ladders per control can be added
+ladder (one MMR) for Blitz, Rapid and Classical at first; separate ladders per control can be added
 later if players ask for them. Running out of time loses the game, unless the opponent has
 no material that can still checkmate (then it's a draw), as in standard chess rules.
 Clocks are kept by the server (milestone 5); the client only displays them.
@@ -269,11 +269,41 @@ A win (+20) is deliberately worth more than a loss (−18): a player who wins ex
 their games still gains about 1 MMR per game. **This is intended**: every game played adds
 real chess experience, and the slow climb reflects that.
 
-The drift is kept in check by **seasons**. At the end of each season every player's MMR is
-pulled part of the way back towards the start value (proposal: 25% of the distance to
-1,000, so 1,800 becomes 1,600 and 600 becomes 700), win streaks reset, and players receive
-end-of-season rewards for the highest rank they reached (an icon or a coin bonus).
-Proposed season length: 3 months. The exact reset share and rewards are tuning knobs.
+The drift is kept in check by **seasons** (implemented in
+`supabase/functions/_shared/seasons.ts`, tested in `tests/seasons.test.ts`).
+
+**Length:** 3 months. **Reset when a season ends:**
+
+| Season that ends | Pull towards 1,000 MMR | Example (1,800 MMR) |
+| --- | --- | --- |
+| Most seasons | 25% | 1,600 |
+| Every 4th season (once a year) | 50% | 1,400 |
+| Every 12th season (every 3 years) | 100%: everyone back to 1,000 | 1,000 |
+
+Win streaks reset with the season.
+
+**Rewards** depend on the **highest rank reached during the season**. Ranks are grouped into
+brackets that receive the same rewards; a higher bracket always gets more:
+
+| Bracket | Coins | Item |
+| --- | --- | --- |
+| Iron | 500 | from the cheapest price band |
+| Bronze & Silver | 1,000 | ↓ |
+| Gold & Platinum | 2,000 | ↓ |
+| Emerald & Diamond | 4,000 | ↓ |
+| Master & Grandmaster | 7,500 | ↓ |
+| Challenger | 12,000 | from the most expensive price band |
+
+Every bracket also gets a **badge** and a **special profile icon** unique to that season.
+The item is a piece set, board or effect from the shop, chosen randomly per season, with
+three guarantees:
+
+- nothing handed out as a season reward in the **previous 3 seasons** is handed out again;
+- every bracket gets a different item;
+- a higher bracket never gets a **cheaper** item than a lower bracket (the eligible items
+  are sorted by price and split into one price band per bracket).
+
+A player who already owns the item gets its price in coins instead.
 
 ### 5.6 Ideas for later
 
@@ -414,10 +444,13 @@ Decided:
 - **Draws**: half the rating difference and half the performance; the streak is unchanged.
 - **Coin stakes** 100 / 500 / 2,000 with a 10% fee; shop price ranges as in 4.5.
 - **Friend, AI and same-device games** pay no coins and no MMR.
+- **Time controls**: Blitz 5+3, Rapid 10+5 and Classical 15+10 for Ranked, Casual and Play
+  for coins; Fast blitz 3+2 for Casual only; no clock for friends, AI and same device.
+- **Seasons**: 3 months; resets of 25% / 50% (every 4th) / 100% (every 12th); rewards per
+  rank bracket as in 5.5.
+- **Username changes**: once every 30 days.
+- **Languages**: English (default) and Czech.
 
 Open:
 
-1. **Time controls**: the proposal in 4.1 (Blitz 5+3 and Rapid 10+5 for ranked). OK?
-2. **Seasons**: 3 months, 25% reset towards 1,000? Which end-of-season rewards?
-3. **Username changes**: once every 30 days (as built in Settings)?
-4. **Languages**: which ones besides English, and in what order?
+1. Which languages come after Czech?

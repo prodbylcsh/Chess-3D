@@ -240,13 +240,3 @@ export function gameAccuracy(moves: Array<{ before: number; after: number }>): n
   const harmonic = accs.length / accs.reduce((s, a) => s + 1 / Math.max(a, 1), 0);
   return Math.round(((mean + harmonic) / 2) * 10) / 10;
 }
-
-// ------------------------------------------------------------------ seasons
-
-/** Share of the distance to the start MMR removed at a season reset. */
-export const SEASON_RESET_SHARE = 0.25;
-
-/** MMR at the start of a new season: pulled part of the way back towards 1,000. */
-export function seasonReset(mmr: number, share = SEASON_RESET_SHARE): number {
-  return Math.round(mmr - (mmr - MMR.start) * share);
-}
