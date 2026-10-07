@@ -22,8 +22,8 @@ The first run pulls images and takes several minutes, so start it with
 2. starts a tiny npm mirror on `:4873` (`scripts/npm-mirror.mjs`, `NODE_USE_ENV_PROXY=1`);
    the Edge Function container can't reach npm through the agent proxy itself;
 3. runs `supabase start` with the images from Docker Hub
-   (`SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`), skipping services the app doesn't use;
-   The first boot often fails with `StatusDbNotReadyError`, so it retries up to 3 times;
+   (`SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io`), skipping services the app doesn't use.
+   The first boot often fails with `StatusDbNotReadyError`, so it retries up to 3 times.
 4. patches the `supabase/edge-runtime` image once: it trusts the proxy CA
    (`/root/.ccr/ca-bundle.crt`) and uses the mirror via the Docker network gateway. The
    original stays tagged `<tag>-orig`;
