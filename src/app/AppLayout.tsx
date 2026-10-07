@@ -14,6 +14,7 @@ import {
 import { rankOf } from '#shared/rating.ts';
 import { LogoMark, ProfileIcon, RankEmblem } from '../ui/art/art';
 import { Badge, Coins, cx } from '../ui/kit';
+import { useBadges } from './notifications';
 import { useProfile } from './session';
 import './layout.css';
 
@@ -49,6 +50,8 @@ export function Wordmark() {
 export function AppLayout() {
   const profile = useProfile();
   const rank = rankOf(profile.mmr);
+  const badges = useBadges();
+  const count = (to: string) => (to === '/messages' ? badges.unreadMessages : to === '/community' ? badges.friendRequests : 0);
 
   return (
     <div className="app">
@@ -67,6 +70,7 @@ export function AppLayout() {
               <NavLink key={item.to} to={item.to} className={({ isActive }) => cx('nav-item', isActive && 'is-active')}>
                 <item.icon size={19} strokeWidth={1.9} />
                 <span>{item.label}</span>
+                {count(item.to) > 0 && <span className="nav-count">{count(item.to)}</span>}
               </NavLink>
             ),
           )}
@@ -97,7 +101,10 @@ export function AppLayout() {
       <nav className="tabbar" aria-label="Main">
         {NAV.filter((i) => i.mobile).map((item) => (
           <NavLink key={item.to} to={item.to} className={({ isActive }) => cx('tab', isActive && 'is-active')}>
-            <item.icon size={21} strokeWidth={1.9} />
+            <span className="tab-icon">
+              <item.icon size={21} strokeWidth={1.9} />
+              {count(item.to) > 0 && <span className="tab-dot" />}
+            </span>
             <span>{item.label}</span>
           </NavLink>
         ))}

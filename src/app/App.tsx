@@ -4,9 +4,14 @@ import { AuthPage } from '../features/auth/AuthPage';
 import { Onboarding } from '../features/onboarding/Onboarding';
 import { PlayHub } from '../features/play/PlayHub';
 import { ComingNext } from '../features/placeholders/ComingNext';
+import { CommunityPage } from '../features/community/CommunityPage';
+import { MessagesPage } from '../features/messages/MessagesPage';
+import { ProfilePage } from '../features/profile/ProfilePage';
+import { SettingsPage } from '../features/settings/SettingsPage';
 import { LogoMark } from '../ui/art/art';
 import { ConfirmHost, Spinner, ToastProvider } from '../ui/kit';
 import { AppLayout } from './AppLayout';
+import { NotificationsProvider } from './notifications';
 import { SessionProvider, useSession } from './session';
 
 // the 3D game (three.js) is loaded only when a game starts
@@ -56,11 +61,12 @@ function Routed() {
         <Route path="/game/:mode/:id?" element={<GamePage />} />
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/play" element={<PlayHub />} />
-          <Route path="/community" element={<ComingNext module="community" />} />
+          <Route path="/community" element={<CommunityPage />} />
           <Route path="/shop" element={<ComingNext module="shop" />} />
-          <Route path="/profile" element={<ComingNext module="profile" />} />
-          <Route path="/messages" element={<ComingNext module="messages" />} />
-          <Route path="/settings" element={<ComingNext module="settings" />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/u/:username" element={<ProfilePage />} />
+          <Route path="/messages/:conversationId?" element={<MessagesPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/play" replace />} />
       </Routes>
@@ -73,7 +79,9 @@ export function App() {
     <SessionProvider>
       <ToastProvider>
         <HashRouter>
-          <Routed />
+          <NotificationsProvider>
+            <Routed />
+          </NotificationsProvider>
         </HashRouter>
         <ConfirmHost />
       </ToastProvider>

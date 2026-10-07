@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Color as Side, PieceSymbol } from 'chess.js';
 import { ArrowLeft, Copy, Link2, RefreshCcw, Share2, Volume2, VolumeX } from 'lucide-react';
 import { sfx } from '../../audio/sfx';
+import { getPrefs, setPrefs } from '../../app/prefs';
 import { PieceGlyph, ProfileIcon, RankEmblem } from '../../ui/art/art';
 import type { PieceId } from '../../ui/art/pieces';
 import { Badge, Button, IconButton, Modal, cx } from '../../ui/kit';
@@ -16,7 +17,8 @@ const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
 export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
   const s = useGameState(engine.store);
   const top = other(s.bottom);
-  const [muted, setMuted] = useState(sfx.muted);
+  // sound follows the saved preference; toggling here saves it too
+  const [muted, setMuted] = useState(() => (sfx.muted = !getPrefs().sound));
 
   return (
     <>
@@ -63,6 +65,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
                 sfx.unlock();
                 sfx.muted = !sfx.muted;
                 setMuted(sfx.muted);
+                setPrefs({ sound: !sfx.muted });
               }}
             >
               {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}

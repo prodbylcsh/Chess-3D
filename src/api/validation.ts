@@ -34,3 +34,13 @@ export function passwordStrength(password: string): number {
   if (password.length >= 12 || /[^A-Za-z0-9]/.test(password)) score++;
   return score;
 }
+
+/** Usernames can be changed once per this many days (the first choice in onboarding is free). */
+export const USERNAME_COOLDOWN_DAYS = 30;
+
+/** When the next username change is allowed, or null if it is allowed now. */
+export function nextUsernameChange(changedAt: string | null, now = Date.now()): Date | null {
+  if (!changedAt) return null;
+  const next = new Date(changedAt).getTime() + USERNAME_COOLDOWN_DAYS * 86_400_000;
+  return next > now ? new Date(next) : null;
+}

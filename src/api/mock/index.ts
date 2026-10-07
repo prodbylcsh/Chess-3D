@@ -2,127 +2,12 @@
 // waits a little so loading states are visible. The rules for MMR and coins are
 // the real shared ones, so results look exactly like they will in production.
 import { mmrChange, rankOf } from '#shared/rating.ts';
-import { COINS, STAKES, coinReward, wagerNet } from '#shared/economy.ts';
-import {
-  ApiError,
-  type Account,
-  type Api,
-  type AuthProviderId,
-  type FriendEntry,
-  type GameRecord,
-  type MatchFound,
-  type MatchKind,
-  type MatchReport,
-  type MatchResult,
-  type Profile,
-  type PublicProfile,
-  type RankInfo,
-  type StakeId,
-} from '../types';
-import { emailProblem, passwordProblem, usernameProblem } from '../validation';
-import { DEFAULT_LOADOUT, NEW_PLAYER_STATS, SEED_FRIENDS, SEED_PLAYERS, START_MMR, type SeedPlayer } from './seed';
-
-interface StoredAccount extends Account {
-  /** demo only: a real back-end never stores plain passwords */
-  password: string | null;
-}
-
-interface PendingMatch {
-  playerId: string;
-  kind: MatchKind;
-  stake: StakeId | null;
-  opponentId: string;
-  color: 'w' | 'b';
-  reported: boolean;
-}
-
-interface Db {
-  version: 1;
-  accounts: StoredAccount[];
-  profiles: Record<string, Profile>;
-  history: Record<string, GameRecord[]>;
-  matches: Record<string, PendingMatch>;
-  sessionId: string | null;
-}
-
-const KEY = 'wizard-chess.mock-db.v1';
-
-function load(): Db {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as Db;
-  } catch {
-    /* fall through to a fresh database */
-  }
-  return { version: 1, accounts: [], profiles: {}, history: {}, matches: {}, sessionId: null };
-}
-
-let db = load();
-
-function save(): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(db));
-  } catch {
-    /* storage full or blocked: keep working in memory */
-  }
-}
-
-const wait = (min = 250, max = 650) => new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
-const id = (prefix: string) => `${prefix}-${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
-
-function rankInfo(mmr: number): RankInfo {
-  const r = rankOf(mmr);
-  return { tier: r.tier.id, division: r.division, label: r.label, progress: r.progress };
-}
-
-function publicSeed(p: SeedPlayer): PublicProfile {
-  return {
-    id: p.id,
-    username: p.username,
-    iconId: p.iconId,
-    rank: rankInfo(p.mmr),
-    stats: p.stats,
-    loadout: DEFAULT_LOADOUT,
-    createdAt: p.createdAt,
-    online: p.online,
-  };
-}
-
-function session(): { account: StoredAccount; profile: Profile } {
-  const account = db.accounts.find((a) => a.id === db.sessionId);
-  const profile = account && db.profiles[account.id];
-  if (!account || !profile) throw new ApiError('unauthorized', 'Please sign in again.');
-  return { account, profile };
-}
-
-function createAccount(email: string, provider: AuthProviderId, password: string | null): StoredAccount {
-  const account: StoredAccount = { id: id('user'), email: email.trim().toLowerCase(), provider, password };
-  db.accounts.push(account);
-  db.profiles[account.id] = {
-    id: account.id,
-    username: null,
-    iconId: null,
-    onboardingStep: 0,
-    onboarded: false,
-    coins: COINS.startingBalance,
-    mmr: START_MMR,
-    stats: { ...NEW_PLAYER_STATS },
-    loadout: { ...DEFAULT_LOADOUT },
-    createdAt: new Date().toISOString(),
-  };
-  db.history[account.id] = [];
-  return account;
-}
-
-const strip = ({ password: _password, ...account }: StoredAccount): Account => account;
-
-function isTaken(username: string, exceptId?: string): boolean {
-  const lower = username.toLowerCase();
-  return (
-    SEED_PLAYERS.some((p) => p.username.toLowerCase() === lower) ||
-    Object.values(db.profiles).some((p) => p.id !== exceptId && p.username?.toLowerCase() === lower)
-  );
-}
+import { STAKES, coinReward, wagerNet } from '#shared/economy.ts';
+import { ApiError, type Api, type MatchFound, type MatchKind, type MatchReport, type MatchResult } from '../types';
+import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../validation';
+import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
+import { SEED_PLAYERS, type SeedPlayer } from './seed';
+import { account, friends, messages, profileLookups } from './social';
 
 function pickOpponent(kind: MatchKind, mmr: number): SeedPlayer {
   const pool = SEED_PLAYERS.filter((p) => p.online);
@@ -210,8 +95,14 @@ export function createMockApi(): Api {
           if (problem) throw new ApiError('invalid', problem);
           if (isTaken(patch.username, profile.id)) throw new ApiError('username_taken', 'That username is taken.');
         }
+        if (patch.username != null && profile.onboarded && patch.username !== profile.username) {
+          const next = nextUsernameChange(profile.usernameChangedAt ?? null);
+          if (next) throw new ApiError('cooldown', `You can change your username again on ${next.toLocaleDateString()}.`);
+          profile.usernameChangedAt = new Date().toISOString();
+        }
         Object.assign(profile, patch);
         save();
+        emit({ type: 'profile' });
         return structuredClone(profile);
       },
 
@@ -219,18 +110,14 @@ export function createMockApi(): Api {
         await wait();
         return structuredClone(db.history[session().profile.id] ?? []);
       },
+
+      ...profileLookups,
     },
 
-    friends: {
-      async list(): Promise<FriendEntry[]> {
-        await wait();
-        session();
-        return SEED_FRIENDS.map((fid, i) => ({
-          profile: publicSeed(SEED_PLAYERS.find((p) => p.id === fid)!),
-          since: new Date(Date.now() - (i + 1) * 6.5e8).toISOString(),
-        }));
-      },
-    },
+    friends,
+    messages,
+    account,
+    events: { subscribe },
 
     matchmaking: {
       find(kind, stake) {

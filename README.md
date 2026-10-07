@@ -14,12 +14,17 @@ npm run build    # type-check + production bundle in dist/
 npm test         # rules, rating/coin and AI unit tests
 ```
 
-## What's in the app today (milestone 1)
+## What's in the app today (milestones 1 and 2)
 
 - **Accounts**: sign in / sign up with email and password, Apple or Google, and a 4-step
   onboarding (username with live availability check, one of six profile icons).
-- **Sidebar** with the eight modules; Puzzles and Learn are marked "Soon", Community, Shop,
-  Profile, Messages and Settings show what is coming in the next milestones.
+- **Sidebar** with the eight modules (Puzzles and Learn marked "Soon", Shop coming next) and
+  badges for unread messages and friend requests.
+- **Profile** (yours and anyone's): rank, stats, awards, game history, cosmetics in use.
+- **Community**: player search, friends, friend requests, suggestions near your rank.
+- **Messages**: chats with friends, unread counts, and challenges sent as game cards.
+- **Settings**: email, password, username (once per 30 days), sound, camera, language,
+  sign out, delete account.
 - **Play hub**: Ranked (with your rank emblem and division progress), Casual, Play a friend
   (friends list, invite link, same device), Play vs AI (5 levels), Play for coins (3 stakes),
   Tournaments ("Soon").
@@ -27,9 +32,10 @@ npm test         # rules, rating/coin and AI unit tests
   captures, move list, actions, promotion picker, invite card, and a result screen with the
   MMR change and its breakdown, rank progress, coins and accuracy.
 
-Accounts, friends, matchmaking and results currently run on an **in-browser mock back-end**
-(`src/api/mock`, data in localStorage) that applies the real MMR and coin rules. Matchmade
-opponents are played by the AI and marked "Demo". Invite-link games are fully online already
+Accounts, friends, messages, matchmaking and results currently run on an **in-browser mock
+back-end** (`src/api/mock`, data in localStorage) that applies the real MMR and coin rules.
+Demo players accept friend requests and answer chats on their own; matchmade opponents are
+played by the AI and marked "Demo". Invite-link games are fully online already
 (Supabase). See the roadmap in docs/PLATFORM.md for the back-end milestones.
 
 ## Controls

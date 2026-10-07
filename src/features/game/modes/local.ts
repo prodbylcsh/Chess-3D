@@ -1,17 +1,18 @@
 import { RefreshCw, RotateCcw, Undo2 } from 'lucide-react';
+import { getPrefs } from '../../../app/prefs';
 import type { Mode, ModeContext } from './types';
 
 /** Two players sharing one device. */
 export class LocalMode implements Mode {
   readonly label = 'Same device';
-  private autoFlip = false;
+  private autoFlip = getPrefs().autoRotate;
 
   constructor(private readonly ctx: ModeContext) {}
 
   start(): void {
     const { store, game } = this.ctx.engine;
     store.reset();
-    void game.begin(null);
+    void game.begin(null).then(() => game.setAutoFlip(this.autoFlip));
   }
 
   dispose(): void {

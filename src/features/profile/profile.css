@@ -1,0 +1,444 @@
+.profile-loading {
+  display: grid;
+  place-items: center;
+  padding: 80px;
+  color: var(--text-2);
+}
+
+/* ---------------------------------------------------------------- hero */
+
+.profile-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 26px;
+  padding: 30px 32px;
+  margin-bottom: 16px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(120deg, rgba(28, 28, 40, 0.95), rgba(16, 17, 25, 0.95));
+  overflow: hidden;
+  animation: rise-in 0.45s var(--ease-out);
+}
+
+.profile-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(380px 240px at 8% 50%, color-mix(in srgb, var(--tier) 22%, transparent), transparent 70%),
+    radial-gradient(420px 260px at 92% 50%, color-mix(in srgb, var(--tier) 14%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.profile-avatar {
+  position: relative;
+  filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55));
+}
+
+.profile-avatar-edit {
+  position: absolute;
+  right: 2px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #171823;
+  background: var(--gold);
+  color: #1d1408;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.profile-avatar-edit:hover {
+  transform: scale(1.08);
+}
+
+.profile-id {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-name h1 {
+  font-size: 30px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.profile-rank {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px 14px 14px;
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border);
+}
+
+.profile-rank > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+  font-size: 12.5px;
+}
+
+.profile-rank strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+/* ---------------------------------------------------------------- stats */
+
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.stat strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat strong svg {
+  color: var(--gold);
+}
+
+.profile-tabs {
+  max-width: 320px;
+  margin-bottom: 16px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-card {
+  padding: 20px;
+}
+
+.profile-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+.profile-card h2 {
+  font-size: 17px;
+}
+
+/* ---------------------------------------------------------------- awards */
+
+.awards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.award {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.award strong {
+  font-size: 14px;
+}
+
+.award-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-3);
+}
+
+.award.is-earned {
+  opacity: 1;
+  border-color: rgba(242, 194, 122, 0.3);
+  background: linear-gradient(180deg, rgba(242, 194, 122, 0.1), rgba(242, 194, 122, 0.02));
+}
+
+.award.is-earned .award-icon {
+  background: var(--gold-soft);
+  color: var(--gold);
+  box-shadow: 0 0 18px rgba(242, 194, 122, 0.25);
+}
+
+.award-progress {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  color: var(--text-3);
+}
+
+/* ---------------------------------------------------------------- loadout */
+
+.loadout {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loadout li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.loadout li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.loadout strong {
+  font-size: 14px;
+}
+
+.loadout-swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #ece5d8, #3a3550);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.loadout-swatch[data-cat='board'] {
+  background: repeating-conic-gradient(#e9e4dc 0% 25%, #2a2a33 0% 50%) 50% / 14px 14px;
+}
+
+.loadout-swatch[data-cat='background'] {
+  background: radial-gradient(circle at 30% 30%, #6b4a2c, #120e0b 70%);
+}
+
+.loadout-swatch[data-cat='moveAnimation'] {
+  background: linear-gradient(135deg, #8fb6ff, #3a3f8f);
+}
+
+.loadout-swatch[data-cat='destruction'] {
+  background: radial-gradient(circle, #ffd28a, #c0572b 55%, #2a1208);
+}
+
+/* ---------------------------------------------------------------- games */
+
+.games {
+  padding: 6px;
+}
+
+.game-row {
+  display: grid;
+  grid-template-columns: 30px 36px minmax(120px, 1.4fr) minmax(120px, 1.2fr) 52px minmax(110px, auto) 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+}
+
+.game-row:hover {
+  background: var(--surface);
+}
+
+.result-pill {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.result-pill.is-win {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.result-pill.is-loss {
+  background: var(--danger-soft);
+  color: #ff8d82;
+}
+
+.result-pill.is-draw {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-2);
+}
+
+.game-opp,
+.game-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12.5px;
+}
+
+.game-opp strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-meta > span:first-child {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.game-acc {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+.game-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.game-delta .up {
+  color: var(--success);
+}
+
+.game-delta .down {
+  color: #ff8d82;
+}
+
+.game-when {
+  text-align: right;
+  font-size: 12.5px;
+}
+
+/* ---------------------------------------------------------------- icon picker */
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.icon-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 6px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.icon-choice.is-selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--text);
+}
+
+@media (max-width: 1000px) {
+  .profile-hero {
+    grid-template-columns: auto 1fr;
+  }
+
+  .profile-rank {
+    grid-column: 1 / -1;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-row {
+    grid-template-columns: 28px 36px 1fr auto;
+  }
+
+  .game-meta,
+  .game-acc,
+  .game-when {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    padding: 24px 18px;
+  }
+
+  .profile-name,
+  .profile-actions {
+    justify-content: center;
+  }
+
+  .profile-avatar > svg {
+    width: 96px;
+    height: 96px;
+  }
+}

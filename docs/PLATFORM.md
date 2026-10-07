@@ -63,11 +63,11 @@ modules and a "More" sheet.
 | Play | 🟡 | Start games in every mode. |
 | Puzzles | ⏸ | Roadmap of 100 puzzle levels. |
 | Learn | ⏸ | Tutorials: basics, tactics, openings. |
-| Community | 🔜 | Find players, friend requests, view profiles. |
+| Community | 🟡 | Find players, friend requests, view profiles. |
 | Shop | 🔜 | Spend coins on cosmetics. |
-| Profile | 🔜 | Rank, history, awards, equipped cosmetics. |
-| Messages | 🔜 | Chat with friends. |
-| Settings | 🔜 | Language, email, password, sound. |
+| Profile | 🟡 | Rank, history, awards, equipped cosmetics. |
+| Messages | 🟡 | Chat with friends. |
+| Settings | 🟡 | Language, email, password, sound. |
 
 Modules marked 🔜 currently show a placeholder page listing their planned features.
 
@@ -123,7 +123,9 @@ Interactive tutorials: rules and basics, then tactics, openings and advanced ide
 ### 4.4 Community
 
 Search players by username, send/accept/decline friend requests, view any profile.
-Everything on a profile is public (see 4.6).
+Everything on a profile is public (see 4.6). Friends can be messaged or challenged
+directly; a challenge creates an online game and posts it as a card in the chat. A side
+panel suggests players near your rank. Pending requests show as a badge on Community.
 
 ### 4.5 Shop
 
@@ -396,7 +398,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Milestone | Content | Status |
 | --- | --- | --- |
 | M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
-| M2 Social | Profile, Community, Messages, Settings screens | 🔜 |
+| M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue, buy and equip, loadout in games | 🔜 |
 | M4 Back-end: accounts | Supabase Auth (email, Apple, Google), profiles, onboarding, usernames | 🔜 |
 | M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |

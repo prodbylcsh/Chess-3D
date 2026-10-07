@@ -50,6 +50,8 @@ export interface Profile {
   stats: Stats;
   loadout: Loadout;
   createdAt: string;
+  /** last time the username was changed after onboarding (changes are limited) */
+  usernameChangedAt: string | null;
 }
 
 export interface RankInfo {
@@ -75,6 +77,35 @@ export interface PublicProfile {
 export interface FriendEntry {
   profile: PublicProfile;
   since: string;
+}
+
+export interface FriendRequest {
+  profile: PublicProfile;
+  at: string;
+}
+
+/** How the signed-in player relates to another player. */
+export type Relation = 'self' | 'friend' | 'incoming' | 'outgoing' | 'none';
+
+// ------------------------------------------------------------------ messages
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  /** sender's user id */
+  from: string;
+  body: string;
+  at: string;
+  /** an invitation to an online game (body is the note, gameId the game) */
+  kind: 'text' | 'invite';
+  gameId?: string;
+}
+
+export interface Conversation {
+  id: string;
+  with: PublicProfile;
+  last: Message | null;
+  unread: number;
 }
 
 // ------------------------------------------------------------------ games
@@ -147,10 +178,49 @@ export interface ProfileService {
   checkUsername(username: string): Promise<UsernameCheck>;
   update(patch: Partial<Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded'>>): Promise<Profile>;
   history(): Promise<GameRecord[]>;
+  /** a player's public profile by username (case-insensitive) or id */
+  get(usernameOrId: string): Promise<PublicProfile | null>;
+  /** a player's recent games (no MMR changes: those are private) */
+  publicHistory(userId: string): Promise<GameRecord[]>;
+  search(query: string): Promise<PublicProfile[]>;
+  /** players near your rank you may want to add */
+  suggestions(): Promise<PublicProfile[]>;
 }
 
 export interface FriendsService {
   list(): Promise<FriendEntry[]>;
+  requests(): Promise<{ incoming: FriendRequest[]; outgoing: FriendRequest[] }>;
+  relation(userId: string): Promise<Relation>;
+  request(userId: string): Promise<void>;
+  accept(userId: string): Promise<void>;
+  decline(userId: string): Promise<void>;
+  cancel(userId: string): Promise<void>;
+  remove(userId: string): Promise<void>;
+}
+
+export interface MessagesService {
+  conversations(): Promise<Conversation[]>;
+  /** the conversation with a player, created if needed */
+  open(userId: string): Promise<Conversation>;
+  messages(conversationId: string): Promise<Message[]>;
+  send(conversationId: string, body: string, invite?: { gameId: string }): Promise<Message>;
+  markRead(conversationId: string): Promise<void>;
+}
+
+export interface AccountService {
+  changeEmail(newEmail: string, password: string): Promise<Account>;
+  changePassword(current: string, next: string): Promise<void>;
+  deleteAccount(username: string): Promise<void>;
+}
+
+/** Something changed on the server (pushed by realtime in production). */
+export type ApiEvent =
+  | { type: 'friends'; text?: string }
+  | { type: 'messages'; conversationId: string; text?: string }
+  | { type: 'profile' };
+
+export interface EventsService {
+  subscribe(fn: (event: ApiEvent) => void): () => void;
 }
 
 export interface MatchmakingTicket {
@@ -170,6 +240,9 @@ export interface Api {
   auth: AuthService;
   profiles: ProfileService;
   friends: FriendsService;
+  messages: MessagesService;
+  account: AccountService;
+  events: EventsService;
   matchmaking: MatchmakingService;
   /** true while the data comes from the in-browser mock */
   mock: boolean;

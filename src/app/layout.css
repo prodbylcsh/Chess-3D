@@ -84,6 +84,21 @@
   cursor: default;
 }
 
+.nav-count {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--gold);
+  color: #1d1408;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  animation: pop-in 0.3s var(--ease-spring);
+}
+
 .nav-item .badge {
   margin-left: auto;
   height: 20px;
@@ -241,5 +256,21 @@
 
   .tab.is-active {
     color: var(--gold);
+  }
+
+  .tab-icon {
+    position: relative;
+    display: flex;
+  }
+
+  .tab-dot {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid #0e0f16;
   }
 }
