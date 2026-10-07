@@ -87,6 +87,25 @@ username, rank) and the coin balance.
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
 | Play for coins | 🟡 | Both players stake the same amount; the winner takes the pot minus a fee. |
 
+**Time controls (proposal).** The cinematic captures take 1–3 seconds to play out, so
+very fast games (bullet) don't suit this game. The clock of the player to move only starts
+once the opponent's move has finished animating on the server-agreed duration, so animations
+never cost anyone time.
+
+| Control | Name | Where |
+| --- | --- | --- |
+| 5 + 3 | Blitz | Ranked, Casual, Play for coins |
+| 10 + 5 | Rapid | Ranked, Casual, Play for coins (default) |
+| 15 + 10 | Classical | Casual, friends |
+| 3 + 2 | Fast blitz | Casual only |
+| No clock | Unlimited | Friends, vs AI, same device |
+
+"10 + 5" means 10 minutes per player plus 5 seconds added after every move. Ranked uses one
+ladder (one MMR) for both Blitz and Rapid at first; separate ladders per control can be added
+later if players ask for them. Running out of time loses the game, unless the opponent has
+no material that can still checkmate (then it's a draw), as in standard chess rules.
+Clocks are kept by the server (milestone 5); the client only displays them.
+
 **Matchmaking (ranked):** start with a ±100 MMR window and widen it by 50 every 5 seconds
 of waiting, up to ±400. Casual uses one queue with no rating window (it still prefers
 close ratings when several players are waiting). Leaving a running game counts as a loss.
@@ -242,12 +261,20 @@ A new player (1,000 MMR) starts in **Silver II**.
 The profile shows a progress bar through the current division (like League points).
 About 5 average wins move you up one division.
 
-### 5.5 Design notes to decide on
+### 5.5 Seasons and the +20 / −18 baseline (decided)
 
-- **Inflation.** Because a win (+20) is worth more than a loss (−18), a player who wins
-  exactly half their games still gains about 1 MMR per game on average, so everyone drifts
-  upwards over time. Options: keep it (it feels rewarding) and do soft resets each season
-  (e.g. pull everyone 25% towards 1,000), or make the baseline symmetric (+19/−19).
+A win (+20) is deliberately worth more than a loss (−18): a player who wins exactly half
+their games still gains about 1 MMR per game. **This is intended**: every game played adds
+real chess experience, and the slow climb reflects that.
+
+The drift is kept in check by **seasons**. At the end of each season every player's MMR is
+pulled part of the way back towards the start value (proposal: 25% of the distance to
+1,000, so 1,800 becomes 1,600 and 600 becomes 700), win streaks reset, and players receive
+end-of-season rewards for the highest rank they reached (an icon or a coin bonus).
+Proposed season length: 3 months. The exact reset share and rewards are tuning knobs.
+
+### 5.6 Ideas for later
+
 - **Grandmaster and Challenger** could later become "top 200 / top 50 players" instead
   of fixed MMR, like League of Legends.
 - **Placement games.** Optionally double the changes for a player's first 5 ranked games
@@ -372,17 +399,23 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M2 Social | Profile, Community, Messages, Settings screens | 🔜 |
 | M3 Shop | Shop catalogue, buy and equip, loadout in games | 🔜 |
 | M4 Back-end: accounts | Supabase Auth (email, Apple, Google), profiles, onboarding, usernames | 🔜 |
-| M5 Back-end: competitive | Matchmaking queues, game kinds, results with MMR and coins, engine analysis, ledger | 🔜 |
+| M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
 | M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |
-| Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer, clocks | ⏸ |
+| Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
 
-## 10. Open questions
+## 10. Decisions and open questions
 
-1. **Inflation**: keep +20/−18 with seasonal soft resets, or make it symmetric? (5.5)
-2. **Draws**: the proposal above (half the difference and half the performance, streak
-   unchanged). OK?
-3. **Coin stakes and prices**: 100 / 500 / 2,000 stakes, 10% fee, and the price ranges in 4.5.
-4. **Friend and AI games**: no coins and no MMR (anti-farming). OK?
-5. **Time controls**: which ones (e.g. 3+2, 5+0, 10+0)? Ranked needs a clock so games end.
-6. **Username changes**: allowed how often?
-7. **Languages**: which ones besides English, and in what order?
+Decided:
+
+- **+20 / −18 baseline** stays; the small average gain is intended and seasons reset the
+  drift (5.5).
+- **Draws**: half the rating difference and half the performance; the streak is unchanged.
+- **Coin stakes** 100 / 500 / 2,000 with a 10% fee; shop price ranges as in 4.5.
+- **Friend, AI and same-device games** pay no coins and no MMR.
+
+Open:
+
+1. **Time controls**: the proposal in 4.1 (Blitz 5+3 and Rapid 10+5 for ranked). OK?
+2. **Seasons**: 3 months, 25% reset towards 1,000? Which end-of-season rewards?
+3. **Username changes**: once every 30 days (as built in Settings)?
+4. **Languages**: which ones besides English, and in what order?
