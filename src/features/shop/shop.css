@@ -728,7 +728,7 @@
 
 /* ---------------------------------------------------------------- mobile */
 
-@media (max-width: 760px) {
+@media (max-width: 820px) {
   .season {
     grid-template-columns: 1fr;
     padding: 20px;

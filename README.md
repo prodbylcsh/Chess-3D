@@ -11,15 +11,20 @@ The platform plan (modules, ranked MMR, coins, shop, architecture, roadmap) live
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check + production bundle in dist/
-npm test         # rules, rating/coin and AI unit tests
+npm test         # rules, rating/coin, seasons, shop, translations and AI unit tests
 ```
 
-## What's in the app today (milestones 1 and 2)
+## What's in the app today (milestones 1–3)
 
 - **Accounts**: sign in / sign up with email and password, Apple or Google, and a 4-step
   onboarding (username with live availability check, one of six profile icons).
-- **Sidebar** with the eight modules (Puzzles and Learn marked "Soon", Shop coming next) and
-  badges for unread messages and friend requests.
+- **Sidebar** with the eight modules (Puzzles and Learn marked "Soon") and badges for unread
+  messages and friend requests.
+- **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile
+  icons with prices and rarities; buy with coins, use from the Shop or your Profile. Your
+  items show in your games (placeholder looks until the real assets arrive). Season panel
+  with the rewards of every rank bracket.
+- **Languages**: English and Czech (Settings).
 - **Profile** (yours and anyone's): rank, stats, awards, game history, cosmetics in use.
 - **Community**: player search, friends, friend requests, suggestions near your rank.
 - **Messages**: chats with friends, unread counts, and challenges sent as game cards.
@@ -32,7 +37,7 @@ npm test         # rules, rating/coin and AI unit tests
   captures, move list, actions, promotion picker, invite card, and a result screen with the
   MMR change and its breakdown, rank progress, coins and accuracy.
 
-Accounts, friends, messages, matchmaking and results currently run on an **in-browser mock
+Accounts, friends, messages, matchmaking, results and the shop currently run on an **in-browser mock
 back-end** (`src/api/mock`, data in localStorage) that applies the real MMR and coin rules.
 Demo players accept friend requests and answer chats on their own; matchmade opponents are
 played by the AI and marked "Demo". Invite-link games are fully online already

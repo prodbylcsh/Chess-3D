@@ -118,3 +118,20 @@ test('coins', () => {
   assert.equal(wagerNet(500, 'loss'), -500);
   assert.equal(wagerNet(500, 'draw'), 0);
 });
+
+// docs/PLATFORM.md §5.3 promises these are the exact output of the code.
+test('worked examples in the docs match the code', () => {
+  const rows: Array<[string, Parameters<typeof mmrChange>[0], number, number]> = [
+    ['win vs equal, average play', { outcome: 'win', mmr: 1000, opponentMmr: 1000, accuracy: 70, winStreak: 0 }, 20, 100],
+    ['win vs +100 stronger', { outcome: 'win', mmr: 1000, opponentMmr: 1100, accuracy: 70, winStreak: 0 }, 30, 110],
+    ['win vs 100 weaker, 92%', { outcome: 'win', mmr: 1000, opponentMmr: 900, accuracy: 92, winStreak: 0 }, 13, 105],
+    ['loss vs 100 stronger, 85%', { outcome: 'loss', mmr: 1000, opponentMmr: 1100, accuracy: 85, winStreak: 0 }, -6, 60],
+    ['loss vs 150 weaker, 45%', { outcome: 'loss', mmr: 1000, opponentMmr: 850, accuracy: 45, winStreak: 0 }, -34, 38],
+    ['4th win in a row, 80%', { outcome: 'win', mmr: 1000, opponentMmr: 1000, accuracy: 80, winStreak: 3 }, 23, 119],
+    ['draw vs 200 stronger, 75%', { outcome: 'draw', mmr: 1000, opponentMmr: 1200, accuracy: 75, winStreak: 0 }, 10, 93],
+  ];
+  for (const [name, game, mmr, coins] of rows) {
+    assert.equal(mmrChange(game).total, mmr, `${name}: MMR`);
+    assert.equal(coinReward({ kind: 'ranked', ...game }).total, coins, `${name}: coins`);
+  }
+});
