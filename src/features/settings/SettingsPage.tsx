@@ -136,7 +136,7 @@ export function SettingsPage() {
           />
         </Section>
 
-        {api.mock && <p className="faint settings-note">{t('Demo mode: account changes are stored only in this browser.')}</p>}
+        {api.demo.accounts && <p className="faint settings-note">{t('Demo mode: account changes are stored only in this browser.')}</p>}
       </div>
 
       <ChangeEmail open={dialog === 'email'} onClose={() => setDialog(null)} />
@@ -194,10 +194,7 @@ function ChangeEmail({ open, onClose }: { open: boolean; onClose: () => void }) 
   const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { busy, error, setError, run } = useSubmit(() => {
-    toast(t('Email updated.'), { tone: 'success' });
-    onClose();
-  });
+  const { busy, error, setError, run } = useSubmit(onClose);
   useEffect(() => {
     if (open) {
       setEmail('');
@@ -209,7 +206,16 @@ function ChangeEmail({ open, onClose }: { open: boolean; onClose: () => void }) 
     e.preventDefault();
     const problem = emailProblem(email);
     if (problem) return setError(problem);
-    void run(async () => signedIn(await api.account.changeEmail(email, password)));
+    void run(async () => {
+      const { account, confirm } = await api.account.changeEmail(email, password);
+      if (confirm) {
+        // the address changes once the player clicks the links we emailed
+        toast(t('Check your inbox: confirm the change with the links we sent to your current and new address.'), { tone: 'success', duration: 10 });
+      } else {
+        await signedIn(account);
+        toast(t('Email updated.'), { tone: 'success' });
+      }
+    });
   };
   return (
     <Modal open={open} onClose={onClose} title={t('Change email')} subtitle={t("We'll use the new address for sign-in and notifications.")} width={420}>

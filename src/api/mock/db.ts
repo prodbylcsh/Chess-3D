@@ -179,8 +179,17 @@ export function socialOf(playerId: string): Social {
 export function createAccount(email: string, provider: AuthProviderId, password: string | null): StoredAccount {
   const account: StoredAccount = { id: newId('user'), email: email.trim().toLowerCase(), provider, password };
   db.accounts.push(account);
-  db.profiles[account.id] = {
-    id: account.id,
+  seedPlayer(account.id, now());
+  return account;
+}
+
+/**
+ * A fresh local profile with the demo social life: a few friends, two friend
+ * requests and one chat waiting.
+ */
+function seedPlayer(id: string, createdAt: string): void {
+  db.profiles[id] = {
+    id,
     username: null,
     iconId: null,
     onboardingStep: 0,
@@ -190,25 +199,62 @@ export function createAccount(email: string, provider: AuthProviderId, password:
     stats: { ...NEW_PLAYER_STATS },
     loadout: { ...DEFAULT_LOADOUT },
     inventory: [],
-    createdAt: now(),
+    createdAt,
     usernameChangedAt: null,
   };
-  db.history[account.id] = [];
+  db.history[id] = [];
 
-  // demo social life: a few friends, two friend requests and one chat waiting
   const day = 86_400_000;
-  const social = socialOf(account.id);
+  const social = socialOf(id);
   SEED_FRIENDS.forEach((fid, i) => (social.friends[fid] = new Date(Date.now() - (i + 2) * 6 * day).toISOString()));
   social.incoming['seed-7'] = new Date(Date.now() - 3 * 3_600_000).toISOString();
   social.incoming['seed-16'] = new Date(Date.now() - 26 * 3_600_000).toISOString();
-  const conv: StoredConversation = { id: newId('conv'), members: [account.id, 'seed-5'], messages: [], readAt: {} };
+  const conv: StoredConversation = { id: newId('conv'), members: [id, 'seed-5'], messages: [], readAt: {} };
   const at = (minutesAgo: number) => new Date(Date.now() - minutesAgo * 60_000).toISOString();
   conv.messages.push(
     { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: t('Welcome to Wizard Chess! 👋'), at: at(95), kind: 'text' },
     { id: newId('msg'), conversationId: conv.id, from: 'seed-5', body: t('Fancy a game later? I still owe you a rematch.'), at: at(94), kind: 'text' },
   );
   db.conversations[conv.id] = conv;
-  return account;
+}
+
+/** The profile fields the server owns once accounts are real (M4). */
+export type Identity = Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'usernameChangedAt' | 'createdAt'>;
+
+/**
+ * Make a real (server) account the session of the local store. Coins, rank,
+ * stats, items and the demo social life stay in this browser until their
+ * back-end milestones; identity fields are copied from the server.
+ */
+export function adoptAccount(account: Account, identity: Identity): Profile {
+  let stored = db.accounts.find((a) => a.id === account.id);
+  if (!stored) {
+    stored = { ...account, password: null };
+    db.accounts.push(stored);
+  }
+  Object.assign(stored, account);
+  if (!db.profiles[account.id]) seedPlayer(account.id, identity.createdAt);
+  Object.assign(db.profiles[account.id], identity);
+  db.sessionId = account.id;
+  save();
+  return db.profiles[account.id];
+}
+
+/** Remove everything this browser stores about a player. */
+export function forgetAccount(id: string): void {
+  db.accounts = db.accounts.filter((a) => a.id !== id);
+  delete db.profiles[id];
+  delete db.history[id];
+  delete db.social[id];
+  delete db.seasonPeak[id];
+  for (const s of Object.values(db.social)) {
+    delete s.friends[id];
+    delete s.incoming[id];
+    delete s.outgoing[id];
+  }
+  for (const [cid, c] of Object.entries(db.conversations)) if (c.members.includes(id)) delete db.conversations[cid];
+  if (db.sessionId === id) db.sessionId = null;
+  save();
 }
 
 export const strip = ({ password: _password, ...account }: StoredAccount): Account => account;

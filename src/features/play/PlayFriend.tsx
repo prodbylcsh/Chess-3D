@@ -82,7 +82,7 @@ function Friends() {
       toast(
         <>
           {t('Invite sent to {name}.', { name: f.profile.username })}
-          {api.mock && ` ${t('(Demo: share the link from the next screen to play for real.)')}`}
+          {api.demo.social && ` ${t('(Demo: share the link from the next screen to play for real.)')}`}
         </>,
         { tone: 'success', duration: 6 },
       );

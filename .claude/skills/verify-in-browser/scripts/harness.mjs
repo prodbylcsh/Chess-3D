@@ -10,11 +10,13 @@ import { mkdirSync } from 'node:fs';
 
 const { chromium } = createRequire(`${process.cwd()}/`)('playwright');
 
-const BASE = process.env.APP_URL ?? 'http://127.0.0.1:5173/';
+// mock accounts by default (VITE_ACCOUNTS=mock on :5174); real accounts: APP_URL=http://127.0.0.1:5173/
+const BASE = process.env.APP_URL ?? 'http://127.0.0.1:5174/';
 const DB_KEY = 'wizard-chess.mock-db.v1';
 const PREFS_KEY = 'wizard-chess.prefs';
 
-/** A signed-in, onboarded mock account; override any profile field. */
+/** A signed-in, onboarded mock account; override any profile field. Works only against a
+ *  server with mock accounts (VITE_ACCOUNTS=mock), see the skill. */
 export function mockDb(profile = {}) {
   const id = 'user-test';
   return {

@@ -210,6 +210,62 @@
   background: var(--success);
 }
 
+/* social sign-in that isn't set up on the server yet */
+.auth-soon {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.btn-google .auth-soon {
+  background: var(--surface-active);
+}
+
+/* "Confirm your email" and the reset-link states */
+.auth-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  animation: rise-in 0.35s var(--ease-out);
+}
+
+.auth-confirm p {
+  margin: 0;
+}
+
+.auth-confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-line);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.auth-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  margin-top: 10px;
+}
+
+.auth-loading {
+  display: grid;
+  place-items: center;
+  padding: 48px;
+}
+
 @media (max-width: 900px) {
   .auth {
     grid-template-columns: 1fr;

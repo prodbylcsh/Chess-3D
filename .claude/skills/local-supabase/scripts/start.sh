@@ -39,7 +39,7 @@ if ! curl -s -o /dev/null http://127.0.0.1:54321/rest/v1/; then
   step "supabase start (first run pulls images: several minutes)"
   for attempt in 1 2 3; do
     if SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io npx supabase start \
-      -x studio,imgproxy,storage-api,logflare,vector,supavisor,mailpit,postgres-meta </dev/null >"$LOGS/start.log" 2>&1; then
+      -x studio,imgproxy,storage-api,logflare,vector,supavisor,postgres-meta,mailpit </dev/null >"$LOGS/start.log" 2>&1; then
       break
     fi
     if [ "$attempt" = 3 ]; then tail -20 "$LOGS/start.log"; exit 1; fi
@@ -47,6 +47,26 @@ if ! curl -s -o /dev/null http://127.0.0.1:54321/rest/v1/; then
     sleep 10
   done
 fi
+
+# 3a. Auth emails. The auth server sends to "supabase_inbucket_chess-3d:1025". Mailpit's
+#     image comes from Docker Hub, which rate-limits these containers, so a tiny SMTP
+#     sink (scripts/smtp-sink.mjs, same HTTP API subset as Mailpit) stands in. It runs
+#     on the host's Node inside the edge-runtime image, which has the needed libraries.
+if ! curl -s -o /dev/null http://127.0.0.1:54324/api/v1/messages; then
+  step "starting the email sink on :54324"
+  EDGE_IMG=$(docker images supabase/edge-runtime --format '{{.Repository}}:{{.Tag}}' | grep -v -- '-orig$' | head -1)
+  if [ -z "$EDGE_IMG" ]; then EDGE_IMG=$(docker images supabase/edge-runtime --format '{{.Repository}}:{{.Tag}}' | head -1); fi
+  docker rm -f supabase_inbucket_chess-3d >/dev/null 2>&1 || true
+  docker run -d --name supabase_inbucket_chess-3d --network supabase_network_chess-3d -p 54324:8025 \
+    --label com.supabase.cli.project=chess-3d \
+    -v "$(readlink -f "$(command -v node)")":/usr/local/bin/sink-node:ro -v "$HERE/smtp-sink.mjs":/sink.mjs:ro \
+    --entrypoint /usr/local/bin/sink-node "$EDGE_IMG" /sink.mjs >/dev/null
+  until curl -s -o /dev/null http://127.0.0.1:54324/api/v1/messages; do sleep 1; done
+fi
+
+# 3b. Apply migrations added since the database volume was created (start only runs
+#     them on a fresh volume).
+npx supabase migration up --local </dev/null >"$LOGS/migrate.log" 2>&1 || { tail -20 "$LOGS/migrate.log"; exit 1; }
 
 # 4. Patch the edge-runtime image once: trust the agent proxy's CA and use the mirror.
 EDGE=$(docker images supabase/edge-runtime --format '{{.Repository}}:{{.Tag}}' | grep -v -- '-orig$' | head -1)
@@ -84,6 +104,7 @@ fi
 
 ANON=$(npx supabase status -o env </dev/null 2>/dev/null | sed -n 's/^ANON_KEY="\(.*\)"$/\1/p')
 echo
-echo "Supabase is up at http://127.0.0.1:54321"
+echo "Supabase is up at http://127.0.0.1:54321 (emails: http://127.0.0.1:54324/api/v1/messages)"
+SERVICE=$(npx supabase status -o env </dev/null 2>/dev/null | sed -n 's/^SERVICE_ROLE_KEY="\(.*\)"$/\1/p')
 echo "Run the online tests with:"
-echo "  SUPABASE_ANON_KEY=$ANON npm run test:e2e"
+echo "  SUPABASE_ANON_KEY=$ANON SUPABASE_SERVICE_ROLE_KEY=$SERVICE npm run test:e2e"

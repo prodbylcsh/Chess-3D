@@ -28,7 +28,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void api.auth.current().then((a) => (a ? signedIn(a) : setStatus('signedOut')));
+    void api.auth
+      .current()
+      .then((a) => (a ? signedIn(a) : setStatus('signedOut')))
+      .catch(() => setStatus('signedOut'));
+    // signed out elsewhere (another tab, an expired session, a deleted account)
+    return api.auth.onChange((event) => {
+      if (event.type !== 'signedOut') return;
+      setAccount(null);
+      setProfile(null);
+      setStatus('signedOut');
+    });
   }, [signedIn]);
 
   const value = useMemo<SessionValue>(

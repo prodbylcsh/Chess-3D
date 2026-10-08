@@ -14,10 +14,12 @@ npm run build    # type-check + production bundle in dist/
 npm test         # rules, rating/coin, seasons, shop, translations and AI unit tests
 ```
 
-## What's in the app today (milestones 1–3)
+## What's in the app today (milestones 1–4)
 
-- **Accounts**: sign in / sign up with email and password, Apple or Google, and a 4-step
-  onboarding (username with live availability check, one of six profile icons).
+- **Accounts** (Supabase): sign up with email and password (confirmation link, password
+  reset by email), Apple or Google (once set up on the server), and a 4-step onboarding
+  (username with live availability check, one of six profile icons). Guests can still
+  play invite games and are invited to register afterwards.
 - **Sidebar** with the eight modules (Puzzles and Learn marked "Soon") and badges for unread
   messages and friend requests.
 - **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile
@@ -37,7 +39,7 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   captures, move list, actions, promotion picker, invite card, and a result screen with the
   MMR change and its breakdown, rank progress, coins and accuracy.
 
-Accounts, friends, messages, matchmaking, results and the shop currently run on an **in-browser mock
+Friends, messages, matchmaking, results, coins and the shop currently run on an **in-browser mock
 back-end** (`src/api/mock`, data in localStorage) that applies the real MMR and coin rules.
 Demo players accept friend requests and answer chats on their own; matchmade opponents are
 played by the AI and marked "Demo". Invite-link games are fully online already
@@ -78,21 +80,23 @@ The "Play online" button only appears when the build has `VITE_SUPABASE_URL` and
 ### Local backend
 
 ```bash
-npx supabase start                # needs Docker
-npx supabase functions serve      # in a second terminal
+npx supabase start                # needs Docker; auth emails land in Mailpit (port 54324)
+npx supabase functions serve      # in a second terminal (functions `game` and `account`)
 cp .env.example .env.local        # fill in the API URL and anon key from `npx supabase status`
-npm run dev
-npm test                          # rules unit tests
-SUPABASE_ANON_KEY=... npm run test:e2e   # two players over the network, against the local stack
+npm run dev                       # real accounts against the local stack
+npm run dev:mock                  # or: accounts in the browser, no Supabase needed
+npm test                          # unit tests
+SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... npm run test:e2e   # online games and accounts
 ```
 
 ### Hosted backend
 
 1. Create a project at supabase.com, then turn on **Authentication → Sign In / Providers →
-   Allow anonymous sign-ins**.
+   Allow anonymous sign-ins** (guests in invite games). For accounts, also follow
+   docs/PLATFORM.md §8.4 (URLs, email confirmation, SMTP, Apple and Google).
 2. Add the repository secrets `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`, and the
    variable `SUPABASE_PROJECT_ID`. The workflow `.github/workflows/supabase.yml` then applies
-   migrations and deploys the function whenever `supabase/` changes (or when run by hand).
+   migrations and deploys the functions whenever `supabase/` changes (or when run by hand).
 3. Put the project URL and anon key in `.env.production` so the Pages build includes them.
 
 ## Tech
@@ -129,11 +133,12 @@ slow motion, camera shake, sparks, dust and a light flash.
 src/
   app/        App (routes, guards), session state, sidebar layout
   features/   auth, onboarding, play (hub, matchmaking, sheets), game (game screen, modes,
-              result card, join page), placeholders for upcoming modules
-  api/        typed service contracts (types.ts) and the in-browser mock back-end (mock/)
+              result card, join page), shop, profile, community, messages, settings
+  api/        typed service contracts (types.ts), accounts on Supabase (supabase/) and the
+              in-browser mock back-end for everything else (mock/)
   ui/         design-system components (kit.tsx), profile icons and rank emblems (art/)
   ai/         chess engine for Play vs AI: 0x88 board, alpha-beta search, Web Worker
-  net/        Supabase client for online games
+  net/        the shared Supabase client and online games
   core/       layout (square <-> world), Animator (single game clock, tweens, bullet time)
   scene/      Stage (renderer, camera, lights, post-processing), GLB loading
   fx/         particles, effects (sparks, dust, shockwave, bolt), shatter physics, dissolve shader

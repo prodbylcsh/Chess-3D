@@ -29,6 +29,8 @@ export interface Mode {
   dispose(): void;
   actions(state: GameState): ModeAction[];
   endActions(state: GameState): EndAction[];
+  /** an extra line on the result card (e.g. inviting guests to register) */
+  endNote?(state: GameState): string | null;
   act(id: string): void;
 }
 

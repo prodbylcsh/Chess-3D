@@ -37,6 +37,24 @@ replaces the mock later without touching screens. The plan and every decision li
   import extensions, the `#shared/...` alias from `src/`, no TypeScript parameter
   properties, enums or namespaces, and no browser or Node APIs.
 
+## 1b. Moving a module to the real back-end (M4 onwards)
+
+Accounts were the first module on Supabase. Follow the same pattern for the next ones:
+
+- **Server:** a migration (table, constraints, RLS select-only for clients, explicit
+  grants), an Edge Function that does every write with the service role, and the rules in
+  `supabase/functions/_shared/` with unit tests. Functions return `{ error, code }`; the
+  app maps codes to translated messages.
+- **App:** implement the service in `src/api/supabase/` and swap it in inside
+  `createSupabaseApi()`. Everything not yet moved keeps running on the mock store, keyed
+  to the real user (`adoptAccount` in `src/api/mock/db.ts` mirrors the server profile
+  into it). When a module moves, its data leaves the mock store and its fields come
+  from the server instead; keep `npm run dev:mock` working.
+- **Tests:** an e2e file against the local stack (local-supabase skill) covering the happy
+  path, every rule the server enforces, and that clients can't write tables directly.
+- **Live settings** that only exist in the Supabase dashboard go into the docs checklist
+  (`docs/PLATFORM.md` §8.4) and the final report to the user: the user does them.
+
 ## 2. UI
 
 - Pages use `Page` (`src/app/AppLayout.tsx`). Build from the kit (`src/ui/kit.tsx`): `Button`,
@@ -71,9 +89,9 @@ interface around them is redesigned.
 
 ## 4. Finish
 
-1. `npx tsc --noEmit` and `npm test` (unit tests: rules, rating, seasons, shop, i18n, AI).
-   `npm run test:e2e` needs a local Supabase (local-supabase skill). Run it when `net/`,
-   `supabase/` or online modes change.
+1. `npx tsc --noEmit` and `npm test` (unit tests: rules, rating, seasons, shop, accounts,
+   i18n, AI). `npm run test:e2e` needs a local Supabase (local-supabase skill). Run it when
+   `net/`, `supabase/`, `src/api/supabase/` or online modes change.
 2. Check it in the browser (verify-in-browser skill) in English **and** Czech, desktop and
    phone width, and read the screenshots.
 3. Update `docs/PLATFORM.md`: the module section, the roadmap table in §9 (status), and §10

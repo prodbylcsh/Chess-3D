@@ -23,7 +23,7 @@ function pickOpponent(kind: MatchKind, mmr: number): SeedPlayer {
 
 export function createMockApi(): Api {
   return {
-    mock: true,
+    demo: { accounts: true, social: true },
 
     auth: {
       async current() {
@@ -41,7 +41,7 @@ export function createMockApi(): Api {
         const account = createAccount(email, 'email', password);
         db.sessionId = account.id;
         save();
-        return strip(account);
+        return { account: strip(account) };
       },
 
       async signIn(email, password) {
@@ -65,10 +65,35 @@ export function createMockApi(): Api {
         return strip(account);
       },
 
+      async providers() {
+        return { apple: true, google: true };
+      },
+
+      async resendConfirmation() {
+        await wait();
+      },
+
       async requestPasswordReset(email) {
         await wait();
         const problem = emailProblem(email);
         if (problem) throw new ApiError('invalid', problem);
+      },
+
+      async updatePassword(password) {
+        await wait();
+        const problem = passwordProblem(password);
+        if (problem) throw new ApiError('invalid', problem);
+        const { account } = session();
+        account.password = password;
+        save();
+      },
+
+      async landing() {
+        return null;
+      },
+
+      onChange() {
+        return () => {};
       },
 
       async signOut() {

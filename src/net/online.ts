@@ -27,10 +27,14 @@ export class Online {
   readonly client: SupabaseClient;
   private uid: string | null = null;
 
-  constructor(url: string, key: string, options: { storageKey?: string } = {}) {
-    this.client = createClient(url, key, {
-      auth: { storageKey: options.storageKey, persistSession: true, autoRefreshToken: true },
-    });
+  /** Use the app's client (shared session with accounts), or connect on your own (tests). */
+  constructor(client: SupabaseClient);
+  constructor(url: string, key: string, options?: { storageKey?: string });
+  constructor(clientOrUrl: SupabaseClient | string, key?: string, options: { storageKey?: string } = {}) {
+    this.client =
+      typeof clientOrUrl === 'string'
+        ? createClient(clientOrUrl, key!, { auth: { storageKey: options.storageKey, persistSession: true, autoRefreshToken: true } })
+        : clientOrUrl;
   }
 
   get userId(): string {
@@ -38,7 +42,7 @@ export class Online {
     return this.uid;
   }
 
-  /** Reuse the stored session or sign in anonymously. */
+  /** Reuse the stored session (a registered player's or a guest's) or sign in anonymously. */
   async signIn(): Promise<string> {
     const { data } = await this.client.auth.getSession();
     let user = data.session?.user ?? null;
@@ -125,11 +129,4 @@ export class Online {
       });
     return () => void this.client.removeChannel(channel);
   }
-}
-
-/** The configured client, or null when this build has no Supabase settings. */
-export function onlineFromEnv(): Online | null {
-  const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-  return url && key ? new Online(url, key) : null;
 }

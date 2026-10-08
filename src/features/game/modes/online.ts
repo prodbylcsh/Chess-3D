@@ -5,7 +5,7 @@ import type { GameRow } from '../../../net/online';
 import { inviteUrl, online } from '../../../net/client';
 import { confirmDialog, toast } from '../../../ui/kit';
 import type { GameState, PlayerView } from '../store';
-import type { Mode, ModeAction, ModeContext } from './types';
+import type { EndAction, Mode, ModeAction, ModeContext } from './types';
 import { dressGame, playerFromProfile } from './types';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
@@ -85,18 +85,26 @@ export class OnlineMode implements Mode {
   }
 
   endActions() {
-    return this.side
+    const guest = !this.ctx.profile;
+    const actions: EndAction[] = this.side
       ? [
           { id: 'rematch', label: t('Rematch'), primary: true },
-          { id: 'exit', label: t('Back to Play') },
+          guest ? { id: 'register', label: t('Create a free account') } : { id: 'exit', label: t('Back to Play') },
         ]
-      : [{ id: 'exit', label: t('Back to Play'), primary: true }];
+      : [guest ? { id: 'register', label: t('Create a free account'), primary: true } : { id: 'exit', label: t('Back to Play'), primary: true }];
+    return actions;
+  }
+
+  endNote(): string | null {
+    return this.ctx.profile ? null : t('You played as a guest. With a free account you climb the ranks, earn coins and keep your games.');
   }
 
   act(id: string): void {
     const row = this.row;
     const run = (p: Promise<GameRow>) => void p.then((r) => this.onRow(r), (e) => this.fail(e));
-    if (id === 'exit') {
+    if (id === 'register') {
+      this.ctx.navigate('/auth?signup');
+    } else if (id === 'exit') {
       void (async () => {
         if (row?.status === 'active' && this.side) {
           const ok = await confirmDialog({ title: t('Leave this game?'), text: t('The game stays open: use the same link to come back.'), confirmLabel: t('Leave') });

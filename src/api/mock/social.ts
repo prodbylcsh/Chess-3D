@@ -15,7 +15,7 @@ import {
   type Relation,
 } from '../types';
 import { emailProblem, passwordProblem } from '../validation';
-import { allPlayers, db, emit, findPlayer, newId, now, publicProfile, save, seedById, session, socialOf, strip, wait, type StoredConversation } from './db';
+import { allPlayers, db, emit, findPlayer, forgetAccount, newId, now, publicProfile, save, seedById, session, socialOf, strip, wait, type StoredConversation } from './db';
 import { SEED_PLAYERS } from './seed';
 
 const isSeed = (id: string) => id.startsWith('seed-');
@@ -329,7 +329,7 @@ export const account: AccountService = {
     if (db.accounts.some((a) => a.email === email && a.id !== acc.id)) throw new ApiError('email_taken', t('That email is already used by another account.'));
     acc.email = email;
     save();
-    return strip(acc);
+    return { account: strip(acc), confirm: false };
   },
 
   async changePassword(current, next) {
@@ -347,18 +347,7 @@ export const account: AccountService = {
     await wait(400, 800);
     const { account: acc, profile } = session();
     if (username !== profile.username) throw new ApiError('confirm', t('Type your username exactly to confirm.'));
-    db.accounts = db.accounts.filter((a) => a.id !== acc.id);
-    delete db.profiles[acc.id];
-    delete db.history[acc.id];
-    delete db.social[acc.id];
-    for (const s of Object.values(db.social)) {
-      delete s.friends[acc.id];
-      delete s.incoming[acc.id];
-      delete s.outgoing[acc.id];
-    }
-    for (const [id, c] of Object.entries(db.conversations)) if (c.members.includes(acc.id)) delete db.conversations[id];
-    db.sessionId = null;
-    save();
+    forgetAccount(acc.id);
   },
 };
 

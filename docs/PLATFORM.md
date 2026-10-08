@@ -51,7 +51,30 @@ A short wizard with a progress bar at the top. Steps:
 4. **Done**: summary card (icon, username, starting rank, starting coins) and "Start playing".
 
 The wizard can be resumed if it is closed half way. Both the username and the icon can be
-changed later (username changes may be limited, e.g. once per 30 days).
+changed later (the username once per 30 days).
+
+### How accounts work (M4)
+
+- **Email + password:** signing up sends a confirmation link; the account works once the
+  link is opened. The link brings the player back to the app already signed in (in the same
+  browser; opened elsewhere it confirms the address and asks them to sign in). Unconfirmed
+  sign-ins get "confirm your email first" with a "send the link again" button.
+- **Password reset:** "Forgot password?" emails a link that opens a "Choose a new password"
+  screen. Links work once and expire after an hour; an expired or reused link says so.
+- **Apple and Google:** the buttons send players to the provider and back. Until a provider
+  is set up on the server, its button shows "Soon" and is disabled.
+- **Email change** (Settings) waits for the confirmation links sent to the old and the new
+  address; **password change** needs the current password; **deleting** the account needs
+  the username typed exactly and removes the profile with it.
+- **Usernames:** 3–20 characters, letters, digits and `_`, unique regardless of case, and a
+  few names are reserved (admin, support, guest, wizardbot, …). The demo players' names
+  count as taken too.
+- **Guests** (invite links) play under an anonymous session and have no profile. Their
+  result card invites them to create a free account. Registered players use their account
+  for online games.
+- Until their milestones, **coins, rank, stats, items, friends, messages and matchmaking
+  stay in the browser** (keyed to the real account): signing in on another device starts
+  them fresh there.
 
 ## 3. Layout and navigation
 
@@ -419,7 +442,12 @@ The 3D board fills the screen. Around it:
 - **Data layer:** `src/api/` defines typed service interfaces (auth, profiles, friends,
   messages, shop, matchmaking, games). A **mock implementation** (browser storage, fake
   latency) makes the whole UI usable now; a **Supabase implementation** replaces it module
-  by module without UI changes.
+  by module without UI changes. Since M4, `src/api/supabase/` provides auth, the own
+  profile and account settings whenever the build has Supabase settings; the remaining
+  services still run on the browser store, keyed to the signed-in Supabase user.
+  `npm run dev:mock` (`VITE_ACCOUNTS=mock`) keeps accounts in the browser too.
+- **One Supabase client** (`src/net/supabase.ts`, PKCE flow so returning links work with
+  hash routes) is shared by accounts and online games.
 - **AI opponent:** a small alpha-beta engine in a Web Worker (5 levels, move generator
   verified with perft). The same worker estimates accuracy for the result screen until
   server-side analysis exists. On the mock back-end, matchmade opponents are played by this
@@ -438,18 +466,22 @@ The 3D board fills the screen. Around it:
 
 | Service | Use |
 | --- | --- |
-| Auth | email + password, Apple, Google; email verification and password reset |
+| Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
-| Edge Functions | game moves (✅ today), matchmaking, results (MMR, coins), shop purchases, friend requests |
+| Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), matchmaking, results (MMR, coins), shop purchases, friend requests |
 | Realtime | live moves (✅ today), presence, matchmaking notifications, chat |
 | Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
 | Email | Supabase Auth emails through a custom SMTP provider (e.g. Resend) in production |
 
 ### 8.3 Data model (first draft)
 
+`games` (online play) and `profiles` exist. `profiles` today (M4): id (= auth user),
+username (unique, case-insensitive), icon_id, onboarding_step, onboarded_at,
+username_changed_at, created_at; written only by the `account` Edge Function. The rest
+is the plan:
+
 ```
-profiles        id (= auth user), username (unique), icon_id, mmr, win_streak, coins,
-                wins, losses, draws, created_at, onboarded_at
+profiles        + mmr, win_streak, coins, wins, losses, draws   (M5)
 games           (exists) + kind (ranked|casual|wager|friend|ai), stake, white/black mmr before
 game_results    game_id, player_id, outcome, accuracy, mmr_delta + breakdown, coins_delta
 coin_ledger     id, player_id, amount, reason (game|purchase|wager|grant), ref_id, created_at
@@ -467,6 +499,31 @@ puzzle_progress player_id, level, stars, completed_at   (later)
 Coins and MMR are only ever changed by server functions, in the same transaction that
 records the reason (ledger, game result).
 
+### 8.4 Turning on real accounts (before merging M4 to `main`)
+
+Merging deploys the `profiles` migration and the `account` function, and the live site then
+uses real accounts right away. These settings live in the Supabase dashboard (project
+`xpfihksbcvhihanoqzrk`) and have to be in place first:
+
+1. **Authentication → URL Configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`;
+   redirect URLs `https://prodbylcsh.github.io/Chess-3D/**` (and
+   `http://localhost:5173/**` for development).
+2. **Authentication → Sign In / Providers → Email:** enabled, "Confirm email" on,
+   "Secure email change" on, minimum password length 8 with letters and digits required.
+   Anonymous sign-ins stay on (guests in invite games).
+3. **Custom SMTP** (Authentication → Emails → SMTP), e.g. Resend: the built-in sender is
+   limited to a few emails per hour and is meant for testing only. Optionally brand the
+   email templates.
+4. **Google:** an OAuth client (Google Cloud Console → Credentials, type "Web application")
+   with the authorized redirect URI
+   `https://xpfihksbcvhihanoqzrk.supabase.co/auth/v1/callback`; paste the client ID and
+   secret into the Google provider.
+5. **Apple:** needs an Apple Developer account. Create a Services ID with "Sign in with
+   Apple" and the same callback URL, plus a key; enter them in the Apple provider.
+   Until then the Apple button shows "Soon".
+
+Players' demo accounts (stored in their browsers) are not carried over.
+
 ## 9. Roadmap
 
 Front-end first (with the mock data layer), then back-end module by module.
@@ -476,7 +533,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
-| M4 Back-end: accounts | Supabase Auth (email, Apple, Google), profiles, onboarding, usernames | 🔜 |
+| M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ in code, tested locally; live after the 8.4 settings |
 | M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
 | M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
@@ -494,7 +551,9 @@ Decided:
   for coins; Fast blitz 3+2 for Casual only; no clock for friends, AI and same device.
 - **Seasons**: 3 months; resets of 25% / 50% (every 4th) / 100% (every 12th); rewards per
   rank bracket as in 5.5.
-- **Username changes**: once every 30 days.
+- **Username changes**: once every 30 days. Reserved names (admin, support, guest, …) can't
+  be taken.
+- **Email verification** is required before an email account can play.
 - **Languages**: English (default) and Czech.
 
 Open:

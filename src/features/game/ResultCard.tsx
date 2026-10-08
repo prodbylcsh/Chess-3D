@@ -90,6 +90,8 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
           </section>
         )}
 
+        {mode.endNote?.(s) && <p className="faint result-note">{mode.endNote(s)}</p>}
+
         <footer className="result-actions">
           {mode.endActions(s).map((a) => (
             <Button key={a.id} variant={a.primary ? 'primary' : 'secondary'} size={a.primary ? 'lg' : 'md'} block={a.primary} onClick={() => mode.act(a.id)}>

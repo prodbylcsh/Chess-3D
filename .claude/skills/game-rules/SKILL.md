@@ -20,6 +20,7 @@ server and the app. The app only previews and displays; the server applies.
 | Coin rewards, stakes, fee | `economy.ts` | `tests/rating.test.ts` | §6 |
 | Season calendar, resets, brackets, reward picking | `seasons.ts` | `tests/seasons.test.ts` | §5.5 |
 | Shop prices and purchase rules | `shop.ts` | `tests/shop.test.ts` | §4.5 |
+| Usernames, reserved names, the 30-day limit, onboarding | `accounts.ts` | `tests/accounts.test.ts`, `tests/accounts.e2e.ts` | §2 |
 
 Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) and use
 `rankOf`, `bracketOf`, `STAKES`, `COINS`, `resetShare` and so on.
@@ -56,8 +57,12 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   get different items, and a higher bracket never gets a cheaper item. A player who
   already owns the item gets its price in coins instead.
 - **Shop prices:** see §4.5 and the shop-items skill.
-- **Username:** changeable once per 30 days after onboarding. **Profile icons:** six
-  starters during onboarding, no photo uploads; more come from the Shop and seasons.
+- **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
+  names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.
+  **Profile icons:** six starters during onboarding, no photo uploads; more come from the
+  Shop and seasons.
+- **Accounts:** email sign-ups must confirm their address before playing; guests (invite
+  links) play without a profile and are invited to register afterwards.
 - **Languages:** English is the default; Czech is complete. Which language comes next is
   still open.
 

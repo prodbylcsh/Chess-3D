@@ -196,12 +196,35 @@ export interface SeasonInfo {
 
 // ------------------------------------------------------------------ service contracts
 
+/** A new account is signed in at once, or first has to confirm its email address. */
+export type SignUpResult = { account: Account } | { confirmEmail: string };
+
+/** What brought the player to the app, when it was an auth email link or a provider. */
+export type AuthLanding =
+  | { kind: 'recovery' }
+  /** the link worked (email confirmed) but this browser has no session: sign in */
+  | { kind: 'confirmed' }
+  | { kind: 'error'; message: string };
+
+export type AuthEvent = { type: 'signedOut' } | { type: 'recovery' };
+
 export interface AuthService {
+  /** the signed-in registered player (guest sessions of invite games don't count) */
   current(): Promise<Account | null>;
-  signUp(email: string, password: string): Promise<Account>;
+  signUp(email: string, password: string): Promise<SignUpResult>;
   signIn(email: string, password: string): Promise<Account>;
+  /** sends the player to Apple or Google; resolves only in the demo */
   signInWith(provider: Exclude<AuthProviderId, 'email'>): Promise<Account>;
+  /** which social sign-ins are set up on the server */
+  providers(): Promise<Record<Exclude<AuthProviderId, 'email'>, boolean>>;
+  resendConfirmation(email: string): Promise<void>;
   requestPasswordReset(email: string): Promise<void>;
+  /** set a new password after following a reset link (the link signs the player in) */
+  updatePassword(password: string): Promise<void>;
+  /** read once at start-up: did an email link or a provider send the player here? */
+  landing(): Promise<AuthLanding | null>;
+  /** session changes made elsewhere (expired, signed out in another tab, reset link) */
+  onChange(fn: (event: AuthEvent) => void): () => void;
   signOut(): Promise<void>;
 }
 
@@ -254,7 +277,8 @@ export interface SeasonsService {
 }
 
 export interface AccountService {
-  changeEmail(newEmail: string, password: string): Promise<Account>;
+  /** `confirm`: the change waits for the player to click the links sent by email */
+  changeEmail(newEmail: string, password: string): Promise<{ account: Account; confirm: boolean }>;
   changePassword(current: string, next: string): Promise<void>;
   deleteAccount(username: string): Promise<void>;
 }
@@ -292,8 +316,8 @@ export interface Api {
   matchmaking: MatchmakingService;
   shop: ShopService;
   seasons: SeasonsService;
-  /** true while the data comes from the in-browser mock */
-  mock: boolean;
+  /** which parts still run on the in-browser demo back-end */
+  demo: { accounts: boolean; social: boolean };
 }
 
 export class ApiError extends Error {

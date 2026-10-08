@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react';
-import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router';
-import { AuthPage } from '../features/auth/AuthPage';
+import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
+import { api } from '../api';
+import { t } from '../i18n';
+import { AuthPage, ResetPasswordPage } from '../features/auth/AuthPage';
 import { Onboarding } from '../features/onboarding/Onboarding';
 import { PlayHub } from '../features/play/PlayHub';
 import { ShopPage } from '../features/shop/ShopPage';
@@ -9,7 +11,7 @@ import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { LogoMark } from '../ui/art/art';
-import { ConfirmHost, Spinner, ToastProvider } from '../ui/kit';
+import { ConfirmHost, Spinner, ToastProvider, useToast } from '../ui/kit';
 import { AppLayout } from './AppLayout';
 import { NotificationsProvider } from './notifications';
 import { usePrefs } from './prefs';
@@ -56,6 +58,8 @@ function Routed() {
     <Suspense fallback={<Splash />}>
       <Routes>
         <Route path="/auth" element={<SignedOutOnly><AuthPage /></SignedOutOnly>} />
+        {/* reached from a password-reset email: the link itself signs the player in */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/onboarding" element={<Guard onboarding><Onboarding /></Guard>} />
         {/* invite links work for guests too */}
         <Route path="/join/:gameId" element={<JoinPage />} />
@@ -75,6 +79,25 @@ function Routed() {
   );
 }
 
+let landingHandled = false;
+
+/** Handles the way back from an auth email link or Apple/Google (once per page load). */
+function AuthReturn() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  useEffect(() => {
+    if (landingHandled) return;
+    landingHandled = true;
+    void api.auth.landing().then((landing) => {
+      if (!landing) return;
+      if (landing.kind === 'recovery') navigate('/reset-password', { replace: true });
+      else if (landing.kind === 'confirmed') toast(t('Your email is confirmed. Sign in to continue.'), { tone: 'success', duration: 8 });
+      else toast(landing.message, { tone: 'danger', duration: 8 });
+    });
+  }, [navigate, toast]);
+  return null;
+}
+
 /** Re-mounts the screens when the language changes, so every text is redrawn. */
 function LanguageRoot() {
   const { language } = usePrefs();
@@ -89,6 +112,7 @@ export function App() {
     <SessionProvider>
       <ToastProvider>
         <HashRouter>
+          <AuthReturn />
           <NotificationsProvider>
             <LanguageRoot />
           </NotificationsProvider>
