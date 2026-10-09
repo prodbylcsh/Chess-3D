@@ -507,20 +507,27 @@ uses real accounts right away. These settings live in the Supabase dashboard (pr
 
 1. **Authentication → URL Configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`;
    redirect URLs `https://prodbylcsh.github.io/Chess-3D/**` (and
-   `http://localhost:5173/**` for development).
+   `http://localhost:5173/**` for development). The GitHub Pages address is temporary;
+   production moves to its own domain (e.g. wizardchess.com). The app builds its return
+   links from the address it runs on, so the move needs no code change: set the new Site
+   URL, add the new domain to the redirect URLs (keep the old one during the switch) and
+   to Google's authorized domains.
 2. **Authentication → Sign In / Providers → Email:** enabled, "Confirm email" on,
    "Secure email change" on, minimum password length 8 with letters and digits required.
    Anonymous sign-ins stay on (guests in invite games).
 3. **Custom SMTP** (Authentication → Emails → SMTP), e.g. Resend: the built-in sender is
-   limited to a few emails per hour and is meant for testing only. Optionally brand the
-   email templates.
+   limited to a few emails per hour and is meant for testing only. Sending needs a domain
+   of our own (DNS records prove it), so the production domain is best bought before the
+   switch, even while the site still runs on GitHub Pages. Optionally brand the email
+   templates.
 4. **Google:** an OAuth client (Google Cloud Console → Credentials, type "Web application")
    with the authorized redirect URI
    `https://xpfihksbcvhihanoqzrk.supabase.co/auth/v1/callback`; paste the client ID and
    secret into the Google provider.
-5. **Apple:** needs an Apple Developer account. Create a Services ID with "Sign in with
-   Apple" and the same callback URL, plus a key; enter them in the Apple provider.
-   Until then the Apple button shows "Soon".
+5. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
+   game earns money; until then the Apple button shows "Soon". Then: a Services ID with
+   "Sign in with Apple" and the same callback URL, plus a key, entered in the Apple
+   provider. The generated secret expires every 6 months and must be renewed.
 
 Players' demo accounts (stored in their browsers) are not carried over.
 
@@ -554,6 +561,9 @@ Decided:
 - **Username changes**: once every 30 days. Reserved names (admin, support, guest, …) can't
   be taken.
 - **Email verification** is required before an email account can play.
+- **Sign in with Apple** waits until the game earns money (Apple Developer Program fee);
+  email and Google come first.
+- **Domain:** GitHub Pages is temporary; production gets its own domain.
 - **Languages**: English (default) and Czech.
 
 Open:
