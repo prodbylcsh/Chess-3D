@@ -63,6 +63,9 @@ changed later (the username once per 30 days).
   screen. Links work once and expire after an hour; an expired or reused link says so.
 - **Apple and Google:** the buttons send players to the provider and back. Until a provider
   is set up on the server, its button shows "Soon" and is disabled.
+- **Emails** (confirmation, reset, email change) come in the player's language: the app
+  stores the interface language on the account (`user_metadata.language`) at sign-up and
+  whenever it changes, and the templates (`supabase/templates/`) pick English or Czech.
 - **Email change** (Settings) waits for the confirmation links sent to the old and the new
   address; **password change** needs the current password; **deleting** the account needs
   the username typed exactly and removes the profile with it.
@@ -471,7 +474,16 @@ The 3D board fills the screen. Around it:
 | Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), matchmaking, results (MMR, coins), shop purchases, friend requests |
 | Realtime | live moves (✅ today), presence, matchmaking notifications, chat |
 | Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
-| Email | Supabase Auth emails through a custom SMTP provider (e.g. Resend) in production |
+| Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
+
+Wizard Chess has its own Supabase project, `wizard-chess` (ref `yhzgrorvjfvbqshneipc`,
+eu-west-1, free plan). Everything in it comes from the repository and is deployed by the
+workflow `.github/workflows/supabase.yml` on every change to `supabase/` on `main` (or when
+run by hand): the migrations, the Edge Functions, and the auth settings and email
+templates. `supabase/config.toml` is the source for both local development and the live
+project; `supabase/auth-config.ts` sends its auth part to the live project with the live
+URLs. A setting changed only in the dashboard is overwritten by the next deploy. Only
+secrets stay in the dashboard (8.4).
 
 ### 8.3 Data model (first draft)
 
@@ -501,42 +513,50 @@ records the reason (ledger, game result).
 
 ### 8.4 Turning on real accounts (before merging M4 to `main`)
 
-Merging deploys the `profiles` migration and the `account` function, and the live site then
-uses real accounts right away. These settings live in the Supabase dashboard (project
-`xpfihksbcvhihanoqzrk`) and have to be in place first:
+Merging to `main` deploys the site pointing at the `wizard-chess` project, and the live site
+then uses real accounts right away. The project itself is already set up from the branch
+(deploy workflow run by hand): tables, functions, auth settings and email templates. These
+are automatic, from `supabase/config.toml`:
 
-1. **Authentication → URL Configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`;
-   redirect URLs `https://prodbylcsh.github.io/Chess-3D/**` (and
-   `http://localhost:5173/**` for development). The GitHub Pages address is temporary;
-   production moves to its own domain (e.g. wizardchess.com). The app builds its return
-   links from the address it runs on, so the move needs no code change: set the new Site
-   URL, add the new domain to the redirect URLs (keep the old one during the switch) and
-   to Google's authorized domains.
-2. **Authentication → Sign In / Providers → Email:** enabled, "Confirm email" on,
-   "Secure email change" on, minimum password length 8 with letters and digits required.
-   Anonymous sign-ins stay on (guests in invite games).
-3. **Custom SMTP** (Authentication → Emails → SMTP), e.g. Resend: the built-in sender is
-   limited to a few emails per hour and is meant for testing only. Sending needs a domain
+- **URL configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`, redirect URL
+  `https://prodbylcsh.github.io/Chess-3D/**` (`SITE_URL` and `REDIRECT_URLS` in
+  `supabase/auth-config.ts`). The GitHub Pages address is temporary; production moves to
+  its own domain (e.g. wizardchess.com). The app builds its return links from the address
+  it runs on, so the move needs no app change: set the new address in `auth-config.ts`
+  (keep the old one in the redirect list during the switch) and add the domain to
+  Google's authorized domains.
+- **Email sign-in:** "Confirm email" on, "Secure email change" on, minimum password length
+  8 with letters and digits, links valid for 1 hour, anonymous sign-ins on (guests in
+  invite games).
+- **Email templates** for sign-up, password reset and email change, in English and Czech.
+
+These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`):
+
+1. **Custom SMTP** (Authentication → Emails → SMTP Settings), Resend: the built-in sender
+   is limited to a few emails per hour and meant for testing only. Sending needs a domain
    of our own (DNS records prove it), so the production domain is best bought before the
    switch, even while the site still runs on GitHub Pages. For now emails go out through
    Resend from the already verified `grow-hub.cz` (sender name "Wizard Chess"); switch the
-   sender once the game's own domain exists. Optionally brand the email templates.
-4. **Google:** in Google Cloud (Google Auth Platform), Branding: app name, support email,
+   sender once the game's own domain exists. Then raise the email rate limit
+   (Authentication → Rate Limits; it can only be changed with custom SMTP), e.g. to 100
+   per hour.
+2. **Google:** in Google Cloud (Google Auth Platform), Branding: app name, support email,
    home page `https://prodbylcsh.github.io/Chess-3D/`, no logo (a logo triggers brand
    verification), authorized domains `prodbylcsh.github.io` and
-   `xpfihksbcvhihanoqzrk.supabase.co` (not `github.io` / `supabase.co`: those are shared
+   `yhzgrorvjfvbqshneipc.supabase.co` (not `github.io` / `supabase.co`: those are shared
    hosting suffixes, so Google wants our own subdomain). Then an OAuth client (type "Web
    application") with the authorized redirect URI
-   `https://xpfihksbcvhihanoqzrk.supabase.co/auth/v1/callback`; paste the client ID and
-   secret into the Google provider, and publish the app (Audience → In production).
-   Privacy policy and terms pages are still to be written (needed for Google's
-   production listing sooner or later, and for GDPR).
-5. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
+   `https://yhzgrorvjfvbqshneipc.supabase.co/auth/v1/callback`; paste the client ID and
+   secret into the Google provider (Authentication → Sign In / Providers), and publish the
+   app (Audience → In production). Privacy policy and terms pages are still to be written
+   (needed for Google's production listing sooner or later, and for GDPR).
+3. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
    game earns money; until then the Apple button shows "Soon". Then: a Services ID with
    "Sign in with Apple" and the same callback URL, plus a key, entered in the Apple
    provider. The generated secret expires every 6 months and must be renewed.
 
-Players' demo accounts (stored in their browsers) are not carried over.
+Online invite games from before the move (in the old shared project) are not carried over,
+and neither are players' demo accounts (stored in their browsers).
 
 ## 9. Roadmap
 
@@ -547,7 +567,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
-| M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ in code, tested locally; live after the 8.4 settings |
+| M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ in code, tested locally; back-end set up in the `wizard-chess` project; the site switches over when merged, after the 8.4 settings (SMTP, Google) |
 | M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
 | M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
@@ -571,6 +591,9 @@ Decided:
 - **Sign in with Apple** waits until the game earns money (Apple Developer Program fee);
   email and Google come first.
 - **Domain:** GitHub Pages is temporary; production gets its own domain.
+- **Own Supabase project** (`wizard-chess`), separate from other apps; its auth settings
+  and email templates live in the repository (8.2).
+- **Auth emails** come in the player's interface language (English or Czech).
 - **Languages**: English (default) and Czech.
 
 Open:

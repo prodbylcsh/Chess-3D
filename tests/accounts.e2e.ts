@@ -43,21 +43,24 @@ async function account(client: SupabaseClient, body: Record<string, unknown>) {
   throw error;
 }
 
-/** The newest email to `to`, waiting for it to arrive. */
-async function mailTo(to: string, subject: RegExp): Promise<string> {
+/** The newest email to `to` with a matching subject, waiting for it to arrive. */
+async function mail(to: string, subject: RegExp): Promise<{ Subject: string; HTML: string; link: string }> {
   for (let i = 0; i < 50; i++) {
     const list = (await (await fetch(`${INBOX}/api/v1/messages`)).json()) as { messages: Array<{ ID: string; Subject: string; To: Array<{ Address: string }> }> };
     const hit = list.messages.find((m) => m.To.some((a) => a.Address === to) && subject.test(m.Subject));
     if (hit) {
-      const message = (await (await fetch(`${INBOX}/api/v1/message/${hit.ID}`)).json()) as { HTML: string; Text: string };
+      const message = (await (await fetch(`${INBOX}/api/v1/message/${hit.ID}`)).json()) as { Subject: string; HTML: string; Text: string };
       const link = /href="([^"]+\/auth\/v1\/verify[^"]+)"/.exec(message.HTML)?.[1] ?? /(https?:\/\/\S+\/auth\/v1\/verify\S+)/.exec(message.Text)?.[1];
       assert.ok(link, 'the email contains a verify link');
-      return link.replaceAll('&amp;', '&');
+      return { Subject: message.Subject, HTML: message.HTML, link: link.replaceAll('&amp;', '&') };
     }
     await new Promise((r) => setTimeout(r, 200));
   }
   throw new Error(`no email to ${to}`);
 }
+
+/** The link in the newest matching email. */
+const mailTo = async (to: string, subject: RegExp) => (await mail(to, subject)).link;
 
 /** Follow an emailed link like a browser would and return where it sends the player. */
 async function follow(link: string): Promise<URL> {
@@ -84,6 +87,32 @@ test('sign-up needs the emailed link; the link brings the player back signed in'
   const me = await account(client, { action: 'me' });
   assert.equal(me.profile.username, null);
   assert.equal(me.profile.onboarding_step, 0);
+});
+
+test('emails are written in the language the player uses', async () => {
+  const client = newClient();
+  const signUp = await client.auth.signUp({
+    email: email('jana'),
+    password: PASSWORD,
+    options: { emailRedirectTo: APP, data: { language: 'cs' } },
+  });
+  assert.ifError(signUp.error);
+  const confirm = await mail(email('jana'), /Potvrď/);
+  assert.equal(confirm.Subject, 'Potvrď svůj e-mail pro Wizard Chess');
+  assert.match(confirm.HTML, /lang="cs"/);
+  assert.match(confirm.HTML, /Potvrdit e-mail/);
+  assert.doesNotMatch(confirm.HTML, /Confirm email/);
+
+  await client.auth.resetPasswordForEmail(email('jana'), { redirectTo: APP });
+  const reset = await mail(email('jana'), /heslo/);
+  assert.equal(reset.Subject, 'Nové heslo pro Wizard Chess');
+  assert.match(reset.HTML, /Zvolit nové heslo/);
+
+  // no language (e.g. older accounts): English
+  await newClient().auth.signUp({ email: email('john'), password: PASSWORD, options: { emailRedirectTo: APP } });
+  const english = await mail(email('john'), /Confirm/);
+  assert.equal(english.Subject, 'Confirm your email for Wizard Chess');
+  assert.match(english.HTML, /lang="en"/);
 });
 
 test('onboarding: unique usernames (any case), known icons, finished only when complete', async () => {

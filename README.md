@@ -91,13 +91,16 @@ SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... npm run test:e2e   # online 
 
 ### Hosted backend
 
-1. Create a project at supabase.com, then turn on **Authentication → Sign In / Providers →
-   Allow anonymous sign-ins** (guests in invite games). For accounts, also follow
-   docs/PLATFORM.md §8.4 (URLs, email confirmation, SMTP, Apple and Google).
+1. Create a project at supabase.com (Wizard Chess uses `wizard-chess`, ref
+   `yhzgrorvjfvbqshneipc`).
 2. Add the repository secrets `SUPABASE_ACCESS_TOKEN` and `SUPABASE_DB_PASSWORD`, and the
    variable `SUPABASE_PROJECT_ID`. The workflow `.github/workflows/supabase.yml` then applies
-   migrations and deploys the functions whenever `supabase/` changes (or when run by hand).
+   migrations, deploys the functions and sets the auth settings and email templates from
+   `supabase/config.toml` (`supabase/auth-config.ts`, with the live URLs) whenever
+   `supabase/` changes on `main` (or when run by hand).
 3. Put the project URL and anon key in `.env.production` so the Pages build includes them.
+4. In the dashboard, set what holds secrets: SMTP, and the Google (later Apple) provider.
+   See docs/PLATFORM.md §8.4.
 
 ## Tech
 
@@ -145,8 +148,12 @@ src/
   game/       Piece, BoardView, Choreographer (move animations), Game (controller), GameUi contract
   audio/      procedural sound effects
 supabase/
-  migrations/         games table, row-level security, realtime
+  config.toml         local stack settings, and the source of the live auth settings
+  auth-config.ts      sends the auth settings and email templates to the live project
+  templates/          auth emails (sign-up, reset, email change) in English and Czech
+  migrations/         games and profiles tables, row-level security, realtime
   functions/game/     Edge Function that validates and applies every online action
+  functions/account/  Edge Function for profiles, usernames and account deletion
   functions/_shared/  pure rules shared by the app, the server and the tests:
                       game rules, MMR/ranks (rating.ts), coins (economy.ts)
 docs/PLATFORM.md      the platform concept and roadmap

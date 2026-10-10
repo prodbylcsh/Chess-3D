@@ -24,6 +24,17 @@ function decodeQP(text) {
   return Buffer.from(bytes).toString('utf8');
 }
 
+/** Decode RFC 2047 words in headers ("=?UTF-8?q?Potvr=C4=8F?="), as Mailpit does. */
+function decodeHeader(value) {
+  return value
+    .replace(/(\?=)\s+(=\?)/g, '$1$2') // whitespace between encoded words is not text
+    .replace(/=\?([^?]+)\?([QB])\?([^?]*)\?=/gi, (_, _charset, kind, text) =>
+      kind.toUpperCase() === 'B'
+        ? Buffer.from(text, 'base64').toString('utf8')
+        : decodeQP(text.replace(/_/g, ' ')),
+    );
+}
+
 function parse(raw, rcpt) {
   const split = raw.indexOf('\r\n\r\n');
   const head = raw.slice(0, split).replace(/\r\n[ \t]+/g, ' ');
@@ -34,7 +45,7 @@ function parse(raw, rcpt) {
   const html = decoded.match(/<html[\s\S]*<\/html>/i)?.[0] ?? (/<a\s/i.test(decoded) ? decoded : '');
   return {
     ID: String(nextId++),
-    Subject: header('Subject'),
+    Subject: decodeHeader(header('Subject')),
     To: rcpt.map((a) => ({ Address: a })),
     Created: new Date().toISOString(),
     Text: decoded.replace(/<[^>]+>/g, ''),

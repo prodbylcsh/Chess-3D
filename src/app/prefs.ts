@@ -36,14 +36,14 @@ export function setPrefs(patch: Partial<Prefs>): void {
   for (const fn of listeners) fn();
 }
 
+/** Calls `fn` after every change; returns the unsubscribe function. */
+export function subscribePrefs(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
 export function usePrefs(): Prefs {
-  return useSyncExternalStore(
-    (fn) => {
-      listeners.add(fn);
-      return () => listeners.delete(fn);
-    },
-    () => current,
-  );
+  return useSyncExternalStore(subscribePrefs, () => current);
 }
 
 /** Languages the interface is available in; more are added as translations arrive. */

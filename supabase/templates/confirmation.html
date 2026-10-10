@@ -1,0 +1,23 @@
+{{ if eq .Data.language "cs" }}<!doctype html>
+<html lang="cs">
+<body style="margin:0;padding:24px;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif;color:#1d1a24">
+  <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;border-top:4px solid #c9a24a">
+    <p style="margin:0 0 4px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#8a6d2b">Wizard Chess</p>
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:normal">Potvrď svůj e-mail</h1>
+    <p style="margin:0 0 24px;font-size:16px;line-height:1.5">Vítej ve Wizard Chess! Potvrď svou e-mailovou adresu a tvůj účet bude hotový.</p>
+    <p style="margin:0 0 24px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#c9a24a;color:#1d1a24;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;padding:12px 24px;border-radius:8px">Potvrdit e-mail</a></p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:#6b6575">Odkaz funguje jen jednou a platí 1 hodinu. Pokud ses neregistroval(a), tento e-mail ignoruj.</p>
+  </div>
+</body>
+</html>{{ else }}<!doctype html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#f4f1ea;font-family:Georgia,'Times New Roman',serif;color:#1d1a24">
+  <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;border-top:4px solid #c9a24a">
+    <p style="margin:0 0 4px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#8a6d2b">Wizard Chess</p>
+    <h1 style="margin:0 0 16px;font-size:24px;font-weight:normal">Confirm your email</h1>
+    <p style="margin:0 0 24px;font-size:16px;line-height:1.5">Welcome to Wizard Chess! Confirm your email address and your account is ready.</p>
+    <p style="margin:0 0 24px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#c9a24a;color:#1d1a24;text-decoration:none;font-family:Arial,sans-serif;font-weight:bold;padding:12px 24px;border-radius:8px">Confirm email</a></p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:#6b6575">The link works once and expires in 1 hour. If you didn't sign up, ignore this email.</p>
+  </div>
+</body>
+</html>{{ end }}

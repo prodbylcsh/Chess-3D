@@ -5,11 +5,13 @@ description: Run the Wizard Chess Supabase back-end (Postgres, auth with emails,
 
 # Local Supabase
 
-The live project is `xpfihksbcvhihanoqzrk`. It deploys from `main` through
-`.github/workflows/supabase.yml` (migrations and the `game` and `account` functions).
-**Never deploy or touch the live project from a session.** Test locally instead.
-Dashboard-only settings for the live project (URLs, SMTP, Apple and Google) are listed in
-`docs/PLATFORM.md` §8.4: tell the user, don't attempt them.
+The live project is `wizard-chess` (`yhzgrorvjfvbqshneipc`). It deploys from `main`
+through `.github/workflows/supabase.yml`: migrations, the `game` and `account` functions,
+and the auth settings and email templates from `supabase/config.toml`
+(`supabase/auth-config.ts` adds the live URLs). **Never deploy or touch the live project
+from a session** unless the user asks; test locally instead. Settings that hold secrets
+(SMTP, Google and Apple) stay in the dashboard and are listed in `docs/PLATFORM.md` §8.4:
+tell the user, don't attempt them.
 
 ## Start everything
 
@@ -39,6 +41,12 @@ Logs: `/tmp/supabase-local/*.log`. After a container restart, run the script aga
 
 ## Auth emails
 
+The templates are `supabase/templates/*.html` (English and Czech, picked by
+`user_metadata.language`; subjects in `config.toml`). The live project gets the same
+ones on deploy, so change them here and check them locally. **Changes to `config.toml`
+need a restart** (`npx supabase stop </dev/null`, then `start.sh`): the containers keep the
+settings they were created with.
+
 `supabase/config.toml` has email confirmation on, like production. The auth server sends
 every email to `supabase_inbucket_chess-3d:1025`. Mailpit's image comes from Docker Hub,
 which rate-limits these containers (429), and the other registries' CDNs are blocked by
@@ -51,7 +59,7 @@ curl -s http://127.0.0.1:54324/api/v1/message/latest    # one message: Subject, 
 curl -s -X DELETE http://127.0.0.1:54324/api/v1/messages
 ```
 
-Links in the emails point at `…/auth/v1/verify?…`. Following one (`fetch(link, {redirect:
+The sink decodes encoded subjects (`=?UTF-8?q?…?=`) as Mailpit does. Links in the emails point at `…/auth/v1/verify?…`. Following one (`fetch(link, {redirect:
 'manual'})`) gives the URL the player lands on: the app with `?code=…` (PKCE), plus our
 `&flow=recovery` on reset links, or `?error_code=otp_expired…` for a used or expired link.
 

@@ -28,7 +28,9 @@ React 19 + Vite + TypeScript UI (`src/app`, `src/features/*`, `src/ui`), Three.j
 typed service contracts (`src/api/types.ts`). Accounts and the own profile run on Supabase
 (`src/api/supabase`, `account` Edge Function); everything else still runs on an in-browser
 mock (`src/api/mock`, localStorage) keyed to the signed-in user. Online invite games are on
-Supabase too (`src/net`, `game` Edge Function). One Supabase client: `src/net/supabase.ts`.
+Supabase too (`src/net`, `game` Edge Function). Wizard Chess has its own Supabase project
+(`wizard-chess`); its auth settings and email templates come from `supabase/config.toml`
+on deploy (`supabase/auth-config.ts`). One Supabase client: `src/net/supabase.ts`.
 Rules shared by app and server: `supabase/functions/_shared/*.ts`, imported as
 `#shared/...` (explicit `.ts` extensions; Node runs them in tests).
 

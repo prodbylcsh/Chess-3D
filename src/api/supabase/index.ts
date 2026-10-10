@@ -7,6 +7,7 @@
 // that store's session (`adoptAccount`).
 import { FunctionsHttpError, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { ProfileRow } from '#shared/accounts.ts';
+import { getPrefs, subscribePrefs } from '../../app/prefs';
 import { t } from '../../i18n';
 import { appUrl, authReturn, cleanAuthReturn } from '../../net/supabase';
 import { shortDate } from '../../ui/format';
@@ -135,6 +136,16 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     if (error) throw error.code === 'invalid_credentials' ? new ApiError('bad_password', message) : authError(error);
   }
 
+  /** Auth emails are written in the player's language (the templates read
+   *  user_metadata.language), so keep it in step with the interface language. */
+  async function syncLanguage(): Promise<void> {
+    const { data } = await client.auth.getSession();
+    const u = data.session?.user;
+    const { language } = getPrefs();
+    if (u && !u.is_anonymous && u.user_metadata?.language !== language) await client.auth.updateUser({ data: { language } });
+  }
+  subscribePrefs(() => void syncLanguage().catch(() => {}));
+
   let providers: Promise<Record<Social, boolean>> | null = null;
   let landing: Promise<AuthLanding | null> | null = null;
 
@@ -143,13 +154,19 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
       await auth.landing(); // a returning email link or provider signs the player in first
       const { data } = await client.auth.getSession();
       const u = data.session?.user;
-      return u && !u.is_anonymous ? toAccount(u) : null;
+      if (!u || u.is_anonymous) return null;
+      void syncLanguage().catch(() => {});
+      return toAccount(u);
     },
 
     async signUp(email, password) {
       const problem = emailProblem(email) ?? passwordProblem(password);
       if (problem) throw new ApiError('invalid', problem);
-      const { data, error } = await client.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: appUrl() } });
+      const { data, error } = await client.auth.signUp({
+        email: email.trim(),
+        password,
+        options: { emailRedirectTo: appUrl(), data: { language: getPrefs().language } },
+      });
       if (error) throw authError(error);
       // with confirmations on, an existing address also lands here (no hint for attackers)
       return data.session && data.user ? { account: toAccount(data.user) } : { confirmEmail: email.trim() };
@@ -278,7 +295,10 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
       if (problem) throw new ApiError('invalid', problem);
       if (newEmail.trim().toLowerCase() === acc.email.toLowerCase()) throw new ApiError('same_email', t('That is already your email.'));
       await verifyPassword(acc.email, password, t('Your password is not correct.'));
-      const { data, error } = await client.auth.updateUser({ email: newEmail.trim() }, { emailRedirectTo: appUrl() });
+      const { data, error } = await client.auth.updateUser(
+        { email: newEmail.trim(), data: { language: getPrefs().language } },
+        { emailRedirectTo: appUrl() },
+      );
       if (error) throw error.code === 'email_exists' ? new ApiError('email_taken', t('That email is already used by another account.')) : authError(error);
       return { account: toAccount(data.user), confirm: true };
     },

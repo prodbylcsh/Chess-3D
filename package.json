@@ -12,7 +12,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/rules.test.ts tests/rating.test.ts tests/seasons.test.ts tests/shop.test.ts tests/accounts.test.ts tests/i18n.test.ts tests/ai.test.ts",
+    "test": "node --test tests/rules.test.ts tests/rating.test.ts tests/seasons.test.ts tests/shop.test.ts tests/accounts.test.ts tests/auth-config.test.ts tests/i18n.test.ts tests/ai.test.ts",
     "test:e2e": "node --test --test-concurrency=1 tests/online.e2e.ts tests/accounts.e2e.ts"
   },
   "dependencies": {

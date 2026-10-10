@@ -52,8 +52,10 @@ Accounts were the first module on Supabase. Follow the same pattern for the next
   from the server instead; keep `npm run dev:mock` working.
 - **Tests:** an e2e file against the local stack (local-supabase skill) covering the happy
   path, every rule the server enforces, and that clients can't write tables directly.
-- **Live settings** that only exist in the Supabase dashboard go into the docs checklist
-  (`docs/PLATFORM.md` §8.4) and the final report to the user: the user does them.
+- **Auth settings** (URLs, email rules, templates) go into `supabase/config.toml`; the
+  deploy applies them to the live project (`supabase/auth-config.ts`). Settings that hold
+  secrets (SMTP, OAuth providers) go into the docs checklist (`docs/PLATFORM.md` §8.4)
+  and the final report to the user: the user does them.
 
 ## 2. UI
 
