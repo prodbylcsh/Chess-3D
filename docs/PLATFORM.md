@@ -135,6 +135,8 @@ Clocks are kept by the server (milestone 5); the client only displays them.
 **Matchmaking (ranked):** start with a ±100 MMR window and widen it by 50 every 5 seconds
 of waiting, up to ±400. Casual uses one queue with no rating window (it still prefers
 close ratings when several players are waiting). Leaving a running game counts as a loss.
+When nobody fits, the search keeps going: it shows how many players are online and
+offers a game against the AI while waiting (which pays nothing, as decided).
 
 ### 4.2 Puzzles ⏸
 
@@ -577,8 +579,8 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
 | M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
-| M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
-| M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |
+| M5 Back-end: social | Friends and requests, real chat between players, challenges from chat (built before the competitive back-end: with few players, friends bring each other in) | 🔜 next |
+| M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | 🔜 |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
 
 ## 10. Decisions and open questions
@@ -615,6 +617,12 @@ Decided:
   without a registered player after 6 months without activity (Privacy Policy §6).
 - **En passant** shows the move dot on the landing square and the capture ring on the
   pawn being taken; clicking either plays it.
+- **Order of the back-end milestones:** social (friends, chat) before competitive
+  (matchmaking, server MMR and coins), October 2026.
+- **Accuracy on the server:** until an engine server exists (Stockfish needs more CPU than
+  Edge Functions give; about $5/month), every server-side game counts as neutral 70%
+  accuracy, so only the result, rating gap and streak change MMR and coins. Switching it
+  on later needs no rule change.
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.

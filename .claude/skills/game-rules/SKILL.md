@@ -32,7 +32,8 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   half the performance; the streak is unchanged.
 - **Difference:** 10% of the gap, in the direction that rewards upsets; upset bonus at
   most 30, expected-result reduction at most 15.
-- **Performance:** ±20% of the baseline from accuracy; 70% accuracy is neutral.
+- **Performance:** ±20% of the baseline from accuracy; 70% accuracy is neutral. Until an
+  engine server exists, server-side games count as 70% (neutral) for everyone.
 - **Streak (ranked):** 3rd win +10% of the baseline, +2% per further win, capped at +30%. A
   loss resets it; a draw keeps it.
 - **Ranks:** Iron → Challenger; tiers below Master have divisions IV–I of 100 MMR
