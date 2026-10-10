@@ -518,12 +518,19 @@ uses real accounts right away. These settings live in the Supabase dashboard (pr
 3. **Custom SMTP** (Authentication → Emails → SMTP), e.g. Resend: the built-in sender is
    limited to a few emails per hour and is meant for testing only. Sending needs a domain
    of our own (DNS records prove it), so the production domain is best bought before the
-   switch, even while the site still runs on GitHub Pages. Optionally brand the email
-   templates.
-4. **Google:** an OAuth client (Google Cloud Console → Credentials, type "Web application")
-   with the authorized redirect URI
+   switch, even while the site still runs on GitHub Pages. For now emails go out through
+   Resend from the already verified `grow-hub.cz` (sender name "Wizard Chess"); switch the
+   sender once the game's own domain exists. Optionally brand the email templates.
+4. **Google:** in Google Cloud (Google Auth Platform), Branding: app name, support email,
+   home page `https://prodbylcsh.github.io/Chess-3D/`, no logo (a logo triggers brand
+   verification), authorized domains `prodbylcsh.github.io` and
+   `xpfihksbcvhihanoqzrk.supabase.co` (not `github.io` / `supabase.co`: those are shared
+   hosting suffixes, so Google wants our own subdomain). Then an OAuth client (type "Web
+   application") with the authorized redirect URI
    `https://xpfihksbcvhihanoqzrk.supabase.co/auth/v1/callback`; paste the client ID and
-   secret into the Google provider.
+   secret into the Google provider, and publish the app (Audience → In production).
+   Privacy policy and terms pages are still to be written (needed for Google's
+   production listing sooner or later, and for GDPR).
 5. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
    game earns money; until then the Apple button shows "Soon". Then: a Services ID with
    "Sign in with Apple" and the same callback URL, plus a key, entered in the Apple
