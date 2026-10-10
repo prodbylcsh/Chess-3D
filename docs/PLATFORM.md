@@ -514,9 +514,9 @@ records the reason (ledger, game result).
 ### 8.4 Turning on real accounts (before merging M4 to `main`)
 
 Merging to `main` deploys the site pointing at the `wizard-chess` project, and the live site
-then uses real accounts right away. The project itself is already set up from the branch
-(deploy workflow run by hand): tables, functions, auth settings and email templates. These
-are automatic, from `supabase/config.toml`:
+then uses real accounts right away. The project itself is set up before that, by running
+the deploy workflow by hand on the development branch: tables, functions, auth settings
+and email templates. These are automatic, from `supabase/config.toml`:
 
 - **URL configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`, redirect URL
   `https://prodbylcsh.github.io/Chess-3D/**` (`SITE_URL` and `REDIRECT_URLS` in
@@ -529,6 +529,10 @@ are automatic, from `supabase/config.toml`:
   8 with letters and digits, links valid for 1 hour, anonymous sign-ins on (guests in
   invite games).
 - **Email templates** for sign-up, password reset and email change, in English and Czech.
+
+The workflow's `SUPABASE_ACCESS_TOKEN` must reach this project: a scoped token made for
+another project fails at `supabase link` ("does not have the necessary privileges"). Use
+a token scoped to `wizard-chess` with read-write project permissions.
 
 These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`):
 
