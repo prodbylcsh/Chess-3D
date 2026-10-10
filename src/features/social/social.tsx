@@ -162,6 +162,16 @@ export function ChallengeButton({ player, compact }: { player: PublicProfile; co
   );
 }
 
+/** Messages and challenges go between friends only: show `children` once you are friends. */
+export function FriendsOnly({ playerId, children }: { playerId: string; children: ReactNode }) {
+  const { version } = useBadges();
+  const [friend, setFriend] = useState(false);
+  useEffect(() => {
+    void api.friends.relation(playerId).then((r) => setFriend(r === 'friend'));
+  }, [playerId, version]);
+  return friend ? <>{children}</> : null;
+}
+
 export function OnlineBadge({ online: on }: { online: boolean }) {
   return on ? <Badge tone="success">{t('Online')}</Badge> : <Badge>{t('Offline')}</Badge>;
 }

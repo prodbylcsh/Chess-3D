@@ -79,6 +79,8 @@ function Friends() {
     setBusy(f.profile.id);
     try {
       const id = await createOnlineGame(profile.username ?? 'Player', 'random');
+      const conversation = await api.messages.open(f.profile.id);
+      await api.messages.send(conversation.id, t("Let's play! ♟️"), { gameId: id });
       toast(
         <>
           {t('Invite sent to {name}.', { name: f.profile.username })}

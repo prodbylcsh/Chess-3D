@@ -1,12 +1,12 @@
 ---
 name: local-supabase
-description: Run the Wizard Chess Supabase back-end (Postgres, auth with emails, realtime, the `game` and `account` Edge Functions) locally inside a Claude Code cloud container, read auth emails, and run the end-to-end tests. Use when changing supabase/ (migrations, functions, _shared rules used by the server), src/net/, src/api/supabase/, online game modes or anything about accounts, or when you need real accounts or online games in the browser.
+description: Run the Wizard Chess Supabase back-end (Postgres, auth with emails, realtime, the `game`, `account` and `social` Edge Functions) locally inside a Claude Code cloud container, read auth emails, and run the end-to-end tests. Use when changing supabase/ (migrations, functions, _shared rules used by the server), src/net/, src/api/supabase/, online game modes or anything about accounts, friends or chat, or when you need real accounts or online games in the browser.
 ---
 
 # Local Supabase
 
 The live project is `wizard-chess` (`yhzgrorvjfvbqshneipc`). It deploys from `main`
-through `.github/workflows/supabase.yml`: migrations, the `game` and `account` functions,
+through `.github/workflows/supabase.yml`: migrations, the `game`, `account` and `social` functions,
 and the auth settings and email templates from `supabase/config.toml`
 (`supabase/auth-config.ts` adds the live URLs). **Never deploy or touch the live project
 from a session** unless the user asks; test locally instead. Settings that hold secrets
@@ -67,12 +67,16 @@ The sink decodes encoded subjects (`=?UTF-8?q?…?=`) as Mailpit does. Links in 
 
 ```bash
 SUPABASE_ANON_KEY=<key> SUPABASE_SERVICE_ROLE_KEY=<key> npm run test:e2e
-# tests/online.e2e.ts (two players over the network) and tests/accounts.e2e.ts
-# (sign-up with the emailed link, onboarding rules, permissions, reset, deletion)
+# tests/online.e2e.ts (two players over the network), tests/social.e2e.ts (friends, chat,
+# realtime, showcase, permissions) and tests/accounts.e2e.ts (sign-up with the emailed
+# link, onboarding rules, permissions, reset, deletion, retention)
 ```
 
 The last accounts test runs the retention job (`cleanup_inactive`) with a zero cutoff, so
 afterwards the local database has no guests and no guest-only games.
+
+Test files that open realtime connections must close them at the end
+(`client.realtime.disconnect()` in `after`), or the test process never exits.
 
 Right after a fresh start, the first online test can time out while realtime and the
 functions warm up ("two players play a game to checkmate…"). Run it again before

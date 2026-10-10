@@ -13,7 +13,7 @@ import { useSession } from '../../app/session';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, Card, Coins, EmptyState, ProgressBar, Segmented, Spinner, cx } from '../../ui/kit';
 import { memberSince, timeAgo, winRate } from '../../ui/format';
-import { ChallengeButton, FriendButton, MessageButton } from '../social/social';
+import { ChallengeButton, FriendButton, FriendsOnly, MessageButton } from '../social/social';
 import './profile.css';
 
 const AWARD_ICON: Record<AwardIcon, LucideIcon> = { trophy: Trophy, flame: Flame, crown: Crown, target: Target, zap: Zap, swords: Swords, gem: Gem };
@@ -104,8 +104,10 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
             ) : (
               <>
                 <FriendButton playerId={player.id} compact />
-                <MessageButton player={player} compact />
-                <ChallengeButton player={player} compact />
+                <FriendsOnly playerId={player.id}>
+                  <MessageButton player={player} compact />
+                  <ChallengeButton player={player} compact />
+                </FriendsOnly>
               </>
             )}
           </div>

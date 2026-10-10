@@ -3,6 +3,7 @@
 // POST { action: 'me' }                          → { profile }   (created on first call)
 // POST { action: 'check_username', username }    → { status: 'available' | 'taken' | 'invalid' }
 // POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded? }
+// POST { action: 'showcase', showcase }          → { ok: true }    rank, stats, loadout others see
 // POST { action: 'delete', username }            → { deleted: true }
 //
 // Errors: { error, code, detail? } with an HTTP error status. Only registered
@@ -10,6 +11,7 @@
 // live in ../_shared/accounts.ts (shared with the app's form checks).
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError, profileUpdate, usernameProblem, type ProfilePatch, type ProfileRow } from '../_shared/accounts.ts';
+import { parseShowcase } from '../_shared/social.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -68,6 +70,15 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       if (error?.code === UNIQUE_VIOLATION) throw new AccountError('taken', 'That username is taken.', 409);
       if (error) throw error;
       return { profile: data as ProfileRow };
+    }
+
+    case 'showcase': {
+      const showcase = parseShowcase(body.showcase);
+      if (!showcase) throw new AccountError('bad_request', 'Invalid showcase.');
+      await me(user);
+      const { error } = await admin.from('profiles').update({ showcase }).eq('id', user.id);
+      if (error) throw error;
+      return { ok: true };
     }
 
     case 'delete': {

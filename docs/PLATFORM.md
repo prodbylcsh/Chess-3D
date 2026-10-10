@@ -75,9 +75,12 @@ changed later (the username once per 30 days).
 - **Guests** (invite links) play under an anonymous session and have no profile. Their
   result card invites them to create a free account. Registered players use their account
   for online games.
-- Until their milestones, **coins, rank, stats, items, friends, messages and matchmaking
-  stay in the browser** (keyed to the real account): signing in on another device starts
-  them fresh there.
+- Until their milestones, **coins, rank, stats, items, game history and matchmaking stay
+  in the browser** (keyed to the real account): signing in on another device starts them
+  fresh there. Friends and messages are on the server (M5). Other players see a player's
+  rank, stats and items through the **showcase**, a snapshot each player's app sends
+  (`profiles.showcase`, checked by `_shared/social.ts`), until the competitive back-end
+  computes them on the server.
 
 ## 3. Layout and navigation
 
@@ -154,6 +157,13 @@ Search players by username, send/accept/decline friend requests, view any profil
 Everything on a profile is public (see 4.6). Friends can be messaged or challenged
 directly; a challenge creates an online game and posts it as a card in the chat. A side
 panel suggests players near your rank. Pending requests show as a badge on Community.
+
+On the server (M5): requests, accepting (a request back accepts too), declining,
+cancelling and removing go through the `social` function; up to 500 friends and 50
+requests waiting. Suggestions are the newest players you don't know yet (online first)
+until ranks are on the server. Who is online comes from realtime presence. New requests
+and accepted requests arrive as toasts and the Community badge. Message and Challenge
+buttons show only for friends.
 
 ### 4.5 Shop
 
@@ -237,6 +247,12 @@ a game with 90%+ accuracy, checkmate in under 20 moves.
 
 One-to-one chats with friends: conversation list, unread badges, game invites inside
 the chat.
+
+On the server (M5): only friends can start a conversation or write; after unfriending,
+the history stays readable. Messages up to 1,000 characters, at most 20 a minute.
+Conversations and messages are visible only to the two players (row-level security) and
+are deleted with either account. New messages arrive through realtime (toast and badge).
+"Play a friend" and Challenge send the invite as a chat card.
 
 ### 4.8 Settings
 
@@ -473,8 +489,8 @@ The 3D board fills the screen. Around it:
 | --- | --- |
 | Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
-| Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), matchmaking, results (MMR, coins), shop purchases, friend requests |
-| Realtime | live moves (✅ today), presence, matchmaking notifications, chat |
+| Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), friends and chat (✅ M5: `social`), matchmaking, results (MMR, coins), shop purchases |
+| Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications |
 | Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
 
@@ -492,22 +508,24 @@ game behind.
 
 ### 8.3 Data model (first draft)
 
-`games` (online play) and `profiles` exist. `profiles` today (M4): id (= auth user),
-username (unique, case-insensitive), icon_id, onboarding_step, onboarded_at,
-username_changed_at, created_at; written only by the `account` Edge Function. The rest
-is the plan:
+`games` (online play), `profiles`, `friendships`, `conversations` and `messages` exist.
+`profiles` (M4): id (= auth user), username (unique, case-insensitive), icon_id,
+onboarding_step, onboarded_at, username_changed_at, created_at, showcase (M5); written
+only by the `account` Edge Function. Social (M5): `friendships` (id, user_a < user_b,
+status, requested_by, created_at, accepted_at), `conversations` (id, user_a < user_b,
+a_read_at, b_read_at, last_message_at), `messages` (id, conversation_id, sender_id, body,
+kind text|invite, game_id, created_at), and the view `conversation_list` (last message and
+unread count for the caller); written only by the `social` Edge Function. The rest is the
+plan:
 
 ```
-profiles        + mmr, win_streak, coins, wins, losses, draws   (M5)
+profiles        + mmr, win_streak, coins, wins, losses, draws   (competitive)
 games           (exists) + kind (ranked|casual|wager|friend|ai), stake, white/black mmr before
 game_results    game_id, player_id, outcome, accuracy, mmr_delta + breakdown, coins_delta
 coin_ledger     id, player_id, amount, reason (game|purchase|wager|grant), ref_id, created_at
 items           id, category, name, price, asset refs, active
 inventory       player_id, item_id, acquired_at
 loadout         player_id, category, item_id (equipped)
-friendships     user_a, user_b, status (pending|accepted), requested_by, created_at
-messages        id, conversation_id, sender_id, body, created_at, read_at
-conversations   id, user_a, user_b, last_message_at
 mm_queue        player_id, kind, mmr, stake, joined_at  (matchmaking)
 awards          id, name, rule;  player_awards  player_id, award_id, earned_at
 puzzle_progress player_id, level, stars, completed_at   (later)
@@ -579,7 +597,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
 | M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
-| M5 Back-end: social | Friends and requests, real chat between players, challenges from chat (built before the competitive back-end: with few players, friends bring each other in) | 🔜 next |
+| M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ in code, tested locally; live when merged |
 | M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | 🔜 |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
 

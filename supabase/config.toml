@@ -431,3 +431,6 @@ verify_jwt = false
 
 [functions.account]
 verify_jwt = false
+
+[functions.social]
+verify_jwt = false

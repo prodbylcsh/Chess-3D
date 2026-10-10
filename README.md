@@ -39,11 +39,12 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   captures, move list, actions, promotion picker, invite card, and a result screen with the
   MMR change and its breakdown, rank progress, coins and accuracy.
 
-Friends, messages, matchmaking, results, coins and the shop currently run on an **in-browser mock
-back-end** (`src/api/mock`, data in localStorage) that applies the real MMR and coin rules.
-Demo players accept friend requests and answer chats on their own; matchmade opponents are
-played by the AI and marked "Demo". Invite-link games are fully online already
-(Supabase). See the roadmap in docs/PLATFORM.md for the back-end milestones.
+Accounts, friends, chat and invite-link games run on **Supabase**. Matchmaking, results,
+coins and the shop still run on an **in-browser mock back-end** (`src/api/mock`, data in
+localStorage) that applies the real MMR and coin rules; matchmade opponents are played by
+the AI and marked "Demo". With `npm run dev:mock` everything runs in the browser, and demo
+players accept friend requests and answer chats on their own. See the roadmap in
+docs/PLATFORM.md for the back-end milestones.
 
 ## Controls
 
@@ -81,7 +82,7 @@ The "Play online" button only appears when the build has `VITE_SUPABASE_URL` and
 
 ```bash
 npx supabase start                # needs Docker; auth emails land in Mailpit (port 54324)
-npx supabase functions serve      # in a second terminal (functions `game` and `account`)
+npx supabase functions serve      # in a second terminal (functions `game`, `account` and `social`)
 cp .env.example .env.local        # fill in the API URL and anon key from `npx supabase status`
 npm run dev                       # real accounts against the local stack
 npm run dev:mock                  # or: accounts in the browser, no Supabase needed

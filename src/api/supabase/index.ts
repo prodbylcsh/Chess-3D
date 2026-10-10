@@ -21,11 +21,14 @@ import {
   type Api,
   type AuthLanding,
   type AuthProviderId,
+  type ApiEvent,
   type AuthService,
+  type EventsService,
   type Profile,
   type ProfileService,
 } from '../types';
 import { emailProblem, passwordProblem, usernameProblem } from '../validation';
+import { createSocial, showcaseOf } from './social';
 
 type Social = Exclude<AuthProviderId, 'email'>;
 const PROVIDER_NAMES: Record<Social, string> = { apple: 'Apple', google: 'Google' };
@@ -127,7 +130,9 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
 
   /** Copy the server's profile into the local store and return the full profile. */
   async function adopt(row: ProfileRow): Promise<Profile> {
-    return structuredClone(adoptAccount(toAccount(await user()), identity(row)));
+    const profile = structuredClone(adoptAccount(toAccount(await user()), identity(row)));
+    void syncShowcase();
+    return profile;
   }
 
   /** Check a password by signing in with it again (Supabase has no separate check). */
@@ -323,5 +328,51 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     },
   };
 
-  return { ...local, demo: { accounts: false, social: true }, auth, profiles, account };
+  // ---------------------------------------------------------------- social (friends, chat)
+
+  const listeners = new Set<(event: ApiEvent) => void>();
+  const emit = (event: ApiEvent) => listeners.forEach((fn) => fn(event));
+  const events: EventsService = {
+    subscribe(fn) {
+      listeners.add(fn);
+      const unsubscribeLocal = local.events.subscribe(fn);
+      return () => {
+        listeners.delete(fn);
+        unsubscribeLocal();
+      };
+    },
+  };
+  const social = createSocial(client, { profiles: local.profiles, me: () => db.sessionId }, emit);
+
+  client.auth.onAuthStateChange((event, session) => {
+    const u = session?.user;
+    if (u && !u.is_anonymous) social.start(u.id);
+    else if (event === 'SIGNED_OUT' || !u) social.stop();
+  });
+
+  // Other players see this player's rank, stats and look (kept on this device until the
+  // competitive back-end) through the showcase: send it whenever it changes.
+  let sentShowcase = '';
+  async function syncShowcase(): Promise<void> {
+    const me = db.sessionId ? db.profiles[db.sessionId] : null;
+    if (!me?.onboarded) return;
+    const showcase = JSON.stringify(showcaseOf(me));
+    if (showcase === sentShowcase) return;
+    sentShowcase = showcase;
+    await call('showcase', { showcase: JSON.parse(showcase) }).catch(() => (sentShowcase = ''));
+  }
+  local.events.subscribe((e) => {
+    if (e.type === 'profile') void syncShowcase();
+  });
+
+  return {
+    ...local,
+    demo: { accounts: false, social: false },
+    auth,
+    profiles: { ...profiles, ...social.lookups },
+    friends: social.friends,
+    messages: social.messages,
+    events,
+    account,
+  };
 }
