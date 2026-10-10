@@ -54,6 +54,15 @@ test('guests have no profile, can read profiles and cannot write them', async ()
   await client.auth.signOut({ scope: 'local' });
 });
 
+/** Resolves like `promise`, or fails after `ms` naming what did not happen. */
+function within<T>(promise: Promise<T>, ms: number, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${what} did not happen within ${ms / 1000} s`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 test('two guests play an online game, with realtime', async () => {
   const host = new Online(URL, KEY, { storageKey: 'smoke-host' });
   const guest = new Online(URL, KEY, { storageKey: 'smoke-guest' });
@@ -62,17 +71,28 @@ test('two guests play an online game, with realtime', async () => {
 
   const game = await host.create('Smoke host', 'w');
   assert.equal(game.status, 'waiting');
-  const joinedSeen = new Promise<GameRow>((resolve, reject) => {
-    const timer = setTimeout(() => (stop(), reject(new Error('no realtime update within 10 s'))), 10_000);
-    const stop = host.watch(game.id, {
-      onRow: (row) => {
-        if (row.status === 'active') (clearTimeout(timer), stop(), resolve(row));
-      },
-    });
+
+  // The first row arrives once the subscription is live (the watcher catches up on
+  // connect). A project's very first realtime connection can take a while: realtime
+  // sets itself up for the project then.
+  let connected!: () => void;
+  let joined!: (row: GameRow) => void;
+  const live = new Promise<void>((resolve) => (connected = resolve));
+  const active = new Promise<GameRow>((resolve) => (joined = resolve));
+  const stop = host.watch(game.id, {
+    onRow: (row) => {
+      connected();
+      if (row.status === 'active') joined(row);
+    },
   });
-  await new Promise((r) => setTimeout(r, 1000)); // let the subscription settle
-  await guest.join(game.id, 'Smoke guest');
-  assert.equal((await joinedSeen).black_id, guest.userId, 'the host hears about the join');
+  try {
+    await within(live, 30_000, 'the realtime subscription');
+    await guest.join(game.id, 'Smoke guest');
+    const seen = await within(active, 10_000, 'the realtime update for the join');
+    assert.equal(seen.black_id, guest.userId, 'the host hears about the join');
+  } finally {
+    stop();
+  }
 
   await host.move(game.id, { from: 'e2', to: 'e4' });
   const over = await guest.resign(game.id);
