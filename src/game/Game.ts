@@ -17,6 +17,11 @@ function castlingRook(m: Move): Square | null {
   return null;
 }
 
+/** The pawn an en passant capture takes (it stands beside the mover, not on the target). */
+function enPassantVictim(m: Move): Square | null {
+  return m.isEnPassant() ? (`${m.to[0]}${m.from[1]}` as Square) : null;
+}
+
 const CHECK_RED =new THREE.Color(1.0, 0.12, 0.05);
 
 /** This browser's place in an online game. */
@@ -173,7 +178,8 @@ export class Game {
 
     if (this.selected) {
       // Castling: click the king's target square, or simply the rook to castle with.
-      const candidates = this.targets.filter((m) => m.to === sq || castlingRook(m) === sq);
+      // En passant: click the target square, or the pawn being taken.
+      const candidates = this.targets.filter((m) => m.to === sq || castlingRook(m) === sq || enPassantVictim(m) === sq);
       if (candidates.length) {
         this.setBusy(true);
         void this.run(() => this.commit(candidates));

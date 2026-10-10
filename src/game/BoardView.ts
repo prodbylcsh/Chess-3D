@@ -183,7 +183,16 @@ export class BoardView {
     for (const m of moves) {
       if (seen.has(m.to)) continue; // promotions list the same square four times
       seen.add(m.to);
-      const marker = this.addMarker(m.isCapture() || m.isEnPassant() ? MarkerKind.Capture : MarkerKind.Move);
+      if (m.isEnPassant()) {
+        // the pawn lands on an empty square and takes the pawn beside it: show both
+        const move = this.addMarker(MarkerKind.Move);
+        move.show(m.to, 0.95, 1);
+        const victim = this.addMarker(MarkerKind.Capture);
+        victim.show(`${m.to[0]}${m.from[1]}` as Square, 0.95, 1);
+        this.targetMarkers.push(move, victim);
+        continue;
+      }
+      const marker = this.addMarker(m.isCapture() ? MarkerKind.Capture : MarkerKind.Move);
       marker.show(m.to, 0.95, 1);
       this.targetMarkers.push(marker);
     }
