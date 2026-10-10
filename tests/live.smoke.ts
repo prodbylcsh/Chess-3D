@@ -73,8 +73,8 @@ test('two guests play an online game, with realtime', async () => {
   assert.equal(game.status, 'waiting');
 
   // The first row arrives once the subscription is live (the watcher catches up on
-  // connect). A project's very first realtime connection can take a while: realtime
-  // sets itself up for the project then.
+  // connect). After a quiet spell Supabase restarts realtime for the project, which can
+  // take a while and drop the first updates; the watcher re-reads the game every 4 s.
   let connected!: () => void;
   let joined!: (row: GameRow) => void;
   const live = new Promise<void>((resolve) => (connected = resolve));
@@ -88,7 +88,8 @@ test('two guests play an online game, with realtime', async () => {
   try {
     await within(live, 30_000, 'the realtime subscription');
     await guest.join(game.id, 'Smoke guest');
-    const seen = await within(active, 10_000, 'the realtime update for the join');
+    // realtime, or the watcher's re-check when realtime is still waking up after a quiet spell
+    const seen = await within(active, 15_000, 'seeing the join');
     assert.equal(seen.black_id, guest.userId, 'the host hears about the join');
   } finally {
     stop();

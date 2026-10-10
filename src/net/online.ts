@@ -12,6 +12,9 @@ export class OnlineError extends Error {
   }
 }
 
+/** How often a watched game is re-read in case realtime missed an update. */
+const WATCH_POLL_MS = 4000;
+
 export interface Watcher {
   /** Every newer version of the game row, in order (also sent once on (re)connect). */
   onRow(row: GameRow): void;
@@ -127,6 +130,13 @@ export class Online {
         // catch up on anything that happened before (or while) we were disconnected
         void this.fetch(id).then((row) => row && push(row)).catch(() => {});
       });
-    return () => void this.client.removeChannel(channel);
+    // Safety net: realtime can miss updates, e.g. while Supabase restarts it for a project
+    // that was idle (the first game after a quiet spell). Re-read the row now and then;
+    // `push` ignores versions we already have.
+    const poll = setInterval(() => void this.fetch(id).then((row) => row && push(row)).catch(() => {}), WATCH_POLL_MS);
+    return () => {
+      clearInterval(poll);
+      void this.client.removeChannel(channel);
+    };
   }
 }

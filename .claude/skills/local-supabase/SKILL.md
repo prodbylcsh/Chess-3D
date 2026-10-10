@@ -78,9 +78,11 @@ afterwards the local database has no guests and no guest-only games.
 Test files that open realtime connections must close them at the end
 (`client.realtime.disconnect()` in `after`), or the test process never exits.
 
-Right after a fresh start, the first online test can time out while realtime and the
-functions warm up ("two players play a game to checkmate…"). Run it again before
-treating it as a failure. A second failure is real.
+Realtime can drop the first updates while it starts (here after a fresh start; on the
+free hosted plan after a quiet spell, when Supabase restarts it for the project). The app
+copes: a watched game is re-read every 4 s (`src/net/online.ts`) and the badges every
+20 s. Tests that need realtime itself should wait for the subscription first. If a test
+still fails right after a fresh start, run it once more; a second failure is real.
 
 Create confirmed test users without email through the admin API (service-role key):
 `admin.auth.admin.createUser({ email, password, email_confirm: true })`.

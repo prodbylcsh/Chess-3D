@@ -32,6 +32,22 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  // Safety net for live updates that realtime missed (e.g. while it restarts after a quiet
+  // spell): re-count now and then, and refresh the screens only when something changed.
+  useEffect(() => {
+    if (!ready) return;
+    const timer = setInterval(async () => {
+      const [conversations, requests] = await Promise.all([api.messages.conversations(), api.friends.requests()]).catch(() => [null, null]);
+      if (!conversations || !requests) return;
+      const unreadMessages = conversations.reduce((n, c) => n + c.unread, 0);
+      const friendRequests = requests.incoming.length;
+      setBadges((b) =>
+        b.unreadMessages === unreadMessages && b.friendRequests === friendRequests ? b : { unreadMessages, friendRequests, version: b.version + 1 },
+      );
+    }, 20_000);
+    return () => clearInterval(timer);
+  }, [ready]);
+
   useEffect(() => {
     if (!ready) return;
     void recount().catch(() => {});

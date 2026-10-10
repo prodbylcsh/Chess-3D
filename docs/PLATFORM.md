@@ -490,7 +490,7 @@ The 3D board fills the screen. Around it:
 | Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
 | Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), friends and chat (✅ M5: `social`), matchmaking, results (MMR, coins), shop purchases |
-| Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications |
+| Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
 | Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
 
