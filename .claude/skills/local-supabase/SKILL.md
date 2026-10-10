@@ -71,6 +71,9 @@ SUPABASE_ANON_KEY=<key> SUPABASE_SERVICE_ROLE_KEY=<key> npm run test:e2e
 # (sign-up with the emailed link, onboarding rules, permissions, reset, deletion)
 ```
 
+The last accounts test runs the retention job (`cleanup_inactive`) with a zero cutoff, so
+afterwards the local database has no guests and no guest-only games.
+
 Right after a fresh start, the first online test can time out while realtime and the
 functions warm up ("two players play a game to checkmate…"). Run it again before
 treating it as a failure. A second failure is real.

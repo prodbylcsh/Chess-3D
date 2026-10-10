@@ -5,6 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
+import { Online } from '../src/net/online.ts';
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const INBOX = process.env.INBOX_URL ?? 'http://127.0.0.1:54324';
@@ -202,4 +203,28 @@ test('deleting an account needs the exact username and removes everything', asyn
   assert.deepEqual(data, []);
   const signIn = await newClient().auth.signInWithPassword({ email: email('frank'), password: PASSWORD });
   assert.equal(signIn.error?.code, 'invalid_credentials');
+});
+
+// Last: it runs the retention job with a zero cutoff, which clears every guest-only game
+// and every guest in the local database.
+test('retention: inactive guests and guest-only games are deleted, registered players keep theirs', async () => {
+  const guest = new Online(URL, KEY!, { storageKey: 'retention-guest' });
+  await guest.signIn();
+  const guestGame = await guest.create('Guest', 'w');
+
+  const member = new Online(await player('keeper'));
+  await member.signIn();
+  const memberGame = await member.create('Keeper', 'w');
+
+  const refused = await newClient().rpc('cleanup_inactive', { older_than: '0 seconds' });
+  assert.ok(refused.error, 'clients cannot run the job');
+
+  const { data, error } = await admin.rpc('cleanup_inactive', { older_than: '0 seconds' });
+  assert.ifError(error);
+  assert.ok(data[0].games_deleted >= 1 && data[0].guests_deleted >= 1);
+
+  const games = await admin.from('games').select('id').in('id', [guestGame.id, memberGame.id]);
+  assert.deepEqual(games.data?.map((g) => g.id), [memberGame.id]);
+  assert.ok((await admin.auth.admin.getUserById(guest.userId)).error, 'the guest is gone');
+  assert.ifError((await admin.auth.admin.getUserById(member.userId)).error);
 });

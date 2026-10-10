@@ -611,6 +611,10 @@ Decided:
   Buying coins with real money is planned; before it starts, the Terms get purchase
   conditions (prices, payment, refunds, right of withdrawal, parental consent under 18)
   and the operator's business details, which Czech consumer law requires for selling.
+- **Retention:** a daily job (`cleanup_inactive`, pg_cron) deletes guests and online games
+  without a registered player after 6 months without activity (Privacy Policy §6).
+- **En passant** shows the move dot on the landing square and the capture ring on the
+  pawn being taken; clicking either plays it.
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.
