@@ -483,7 +483,10 @@ run by hand): the migrations, the Edge Functions, and the auth settings and emai
 templates. `supabase/config.toml` is the source for both local development and the live
 project; `supabase/auth-config.ts` sends its auth part to the live project with the live
 URLs. A setting changed only in the dashboard is overwritten by the next deploy. Only
-secrets stay in the dashboard (8.4).
+secrets stay in the dashboard (8.4). Every deploy ends with a smoke test of the live
+project from GitHub's servers (`tests/live.smoke.ts`: auth settings, both functions, row
+security, an online game with realtime); it leaves a few anonymous guests and a finished
+game behind.
 
 ### 8.3 Data model (first draft)
 
@@ -511,12 +514,11 @@ puzzle_progress player_id, level, stars, completed_at   (later)
 Coins and MMR are only ever changed by server functions, in the same transaction that
 records the reason (ledger, game result).
 
-### 8.4 Turning on real accounts (before merging M4 to `main`)
+### 8.4 Live settings
 
-Merging to `main` deploys the site pointing at the `wizard-chess` project, and the live site
-then uses real accounts right away. The project itself is set up before that, by running
-the deploy workflow by hand on the development branch: tables, functions, auth settings
-and email templates. These are automatic, from `supabase/config.toml`:
+Real accounts went live with M4 (October 2026) on the `wizard-chess` project. A new
+project is set up by running the deploy workflow by hand: tables, functions, auth
+settings and email templates. These are automatic, from `supabase/config.toml`:
 
 - **URL configuration:** Site URL `https://prodbylcsh.github.io/Chess-3D/`, redirect URL
   `https://prodbylcsh.github.io/Chess-3D/**` (`SITE_URL` and `REDIRECT_URLS` in
@@ -552,8 +554,11 @@ These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`)
    application") with the authorized redirect URI
    `https://yhzgrorvjfvbqshneipc.supabase.co/auth/v1/callback`; paste the client ID and
    secret into the Google provider (Authentication → Sign In / Providers), and publish the
-   app (Audience → In production). Privacy policy and terms pages are still to be written
-   (needed for Google's production listing sooner or later, and for GDPR).
+   app (Audience → In production). **Not published yet:** publishing needs a privacy
+   policy link in Branding, and the privacy policy and terms pages are still to be
+   written (also needed for GDPR). Until then the app is in "Testing" and only the test
+   users listed under Audience can sign in with Google; everyone else gets Google's
+   "access blocked" page.
 3. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
    game earns money; until then the Apple button shows "Soon". Then: a Services ID with
    "Sign in with Apple" and the same callback URL, plus a key, entered in the Apple
@@ -571,7 +576,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M1 Foundation | Concept doc, rating and coin rules (tested), React shell, design system, sidebar, auth screens, onboarding, Play hub, redesigned game screen, vs AI, result screen | ✅ (on the mock back-end) |
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
-| M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ in code, tested locally; back-end set up in the `wizard-chess` project; the site switches over when merged, after the 8.4 settings (SMTP, Google) |
+| M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
 | M5 Back-end: competitive | Matchmaking queues, game kinds, server clocks, results with MMR and coins, engine analysis, ledger, seasons | 🔜 |
 | M6 Back-end: social and shop | Friends, messages, shop purchases, inventory, loadout | 🔜 |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
