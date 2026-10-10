@@ -2,7 +2,8 @@ name: Deploy Supabase backend
 
 # Applies database migrations, deploys the Edge Functions (`game`, `account`) and sets the
 # auth settings and email templates from supabase/config.toml (supabase/auth-config.ts)
-# whenever anything under supabase/ changes on main. Needs, in Settings → Secrets and
+# whenever anything under supabase/ changes on main, then smoke-tests the live project
+# (tests/live.smoke.ts; leaves a few anonymous guests and one finished game behind). Needs, in Settings → Secrets and
 # variables → Actions:
 #   secrets:   SUPABASE_ACCESS_TOKEN  (supabase.com/dashboard/account/tokens)
 #              SUPABASE_DB_PASSWORD   (the database password chosen at project creation)
@@ -37,3 +38,4 @@ jobs:
       - run: npx supabase functions deploy game --project-ref "$PROJECT_ID" --use-api
       - run: npx supabase functions deploy account --project-ref "$PROJECT_ID" --use-api
       - run: node supabase/auth-config.ts
+      - run: node --test tests/live.smoke.ts
