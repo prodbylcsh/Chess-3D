@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { tk, useT } from '../../i18n';
+import { tk, useT, withNodes } from '../../i18n';
 import { Eye, EyeOff, KeyRound, Lock, Mail, MailCheck, Sparkles, Swords, Trophy } from 'lucide-react';
 import { api, ApiError } from '../../api';
 import { emailProblem, passwordProblem, passwordStrength } from '../../api/validation';
+import { legalUrl } from '../../app/legal';
 import { useSession } from '../../app/session';
 import { Wordmark } from '../../app/AppLayout';
 import { PieceGlyph } from '../../ui/art/art';
@@ -272,7 +273,18 @@ export function AuthPage() {
               </form>
 
               <p className="auth-foot faint">
-                {t('By continuing you agree to the Terms of Service and Privacy Policy.')}
+                {withNodes(t('By continuing you confirm you are at least 15 and agree to the {terms} and the {privacy}.'), {
+                  terms: (
+                    <a href={legalUrl('terms')} target="_blank" rel="noreferrer">
+                      {t('Terms of Service')}
+                    </a>
+                  ),
+                  privacy: (
+                    <a href={legalUrl('privacy')} target="_blank" rel="noreferrer">
+                      {t('Privacy Policy')}
+                    </a>
+                  ),
+                })}
                 {api.demo.accounts && <> {t('Demo mode: accounts are stored only in this browser.')}</>}
               </p>
             </>

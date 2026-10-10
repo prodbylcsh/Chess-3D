@@ -18,6 +18,10 @@ behaviour, and update it when something changes.
   limits) are not changed without the user's yes. See the `game-rules` skill.
 - **All UI text** goes through `t()`/`tk()`/`tn()` with a Czech entry. English is the
   default. See the `i18n` skill.
+- **Legal pages match the app:** the Privacy Policy and Terms (`public/legal/`, English
+  and Czech) describe what is stored where and which providers see it. When that changes
+  (new data, a new provider, browser data moving to the server, paid coins), update both
+  languages and the date in the same change.
 - Ask the user about undecided *product* questions, with a recommendation. Decide
   engineering questions yourself.
 

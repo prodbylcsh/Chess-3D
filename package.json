@@ -16,6 +16,8 @@
     "test:e2e": "node --test --test-concurrency=1 tests/online.e2e.ts tests/accounts.e2e.ts"
   },
   "dependencies": {
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "@supabase/supabase-js": "^2.117.2",
     "chess.js": "^1.4.0",
     "lucide-react": "^1.52.0",

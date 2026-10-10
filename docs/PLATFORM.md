@@ -554,10 +554,10 @@ These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`)
    application") with the authorized redirect URI
    `https://yhzgrorvjfvbqshneipc.supabase.co/auth/v1/callback`; paste the client ID and
    secret into the Google provider (Authentication → Sign In / Providers), and publish the
-   app (Audience → In production). **Not published yet:** publishing needs a privacy
-   policy link in Branding, and the privacy policy and terms pages are still to be
-   written (also needed for GDPR). Until then the app is in "Testing" and only the test
-   users listed under Audience can sign in with Google; everyone else gets Google's
+   app (Audience → In production). Publishing needs the privacy policy link in Branding:
+   `https://prodbylcsh.github.io/Chess-3D/legal/privacy.html` (terms:
+   `…/legal/terms.html`). Until the app is published it is in "Testing": only the test
+   users listed under Audience can sign in with Google, everyone else gets Google's
    "access blocked" page.
 3. **Apple (later):** needs the paid Apple Developer Program, so it is switched on once the
    game earns money; until then the Apple button shows "Soon". Then: a Services ID with
@@ -603,6 +603,16 @@ Decided:
 - **Own Supabase project** (`wizard-chess`), separate from other apps; its auth settings
   and email templates live in the repository (8.2).
 - **Auth emails** come in the player's interface language (English or Czech).
+- **Operator and legal pages:** Wizard Chess is run by Lukáš Schöbel, Czech Republic
+  (contact seblis@seznam.cz). Privacy Policy and Terms of Service are static pages in
+  English and Czech (`public/legal/`, linked from sign-up and Settings). Minimum age 15,
+  confirmed at sign-up ("By continuing you confirm you are at least 15…").
+- **Coins have no real-money value** (Terms §5): no cash-out, no transfers, no refunds.
+  Buying coins with real money is planned; before it starts, the Terms get purchase
+  conditions (prices, payment, refunds, right of withdrawal, parental consent under 18)
+  and the operator's business details, which Czech consumer law requires for selling.
+- **No third-party requests** from the site apart from the back-end: fonts are served
+  with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.
 
 Open:

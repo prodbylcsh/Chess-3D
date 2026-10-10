@@ -63,6 +63,10 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   Shop and seasons.
 - **Accounts:** email sign-ups must confirm their address before playing; guests (invite
   links) play without a profile and are invited to register afterwards.
+- **Coins have no real-money value** (Terms of Service §5): no cash-out, no transfers
+  between players, no refunds. Buying coins with real money comes later; before it does,
+  the Terms (`public/legal/`, both languages) get the purchase conditions and the
+  operator's business details.
 - **Languages:** English is the default; Czech is complete. Which language comes next is
   still open.
 

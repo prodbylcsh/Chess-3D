@@ -2,10 +2,11 @@ import { t, tk } from '../../i18n';
 import { shortDate } from '../../ui/format';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { AtSign, Check, Globe, KeyRound, LogOut, Mail, Trash2, UserRound, Volume2, X, RefreshCw } from 'lucide-react';
+import { AtSign, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, X, RefreshCw } from 'lucide-react';
 import { api, ApiError, type UsernameCheck } from '../../api';
 import { USERNAME_COOLDOWN_DAYS, USERNAME_MAX, emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../../api/validation';
 import { Page } from '../../app/AppLayout';
+import { CONTACT_EMAIL, legalUrl } from '../../app/legal';
 import { LANGUAGES, setPrefs, usePrefs } from '../../app/prefs';
 import { useSession } from '../../app/session';
 import { ProfileIcon } from '../../ui/art/art';
@@ -106,6 +107,39 @@ export function SettingsPage() {
                   </option>
                 ))}
               </select>
+            }
+          />
+        </Section>
+
+        <Section title={t('Legal and contact')}>
+          <Row
+            icon={<FileText size={18} />}
+            title={t('Terms of Service')}
+            text={t('The rules for playing Wizard Chess')}
+            action={
+              <a href={legalUrl('terms')} target="_blank" rel="noreferrer" className="btn btn-sm btn-secondary">
+                <span>{t('Open')}</span>
+              </a>
+            }
+          />
+          <Row
+            icon={<ShieldCheck size={18} />}
+            title={t('Privacy Policy')}
+            text={t('What data we keep and why')}
+            action={
+              <a href={legalUrl('privacy')} target="_blank" rel="noreferrer" className="btn btn-sm btn-secondary">
+                <span>{t('Open')}</span>
+              </a>
+            }
+          />
+          <Row
+            icon={<MessageCircleQuestion size={18} />}
+            title={t('Contact')}
+            text={CONTACT_EMAIL}
+            action={
+              <a href={`mailto:${CONTACT_EMAIL}`} className="btn btn-sm btn-secondary">
+                <span>{t('Write to us')}</span>
+              </a>
             }
           />
         </Section>

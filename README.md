@@ -147,6 +147,7 @@ src/
   fx/         particles, effects (sparks, dust, shockwave, bolt), shatter physics, dissolve shader
   game/       Piece, BoardView, Choreographer (move animations), Game (controller), GameUi contract
   audio/      procedural sound effects
+public/legal/         Privacy Policy and Terms of Service (English, Czech in cs/)
 supabase/
   config.toml         local stack settings, and the source of the live auth settings
   auth-config.ts      sends the auth settings and email templates to the live project

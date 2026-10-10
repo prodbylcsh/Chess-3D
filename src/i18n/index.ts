@@ -1,7 +1,7 @@
 // Interface translations. Strings are written in English in the code and wrapped
 // in t(); each language is a dictionary from the English text to its translation.
 // Missing entries fall back to English (tests/i18n.test.ts checks Czech is complete).
-import { useCallback } from 'react';
+import { Fragment, createElement, useCallback, type ReactNode } from 'react';
 import { getPrefs, usePrefs } from '../app/prefs';
 import { cs } from './cs';
 
@@ -63,6 +63,15 @@ export function rankText(label: string | null | undefined): string {
   if (!label) return '';
   const [tier, division] = label.split(' ');
   return division ? `${t(tier)} ${division}` : t(tier);
+}
+
+/**
+ * Fill a translated sentence's {placeholders} with elements, e.g. links inside text:
+ * `withNodes(t('Agree to the {terms}.'), { terms: <a …>{t('Terms of Service')}</a> })`.
+ * Pass t() the literal without variables, so the placeholders survive translation.
+ */
+export function withNodes(text: string, nodes: Record<string, ReactNode>): ReactNode[] {
+  return text.split(/\{(\w+)\}/).map((part, i) => (i % 2 ? createElement(Fragment, { key: i }, nodes[part]) : part));
 }
 
 /** Marks a string in data (menus, tables) as translatable; translate it with t() when shown. */

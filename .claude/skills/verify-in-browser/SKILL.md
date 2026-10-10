@@ -119,7 +119,7 @@ for the notification instead of polling.
   pattern matching itself) and kill those PIDs.
 - Foreground `sleep` is blocked in this environment. Wait with `until …; do sleep 1; done`
   in a background command, or with Monitor.
-- 404 and certificate console errors from fonts and the agent proxy are expected noise,
+- 404 and certificate console errors from the agent proxy are expected noise,
   and so is one 403 right after deleting an account (the sign-out call for a user that
   no longer exists).
 - Result cards and other game endings need `gl: true`: without WebGL the engine never
