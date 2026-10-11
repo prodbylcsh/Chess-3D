@@ -19,4 +19,7 @@ export const EXTERNAL_KEYS = [
   tk('Checkmate'), tk('Checkmate!'), tk('Check!'), tk('Draw'), tk('Stalemate'), tk('Insufficient material'), tk('Threefold repetition'), tk('Fifty-move rule'),
   // stored game-end reasons (game records)
   tk('checkmate'), tk('resignation'), tk('agreement'), tk('stalemate'), tk('insufficient material'), tk('threefold repetition'), tk('fifty-move rule'), tk('abandoned'),
+  tk('timeout'), tk('timeout vs insufficient material'), tk('aborted'),
+  // time controls (supabase/functions/_shared/play.ts)
+  tk('Fast blitz'), tk('Blitz'), tk('Rapid'), tk('Classical'),
 ];

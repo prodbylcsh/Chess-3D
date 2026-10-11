@@ -14,6 +14,7 @@ import { MatchMode } from './modes/match';
 import { OnlineMode } from './modes/online';
 import type { Mode, ModeContext } from './modes/types';
 import './game.css';
+import { api } from '../../api';
 
 /** Full-screen game: the 3D board with the game interface around it. */
 export default function GamePage() {
@@ -67,8 +68,11 @@ export default function GamePage() {
         return new AiMode(ctx, side, level);
       }
       case 'match': {
-        const match = id ? getMatch(id) : null;
-        return match ? new MatchMode(ctx, match) : null;
+        if (!id) return null;
+        // demo matches (mock back-end) are played by the AI; real ones are server games
+        const match = getMatch(id);
+        if (match?.demo) return new MatchMode(ctx, match);
+        return api.demo.accounts ? null : new OnlineMode(ctx, id);
       }
       case 'online':
         return id ? new OnlineMode(ctx, id) : null;

@@ -29,10 +29,11 @@ behaviour, and update it when something changes.
 
 React 19 + Vite + TypeScript UI (`src/app`, `src/features/*`, `src/ui`), Three.js engine
 (`src/game`, `src/scene`, `src/fx`, cosmetics in `src/cosmetics` + `src/game/Wardrobe.ts`),
-typed service contracts (`src/api/types.ts`). Accounts, the own profile, friends and chat
-run on Supabase (`src/api/supabase`, `account` and `social` Edge Functions); coins, rank,
-items, history and matchmaking still run on an in-browser mock (`src/api/mock`,
-localStorage) keyed to the signed-in user. Online invite games are on
+typed service contracts (`src/api/types.ts`). In real-account mode everything a player has
+runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`):
+accounts, profile, friends, chat, coins, rank, items, history, matchmaking and timed games.
+The in-browser mock (`src/api/mock`, localStorage) is the store the screens read (the
+server state is copied in) and the whole back-end in `npm run dev:mock`. Online invite games are on
 Supabase too (`src/net`, `game` Edge Function). Wizard Chess has its own Supabase project
 (`wizard-chess`); its auth settings and email templates come from `supabase/config.toml`
 on deploy (`supabase/auth-config.ts`). One Supabase client: `src/net/supabase.ts`.

@@ -21,6 +21,7 @@ server and the app. The app only previews and displays; the server applies.
 | Season calendar, resets, brackets, reward picking | `seasons.ts` | `tests/seasons.test.ts` | §5.5 |
 | Shop prices and purchase rules | `shop.ts` | `tests/shop.test.ts` | §4.5 |
 | Usernames, reserved names, the 30-day limit, onboarding | `accounts.ts` | `tests/accounts.test.ts`, `tests/accounts.e2e.ts` | §2 |
+| Time controls, clocks, first move, timeouts, settling a game, season rollover | `play.ts` | `tests/play.test.ts`, `tests/competitive.e2e.ts` | §4.1, §6.3 |
 
 Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) and use
 `rankOf`, `bracketOf`, `STAKES`, `COINS`, `resetShare` and so on.
@@ -47,6 +48,13 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
 - **Play for coins:** stakes 100 / 500 / 2,000; the winner takes the pot minus a **10% fee**.
 - **Time controls:** Blitz 5+3, Rapid 10+5 and Classical 15+10 for Ranked, Casual and Play
   for coins; Fast blitz 3+2 for Casual only; no clock for friends, AI and same device.
+  The next player's time starts after the move's animation (3 s capture, 2.5 s castling or
+  promotion, 1.5 s otherwise). 30 s for each player's first move, no clock before it; no
+  first move in time aborts the game (nothing changes, stakes back). Out of time loses,
+  unless the opponent cannot mate (draw).
+- **Short games:** fewer than 20 half-moves (10 moves each) pay no coins; MMR still counts.
+- **Fresh start on the server (M6):** 500 coins, 1,000 MMR, free items; browser data was
+  not carried over.
 - **Seasons:** 3 months, season 1 started July 2026. At season end MMR is pulled towards
   1,000 by 25%, by 50% every 4th season, and by 100% every 12th (everyone back to 1,000).
   Win streaks reset.

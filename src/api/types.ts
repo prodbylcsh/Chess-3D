@@ -6,8 +6,9 @@ import type { MmrChange, Outcome, TierId } from '#shared/rating.ts';
 import type { CoinReward, GameKind, StakeId } from '#shared/economy.ts';
 import type { ItemCategory, Rarity } from '#shared/shop.ts';
 import type { SeasonReward } from '#shared/seasons.ts';
+import type { ControlId } from '#shared/play.ts';
 
-export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward };
+export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId };
 
 // ------------------------------------------------------------------ accounts and profiles
 
@@ -127,6 +128,8 @@ export interface MatchFound {
   opponentMmr: number;
   /** true while matchmaking runs on mock data: the opponent is the AI engine */
   demo: boolean;
+  /** time control of a server game */
+  control?: ControlId;
 }
 
 export interface MatchReport {
@@ -287,7 +290,7 @@ export interface AccountService {
 export type ApiEvent =
   | { type: 'friends'; text?: string }
   | { type: 'messages'; conversationId: string; text?: string }
-  | { type: 'profile' };
+  | { type: 'profile'; text?: string };
 
 export interface EventsService {
   subscribe(fn: (event: ApiEvent) => void): () => void;
@@ -300,10 +303,12 @@ export interface MatchmakingTicket {
 }
 
 export interface MatchmakingService {
-  find(kind: MatchKind, stake?: StakeId): MatchmakingTicket;
+  find(kind: MatchKind, stake?: StakeId, control?: ControlId): MatchmakingTicket;
   /** players currently searching, for the queue screen */
   queueSize(kind: MatchKind): Promise<number>;
   report(matchId: string, report: MatchReport): Promise<MatchResult>;
+  /** server games: the player's result once the game is over (null: aborted, nothing changed) */
+  result?(matchId: string): Promise<MatchResult | null>;
 }
 
 export interface Api {

@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { DEFAULT_CONTROL, type ControlId } from '#shared/play.ts';
 
 // Per-device preferences (not synced to the account).
 export interface Prefs {
@@ -6,10 +7,12 @@ export interface Prefs {
   /** same-device games: turn the camera to the side to move */
   autoRotate: boolean;
   language: string;
+  /** time control for matchmaking */
+  control: ControlId;
 }
 
 const KEY = 'wizard-chess.prefs';
-const DEFAULTS: Prefs = { sound: true, autoRotate: false, language: 'en' };
+const DEFAULTS: Prefs = { sound: true, autoRotate: false, language: 'en', control: DEFAULT_CONTROL };
 
 function read(): Prefs {
   try {

@@ -418,5 +418,5 @@ export function createSocial(
     changes = presence = null;
   }
 
-  return { lookups, friends, messages, start, stop };
+  return { lookups, friends, messages, start, stop, onlineCount: () => online.size };
 }

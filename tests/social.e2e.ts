@@ -175,18 +175,21 @@ test('new messages and requests arrive through realtime, only for the people inv
   for (const h of [kimRequests, louRequests, kimMessages, louMessages]) await h.stop();
 });
 
-test('showcase: players share a checked snapshot of rank, stats and look', async () => {
+test('showcase: the server publishes rank, stats and look; players cannot write it', async () => {
   const max = await player('max');
   const ned = await player('ned');
+  await fn(max.client, 'account', { action: 'me' }); // creates max's competitive state
   const showcase = {
     rank: { tier: 'gold', division: 3, progress: 0.25 },
     stats: { wins: 7, losses: 2, draws: 1, winStreak: 3, rankedStreak: 2, bestStreak: 4 },
     loadout: { pieces: 'marble-set', board: 'marble-board', background: 'candlelit-study', moveAnimation: 'glide', destruction: 'shatter' },
   };
-  assert.deepEqual(await fn(max.client, 'account', { action: 'showcase', showcase }), { ok: true });
-  assert.equal((await fn(max.client, 'account', { action: 'showcase', showcase: { ...showcase, rank: { tier: 'god' } } })).code, 'bad_request');
-  const seen = await ned.client.from('profiles').select('showcase').eq('id', max.id).single();
-  assert.deepEqual(seen.data?.showcase, showcase);
+  assert.equal((await fn(max.client, 'account', { action: 'showcase', showcase })).code, 'bad_request');
+  await max.client.from('profiles').update({ showcase }).eq('id', max.id);
+  const seen = (await ned.client.from('profiles').select('showcase').eq('id', max.id).single()).data?.showcase;
+  assert.equal(seen.rank.tier, 'silver');
+  assert.equal(seen.stats.wins, 0);
+  assert.equal(seen.loadout.pieces, 'marble-set');
 });
 
 test('deleting an account removes its friendships and conversations', async () => {

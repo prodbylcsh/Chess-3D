@@ -54,6 +54,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     return api.events.subscribe((e) => {
       if (e.type === 'profile') {
         void refresh();
+        if (e.text) toast(e.text, { tone: 'success', duration: 8 });
         return;
       }
       void recount().catch(() => {});

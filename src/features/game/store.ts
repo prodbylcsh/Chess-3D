@@ -23,6 +23,18 @@ export interface ResultState {
   error: string | null;
 }
 
+/** Server clocks of a timed game. The running side's time is counted down on screen. */
+export interface ClockView {
+  w: number;
+  b: number;
+  /** side whose time runs, or null when the game is not running */
+  running: Side | null;
+  /** when the running side's time started (local ms; after the last move's animation) */
+  since: number;
+  /** the running side has not made its first move yet: `w`/`b` holds that window */
+  firstMove: boolean;
+}
+
 export interface GameState {
   turn: Side;
   /** "Check!", "Checkmate!", "Draw" … */
@@ -48,6 +60,7 @@ export interface GameState {
   /** short line under the turn pill, e.g. "Opponent is thinking…" */
   note: string | null;
   drawOffered: boolean;
+  clock: ClockView | null;
 }
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -72,6 +85,7 @@ export function initialState(): GameState {
     invite: null,
     note: null,
     drawOffered: false,
+    clock: null,
   };
 }
 

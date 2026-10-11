@@ -28,7 +28,9 @@ import {
   type ProfileService,
 } from '../types';
 import { emailProblem, passwordProblem, usernameProblem } from '../validation';
-import { createSocial, showcaseOf } from './social';
+import type { SeasonGrant } from '#shared/play.ts';
+import { createCompetitive, economyOf, type PlayerRecord } from './competitive';
+import { createSocial } from './social';
 
 type Social = Exclude<AuthProviderId, 'email'>;
 const PROVIDER_NAMES: Record<Social, string> = { apple: 'Apple', google: 'Google' };
@@ -129,10 +131,9 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
   }
 
   /** Copy the server's profile into the local store and return the full profile. */
-  async function adopt(row: ProfileRow): Promise<Profile> {
-    const profile = structuredClone(adoptAccount(toAccount(await user()), identity(row)));
-    void syncShowcase();
-    return profile;
+  /** Copy the server's profile (and competitive state, when given) into the local store. */
+  async function adopt(row: ProfileRow, player?: PlayerRecord): Promise<Profile> {
+    return structuredClone(adoptAccount(toAccount(await user()), { ...identity(row), ...(player ? economyOf(player) : {}) }));
   }
 
   /** Check a password by signing in with it again (Supabase has no separate check). */
@@ -266,7 +267,12 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     ...local.profiles,
 
     async me() {
-      return adopt((await call<{ profile: ProfileRow }>('me')).profile);
+      const { profile, player, seasonGrants } = await call<{ profile: ProfileRow; player: PlayerRecord; seasonGrants: SeasonGrant[] }>('me');
+      const adopted = await adopt(profile, player);
+      for (const g of seasonGrants ?? []) {
+        emit({ type: 'profile', text: t('Season {n} is over: you earned {coins} coins and a new icon.', { n: g.season, coins: g.coins }) });
+      }
+      return adopted;
     },
 
     async checkUsername(username) {
@@ -350,26 +356,31 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     else if (event === 'SIGNED_OUT' || !u) social.stop();
   });
 
-  // Other players see this player's rank, stats and look (kept on this device until the
-  // competitive back-end) through the showcase: send it whenever it changes.
-  let sentShowcase = '';
-  async function syncShowcase(): Promise<void> {
-    const me = db.sessionId ? db.profiles[db.sessionId] : null;
-    if (!me?.onboarded) return;
-    const showcase = JSON.stringify(showcaseOf(me));
-    if (showcase === sentShowcase) return;
-    sentShowcase = showcase;
-    await call('showcase', { showcase: JSON.parse(showcase) }).catch(() => (sentShowcase = ''));
-  }
-  local.events.subscribe((e) => {
-    if (e.type === 'profile') void syncShowcase();
+  // ---------------------------------------------------------------- competitive (games, shop)
+
+  const competitive = createCompetitive(client, {
+    me: () => db.sessionId,
+    adopt: (player) => {
+      const id = db.sessionId!;
+      const { seasonPeak, ...fields } = economyOf(player);
+      Object.assign(db.profiles[id], fields);
+      (db.seasonPeak[id] ??= {})[String(seasonPeak.season)] = seasonPeak.mmr;
+      save();
+      emit({ type: 'profile' });
+      return db.profiles[id];
+    },
+    account: call,
+    lookup: (id) => social.lookups.get(id),
+    onlineCount: () => social.onlineCount(),
   });
 
   return {
     ...local,
     demo: { accounts: false, social: false },
     auth,
-    profiles: { ...profiles, ...social.lookups },
+    profiles: { ...profiles, ...social.lookups, ...competitive.history },
+    shop: { ...local.shop, ...competitive.shop },
+    matchmaking: competitive.matchmaking,
     friends: social.friends,
     messages: social.messages,
     events,

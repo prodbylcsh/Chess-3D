@@ -219,12 +219,13 @@ function seedPlayer(id: string, createdAt: string): void {
 }
 
 /** The profile fields the server owns once accounts are real (M4). */
-export type Identity = Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'usernameChangedAt' | 'createdAt'>;
+export type Identity = Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'usernameChangedAt' | 'createdAt'> &
+  Partial<Pick<Profile, 'coins' | 'mmr' | 'stats' | 'loadout' | 'inventory'>> & { seasonPeak?: { season: number; mmr: number } };
 
 /**
- * Make a real (server) account the session of the local store. Coins, rank,
- * stats, items and the demo social life stay in this browser until their
- * back-end milestones; identity fields are copied from the server.
+ * Make a real (server) account the session of the local store: the screens read the
+ * profile from here, so the server's identity and competitive state (coins, MMR,
+ * stats, items, season peak) are copied in whenever they arrive.
  */
 export function adoptAccount(account: Account, identity: Identity): Profile {
   let stored = db.accounts.find((a) => a.id === account.id);
@@ -234,7 +235,9 @@ export function adoptAccount(account: Account, identity: Identity): Profile {
   }
   Object.assign(stored, account);
   if (!db.profiles[account.id]) seedPlayer(account.id, identity.createdAt);
-  Object.assign(db.profiles[account.id], identity);
+  const { seasonPeak, ...fields } = identity;
+  Object.assign(db.profiles[account.id], fields);
+  if (seasonPeak) (db.seasonPeak[account.id] ??= {})[String(seasonPeak.season)] = seasonPeak.mmr;
   db.sessionId = account.id;
   save();
   return db.profiles[account.id];

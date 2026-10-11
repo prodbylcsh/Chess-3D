@@ -82,6 +82,10 @@ export class Online {
   resign(id: string) {
     return this.call({ action: 'resign', id });
   }
+  /** End a timed game whose side to move is out of time (or never made its first move). */
+  claim(id: string) {
+    return this.call({ action: 'claim', id });
+  }
   offerDraw(id: string) {
     return this.call({ action: 'offer_draw', id });
   }

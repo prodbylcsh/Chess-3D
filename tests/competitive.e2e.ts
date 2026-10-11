@@ -215,6 +215,18 @@ test('running out of time loses; a game nobody claims is ended when a player com
   await play(b2, { action: 'leave' });
 });
 
+test('a match that ended before the player picked it up starts a new search', async () => {
+  const a = await player('ole');
+  const b = await player('ria');
+  const row = await match(a, b, 'casual', 'rapid');
+  await game(a, { action: 'resign', id: row.id });
+  // b's search was matched by a's, but b only comes back after the game is over
+  await admin.from('mm_queue').upsert({ player_id: b.id, kind: 'casual', control: 'rapid', mmr: 1000, game_id: row.id });
+  const back = await play(b, { action: 'search', kind: 'casual', control: 'rapid' });
+  assert.equal(back.searching, true);
+  await play(b, { action: 'leave' });
+});
+
 test('a player in a running game gets it back instead of a new search', async () => {
   const a = await player('oda');
   const b = await player('pia');

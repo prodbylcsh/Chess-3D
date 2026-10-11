@@ -9,8 +9,9 @@ import type { PieceId } from '../../ui/art/pieces';
 import { Badge, Button, IconButton, Modal, cx } from '../../ui/kit';
 import type { Engine } from './engine';
 import type { Mode } from './modes/types';
+import { SearchPill } from '../play/SearchWatcher';
 import { ResultCard } from './ResultCard';
-import { useGameState, type GameState, type PlayerView } from './store';
+import { useGameState, type ClockView, type GameState, type PlayerView } from './store';
 
 const PIECE_ID: Record<PieceSymbol, PieceId> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
@@ -117,6 +118,7 @@ function TurnPill({ s }: { s: GameState }) {
         )}
       </div>
       {s.note && <div className="gs-note">{s.note}</div>}
+      <SearchPill />
     </div>
   );
 }
@@ -149,6 +151,7 @@ function PlayerCard({ side, player, s }: { side: Side; player: PlayerView; s: Ga
           )}
         </div>
       </div>
+      {s.clock && <ClockFace clock={s.clock} side={side} />}
       <div className="player-captures" aria-label={t('Captured pieces')}>
         <span className="captured">
           {s.captured[side].map((p, i) => (
@@ -159,6 +162,31 @@ function PlayerCard({ side, player, s }: { side: Side; player: PlayerView; s: Ga
         </span>
         {s.advantage[side] > 0 && <span className="advantage">+{s.advantage[side]}</span>}
       </div>
+    </div>
+  );
+}
+
+/** A player's clock; the running side counts down live. Under 20 s it turns red and shows tenths. */
+function ClockFace({ clock, side }: { clock: ClockView; side: Side }) {
+  const running = clock.running === side;
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!running) return;
+    const timer = setInterval(() => setNow(Date.now()), 100);
+    return () => clearInterval(timer);
+  }, [running]);
+  const base = side === 'w' ? clock.w : clock.b;
+  const ms = Math.max(0, running ? base - Math.max(0, now - clock.since) : base);
+  const low = ms < 20_000;
+  const total = Math.ceil(ms / 1000);
+  const text =
+    low && ms > 0 && !(running && clock.firstMove)
+      ? `${Math.floor(ms / 1000)}.${Math.floor((ms % 1000) / 100)}`
+      : `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+  return (
+    <div className={cx('player-clock', running && 'is-running', low && 'is-low')} aria-label={t('Time left')}>
+      {running && clock.firstMove && <span className="player-clock-note">{t('First move')}</span>}
+      <span className="player-clock-time">{text}</span>
     </div>
   );
 }

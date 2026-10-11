@@ -129,14 +129,22 @@ declare
   white uuid;
   black uuid;
 begin
-  delete from public.mm_queue q where q.heartbeat_at < now() - interval '15 seconds' and q.game_id is null;
+  -- searches that stopped polling, and matches nobody picked up within an hour
+  delete from public.mm_queue q
+  where (q.game_id is null and q.heartbeat_at < now() - interval '15 seconds')
+     or (q.game_id is not null and q.heartbeat_at < now() - interval '1 hour');
 
   select * into me from public.mm_queue q where q.player_id = p_player for update;
   if found and me.game_id is not null then
+    -- another player's search matched this one: hand over the game, unless it has already
+    -- ended (the player came back later); then this is a new search
     delete from public.mm_queue q where q.player_id = p_player;
-    return me.game_id;
+    if exists (select 1 from public.games g where g.id = me.game_id and g.status = 'active') then
+      return me.game_id;
+    end if;
+    me := null;
   end if;
-  if not found or me.kind <> p_kind or me.control <> p_control or coalesce(me.stake, 0) <> coalesce(p_stake, 0) then
+  if me.player_id is null or me.kind <> p_kind or me.control <> p_control or coalesce(me.stake, 0) <> coalesce(p_stake, 0) then
     insert into public.mm_queue (player_id, kind, control, stake, mmr)
     values (p_player, p_kind, p_control, p_stake, p_mmr)
     on conflict (player_id) do update

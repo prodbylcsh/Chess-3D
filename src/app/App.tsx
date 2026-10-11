@@ -16,6 +16,7 @@ import { AppLayout } from './AppLayout';
 import { NotificationsProvider } from './notifications';
 import { usePrefs } from './prefs';
 import { SessionProvider, useSession } from './session';
+import { SearchWatcher } from '../features/play/SearchWatcher';
 
 // the 3D game (three.js) is loaded only when a game starts
 const GamePage = lazy(() => import('../features/game/GamePage'));
@@ -113,6 +114,7 @@ export function App() {
       <ToastProvider>
         <HashRouter>
           <AuthReturn />
+          <SearchWatcher />
           <NotificationsProvider>
             <LanguageRoot />
           </NotificationsProvider>

@@ -15,6 +15,7 @@ const REASON: Record<string, string> = {
   'threefold repetition': tk('by threefold repetition'),
   'fifty-move rule': tk('by the fifty-move rule'),
   abandoned: tk('by abandonment'),
+  timeout: tk('on time'),
 };
 
 function signed(n: number): string {
@@ -25,7 +26,9 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
   const end = s.end!;
   const me = s.mySide;
   const outcome = !me ? null : end.winner === null ? 'draw' : end.winner === me ? 'win' : 'loss';
-  const title = outcome === 'win' ? t('Victory') : outcome === 'loss' ? t('Defeat') : outcome === 'draw' ? t('Draw') : end.winner ? t('{name} wins', { name: s.players[end.winner].name }) : t('Draw');
+  // an aborted game has no result: say so instead of "Draw"
+  const aborted = end.reason === 'aborted';
+  const title = aborted ? end.title : outcome === 'win' ? t('Victory') : outcome === 'loss' ? t('Defeat') : outcome === 'draw' ? t('Draw') : end.winner ? t('{name} wins', { name: s.players[end.winner].name }) : t('Draw');
   const sub = REASON[end.reason] ? t(REASON[end.reason]) : end.text;
   const opp = me ? s.players[me === 'w' ? 'b' : 'w'] : null;
   const result = s.result;
@@ -38,7 +41,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
         <header className="result-head">
           <span className="result-kicker">{mode.label}</span>
           <h1 className="display">{title}</h1>
-          <p className="muted">{outcome ? `${end.text} · ${sub}` : sub}</p>
+          <p className="muted">{aborted ? end.text : outcome ? `${end.text} · ${sub}` : sub}</p>
         </header>
 
         {me && opp && (

@@ -1,64 +1,76 @@
 import { rankText, t, tk } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
+import { Bot } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router';
 import { STAKES } from '#shared/economy.ts';
+import { CONTROLS, controlLabel } from '#shared/play.ts';
 import { rankOf } from '#shared/rating.ts';
-import { api, ApiError, type MatchFound, type MatchKind, type StakeId } from '../../api';
+import { api, ApiError, type ControlId, type MatchKind, type StakeId } from '../../api';
 import { useProfile } from '../../app/session';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, formatNumber, useToast } from '../../ui/kit';
 import { rememberMatch } from '../game/matches';
+import { cancelSearch, clearSearch, currentSearch, searchInBackground, startSearch, useSearch } from './search';
 
 const TITLES: Record<MatchKind, string> = { ranked: tk('Ranked'), casual: tk('Casual'), wager: tk('Play for coins') };
 
 /** Full-screen search: pulsing rings while searching, then a versus card and a countdown. */
-export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?: StakeId; onCancel: () => void }) {
+export function Matchmaking({ kind, stake, control, onCancel }: { kind: MatchKind; stake?: StakeId; control: ControlId; onCancel: () => void }) {
   const profile = useProfile();
   const navigate = useNavigate();
   const toast = useToast();
-  const [elapsed, setElapsed] = useState(0);
+  const search = useSearch();
+  const [now, setNow] = useState(Date.now());
   const [queueSize, setQueueSize] = useState<number | null>(null);
-  const [match, setMatch] = useState<MatchFound | null>(null);
   const [count, setCount] = useState(3);
-  const cancelRef = useRef<() => void>(() => {});
+  const match = search?.match ?? null;
   // the parent passes a new callback on every render; the search must not restart
   const onCancelRef = useRef(onCancel);
   onCancelRef.current = onCancel;
 
   useEffect(() => {
-    const ticket = api.matchmaking.find(kind, stake);
-    cancelRef.current = ticket.cancel;
+    startSearch(kind, stake, control);
     let live = true;
     void api.matchmaking.queueSize(kind).then((n) => live && setQueueSize(n));
-    ticket.found.then(
-      (m) => live && setMatch(m),
-      (err) => {
-        if (!live || (err instanceof ApiError && err.code === 'cancelled')) return;
-        toast(err instanceof ApiError ? t(err.message) : t('Matchmaking failed. Please try again.'), { tone: 'danger' });
-        onCancelRef.current();
-      },
-    );
-    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => {
       live = false;
       clearInterval(timer);
-      ticket.cancel();
     };
-  }, [kind, stake, toast]);
+  }, [kind, stake, control]);
+
+  // leaving the screen ends the search, unless the player went to play the AI meanwhile
+  useEffect(
+    () => () => {
+      const s = currentSearch();
+      if (s && !s.background && !s.match) cancelSearch();
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!search?.error) return;
+    const err = search.error;
+    toast(err instanceof ApiError ? t(err.message) : t('Matchmaking failed. Please try again.'), { tone: 'danger' });
+    clearSearch();
+    onCancelRef.current();
+  }, [search?.error, toast]);
 
   // countdown, then into the game
   useEffect(() => {
     if (!match) return;
     rememberMatch(match);
     if (count <= 0) {
+      clearSearch();
       navigate(`/game/match/${match.matchId}`);
       return;
     }
-    const t = setTimeout(() => setCount((c) => c - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setCount((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
   }, [match, count, navigate]);
 
+  const elapsed = Math.max(0, Math.floor((now - (search?.startedAt ?? now)) / 1000));
   const mm = String(Math.floor(elapsed / 60)).padStart(1, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
   const myRank = rankOf(profile.mmr);
@@ -80,18 +92,37 @@ export function Matchmaking({ kind, stake, onCancel }: { kind: MatchKind; stake?
             {mm}:{ss}
           </p>
           <p className="faint">
-            {queueSize ? t('{n} players searching', { n: formatNumber(queueSize) }) : ' '}
+            {api.demo.accounts
+              ? queueSize
+                ? t('{n} players searching', { n: formatNumber(queueSize) })
+                : ' '
+              : t('{n} players online', { n: formatNumber(Math.max(1, queueSize ?? 1)) })}
             {kind === 'ranked' && ` · ${t('matching by rank')}`}
+            {` · ${t(CONTROLS[control].name)} ${controlLabel(control)}`}
           </p>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              cancelRef.current();
-              onCancel();
-            }}
-          >
-            {t('Cancel')}
-          </Button>
+          <div className="mm-actions">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                cancelSearch();
+                onCancel();
+              }}
+            >
+              {t('Cancel')}
+            </Button>
+            {elapsed >= 10 && (
+              <Button
+                variant="ghost"
+                icon={<Bot size={16} />}
+                onClick={() => {
+                  searchInBackground();
+                  navigate('/game/ai?level=3&color=random');
+                }}
+              >
+                {t('Play the AI while you wait')}
+              </Button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="mm-found">

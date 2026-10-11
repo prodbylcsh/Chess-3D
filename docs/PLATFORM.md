@@ -75,12 +75,11 @@ changed later (the username once per 30 days).
 - **Guests** (invite links) play under an anonymous session and have no profile. Their
   result card invites them to create a free account. Registered players use their account
   for online games.
-- Until their milestones, **coins, rank, stats, items, game history and matchmaking stay
-  in the browser** (keyed to the real account): signing in on another device starts them
-  fresh there. Friends and messages are on the server (M5). Other players see a player's
-  rank, stats and items through the **showcase**, a snapshot each player's app sends
-  (`profiles.showcase`, checked by `_shared/social.ts`), until the competitive back-end
-  computes them on the server.
+- **Everything a player owns is on the server** (M6): coins, rank, stats, items, loadout,
+  game history, friends and messages. The app copies the player's state into its local
+  store, which the screens read. Other players see a player's rank, stats and items
+  through the **showcase** (`profiles.showcase`), which the server writes after every
+  game, purchase and equip; MMR itself never leaves the server.
 
 ## 3. Layout and navigation
 
@@ -109,12 +108,12 @@ username, rank) and the coin balance.
 
 | Mode | Status | Description |
 | --- | --- | --- |
-| Casual | 🟡 | Matchmaking against any online player. Pays coins, no MMR. |
-| Ranked | 🟡 | Matchmaking against players of similar MMR. Changes MMR and pays coins. |
+| Casual | ✅ (M6) | Matchmaking against any online player. Pays coins, no MMR. |
+| Ranked | ✅ (M6) | Matchmaking against players of similar MMR. Changes MMR and pays coins. |
 | Tournaments | ⏸ | Coin entry fee, brackets. Later. |
 | Play a friend | 🟡 | Invite from the friends list (🟡 demo list), play on one device (✅), or create a link anyone can open (✅ live online). |
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
-| Play for coins | 🟡 | Both players stake the same amount; the winner takes the pot minus a fee. |
+| Play for coins | ✅ (M6) | Both players stake the same amount; the winner takes the pot minus a fee. |
 
 **Time controls (decided).** The cinematic captures take 1–3 seconds to play out, so
 very fast games (bullet) don't suit this game. The clock of the player to move only starts
@@ -133,7 +132,16 @@ never cost anyone time.
 ladder (one MMR) for Blitz, Rapid and Classical at first; separate ladders per control can be added
 later if players ask for them. Running out of time loses the game, unless the opponent has
 no material that can still checkmate (then it's a draw), as in standard chess rules.
-Clocks are kept by the server (milestone 5); the client only displays them.
+Clocks are kept by the server (M6, `_shared/play.ts`); the client only displays them and
+tells the server when a clock shows zero (either player may; the server checks). The next
+player's time starts after the previous move's animation: 3 s after a capture, 2.5 s after
+castling or a promotion, 1.5 s otherwise. The players pick the time control on the Play
+hub (remembered on the device); Rapid is the default.
+
+**First move:** each player has 30 seconds for their first move, and no clock runs before
+it. If a player doesn't move in time, the game is **aborted**: no MMR, no coins, stakes
+refunded (decided October 2026). A move sent after the clock ran out ends the game on time
+instead.
 
 **Matchmaking (ranked):** start with a ±100 MMR window and widen it by 50 every 5 seconds
 of waiting, up to ±400. Casual uses one queue with no rating window (it still prefers
@@ -213,8 +221,9 @@ Season reward icons ("Season 2 · Gold & Platinum") are icons too, but are never
 animation and destruction effect. Board and background come from one of the two players;
 when they differ, the pick is random but derived from the game id, so both players see
 the same. Same-device games use your items for both sides; AI opponents use the standard
-items; matchmade demo opponents show their own items. Online friend games show your items
-on your side; the opponent's arrive with the back-end (M6).
+items; matchmade opponents (and demo opponents) show their own items, read from their
+public profile. Online friend games show your items on your side and the standard set for
+the opponent.
 
 **Assets.** The current looks are placeholders made from the classic set: piece sets and
 boards recolour the marble textures with a shader, backgrounds change sky, table, lights
@@ -435,8 +444,11 @@ shop purchases are the other one. A player needs at least the stake in their bal
 
 ### 6.3 Anti-abuse
 
-- All rewards are computed and credited on the server, written to a transaction ledger.
-- Games shorter than ~10 moves, or abandoned in the first moves, pay nothing.
+- All rewards are computed and credited on the server, written to a transaction ledger
+  (`coin_ledger`: games, stakes, payouts, purchases, season rewards).
+- Games with fewer than **20 half-moves (10 moves each)** pay no coins; ranked MMR still
+  counts, so resigning early still costs rating (decided October 2026). Coin games are
+  not affected: the stake is the point. Aborted games change nothing.
 - Possible later: a soft daily cap on coins from Casual.
 
 ## 7. In-game interface (redesign)
@@ -489,7 +501,7 @@ The 3D board fills the screen. Around it:
 | --- | --- |
 | Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
-| Edge Functions | game moves (✅), profiles and accounts (✅ M4: `account`), friends and chat (✅ M5: `social`), matchmaking, results (MMR, coins), shop purchases |
+| Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`) |
 | Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
 | Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
@@ -508,25 +520,27 @@ game behind.
 
 ### 8.3 Data model (first draft)
 
-`games` (online play), `profiles`, `friendships`, `conversations` and `messages` exist.
+`games` (online play), `profiles`, `friendships`, `conversations`, `messages`, `players`,
+`game_results`, `coin_ledger` and `mm_queue` exist.
 `profiles` (M4): id (= auth user), username (unique, case-insensitive), icon_id,
 onboarding_step, onboarded_at, username_changed_at, created_at, showcase (M5); written
 only by the `account` Edge Function. Social (M5): `friendships` (id, user_a < user_b,
 status, requested_by, created_at, accepted_at), `conversations` (id, user_a < user_b,
 a_read_at, b_read_at, last_message_at), `messages` (id, conversation_id, sender_id, body,
 kind text|invite, game_id, created_at), and the view `conversation_list` (last message and
-unread count for the caller); written only by the `social` Edge Function. The rest is the
-plan:
+unread count for the caller); written only by the `social` Edge Function. Competitive (M6):
+`players` (private to the player: mmr, coins, wins, losses, draws, streaks, season,
+season_peak_mmr, inventory, loadout, badges; MMR is never public, others see the
+showcase), `games` + kind (friend|ranked|casual|wager), control, clock_w, clock_b,
+turn_started_at, stake, settled_at; `game_results` (one row per player and game: public
+columns, plus private mmr_delta, coins_delta and the breakdown), `coin_ledger` and
+`mm_queue`. Atomic steps are SQL functions only the service role may call: `mm_poll`
+(matching, stakes), `settle_game` (once per game), `buy_item`, `apply_seasons`. Season ends
+are applied lazily the next time a player shows up (rewards by the season's peak, MMR
+reset, streaks reset). The shop catalogue stays in code (`_shared/shop.ts`). The rest is
+the plan:
 
 ```
-profiles        + mmr, win_streak, coins, wins, losses, draws   (competitive)
-games           (exists) + kind (ranked|casual|wager|friend|ai), stake, white/black mmr before
-game_results    game_id, player_id, outcome, accuracy, mmr_delta + breakdown, coins_delta
-coin_ledger     id, player_id, amount, reason (game|purchase|wager|grant), ref_id, created_at
-items           id, category, name, price, asset refs, active
-inventory       player_id, item_id, acquired_at
-loadout         player_id, category, item_id (equipped)
-mm_queue        player_id, kind, mmr, stake, joined_at  (matchmaking)
 awards          id, name, rule;  player_awards  player_id, award_id, earned_at
 puzzle_progress player_id, level, stars, completed_at   (later)
 ```
@@ -598,7 +612,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
 | M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
 | M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ in code, tested locally; live when merged |
-| M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | 🔜 |
+| M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ in code, tested locally; live when merged |
 | Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
 
 ## 10. Decisions and open questions
@@ -627,7 +641,7 @@ Decided:
   (contact seblis@seznam.cz). Privacy Policy and Terms of Service are static pages in
   English and Czech (`public/legal/`, linked from sign-up and Settings). Minimum age 15,
   confirmed at sign-up ("By continuing you confirm you are at least 15…").
-- **Coins have no real-money value** (Terms §5): no cash-out, no transfers, no refunds.
+- **Coins have no real-money value** (Terms §6): no cash-out, no transfers, no refunds.
   Buying coins with real money is planned; before it starts, the Terms get purchase
   conditions (prices, payment, refunds, right of withdrawal, parental consent under 18)
   and the operator's business details, which Czech consumer law requires for selling.
@@ -635,6 +649,12 @@ Decided:
   without a registered player after 6 months without activity (Privacy Policy §6).
 - **En passant** shows the move dot on the landing square and the capture ring on the
   pawn being taken; clicking either plays it.
+- **Fresh start on the server** (M6): coins, rank and items from the browser are not carried
+  over; everyone starts with 500 coins, Silver II and the free items.
+  The legal pages say so (Privacy §3, Terms §6, effective 11 October 2026); Terms §5
+  covers clocks, leaving and the first-move window.
+- **No coins under 20 half-moves**, MMR still counts; **30 s first-move window**, else the
+  game is aborted (both October 2026).
 - **Order of the back-end milestones:** social (friends, chat) before competitive
   (matchmaking, server MMR and coins), October 2026.
 - **Accuracy on the server:** until an engine server exists (Stockfish needs more CPU than

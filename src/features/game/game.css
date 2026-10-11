@@ -276,6 +276,53 @@
   border: 1px solid #6c5ca8;
 }
 
+.player:has(.player-clock) {
+  grid-template-columns: auto 1fr auto;
+}
+
+.player-clock {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 78px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.player-clock-time {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-2);
+}
+
+.player-clock-note {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.player-clock.is-running {
+  border-color: var(--gold-line);
+  background: var(--gold-soft);
+}
+
+.player-clock.is-running .player-clock-time {
+  color: var(--text);
+}
+
+.player-clock.is-low .player-clock-time {
+  color: #ff7a6b;
+}
+
 .player-captures {
   display: flex;
   align-items: center;
@@ -849,6 +896,11 @@
 
   .gs-panel > .player:first-child {
     top: 70px;
+  }
+
+  /* a background search shows under the turn indicator: make room for it */
+  .game-screen:has(.gs-turn .search-pill) .gs-panel > .player:first-child {
+    top: 116px;
   }
 
   .gs-panel > .player:last-child {

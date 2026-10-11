@@ -4,11 +4,13 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { Bot, ChevronRight, Coins as CoinsIcon, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
+import { CONTROLS, controlLabel, type ControlId } from '#shared/play.ts';
 import type { MatchKind, StakeId } from '../../api';
+import { setPrefs, usePrefs } from '../../app/prefs';
 import { Page } from '../../app/AppLayout';
 import { useProfile } from '../../app/session';
 import { RankEmblem } from '../../ui/art/art';
-import { Badge, Button, ProgressBar, cx } from '../../ui/kit';
+import { Badge, Button, ProgressBar, Segmented, cx } from '../../ui/kit';
 import { prefetchModel } from '../game/model';
 import { AiSetup } from './AiSetup';
 import { Matchmaking } from './Matchmaking';
@@ -29,6 +31,8 @@ export function PlayHub() {
   const [params, setParams] = useSearchParams();
   const [sheet, setSheet] = useState<Sheet>(null);
   const [queue, setQueue] = useState<{ kind: MatchKind; stake?: StakeId } | null>(null);
+  const { control } = usePrefs();
+  const casualOnly = !CONTROLS[control].kinds.includes('ranked');
   const rank = rankOf(profile.mmr);
   const { wins, losses, draws } = profile.stats;
 
@@ -76,12 +80,29 @@ export function PlayHub() {
           </p>
         </div>
         <div className="ranked-cta">
-          <Button variant="primary" size="lg" icon={<Swords size={18} />} onClick={() => setQueue({ kind: 'ranked' })}>
+          <Button variant="primary" size="lg" icon={<Swords size={18} />} disabled={casualOnly} onClick={() => setQueue({ kind: 'ranked' })}>
             {t('Find ranked match')}
           </Button>
-          <span className="faint">{t('Opponents near your rank')}</span>
+          <span className="faint">{casualOnly ? t('Fast blitz is for casual games only') : t('Opponents near your rank')}</span>
         </div>
       </section>
+
+      <div className="time-control">
+        <span className="faint">{t('Time control')}</span>
+        <Segmented<ControlId>
+          label={t('Time control')}
+          value={control}
+          onChange={(c) => setPrefs({ control: c })}
+          options={(['blitz', 'rapid', 'classical', 'fast'] as ControlId[]).map((id) => ({
+            value: id,
+            label: (
+              <>
+                {t(CONTROLS[id].name)} <span className="faint">{controlLabel(id)}</span>
+              </>
+            ),
+          }))}
+        />
+      </div>
 
       <div className="modes">
         <ModeCard
@@ -94,7 +115,15 @@ export function PlayHub() {
         />
         <ModeCard icon={Users} tone="green" title={t('Play a friend')} text={t('Invite a friend, share a link, or play on one device.')} meta={t('Link, friends list or same screen')} onClick={() => setSheet('friend')} />
         <ModeCard icon={Bot} tone="violet" title={t('Play vs AI')} text={t('Five levels from Novice to Master. Practise without pressure.')} meta={t('No rank, no coins')} onClick={() => setSheet('ai')} />
-        <ModeCard icon={CoinsIcon} tone="gold" title={t('Play for coins')} text={t('Both players stake coins. The winner takes the pot.')} meta={t('Stakes from 100 to 2,000')} onClick={() => setSheet('stake')} />
+        <ModeCard
+          icon={CoinsIcon}
+          tone="gold"
+          title={t('Play for coins')}
+          text={t('Both players stake coins. The winner takes the pot.')}
+          meta={casualOnly ? t('Fast blitz is for casual games only') : t('Stakes from 100 to 2,000')}
+          onClick={() => setSheet('stake')}
+          disabled={casualOnly}
+        />
         <ModeCard icon={Trophy} tone="red" title={t('Tournaments')} text={t('Brackets with entry fees and big prizes.')} meta={t('Coming soon')} disabled />
       </div>
 
@@ -108,7 +137,7 @@ export function PlayHub() {
           setQueue({ kind: 'wager', stake });
         }}
       />
-      {queue && <Matchmaking kind={queue.kind} stake={queue.stake} onCancel={() => setQueue(null)} />}
+      {queue && <Matchmaking kind={queue.kind} stake={queue.stake} control={control} onCancel={() => setQueue(null)} />}
     </Page>
   );
 }
@@ -138,7 +167,7 @@ function ModeCard({
       <span className="mode-body">
         <span className="mode-title">
           {title}
-          {disabled && <Badge>{t('Soon')}</Badge>}
+          {disabled && !onClick && <Badge>{t('Soon')}</Badge>}
         </span>
         <span className="mode-text">{text}</span>
         <span className="mode-meta">{meta}</span>
