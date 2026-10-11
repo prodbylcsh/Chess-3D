@@ -259,7 +259,10 @@ piece's height is set per set), simplified meshes, WebP textures, meshopt-compre
 geometry, and the missing colour of a piece set (non-metal parts recoloured, chrome kept).
 A look in `src/cosmetics/looks.ts` points at the folder (`model: { dir }` for sets,
 `model: { file }` for boards); the engine loads it when a game uses the item and falls
-back to the classic set if loading fails. Delivery format: one GLB per piece
+back to the classic set if loading fails. A model board keeps its playing surface at the classic
+board's height and the table drops to the board's foot (`layout.floorY`), so a board on
+a pedestal (Monolith) stands on it; only the depth of the Monolith board is stretched,
+so its squares are square like the game's grid. Delivery format: one GLB per piece
 (`king.glb` … `pawn.glb`) plus `chessboard.glb` for a board, in either colour, any scale;
 the shop-items skill has the steps. Placeholder looks (recolours of the classic set)
 still work for items without models.
@@ -488,6 +491,9 @@ The 3D board fills the screen. Around it:
   outcome, the MMR change with its breakdown (base, difference, performance, streak) and
   the new rank progress, the coins earned, and Rematch / New game / Back to lobby.
 - Toasts for draw offers, rematch requests, opponent connection.
+- **Camera:** drag to orbit, right-drag to pan, scroll or pinch to zoom; zooming out goes
+  far enough (distance 42) to see the whole board on a phone, and beyond the earlier
+  limit (26) the fog thins so the board stays clear.
 
 ## 8. Technical architecture
 

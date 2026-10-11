@@ -10,6 +10,8 @@ export const MODEL_SCALE = 1 / MODEL_SQUARE;
 export const layout = {
   boardTop: 0.3,
   boardHalf: 4.78,
+  /** the table top: 0, or lower when the board stands on a pedestal (a model board) */
+  floorY: 0,
 };
 
 const FILES = 'abcdefgh';

@@ -9,6 +9,11 @@ import type { BackgroundLook } from '../cosmetics/looks';
 
 const BG = new THREE.Color(0x07080b);
 
+/** How far the camera may zoom out (room to see the whole board on a phone). */
+const MAX_DISTANCE = 42;
+/** Up to this distance the fog is exactly the background's (the earlier zoom-out limit). */
+const FOG_DISTANCE = 26;
+
 /**
  * Renderer, camera, orbit controls, lighting and post-processing.
  * Everything chess-specific lives elsewhere.
@@ -33,6 +38,7 @@ export class Stage {
   };
   private readonly tableCanvas = document.createElement('canvas');
   private readonly tableTexture: THREE.CanvasTexture;
+  private table!: THREE.Mesh;
   private backdrop: BackgroundLook | null = null;
 
   constructor(private readonly container: HTMLElement) {
@@ -55,7 +61,7 @@ export class Stage {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.07;
     this.controls.minDistance = 3.5;
-    this.controls.maxDistance = 26;
+    this.controls.maxDistance = MAX_DISTANCE;
     this.controls.maxPolarAngle = Math.PI * 0.46;
     this.controls.screenSpacePanning = true;
     this.controls.zoomToCursor = true;
@@ -125,6 +131,7 @@ export class Stage {
   frame(dt: number): void {
     this.update(dt);
     this.controls.update(dt);
+    this.thinFog();
     this.applyShake(dt);
     this.composer.render(dt);
     this.camera.position.sub(this.shakeOffset);
@@ -152,6 +159,23 @@ export class Stage {
       t.z *= 6 / r;
     }
     t.y = THREE.MathUtils.clamp(t.y, -0.5, 3);
+  }
+
+  /** Height of the table top (`layout.floorY`): below 0 when a board stands on a pedestal. */
+  setFloor(y: number): void {
+    this.table.position.y = y - 0.002;
+  }
+
+  /**
+   * Zoomed out past the old limit (phones need it to see the whole board), the fog thins
+   * with the distance so the board stays as clear as at that limit. Closer in, the
+   * background's fog is unchanged.
+   */
+  private thinFog(): void {
+    const fog = this.scene.fog as THREE.FogExp2 | null;
+    if (!fog || !this.backdrop) return;
+    const distance = this.camera.position.distanceTo(this.controls.target);
+    fog.density = this.backdrop.fog * Math.min(1, FOG_DISTANCE / distance);
   }
 
   /** Sky, fog, table and light colours of a background. */
@@ -227,10 +251,10 @@ export class Stage {
     const tex = new THREE.CanvasTexture(this.tableCanvas);
     tex.colorSpace = THREE.SRGBColorSpace;
 
-    const table = new THREE.Mesh(
+    const table = (this.table = new THREE.Mesh(
       new THREE.CircleGeometry(40, 96),
       new THREE.MeshStandardMaterial({ map: tex, roughness: 0.78, metalness: 0.0 }),
-    );
+    ));
     table.rotation.x = -Math.PI / 2;
     table.position.y = -0.002;
     table.receiveShadow = true;

@@ -120,12 +120,17 @@ export class Wardrobe {
     this.assets.board.visible = !this.modelBoard;
     if (!this.modelBoard) {
       layout.boardHalf = this.classicHalf;
+      layout.floorY = 0;
+      this.stage.setFloor(0);
       return;
     }
     const box = new THREE.Box3().setFromObject(this.modelBoard);
-    // the playing surface sits exactly where the classic board's top is
+    // the playing surface sits exactly where the classic board's top is; the table drops
+    // to the board's foot, so a board on a pedestal stands on it (nothing else moves)
     this.modelBoard.position.y = layout.boardTop - box.max.y;
     layout.boardHalf = Math.min(box.max.x, -box.min.x, box.max.z, -box.min.z);
+    layout.floorY = Math.min(0, box.min.y + this.modelBoard.position.y);
+    this.stage.setFloor(layout.floorY);
     this.stage.scene.add(this.modelBoard);
   }
 

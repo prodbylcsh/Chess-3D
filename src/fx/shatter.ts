@@ -200,7 +200,7 @@ export class Debris {
     }
 
     const onBoard = Math.abs(p.x) < layout.boardHalf && Math.abs(p.z) < layout.boardHalf;
-    const floor = (onBoard ? layout.boardTop : 0) + f.radius;
+    const floor = (onBoard ? layout.boardTop : layout.floorY) + f.radius;
     if (p.y < floor) {
       // only collide with the board top when we arrive from above
       if (!onBoard || p.y > floor - 0.3) {
