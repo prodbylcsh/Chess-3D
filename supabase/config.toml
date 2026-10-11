@@ -434,3 +434,6 @@ verify_jwt = false
 
 [functions.social]
 verify_jwt = false
+
+[functions.play]
+verify_jwt = false

@@ -1,6 +1,6 @@
 // Friends, chat and the public "showcase" (rank, stats, loadout), shared by the `social`
 // and `account` Edge Functions and the app.
-import { TIERS } from './rating.ts';
+import { TIERS, rankOf } from './rating.ts';
 import { DEFAULT_LOADOUT, itemDef } from './shop.ts';
 
 export const MESSAGE_MAX = 1000;
@@ -81,4 +81,24 @@ export function parseShowcase(input: unknown): Showcase | null {
     stats: cleanStats,
     loadout: cleanLoadout,
   };
+}
+
+/** The showcase the server publishes from a player's real state. */
+export function showcaseOf(
+  player: { mmr: number; wins: number; losses: number; draws: number; win_streak: number; ranked_streak: number; best_streak: number },
+  loadout: Partial<Showcase['loadout']> | null,
+): Showcase {
+  const r = rankOf(player.mmr);
+  return parseShowcase({
+    rank: { tier: r.tier.id, division: r.division, progress: r.progress },
+    stats: {
+      wins: player.wins,
+      losses: player.losses,
+      draws: player.draws,
+      winStreak: player.win_streak,
+      rankedStreak: player.ranked_streak,
+      bestStreak: player.best_streak,
+    },
+    loadout: { ...DEFAULT_LOADOUT, ...loadout },
+  })!;
 }

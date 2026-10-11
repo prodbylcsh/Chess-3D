@@ -1,17 +1,19 @@
 // Every write to a player's profile and account.
 //
-// POST { action: 'me' }                          → { profile }   (created on first call)
+// POST { action: 'me' }                          → { profile, player, seasonGrants }   (created on first call)
 // POST { action: 'check_username', username }    → { status: 'available' | 'taken' | 'invalid' }
 // POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded? }
-// POST { action: 'showcase', showcase }          → { ok: true }    rank, stats, loadout others see
+// POST { action: 'buy', itemId }                 → { player }    take the price, add the item
+// POST { action: 'equip', itemId }               → { profile, player }   use an owned item
 // POST { action: 'delete', username }            → { deleted: true }
 //
 // Errors: { error, code, detail? } with an HTTP error status. Only registered
 // players have a profile; anonymous guest sessions get 403 'guest'. The rules
 // live in ../_shared/accounts.ts (shared with the app's form checks).
 import { createClient, type User } from '@supabase/supabase-js';
-import { AccountError, profileUpdate, usernameProblem, type ProfilePatch, type ProfileRow } from '../_shared/accounts.ts';
-import { parseShowcase } from '../_shared/social.ts';
+import { AccountError, isIcon, profileUpdate, usernameProblem, type ProfilePatch, type ProfileRow } from '../_shared/accounts.ts';
+import { FREE_ITEMS, itemDef, purchaseProblem } from '../_shared/shop.ts';
+import { ensurePlayer, publishShowcase, type PlayerRow } from '../_shared/server/competitive.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -51,10 +53,16 @@ async function usernameTaken(username: string, exceptId: string): Promise<boolea
   return data.length > 0;
 }
 
+/** Free items belong to everyone; the rest must be in the inventory. */
+const owns = (player: PlayerRow, id: string) => FREE_ITEMS.includes(id) || player.inventory.includes(id);
+
 async function handle(user: User, body: Record<string, unknown>): Promise<unknown> {
   switch (body.action) {
-    case 'me':
-      return { profile: await me(user) };
+    case 'me': {
+      const profile = await me(user);
+      const { player, grants } = await ensurePlayer(admin, user.id);
+      return { profile, player, seasonGrants: grants };
+    }
 
     case 'check_username': {
       const username = typeof body.username === 'string' ? body.username : '';
@@ -64,7 +72,12 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
 
     case 'update': {
       const row = await me(user);
-      const changes = profileUpdate(row, body.patch as ProfilePatch);
+      const patch = body.patch as ProfilePatch;
+      if (patch?.iconId != null && isIcon(patch.iconId)) {
+        const { player } = await ensurePlayer(admin, user.id);
+        if (!owns(player, patch.iconId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
+      }
+      const changes = profileUpdate(row, patch);
       if (Object.keys(changes).length === 0) return { profile: row };
       const { data, error } = await admin.from('profiles').update(changes).eq('id', user.id).select().single();
       if (error?.code === UNIQUE_VIOLATION) throw new AccountError('taken', 'That username is taken.', 409);
@@ -72,13 +85,33 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return { profile: data as ProfileRow };
     }
 
-    case 'showcase': {
-      const showcase = parseShowcase(body.showcase);
-      if (!showcase) throw new AccountError('bad_request', 'Invalid showcase.');
-      await me(user);
-      const { error } = await admin.from('profiles').update({ showcase }).eq('id', user.id);
+    case 'buy': {
+      const { player } = await ensurePlayer(admin, user.id);
+      const itemId = String(body.itemId ?? '');
+      const problem = purchaseProblem(itemId, player.inventory, player.coins);
+      if (problem === 'coins') throw new AccountError('insufficient_coins', 'You do not have enough coins for this item.', 409);
+      if (problem === 'owned') throw new AccountError('owned', 'You already own this item.', 409);
+      if (problem) throw new AccountError('not_for_sale', 'This item cannot be bought.', 409);
+      const { data, error } = await admin.rpc('buy_item', { p_player: user.id, p_item: itemId, p_price: itemDef(itemId)!.price });
+      if (error) throw /cannot_buy/.test(error.message) ? new AccountError('insufficient_coins', 'You do not have enough coins for this item.', 409) : error;
+      return { player: data };
+    }
+
+    case 'equip': {
+      const { player } = await ensurePlayer(admin, user.id);
+      const itemId = String(body.itemId ?? '');
+      const def = itemDef(itemId);
+      if (!def || !owns(player, itemId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
+      if (def.category === 'icon') {
+        const { error } = await admin.from('profiles').update({ icon_id: itemId }).eq('id', user.id);
+        if (error) throw error;
+        return { profile: await me(user), player };
+      }
+      const loadout = { ...player.loadout, [def.category]: itemId };
+      const { data, error } = await admin.from('players').update({ loadout }).eq('id', user.id).select().single();
       if (error) throw error;
-      return { ok: true };
+      await publishShowcase(admin, data as PlayerRow);
+      return { profile: await me(user), player: data };
     }
 
     case 'delete': {

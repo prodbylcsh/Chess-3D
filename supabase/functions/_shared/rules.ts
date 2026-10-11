@@ -2,6 +2,7 @@
 // each returns the columns to update, or throws a RuleError. The Edge Function
 // handles auth and persistence; this module decides what is legal.
 import { Chess } from 'chess.js';
+import { clocksAfterMove, remaining, timeoutEnd, type Clocks, type ControlId } from './play.ts';
 
 export type Side = 'w' | 'b';
 export type Status = 'waiting' | 'active' | 'finished';
@@ -21,9 +22,25 @@ export interface GameRow {
   draw_offer: Side | null;
   rematch_id: string | null;
   version: number;
+  /** matchmade games (ranked, casual, coins) have a kind, a time control and clocks */
+  kind?: 'friend' | 'ranked' | 'casual' | 'wager';
+  control?: ControlId | null;
+  /** ms left for each side at the start of its turn */
+  clock_w?: number | null;
+  clock_b?: number | null;
+  /** when the side to move's time started (after the last move's animation) */
+  turn_started_at?: string | null;
+  stake?: number | null;
+  settled_at?: string | null;
 }
 
 export type Patch = Partial<Omit<GameRow, 'id' | 'version'>>;
+
+/** The clocks of a game with a time control, or null. */
+export function clocksOf(row: GameRow): Clocks | null {
+  if (!row.control || row.clock_w == null || row.clock_b == null || !row.turn_started_at) return null;
+  return { control: row.control, white: row.clock_w, black: row.clock_b, turnStartedAt: Date.parse(row.turn_started_at) };
+}
 
 export interface MoveInput {
   from: string;
@@ -100,10 +117,15 @@ function requireActive(row: GameRow, userId: string): Side {
   return side;
 }
 
-export function move(row: GameRow, userId: string, input: MoveInput): Patch {
+export function move(row: GameRow, userId: string, input: MoveInput, now = Date.now()): Patch {
   const side = requireActive(row, userId);
   const chess = replay(row.moves);
   if (chess.turn() !== side) throw new RuleError('not_your_turn', 'It is not your turn.', 409);
+  const clocks = clocksOf(row);
+  // out of time (or never made the first move): the game ends, whatever the move
+  if (clocks && remaining(clocks, side, row.moves.length, now) <= 0) {
+    return { status: 'finished', draw_offer: null, ...timeoutEnd(chess, row.moves.length) };
+  }
 
   let m;
   try {
@@ -111,15 +133,28 @@ export function move(row: GameRow, userId: string, input: MoveInput): Patch {
   } catch {
     throw new RuleError('illegal_move', `Illegal move ${input.from}-${input.to}.`);
   }
+  const next = clocks && clocksAfterMove(clocks, side, row.moves.length, now, m);
+  if (next === 'flagged' || next === 'aborted') return { status: 'finished', draw_offer: null, ...timeoutEnd(replay(row.moves), row.moves.length) };
   const patch: Patch = {
     moves: [...row.moves, m.lan],
     fen: chess.fen(),
     // making a move declines any offer made to you; your own offer stands
     draw_offer: row.draw_offer === side ? side : null,
   };
+  if (next) Object.assign(patch, { clock_w: next.white, clock_b: next.black, turn_started_at: new Date(next.turnStartedAt).toISOString() });
   const end = outcome(chess);
   if (end) Object.assign(patch, { status: 'finished', draw_offer: null, ...end });
   return patch;
+}
+
+/** Either player may end the game when the side to move is out of time (or never moved). */
+export function claim(row: GameRow, userId: string, now = Date.now()): Patch {
+  requireActive(row, userId);
+  const clocks = clocksOf(row);
+  if (!clocks) throw new RuleError('no_clock', 'This game has no clock.', 409);
+  const chess = replay(row.moves);
+  if (remaining(clocks, chess.turn(), row.moves.length, now) > 0) throw new RuleError('not_yet', 'There is still time left.', 409);
+  return { status: 'finished', draw_offer: null, ...timeoutEnd(chess, row.moves.length) };
 }
 
 export function resign(row: GameRow, userId: string): Patch {
@@ -147,6 +182,7 @@ export function declineDraw(row: GameRow, userId: string): Patch {
 
 /** Seat for the requester in a rematch: colours swap. */
 export function rematch(row: GameRow, userId: string): Patch {
+  if (row.kind && row.kind !== 'friend') throw new RuleError('no_rematch', 'Find a new game through matchmaking.', 409);
   const side = seatOf(row, userId);
   if (!side) throw new RuleError('not_a_player', 'You are not playing in this game.', 403);
   if (row.status !== 'finished') throw new RuleError('not_finished', 'The game is still in progress.', 409);

@@ -4,6 +4,10 @@
 // POST { action: 'join', id, name }
 // POST { action: 'move', id, move: { from, to, promotion? } }
 // POST { action: 'resign' | 'offer_draw' | 'accept_draw' | 'decline_draw' | 'rematch', id }
+// POST { action: 'claim', id }   the side to move is out of time (or never made its first move)
+//
+// Ranked, casual and coin games are created by matchmaking (the `play` function) with a
+// clock; when one ends, it is settled here at once (MMR, coins, results).
 //
 // Responds with { game } (the updated row; for 'rematch', the new game) or
 // { error, code } with an HTTP error status. Every action is validated against
@@ -12,6 +16,7 @@
 import { createClient } from '@supabase/supabase-js';
 import * as rules from '../_shared/rules.ts';
 import { RuleError, type GameRow, type Patch } from '../_shared/rules.ts';
+import { settleGame } from '../_shared/server/competitive.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -68,6 +73,7 @@ type Update = (row: GameRow, userId: string, body: Record<string, unknown>) => P
 
 const UPDATES: Record<string, Update> = {
   move: (row, user, body) => rules.move(row, user, body.move as rules.MoveInput),
+  claim: (row, user) => rules.claim(row, user),
   resign: (row, user) => rules.resign(row, user),
   offer_draw: (row, user) => rules.offerDraw(row, user),
   accept_draw: (row, user) => rules.acceptDraw(row, user),
@@ -97,7 +103,9 @@ async function handle(userId: string, body: Record<string, unknown>): Promise<Ga
       }
       const update = UPDATES[body.action as string];
       if (!update) throw new RuleError('bad_request', 'Unknown action.');
-      return await save(row, update(row, userId, body));
+      const saved = await save(row, update(row, userId, body));
+      if (saved.status === 'finished') await settleGame(admin, saved);
+      return saved;
     } catch (err) {
       if (!(err instanceof Conflict)) throw err;
       // someone else wrote first: re-validate against the fresh row
