@@ -123,7 +123,7 @@ test('onboarding: unique usernames (any case), known icons, finished only when c
 
   assert.deepEqual(await account(a, { action: 'check_username', username: name }), { status: 'available' });
   assert.equal((await account(a, { action: 'update', patch: { onboarded: true } })).code, 'not_ready');
-  assert.equal((await account(a, { action: 'update', patch: { iconId: 'frost-set' } })).code, 'unknown_icon');
+  assert.equal((await account(a, { action: 'update', patch: { iconId: 'monolith-set' } })).code, 'unknown_icon');
   assert.equal((await account(a, { action: 'update', patch: { username: 'Admin' } })).code, 'reserved');
   assert.equal((await account(a, { action: 'update', patch: { username: 'no spaces' } })).code, 'chars');
 

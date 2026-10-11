@@ -26,9 +26,9 @@ test('the default loadout is free and in the right categories', () => {
 });
 
 test('purchase rules', () => {
-  assert.equal(purchaseProblem('frost-set', [], 21_999), 'coins');
-  assert.equal(purchaseProblem('frost-set', [], 22_000), null);
-  assert.equal(purchaseProblem('frost-set', ['frost-set'], 99_999), 'owned');
+  assert.equal(purchaseProblem('monolith-set', [], 67_999), 'coins');
+  assert.equal(purchaseProblem('monolith-set', [], 68_000), null);
+  assert.equal(purchaseProblem('monolith-set', ['monolith-set'], 99_999), 'owned');
   assert.equal(purchaseProblem('marble-set', [], 99_999), 'owned');
   assert.equal(purchaseProblem('season-2-iron', [], 99_999), 'not-for-sale');
   assert.equal(purchaseProblem('nope', [], 99_999), 'unknown');

@@ -84,6 +84,12 @@ export interface SeasonReward {
   item: string | null;
 }
 
+/**
+ * Seasons before this one hand out no shop item: they ended before the server kept
+ * anyone's items (the fresh start was in season 2), and the real items arrived later.
+ */
+export const FIRST_ITEM_SEASON = 2;
+
 /** Item ids handed out in the last few seasons may not be handed out again. */
 export const NO_REPEAT_SEASONS = 3;
 
@@ -145,7 +151,7 @@ export function pickSeasonRewards(season: number, pool: RewardCandidate[], previ
 export function rewardHistory(season: number, pool: RewardCandidate[]): SeasonReward[][] {
   const all: SeasonReward[][] = [];
   for (let s = 1; s <= season; s++) {
-    all.push(pickSeasonRewards(s, pool, all.map((r) => r.map((x) => x.item).filter((x): x is string => !!x))));
+    all.push(pickSeasonRewards(s, s < FIRST_ITEM_SEASON ? [] : pool, all.map((r) => r.map((x) => x.item).filter((x): x is string => !!x))));
   }
   return all;
 }

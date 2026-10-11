@@ -1,14 +1,16 @@
-// 2D previews of shop items, drawn from the same colours the 3D engine uses.
-// When real preview images arrive, list them in PREVIEW_IMAGES and they are
-// shown instead.
+// 2D previews of shop items: a picture of the real model (PREVIEW_IMAGES), or one
+// drawn from the same colours the 3D engine uses.
 import { useId, type CSSProperties } from 'react';
 import { itemDef } from '#shared/shop.ts';
 import { backgroundLook, boardLook, destructionStyle, moveStyle, pieceSetLook, type PieceTone } from '../../cosmetics/looks';
 import { PieceGlyph, ProfileIcon } from '../../ui/art/art';
 import { PIECE_PATHS, type PieceId } from '../../ui/art/pieces';
 
-/** item id → image URL (e.g. `${import.meta.env.BASE_URL}shop/frost-set.webp`) */
-export const PREVIEW_IMAGES: Record<string, string> = {};
+/** item id → preview image (public/assets/shop/<id>.webp, 16:10); otherwise one is drawn from the look */
+export const PREVIEW_IMAGES: Record<string, string> = {
+  'monolith-set': `${import.meta.env.BASE_URL}assets/shop/monolith-set.webp`,
+  'monolith-board': `${import.meta.env.BASE_URL}assets/shop/monolith-board.webp`,
+};
 
 const CLASSIC: Record<'light' | 'dark', PieceTone> = {
   light: { base: '#f3ede2', vein: '#c9c0b2', veinAmount: 0.5 },

@@ -28,7 +28,9 @@ behaviour, and update it when something changes.
 ## Architecture in one breath
 
 React 19 + Vite + TypeScript UI (`src/app`, `src/features/*`, `src/ui`), Three.js engine
-(`src/game`, `src/scene`, `src/fx`, cosmetics in `src/cosmetics` + `src/game/Wardrobe.ts`),
+(`src/game`, `src/scene`, `src/fx`, cosmetics in `src/cosmetics` + `src/game/Wardrobe.ts`;
+real item models in `public/assets/`, built from the user's originals by
+`scripts/assets/build-models.ts`),
 typed service contracts (`src/api/types.ts`). In real-account mode everything a player has
 runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`):
 accounts, profile, friends, chat, coins, rank, items, history, matchmaking and timed games.

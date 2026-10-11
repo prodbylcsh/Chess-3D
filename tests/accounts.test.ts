@@ -69,7 +69,7 @@ test('icons: any icon item, nothing else', () => {
   assert.equal(profileUpdate(row(), { iconId: 'queen' }, NOW).icon_id, 'queen');
   assert.equal(profileUpdate(row(), { iconId: 'sun-king' }, NOW).icon_id, 'sun-king');
   assert.equal(profileUpdate(row(), { iconId: 'season-2-iron' }, NOW).icon_id, 'season-2-iron');
-  assert.equal(code(() => profileUpdate(row(), { iconId: 'frost-set' }, NOW)), 'unknown_icon');
+  assert.equal(code(() => profileUpdate(row(), { iconId: 'monolith-set' }, NOW)), 'unknown_icon');
   assert.equal(code(() => profileUpdate(row(), { iconId: 'nope' }, NOW)), 'unknown_icon');
 });
 

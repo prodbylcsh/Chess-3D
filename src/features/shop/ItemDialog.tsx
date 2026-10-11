@@ -1,22 +1,37 @@
-import { useState } from 'react';
-import { Check, Eye, Lock, Sparkles } from 'lucide-react';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { Box, Check, Eye, Lock, Sparkles } from 'lucide-react';
 import { api, type ShopItem } from '../../api';
 import { CATEGORY_AUDIENCE, CATEGORY_NAMES, RARITY_NAMES, itemDescription, itemName } from '../../api/catalog';
 import { useSession } from '../../app/session';
 import { t } from '../../i18n';
-import { Button, Coins, Modal, confirmDialog, cx, formatNumber, useToast } from '../../ui/kit';
+import { Button, Coins, Modal, Spinner, confirmDialog, cx, formatNumber, useToast } from '../../ui/kit';
 import { ItemPreview } from './previews';
 
-/** Everything about one item, with buy and use actions. */
+// three.js loads only when someone opens the 3D view
+const ModelViewer = lazy(() => import('./ModelViewer').then((m) => ({ default: m.ModelViewer })));
+
+/** Piece sets and boards can be looked at in 3D. */
+const hasModel = (item: ShopItem) => item.category === 'pieces' || item.category === 'board';
+
+/** Everything about one item, with buy and use actions, and a 3D view of sets and boards. */
 export function ItemDialog({ item, onClose, onChanged }: { item: ShopItem | null; onClose: () => void; onChanged: () => void }) {
+  const [view3d, setView3d] = useState(false);
+  useEffect(() => setView3d(false), [item?.id]);
   return (
-    <Modal open={!!item} onClose={onClose} width={520}>
-      {item && <ItemDetail item={item} onChanged={onChanged} />}
+    <Modal open={!!item} onClose={onClose} width={view3d ? 920 : 520}>
+      {item &&
+        (view3d ? (
+          <Suspense fallback={<div className="model-viewer-status"><Spinner size={28} /></div>}>
+            <ModelViewer itemId={item.id} name={itemName(item.id)} onBack={() => setView3d(false)} />
+          </Suspense>
+        ) : (
+          <ItemDetail item={item} onChanged={onChanged} onView3d={hasModel(item) ? () => setView3d(true) : undefined} />
+        ))}
     </Modal>
   );
 }
 
-function ItemDetail({ item, onChanged }: { item: ShopItem; onChanged: () => void }) {
+function ItemDetail({ item, onChanged, onView3d }: { item: ShopItem; onChanged: () => void; onView3d?: () => void }) {
   const { profile, setProfile } = useSession();
   const toast = useToast();
   const [busy, setBusy] = useState<'buy' | 'equip' | null>(null);
@@ -60,6 +75,11 @@ function ItemDetail({ item, onChanged }: { item: ShopItem; onChanged: () => void
     <div className={cx('item-detail', `rarity-${item.rarity}`)}>
       <div className="item-detail-art">
         <ItemPreview id={item.id} animate />
+        {onView3d && (
+          <Button variant="secondary" size="sm" className="item-detail-3d" icon={<Box size={15} />} onClick={onView3d}>
+            {t('View in 3D')}
+          </Button>
+        )}
       </div>
       <div className="item-detail-head">
         <span className="rarity-label">{t(RARITY_NAMES[item.rarity])}</span>

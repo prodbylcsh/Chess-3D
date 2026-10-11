@@ -47,6 +47,7 @@ export function loadEngine(container: HTMLElement, onProgress: (fraction: number
     const debris = new Debris(stage.scene, () => view.pieces.values());
     const wardrobe = new Wardrobe(stage, fx, assets);
     view.dress = (piece) => wardrobe.dress(piece);
+    view.template = (color, type) => wardrobe.template(color, type);
     const choreo = new Choreographer(view, fx, debris, stage, wardrobe);
     const game = new Game(stage, view, choreo, store);
 

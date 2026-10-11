@@ -76,7 +76,7 @@ function seedLoadout(i: number, mmr: number): Loadout {
   keys.forEach((category, k) => {
     if (seeded(i * 7 + k + 50) > Math.min(0.85, mmr / 2600)) return;
     const paid = ITEMS.filter((x) => x.category === category && x.price > 0);
-    loadout[category] = paid[Math.floor(seeded(i * 13 + k + 90) * paid.length)].id;
+    if (paid.length) loadout[category] = paid[Math.floor(seeded(i * 13 + k + 90) * paid.length)].id;
   });
   return loadout;
 }

@@ -3,7 +3,7 @@
 // POST { action: 'me' }                          → { profile, player, seasonGrants }   (created on first call)
 // POST { action: 'check_username', username }    → { status: 'available' | 'taken' | 'invalid' }
 // POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded? }
-// POST { action: 'buy', itemId }                 → { player }    take the price, add the item
+// POST { action: 'buy', itemId }                 → { player }    take the price, add the item (player_items)
 // POST { action: 'equip', itemId }               → { profile, player }   use an owned item
 // POST { action: 'delete', username }            → { deleted: true }
 //
@@ -13,7 +13,7 @@
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError, isIcon, profileUpdate, usernameProblem, type ProfilePatch, type ProfileRow } from '../_shared/accounts.ts';
 import { FREE_ITEMS, itemDef, purchaseProblem } from '../_shared/shop.ts';
-import { ensurePlayer, publishShowcase, type PlayerRow } from '../_shared/server/competitive.ts';
+import { ensurePlayer, getPlayer, publishShowcase, type PlayerRow } from '../_shared/server/competitive.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -92,9 +92,9 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       if (problem === 'coins') throw new AccountError('insufficient_coins', 'You do not have enough coins for this item.', 409);
       if (problem === 'owned') throw new AccountError('owned', 'You already own this item.', 409);
       if (problem) throw new AccountError('not_for_sale', 'This item cannot be bought.', 409);
-      const { data, error } = await admin.rpc('buy_item', { p_player: user.id, p_item: itemId, p_price: itemDef(itemId)!.price });
+      const { error } = await admin.rpc('buy_item', { p_player: user.id, p_item: itemId, p_price: itemDef(itemId)!.price });
       if (error) throw /cannot_buy/.test(error.message) ? new AccountError('insufficient_coins', 'You do not have enough coins for this item.', 409) : error;
-      return { player: data };
+      return { player: await getPlayer(admin, user.id) };
     }
 
     case 'equip': {
@@ -108,10 +108,11 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
         return { profile: await me(user), player };
       }
       const loadout = { ...player.loadout, [def.category]: itemId };
-      const { data, error } = await admin.from('players').update({ loadout }).eq('id', user.id).select().single();
+      const { error } = await admin.from('players').update({ loadout }).eq('id', user.id);
       if (error) throw error;
-      await publishShowcase(admin, data as PlayerRow);
-      return { profile: await me(user), player: data };
+      const updated = await getPlayer(admin, user.id);
+      await publishShowcase(admin, updated);
+      return { profile: await me(user), player: updated };
     }
 
     case 'delete': {

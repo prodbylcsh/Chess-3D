@@ -65,6 +65,9 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   effect). The item is random, but nothing from the previous 3 seasons repeats, brackets
   get different items, and a higher bracket never gets a cheaper item. A player who
   already owns the item gets its price in coins instead.
+  Items start with season 2 (`FIRST_ITEM_SEASON`); with fewer items than brackets the most
+  expensive go to the highest brackets (season 2: Challenger the Monolith set, Master &
+  Grandmaster the Monolith board).
 - **Shop prices:** see §4.5 and the shop-items skill.
 - **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
   names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.

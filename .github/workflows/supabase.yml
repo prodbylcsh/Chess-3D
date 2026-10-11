@@ -1,6 +1,6 @@
 name: Deploy Supabase backend
 
-# Applies database migrations, deploys the Edge Functions (`game`, `account`, `social`, `play`) and sets the
+# Applies database migrations, copies the shop catalogue into the database (supabase/catalog.ts), deploys the Edge Functions (`game`, `account`, `social`, `play`) and sets the
 # auth settings and email templates from supabase/config.toml (supabase/auth-config.ts)
 # whenever anything under supabase/ changes on main, then smoke-tests the live project
 # (tests/live.smoke.ts; leaves a few anonymous guests and one finished game behind). Needs, in Settings → Secrets and
@@ -35,6 +35,8 @@ jobs:
       - run: npm ci
       - run: npx supabase link --project-ref "$PROJECT_ID"
       - run: npx supabase db push
+      # the shop catalogue into the `items` table (before the functions that sell it)
+      - run: node supabase/catalog.ts --linked
       - run: npx supabase functions deploy game --project-ref "$PROJECT_ID" --use-api
       - run: npx supabase functions deploy account --project-ref "$PROJECT_ID" --use-api
       - run: npx supabase functions deploy social --project-ref "$PROJECT_ID" --use-api

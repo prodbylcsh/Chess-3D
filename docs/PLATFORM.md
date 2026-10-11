@@ -187,8 +187,12 @@ Coins earned by playing are spent here. Categories:
 | Profile icons | your avatar | everyone |
 
 Owned items can be equipped ("Used") from the Shop or from the Profile ("In use" → your
-items). Later: real-money coin packs and temporary coin boosts (e.g. +50% coins for 24 h),
-and a 3D viewer for items.
+items). Piece sets and boards have a **3D view** in their item dialog (Shop and Profile →
+your items): pick a piece and a colour, drag to rotate, scroll or pinch to zoom,
+right-drag or two fingers to move (`src/features/shop/ModelViewer.tsx`, loaded only when
+opened). The shop lists only categories with something to buy; the others hold just
+their standard item until real items arrive. Later: real-money coin packs and temporary
+coin boosts (e.g. +50% coins for 24 h).
 
 Price ranges per category (enforced by `tests/shop.test.ts`):
 
@@ -197,23 +201,35 @@ Price ranges per category (enforced by `tests/shop.test.ts`):
 | Profile icon | 1,500 – 3,000 |
 | Background | 5,000 – 12,000 |
 | Move animation / destruction effect | 8,000 – 20,000 |
-| Board | 10,000 – 25,000 |
-| Piece set | 15,000 – 40,000 |
+| Board | 10,000 – 45,000 |
+| Piece set | 15,000 – 70,000 |
+
+(Raised in October 2026 for the first real, premium set: about 70% above the most
+expensive placeholder set, 40,000 → 68,000; the board follows the same rule, 25,000 →
+42,500.)
 
 At roughly 10 games a day this means a new icon every 2–3 days and a piece set every few
 weeks, which keeps the shop meaningful without feeling out of reach.
 
-**Catalogue (M3).** Every category has one free standard item that everyone owns; profile
-icons have six free starters.
+**Catalogue.** Every category has one free standard item that everyone owns; profile
+icons have six free starters. Piece sets and boards are separate items (a set never
+includes a board).
 
 | Category | Items (price, rarity) |
 | --- | --- |
-| Piece sets | Classic Marble (free) · Onyx & Gold 15,000 rare · Frostbound 22,000 epic · Emberforged 28,000 epic · Celestial 40,000 legendary |
-| Boards | Classic Marble (free) · Walnut 10,000 common · Moonstone 14,000 rare · Jade Palace 18,000 epic · Royal Court 25,000 legendary |
-| Backgrounds | Candlelit Study (free) · Moonlit Hall 5,000 common · Emerald Grove 7,000 rare · Arcane Void 9,500 epic · Volcanic Forge 12,000 legendary |
-| Move animations | Glide (free) · Levitate 8,000 rare · Blink 14,000 epic · Comet 20,000 legendary |
-| Destruction effects | Shatter (free) · Embers 9,000 rare · Frostbite 14,000 epic · Implode 20,000 legendary |
+| Piece sets | Classic Marble (free) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) |
+| Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) |
+| Backgrounds | Candlelit Study (free) |
+| Move animations | Glide (free) |
+| Destruction effects | Shatter (free) |
 | Profile icons | 6 starters (free) · Ember Rook / Frost Knight 1,500 · Jade Bishop / Storm Pawn 2,000 · Void Queen 2,500 · Sun King 3,000 |
+
+The first catalogue (M3) had placeholder sets, boards, backgrounds and effects that
+recoloured the classic set; they were taken out of the shop when the first real models
+arrived (October 2026, nobody owned any). Their ids are kept as retired
+(`RETIRED_ITEMS` in `_shared/shop.ts`) and must never be reused. The engine still has
+the extra move and capture animations (levitate, blink, comet, embers, frostbite,
+implode) for future items.
 
 Season reward icons ("Season 2 · Gold & Platinum") are icons too, but are never for sale.
 
@@ -225,19 +241,28 @@ items; matchmade opponents (and demo opponents) show their own items, read from 
 public profile. Online friend games show your items on your side and the standard set for
 the opponent.
 
-**Assets.** The current looks are placeholders made from the classic set: piece sets and
-boards recolour the marble textures with a shader, backgrounds change sky, table, lights
-and floating particles, and the effects reuse the existing particle and shatter systems.
-Real assets replace them item by item without changing the shop or the API. Each look
-already has an `assets` slot; loading GLBs and textures from it is added in the engine
-together with the first delivered assets. Preview images work today.
+**Assets.** Real items are 3D models under `public/assets/`, served with the site:
 
-| Category | Asset to provide | Where it goes |
-| --- | --- | --- |
-| Piece set | GLB with nodes `piece_<pawn…king>_<white\|black>`, same scale as `chess-set.glb` | `public/models/sets/<id>.glb`, referenced from `assets.model` in `src/cosmetics/looks.ts` |
-| Board | GLB with a `board` node, or a replacement diffuse texture | `public/models/boards/<id>.glb` |
-| Background | equirectangular image or a scene GLB | `public/backgrounds/<id>.*` |
-| Any item | preview image, 16:10, ~640×400, WebP/PNG | `public/shop/<id>.webp`, listed in `PREVIEW_IMAGES` (`src/features/shop/previews.tsx`) |
+```
+public/assets/
+  pieces/<set>/<king…pawn>-<white|black>.glb       the board (≈6k triangles each)
+  pieces/<set>/<king…pawn>-<white|black>-hd.glb    the 3D view (≈24k triangles)
+  boards/<board>/board.glb                          8×8 grid = 8 units, top at the classic board's height
+  shop/<item-id>.webp                               shop card picture, 16:10 (PREVIEW_IMAGES)
+  backgrounds/, effects/, animations/               future items, same idea
+```
+
+The originals the user delivers (large: 4K textures, up to 450k triangles) are not in
+git; they go to `assets-src/<item>/` locally and `scripts/assets/build-models.ts` turns
+them into the files above: base at y = 0, size on the board (one square = one unit; each
+piece's height is set per set), simplified meshes, WebP textures, meshopt-compressed
+geometry, and the missing colour of a piece set (non-metal parts recoloured, chrome kept).
+A look in `src/cosmetics/looks.ts` points at the folder (`model: { dir }` for sets,
+`model: { file }` for boards); the engine loads it when a game uses the item and falls
+back to the classic set if loading fails. Delivery format: one GLB per piece
+(`king.glb` … `pawn.glb`) plus `chessboard.glb` for a board, in either colour, any scale;
+the shop-items skill has the steps. Placeholder looks (recolours of the classic set)
+still work for items without models.
 
 Move animations and destruction effects are code (`src/game/Choreographer.ts`); new ones
 need a short description or reference video.
@@ -531,15 +556,18 @@ a_read_at, b_read_at, last_message_at), `messages` (id, conversation_id, sender_
 kind text|invite, game_id, created_at), and the view `conversation_list` (last message and
 unread count for the caller); written only by the `social` Edge Function. Competitive (M6):
 `players` (private to the player: mmr, coins, wins, losses, draws, streaks, season,
-season_peak_mmr, inventory, loadout, badges; MMR is never public, others see the
-showcase), `games` + kind (friend|ranked|casual|wager), control, clock_w, clock_b,
+season_peak_mmr, loadout, badges; MMR is never public, others see the showcase), `games` + kind (friend|ranked|casual|wager), control, clock_w, clock_b,
 turn_started_at, stake, settled_at; `game_results` (one row per player and game: public
 columns, plus private mmr_delta, coins_delta and the breakdown), `coin_ledger` and
 `mm_queue`. Atomic steps are SQL functions only the service role may call: `mm_poll`
 (matching, stakes), `settle_game` (once per game), `buy_item`, `apply_seasons`. Season ends
 are applied lazily the next time a player shows up (rewards by the season's peak, MMR
-reset, streaks reset). The shop catalogue stays in code (`_shared/shop.ts`). The rest is
-the plan:
+reset, streaks reset). Items: `items` (the catalogue: id, category, rarity, price,
+for_sale, retired; public) is copied from `_shared/shop.ts` on every deploy by
+`supabase/catalog.ts`; `player_items` (player_id, item_id, source purchase|season|grant,
+price_paid, season, acquired_at; private to the player) has one row per owned item, so
+"who owns what, since when, how" is one query (free standard items have no rows).
+`buy_item` checks the price against `items` too. The rest is the plan:
 
 ```
 awards          id, name, rule;  player_awards  player_id, award_id, earned_at
@@ -612,9 +640,10 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M2 Social | Profile (own and public, stats, awards, history, loadout, icon change), Community (search, friends, requests, suggestions), Messages (chat, unread badges, challenges in chat), Settings (email, password, username with 30-day limit, sound, camera, language, sign out, delete account) | ✅ (on the mock back-end) |
 | M3 Shop | Shop catalogue (30+ items, placeholder looks), buy and equip, your items on the Profile, loadouts in games, season rewards view | ✅ (on the mock back-end) |
 | M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
-| M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ in code, tested locally; live when merged |
-| M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ in code, tested locally; live when merged |
-| Later | Tournaments, Puzzles, Learn, more cosmetics, real-money coins, boosts, 3D item viewer | ⏸ |
+| M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ live (October 2026) |
+| M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ live (October 2026) |
+| M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ in code, tested locally; live when merged |
+| Later | Tournaments, Puzzles, Learn, more sets, boards, backgrounds and effects, real-money coins, boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -652,6 +681,15 @@ Decided:
   pawn being taken; clicking either plays it.
 - **Fresh start on the server** (M6): coins, rank and items from the browser are not carried
   over; everyone starts with 500 coins, Silver II and the free items.
+- **Real items replace the placeholders** (October 2026): the first real piece set and
+  board, **Monolith** (68,000 and 42,500 coins: about 70% above the most expensive
+  placeholder of their kind), with a White version of the black models made by
+  recolouring; boards are always separate items. All placeholder items except the
+  profile icons left the shop (retired, nobody owned any). Ownership is recorded per
+  item in `player_items`. Season item rewards start with season 2 (season 1 ended before
+  the server kept items), so in season 2 the Challenger bracket gets the Monolith set and
+  Master & Grandmaster the Monolith board, by the existing rule that the most expensive
+  items go to the highest brackets.
   The legal pages say so (Privacy §3, Terms §6, effective 11 October 2026); Terms §5
   covers clocks, leaving and the first-move window.
 - **No coins under 20 half-moves**, MMR still counts; **30 s first-move window**, else the

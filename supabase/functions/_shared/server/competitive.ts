@@ -8,6 +8,7 @@ import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
 
 export interface PlayerRow extends PlayerState {
+  /** items bought or won (the `player_items` table; free items are not listed) */
   inventory: string[];
   loadout: Record<string, string>;
   badges: string[];
@@ -21,9 +22,20 @@ export function rankInfo(mmr: number) {
 }
 
 async function loadPlayer(admin: SupabaseClient, id: string): Promise<PlayerRow | null> {
-  const { data, error } = await admin.from('players').select('*').eq('id', id).maybeSingle();
-  if (error) throw error;
-  return data as PlayerRow | null;
+  const [player, items] = await Promise.all([
+    admin.from('players').select('*').eq('id', id).maybeSingle(),
+    admin.from('player_items').select('item_id').eq('player_id', id).order('acquired_at'),
+  ]);
+  if (player.error) throw player.error;
+  if (items.error) throw items.error;
+  return player.data ? ({ ...player.data, inventory: items.data.map((i) => i.item_id as string) } as PlayerRow) : null;
+}
+
+/** A player's current state (after `ensurePlayer` created it). */
+export async function getPlayer(admin: SupabaseClient, id: string): Promise<PlayerRow> {
+  const player = await loadPlayer(admin, id);
+  if (!player) throw new Error('player not found');
+  return player;
 }
 
 /** Publish what other players see of this player (rank, stats, items in use). */

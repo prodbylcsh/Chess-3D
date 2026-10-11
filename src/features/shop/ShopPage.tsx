@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Check } from 'lucide-react';
 import { api, type ShopItem } from '../../api';
-import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PLURALS, RARITY_NAMES, itemName, type ItemCategory } from '../../api/catalog';
+import { SHOP_CATEGORIES, CATEGORY_NAMES, CATEGORY_PLURALS, RARITY_NAMES, itemName, type ItemCategory } from '../../api/catalog';
 import { Page } from '../../app/AppLayout';
 import { useSession } from '../../app/session';
 import { t } from '../../i18n';
@@ -39,7 +39,7 @@ export function ShopPage() {
       ),
     [items, category, filter],
   );
-  const groups = CATEGORIES.filter((c) => !category || c === category)
+  const groups = SHOP_CATEGORIES.filter((c) => !category || c === category)
     .map((c) => ({ category: c, items: shown.filter((i) => i.category === c) }))
     .filter((g) => g.items.length);
 
@@ -66,7 +66,7 @@ export function ShopPage() {
           <button type="button" role="tab" aria-selected={!category} className={cx('chip', !category && 'is-active')} onClick={() => pick(null)}>
             {t('All')}
           </button>
-          {CATEGORIES.map((c) => (
+          {SHOP_CATEGORIES.map((c) => (
             <button key={c} type="button" role="tab" aria-selected={category === c} className={cx('chip', category === c && 'is-active')} onClick={() => pick(c)}>
               {t(CATEGORY_PLURALS[c])}
             </button>

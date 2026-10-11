@@ -22,8 +22,8 @@ export const PRICE_RANGES: Record<ItemCategory, [number, number]> = {
   background: [5_000, 12_000],
   moveAnimation: [8_000, 20_000],
   destruction: [8_000, 20_000],
-  board: [10_000, 25_000],
-  pieces: [15_000, 40_000],
+  board: [10_000, 45_000],
+  pieces: [15_000, 70_000],
 };
 
 const item = (id: string, category: ItemCategory, price: number, rarity: Rarity): ShopItemDef => ({ id, category, price, rarity, forSale: price > 0 });
@@ -31,32 +31,14 @@ const item = (id: string, category: ItemCategory, price: number, rarity: Rarity)
 export const ITEMS: readonly ShopItemDef[] = [
   // piece sets
   item('marble-set', 'pieces', 0, 'standard'),
-  item('onyx-gold-set', 'pieces', 15_000, 'rare'),
-  item('frost-set', 'pieces', 22_000, 'epic'),
-  item('ember-set', 'pieces', 28_000, 'epic'),
-  item('celestial-set', 'pieces', 40_000, 'legendary'),
+  item('monolith-set', 'pieces', 68_000, 'legendary'),
   // boards
   item('marble-board', 'board', 0, 'standard'),
-  item('walnut-board', 'board', 10_000, 'common'),
-  item('moonstone-board', 'board', 14_000, 'rare'),
-  item('jade-board', 'board', 18_000, 'epic'),
-  item('royal-board', 'board', 25_000, 'legendary'),
-  // backgrounds
+  item('monolith-board', 'board', 42_500, 'legendary'),
+  // backgrounds, move animations and destruction effects: only the standard ones so far
   item('candlelit-study', 'background', 0, 'standard'),
-  item('moonlit-hall', 'background', 5_000, 'common'),
-  item('emerald-grove', 'background', 7_000, 'rare'),
-  item('arcane-void', 'background', 9_500, 'epic'),
-  item('volcanic-forge', 'background', 12_000, 'legendary'),
-  // move animations
   item('glide', 'moveAnimation', 0, 'standard'),
-  item('levitate', 'moveAnimation', 8_000, 'rare'),
-  item('blink', 'moveAnimation', 14_000, 'epic'),
-  item('comet', 'moveAnimation', 20_000, 'legendary'),
-  // destruction effects
   item('shatter', 'destruction', 0, 'standard'),
-  item('embers', 'destruction', 9_000, 'rare'),
-  item('frostbite', 'destruction', 14_000, 'epic'),
-  item('implode', 'destruction', 20_000, 'legendary'),
   // profile icons (the six starters are free)
   item('king', 'icon', 0, 'standard'),
   item('queen', 'icon', 0, 'standard'),
@@ -70,6 +52,20 @@ export const ITEMS: readonly ShopItemDef[] = [
   item('storm-pawn', 'icon', 2_000, 'rare'),
   item('void-queen', 'icon', 2_500, 'epic'),
   item('sun-king', 'icon', 3_000, 'legendary'),
+];
+
+/**
+ * Items taken out of the shop. Never reuse their ids: players may still own them (the
+ * database keeps them as retired, `supabase/catalog.ts`). The first looks were
+ * placeholders that recoloured the classic set; they were removed when real models
+ * arrived (October 2026).
+ */
+export const RETIRED_ITEMS: ReadonlyArray<Pick<ShopItemDef, 'id' | 'category'>> = [
+  ...(['onyx-gold-set', 'frost-set', 'ember-set', 'celestial-set'] as const).map((id) => ({ id, category: 'pieces' as const })),
+  ...(['walnut-board', 'moonstone-board', 'jade-board', 'royal-board'] as const).map((id) => ({ id, category: 'board' as const })),
+  ...(['moonlit-hall', 'emerald-grove', 'arcane-void', 'volcanic-forge'] as const).map((id) => ({ id, category: 'background' as const })),
+  ...(['levitate', 'blink', 'comet'] as const).map((id) => ({ id, category: 'moveAnimation' as const })),
+  ...(['embers', 'frostbite', 'implode'] as const).map((id) => ({ id, category: 'destruction' as const })),
 ];
 
 /** What every new account owns and uses. */

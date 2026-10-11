@@ -57,6 +57,8 @@ export class Game {
   private seat: Seat | null = null;
   /** board work runs strictly in order: moves, remote updates and resets never interleave */
   private queue: Promise<void> = Promise.resolve();
+  /** loading of the next game's items (`prepare`); `begin` waits for it */
+  private preparing: Promise<void> = Promise.resolve();
   private introduced = false;
   /** keyboard shortcuts only apply while the game screen is showing */
   active = false;
@@ -77,12 +79,18 @@ export class Game {
   begin(seat: Seat | null, moves: string[] = []): Promise<void> {
     this.setBusy(true);
     return this.run(async () => {
+      await this.preparing; // the players' piece sets and board
       this.seat = seat;
       const side = seat?.side ?? 'w';
       if (this.introduced) return this.resetBoard(moves, side);
       this.introduced = true;
       await this.intro(moves, side);
     });
+  }
+
+  /** The next `begin` waits for this (the Wardrobe loading the players' models). */
+  prepare(loading: Promise<void>): void {
+    this.preparing = loading.catch(() => {});
   }
 
   /** Moves so far in UCI notation ("e2e4", "e7e8q"). */

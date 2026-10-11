@@ -78,12 +78,15 @@ test('every player starts fresh on the server; the shop takes coins and adds ite
   assert.deepEqual(me.seasonGrants, []);
 
   const { itemDef } = await import('../supabase/functions/_shared/shop.ts');
-  const cheap = itemDef('walnut-board')!;
-  const pricey = itemDef('celestial-set')!;
-  await admin.from('players').update({ coins: 20_000 }).eq('id', ana.id); // as if earned in games
+  const cheap = itemDef('monolith-board')!;
+  const pricey = itemDef('monolith-set')!;
+  await admin.from('players').update({ coins: 50_000 }).eq('id', ana.id); // as if earned in games
   const bought = await fn(ana.client, 'account', { action: 'buy', itemId: cheap.id });
-  assert.equal(bought.player.coins, 20_000 - cheap.price);
+  assert.equal(bought.player.coins, 50_000 - cheap.price);
   assert.ok(bought.player.inventory.includes(cheap.id));
+  // ownership is recorded with how and when the item came
+  const owned = await ana.client.from('player_items').select('item_id, source, price_paid');
+  assert.deepEqual(owned.data, [{ item_id: cheap.id, source: 'purchase', price_paid: cheap.price }]);
   assert.equal((await fn(ana.client, 'account', { action: 'buy', itemId: cheap.id })).code, 'owned');
   assert.equal((await fn(ana.client, 'account', { action: 'buy', itemId: pricey.id })).code, 'insufficient_coins');
   assert.equal((await fn(ana.client, 'account', { action: 'equip', itemId: pricey.id })).code, 'not_owned');
@@ -246,6 +249,8 @@ test('season end: rewards by the peak rank, MMR pulled towards 1,000, once', asy
   assert.equal(me.player.mmr, 1375);
   assert.equal(me.player.coins, 500 + me.seasonGrants[0].coins);
   assert.ok(me.player.inventory.includes('season-1-gold-platinum'));
+  const won = await q.client.from('player_items').select('item_id, source, season');
+  assert.deepEqual(won.data, [{ item_id: 'season-1-gold-platinum', source: 'season', season: 1 }]);
   assert.deepEqual((await fn(q.client, 'account', { action: 'me' })).seasonGrants, []);
 });
 
@@ -260,6 +265,11 @@ test('players cannot write their state, see others\' MMR, or run the server func
   assert.ok((await r.client.from('coin_ledger').insert({ player_id: r.id, amount: 5, reason: 'game' })).error);
   assert.ok((await r.client.from('mm_queue').select('*')).error || true);
   assert.ok((await r.client.rpc('buy_item', { p_player: r.id, p_item: 'x', p_price: 0 })).error);
+  assert.ok((await r.client.from('player_items').insert({ player_id: r.id, item_id: 'monolith-set', source: 'grant' })).error, 'no free items');
+  assert.equal((await r.client.from('items').select('id').eq('id', 'monolith-set')).data?.length, 1, 'the catalogue is public');
+  // the server checks the catalogue too: not for sale, or the wrong price
+  assert.ok((await admin.rpc('buy_item', { p_player: r.id, p_item: 'onyx-gold-set', p_price: 0 })).error, 'retired');
+  assert.ok((await admin.rpc('buy_item', { p_player: r.id, p_item: 'monolith-set', p_price: 1 })).error, 'wrong price');
   assert.ok((await r.client.rpc('settle_game', { p_game: 'x', p_rows: [] })).error);
   assert.ok((await r.client.rpc('mm_poll', { p_player: r.id, p_kind: 'casual', p_control: 'rapid', p_stake: null, p_mmr: 0, p_base_ms: 1 })).error);
 

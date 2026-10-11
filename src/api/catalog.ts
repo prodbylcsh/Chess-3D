@@ -11,6 +11,8 @@ export type LoadoutCategory = keyof Loadout;
 /** Display order of the categories. */
 export const CATEGORIES: ItemCategory[] = ['pieces', 'board', 'background', 'moveAnimation', 'destruction', 'icon'];
 export const LOADOUT_CATEGORIES: LoadoutCategory[] = ['pieces', 'board', 'background', 'moveAnimation', 'destruction'];
+/** Categories the shop shows: those with something to buy (the rest hold only the standard item). */
+export const SHOP_CATEGORIES: ItemCategory[] = CATEGORIES.filter((c) => ITEMS.some((i) => i.category === c && i.forSale));
 
 export const CATEGORY_NAMES: Record<ItemCategory, string> = {
   pieces: tk('Piece set'),
@@ -42,28 +44,12 @@ export const CATEGORY_AUDIENCE: Record<ItemCategory, string> = {
 
 const TEXT: Record<string, [name: string, description: string]> = {
   'marble-set': [tk('Classic Marble'), tk('Polished ivory and obsidian marble.')],
-  'onyx-gold-set': [tk('Onyx & Gold'), tk('Black onyx veined with gold, against pieces of solid gold.')],
-  'frost-set': [tk('Frostbound'), tk('Carved from glacier ice, with veins of cold blue light.')],
-  'ember-set': [tk('Emberforged'), tk('Pieces cooled from lava, still glowing inside.')],
-  'celestial-set': [tk('Celestial'), tk('Starlight and night sky, veined with gold and violet.')],
+  'monolith-set': [tk('Monolith'), tk('Faceted towers of black stone and ivory marble, crowned in polished chrome.')],
   'marble-board': [tk('Classic Marble'), tk('Veined marble squares in a dark frame.')],
-  'walnut-board': [tk('Walnut'), tk('Warm walnut and maple, like a club board.')],
-  'moonstone-board': [tk('Moonstone'), tk('Pale moonstone and deep slate blue.')],
-  'jade-board': [tk('Jade Palace'), tk('Polished jade and white nephrite.')],
-  'royal-board': [tk('Royal Court'), tk('Ivory and crimson marble with veins of gold.')],
+  'monolith-board': [tk('Monolith'), tk('Graphite oak and matte black squares on a polished chrome hull.')],
   'candlelit-study': [tk('Candlelit Study'), tk('A warm, dark study lit by candles.')],
-  'moonlit-hall': [tk('Moonlit Hall'), tk('Cold moonlight and drifting dust in an empty hall.')],
-  'emerald-grove': [tk('Emerald Grove'), tk('A quiet forest clearing full of fireflies.')],
-  'arcane-void': [tk('Arcane Void'), tk('The board floats in violet nothingness.')],
-  'volcanic-forge': [tk('Volcanic Forge'), tk('Glowing embers rise from the heart of a forge.')],
   glide: [tk('Glide'), tk('Pieces lean into the move and leap over blockers.')],
-  levitate: [tk('Levitate'), tk('Pieces rise into the air and float to their square.')],
-  blink: [tk('Blink'), tk('Pieces vanish in a swirl of magic and reappear on their square.')],
-  comet: [tk('Comet'), tk('Pieces streak across the board trailing sparks.')],
   shatter: [tk('Shatter'), tk('Victims break into physics-driven shards.')],
-  embers: [tk('Embers'), tk('Victims burn away into rising embers.')],
-  frostbite: [tk('Frostbite'), tk('Victims freeze solid, then burst into ice.')],
-  implode: [tk('Implode'), tk('Victims collapse into a tiny star and vanish in a flash.')],
   king: [tk('King'), tk('One of the six starter icons.')],
   queen: [tk('Queen'), tk('One of the six starter icons.')],
   rook: [tk('Rook'), tk('One of the six starter icons.')],

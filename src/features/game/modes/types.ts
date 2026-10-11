@@ -56,8 +56,9 @@ export function playerFromProfile(profile: Profile | null, fallbackName = 'You')
  * Dress the next game: each side in its player's items, board and background
  * picked from one of them (`seed` makes the pick the same for both players).
  */
+/** Dress the next game in the players' items; `game.begin` waits for their models. */
 export function dressGame(engine: Engine, loadouts: Partial<Record<Side, Loadout | null>>, seed: string): void {
-  engine.wardrobe.apply(looksFor(loadouts.w ?? null, loadouts.b ?? null, seed));
+  engine.game.prepare(engine.wardrobe.apply(looksFor(loadouts.w ?? null, loadouts.b ?? null, seed)));
 }
 
 export const randomSeed = () => Math.random().toString(36).slice(2);

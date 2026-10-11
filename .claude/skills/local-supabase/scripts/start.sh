@@ -68,6 +68,9 @@ fi
 #     them on a fresh volume).
 npx supabase migration up --local </dev/null >"$LOGS/migrate.log" 2>&1 || { tail -20 "$LOGS/migrate.log"; exit 1; }
 
+# 3c. The shop catalogue in the database (`items`), as the deploy does it.
+node supabase/catalog.ts --local </dev/null >>"$LOGS/migrate.log" 2>&1 || { tail -20 "$LOGS/migrate.log"; exit 1; }
+
 # 4. Patch the edge-runtime image once: trust the agent proxy's CA and use the mirror.
 EDGE=$(docker images supabase/edge-runtime --format '{{.Repository}}:{{.Tag}}' | grep -v -- '-orig$' | head -1)
 if [ -z "$EDGE" ]; then
