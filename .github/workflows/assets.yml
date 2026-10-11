@@ -1,0 +1,29 @@
+name: Shop assets to Cloudflare R2
+
+# Uploads public/assets (the built shop models and pictures) to the R2 bucket and checks
+# that the site can load them. The Pages deploy (deploy.yml) does the same before every
+# build; run this by hand to try R2 from any branch without deploying the site.
+# Needs the secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: r2
+        run: node scripts/assets/r2.ts publish
+      - run: node scripts/assets/r2.ts list assets
+      - name: Ready?
+        run: test "${{ steps.r2.outputs.ready }}" = "true"

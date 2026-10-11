@@ -252,15 +252,20 @@ public/assets/
   backgrounds/, effects/, animations/               future items, same idea
 ```
 
-**Storage on Cloudflare R2 (being set up, October 2026).** Two buckets:
+**Storage on Cloudflare R2 (October 2026).** Two buckets:
 `wizard-chess-assets` (public; the files above, same paths without the `assets/` prefix;
 the app reads them from `VITE_ASSETS_URL`, the bucket's public URL, and falls back to
 `public/assets/` on the site when it is not set) and `wizard-chess-originals` (private;
 the user's original models and pictures per item, so they are never lost).
 `scripts/assets/r2.ts` uploads (`push-assets`, `push-originals`), downloads
 (`pull-originals`) and sets CORS; it needs an R2 API token in the environment
-(`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`). Once the bucket serves the
-live site, `public/assets/` leaves git and the Privacy Policy names Cloudflare.
+(`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, GitHub Actions secrets; the
+Claude cloud environment cannot reach Cloudflare). The Pages deploy runs `r2.ts publish`
+(upload changed files, CORS, check that the live site can load a model) and builds with
+`VITE_ASSETS_URL` only when that passes, otherwise the site serves `public/assets/` itself;
+`.github/workflows/assets.yml` runs the same by hand from any branch. The built files stay
+in git (`public/assets/`, the source of each upload); the originals are uploaded to the
+originals bucket in the Cloudflare dashboard. The Privacy Policy names Cloudflare.
 
 The originals the user delivers (large: 4K textures, up to 450k triangles) are not in
 git; they go to `assets-src/<item>/` locally (and to the originals bucket) and `scripts/assets/build-models.ts` turns

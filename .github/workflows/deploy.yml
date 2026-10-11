@@ -17,6 +17,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Cloudflare R2 (shop models and pictures, scripts/assets/r2.ts). Without these
+      # secrets, or when R2 is not ready, the site serves the files itself.
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -25,7 +31,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npm run build
+      - name: Shop assets to Cloudflare R2
+        id: r2
+        if: env.R2_ACCOUNT_ID != ''
+        run: node scripts/assets/r2.ts publish
+      - name: Build
+        run: |
+          # load shop assets from R2 only when they are there and readable (see the step above)
+          if [ "${{ steps.r2.outputs.ready }}" != "true" ]; then export VITE_ASSETS_URL=; fi
+          npm run build
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
