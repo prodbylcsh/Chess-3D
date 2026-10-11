@@ -475,10 +475,11 @@ The 3D board fills the screen. Around it:
 - **Data layer:** `src/api/` defines typed service interfaces (auth, profiles, friends,
   messages, shop, matchmaking, games). A **mock implementation** (browser storage, fake
   latency) makes the whole UI usable now; a **Supabase implementation** replaces it module
-  by module without UI changes. Since M4, `src/api/supabase/` provides auth, the own
-  profile and account settings whenever the build has Supabase settings; the remaining
-  services still run on the browser store, keyed to the signed-in Supabase user.
-  `npm run dev:mock` (`VITE_ACCOUNTS=mock`) keeps accounts in the browser too.
+  by module without UI changes. Since M6, whenever the build has Supabase settings,
+  `src/api/supabase/` provides everything a player has (accounts, profile, friends, chat,
+  coins, rank, items, history, matchmaking); the browser store only holds a copy of the
+  server state for the screens to read. `npm run dev:mock` (`VITE_ACCOUNTS=mock`) runs the
+  whole back-end in the browser.
 - **One Supabase client** (`src/net/supabase.ts`, PKCE flow so returning links work with
   hash routes) is shared by accounts and online games.
 - **AI opponent:** a small alpha-beta engine in a Web Worker (5 levels, move generator
