@@ -155,6 +155,18 @@ A roadmap of 100 levels, easiest to hardest, with progress saved to the account.
 puts the player in a position (a mid-game scenario or a forced line) where the opponent's
 replies are pre-programmed. Later: more packs and community-made puzzles.
 
+Decided (October 2026, before building it):
+
+- **Source:** the 100 levels are picked from the Lichess puzzle database (CC0, millions of
+  puzzles with a difficulty rating and themes), sorted from easiest to hardest.
+- **Coins:** a small reward only the first time a level is solved, about 25–50 coins by
+  difficulty (exact numbers set with the economy when building it). Solving it again pays
+  nothing, so puzzles cannot be farmed.
+- **Stars:** 1–3 per level by mistakes and hints used. They are for motivation only and do
+  not change the coins.
+- **Progress:** a map of levels; the next one unlocks when the previous one is solved.
+- **Guests** can try the first few levels; progress is saved only for signed-in players.
+
 ### 4.3 Learn ⏸
 
 Interactive tutorials: rules and basics, then tactics, openings and advanced ideas.
@@ -506,6 +518,8 @@ The 3D board fills the screen. Around it:
   outcome, the MMR change with its breakdown (base, difference, performance, streak) and
   the new rank progress, the coins earned, and Rematch / New game / Back to lobby.
 - Toasts for draw offers, rematch requests, opponent connection.
+- **Start framing:** a game starts at the classic distance, or further away on narrow
+  screens (phones held upright) so the whole width of the board is in view.
 - **Camera:** drag to orbit, right-drag to pan, scroll or pinch to zoom; zooming out goes
   far enough (distance 42) to see the whole board on a phone, and beyond the earlier
   limit (26) the fog thins so the board stays clear.

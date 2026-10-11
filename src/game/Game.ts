@@ -57,6 +57,8 @@ export class Game {
   private seat: Seat | null = null;
   /** board work runs strictly in order: moves, remote updates and resets never interleave */
   private queue: Promise<void> = Promise.resolve();
+  /** the camera's distance from the board at the start of a game on a wide screen */
+  private readonly classicDistance: number;
   /** loading of the next game's items (`prepare`); `begin` waits for it */
   private preparing: Promise<void> = Promise.resolve();
   private introduced = false;
@@ -69,6 +71,7 @@ export class Game {
     private readonly choreo: Choreographer,
     private readonly ui: GameUi,
   ) {
+    this.classicDistance = stage.camera.position.distanceTo(stage.controls.target);
     this.bindInput();
   }
 
@@ -497,7 +500,7 @@ export class Game {
     const pieces = this.view.rebuild(this.chess);
     for (const p of pieces) p.dissolve.uDissolve.value = 1.1;
     this.ui.update(this.chess);
-    await Promise.all([this.faceSide(side), this.choreo.materialize(pieces)]);
+    await Promise.all([this.faceSide(side, this.startDistance()), this.choreo.materialize(pieces)]);
     this.settle();
   }
 
@@ -523,22 +526,37 @@ export class Game {
     return new THREE.Spherical().setFromVector3(off).theta;
   }
 
-  private faceSide(side: Side): Promise<void> {
-    return this.orbitTo(side === 'w' ? 0 : Math.PI);
+  /**
+   * How far the camera starts from the board: the classic framing, or further away on
+   * narrow screens (phones held upright) so the whole width of the board is in view.
+   */
+  private startDistance(): number {
+    const { camera } = this.stage;
+    const halfWidth = Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+    // the near edge of the board is closer to the camera than the centre: leave a margin
+    return Math.max(this.classicDistance, (layout.boardHalf * 1.15) / Math.tan(halfWidth));
   }
 
-  private async orbitTo(theta: number, duration = 1.2): Promise<void> {
+  private faceSide(side: Side, distance?: number): Promise<void> {
+    return this.orbitTo(side === 'w' ? 0 : Math.PI, 1.2, distance);
+  }
+
+  /** Turn the camera round the board to `theta` (and to `distance` from it, if given). */
+  private async orbitTo(theta: number, duration = 1.2, distance?: number): Promise<void> {
     const { camera, controls } = this.stage;
     const off = camera.position.clone().sub(controls.target);
     const s = new THREE.Spherical().setFromVector3(off);
     const delta = Math.atan2(Math.sin(theta - s.theta), Math.cos(theta - s.theta));
-    if (Math.abs(delta) < 0.02) return;
+    const r0 = s.radius;
+    const r1 = distance ?? r0;
+    if (Math.abs(delta) < 0.02 && Math.abs(r1 - r0) < 0.05) return;
     const t0 = s.theta;
     const wasRotating = controls.autoRotate;
     controls.enabled = false;
     controls.autoRotate = false;
     await animator.tween(duration, (k) => {
       s.theta = t0 + delta * k;
+      s.radius = lerp(r0, r1, k);
       off.setFromSpherical(s);
       camera.position.copy(controls.target).add(off);
       camera.lookAt(controls.target);
@@ -550,6 +568,7 @@ export class Game {
   private async introCamera(side: Side): Promise<void> {
     const { camera, controls } = this.stage;
     const end = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    end.radius = this.startDistance();
     if (side === 'b') end.theta += Math.PI;
     const start = new THREE.Spherical(end.radius * 1.7, 0.35, end.theta - 1.4);
     const s = new THREE.Spherical();
