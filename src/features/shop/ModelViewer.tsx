@@ -10,7 +10,8 @@ import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { boardLook, pieceSetLook, BOARDS } from '../../cosmetics/looks';
 import { MODEL_SCALE } from '../../core/layout';
 import { t, tk } from '../../i18n';
-import { PIECE_TYPES, loadModel, pieceModelPath } from '../../scene/models';
+import { PIECE_TYPES, loadModel, pieceModelUrl } from '../../scene/models';
+import { assetUrl } from '../../cosmetics/assets';
 import { MODEL_URL } from '../game/model';
 import { PieceGlyph } from '../../ui/art/art';
 import type { PieceId } from '../../ui/art/pieces';
@@ -126,12 +127,12 @@ export function ModelViewer({ itemId, name, onBack }: { itemId: string; name: st
 async function modelFor(itemId: string, isBoard: boolean, piece: PieceSymbol, side: Side): Promise<THREE.Object3D> {
   if (isBoard) {
     const file = boardLook(itemId).model?.file;
-    if (file) return (await loadModel(file)).clone();
+    if (file) return (await loadModel(assetUrl(file))).clone();
     return classicPart('board');
   }
   const dir = pieceSetLook(itemId).model?.dir;
   if (dir) {
-    const object = (await loadModel(pieceModelPath(dir, piece, side, true))).clone();
+    const object = (await loadModel(pieceModelUrl(dir, piece, side, true))).clone();
     object.rotation.y = side === 'b' ? Math.PI : 0;
     return object;
   }
@@ -140,8 +141,7 @@ async function modelFor(itemId: string, isBoard: boolean, piece: PieceSymbol, si
 
 /** A piece or the board from the classic model (the file the game loads anyway). */
 async function classicPart(prefix: string): Promise<THREE.Object3D> {
-  const url = MODEL_URL.replace(import.meta.env.BASE_URL, '');
-  const scene = await loadModel(url);
+  const scene = await loadModel(MODEL_URL);
   let found: THREE.Object3D | undefined;
   scene.traverse((o) => {
     if (!found && o.name.startsWith(prefix)) found = o;

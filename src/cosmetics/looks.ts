@@ -57,12 +57,12 @@ export interface BackgroundLook {
 
 export const PIECE_SETS: Record<string, PieceSetLook> = {
   'marble-set': { light: null, dark: null },
-  'monolith-set': { light: null, dark: null, model: { dir: 'assets/pieces/monolith' } },
+  'monolith-set': { light: null, dark: null, model: { dir: 'pieces/monolith' } },
 };
 
 export const BOARDS: Record<string, BoardLook> = {
   'marble-board': { tones: null },
-  'monolith-board': { tones: null, model: { file: 'assets/boards/monolith/board.glb' } },
+  'monolith-board': { tones: null, model: { file: 'boards/monolith/board.glb' } },
 };
 
 export const BACKGROUNDS: Record<string, BackgroundLook> = {

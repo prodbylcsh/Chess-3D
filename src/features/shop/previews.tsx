@@ -2,14 +2,15 @@
 // drawn from the same colours the 3D engine uses.
 import { useId, type CSSProperties } from 'react';
 import { itemDef } from '#shared/shop.ts';
+import { assetUrl } from '../../cosmetics/assets';
 import { backgroundLook, boardLook, destructionStyle, moveStyle, pieceSetLook, type PieceTone } from '../../cosmetics/looks';
 import { PieceGlyph, ProfileIcon } from '../../ui/art/art';
 import { PIECE_PATHS, type PieceId } from '../../ui/art/pieces';
 
-/** item id → preview image (public/assets/shop/<id>.webp, 16:10); otherwise one is drawn from the look */
+/** item id → preview image (`shop/<id>.webp` in the assets, 16:10); otherwise one is drawn from the look */
 export const PREVIEW_IMAGES: Record<string, string> = {
-  'monolith-set': `${import.meta.env.BASE_URL}assets/shop/monolith-set.webp`,
-  'monolith-board': `${import.meta.env.BASE_URL}assets/shop/monolith-board.webp`,
+  'monolith-set': assetUrl('shop/monolith-set.webp'),
+  'monolith-board': assetUrl('shop/monolith-board.webp'),
 };
 
 const CLASSIC: Record<'light' | 'dark', PieceTone> = {

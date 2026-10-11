@@ -16,6 +16,7 @@ import {
 import type { Effects } from '../fx/effects';
 import { applyRecolor, createRecolorUniforms, measureTones, type RecolorUniforms } from '../fx/recolor';
 import type { ChessAssets, PieceTemplate } from '../scene/assets';
+import { assetUrl } from '../cosmetics/assets';
 import { loadModel, loadPieceTemplates } from '../scene/models';
 import type { Stage } from '../scene/Stage';
 import type { Piece } from './Piece';
@@ -106,7 +107,7 @@ export class Wardrobe {
     const [w, b, board] = await Promise.all([
       set('w'),
       set('b'),
-      file ? loadModel(file).catch((err) => fallback(err, null)) : Promise.resolve(null),
+      file ? loadModel(assetUrl(file)).catch((err) => fallback(err, null)) : Promise.resolve(null),
     ]);
     if (generation !== this.generation) return;
     this.sets = { w, b };
