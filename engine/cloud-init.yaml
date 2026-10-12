@@ -1,0 +1,97 @@
+#cloud-config
+# Wizard Chess engine server on an Oracle Cloud Always Free VM (Ubuntu 24.04, Ampere A1).
+# Paste this whole file when creating the instance:
+#   Create instance → Show advanced options → Management → "Paste cloud-init script".
+# Before pasting, replace PASTE_YOUR_ENGINE_SECRET below with your own secret: a random string
+# of 32+ letters and digits, the same value as the GitHub secret ENGINE_SECRET.
+#
+# On first boot it installs Stockfish, Node and Caddy, starts engine/server.mjs from the
+# GitHub repository behind HTTPS at https://<public-ip-with-dashes>.sslip.io (certificate from
+# Let's Encrypt), opens ports 80 and 443 in the VM's firewall, and checks the repository
+# every 15 minutes for a new version of the server. See engine/README.md.
+
+package_update: true
+packages:
+  - stockfish
+  - nodejs
+  - git
+  - curl
+  - iptables-persistent
+
+write_files:
+  - path: /etc/wizard-engine.env
+    permissions: '0600'
+    content: |
+      ENGINE_SECRET=PASTE_YOUR_ENGINE_SECRET
+
+  - path: /etc/systemd/system/wizard-engine.service
+    content: |
+      [Unit]
+      Description=Wizard Chess engine server (Stockfish)
+      After=network-online.target
+      [Service]
+      EnvironmentFile=/etc/wizard-engine.env
+      ExecStart=/usr/bin/node /opt/chess-3d/engine/server.mjs
+      Restart=always
+      RestartSec=3
+      DynamicUser=yes
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/systemd/system/caddy.service
+    content: |
+      [Unit]
+      Description=Caddy (HTTPS in front of the engine server)
+      After=network-online.target
+      [Service]
+      ExecStart=/usr/local/bin/caddy run --config /etc/caddy/Caddyfile
+      Restart=always
+      Environment=XDG_DATA_HOME=/var/lib/caddy
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /usr/local/bin/wizard-engine-update
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      # New version of the engine server on GitHub? Update and restart it.
+      set -e
+      cd /opt/chess-3d
+      git fetch --quiet --depth 1 origin main
+      if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+        old=$(git rev-parse HEAD:engine)
+        git reset --quiet --hard FETCH_HEAD
+        [ "$old" = "$(git rev-parse HEAD:engine)" ] || systemctl restart wizard-engine
+      fi
+
+  - path: /etc/systemd/system/wizard-engine-update.service
+    content: |
+      [Unit]
+      Description=Update the Wizard Chess engine server from GitHub
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/wizard-engine-update
+
+  - path: /etc/systemd/system/wizard-engine-update.timer
+    content: |
+      [Unit]
+      Description=Check for a new engine server every 15 minutes
+      [Timer]
+      OnBootSec=5min
+      OnUnitActiveSec=15min
+      [Install]
+      WantedBy=timers.target
+
+runcmd:
+  - git clone --quiet --depth 1 https://github.com/prodbylcsh/Chess-3D /opt/chess-3d
+  # Oracle's Ubuntu images block everything but SSH in the VM's own firewall
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - netfilter-persistent save
+  - curl -sSL -o /usr/local/bin/caddy "https://caddyserver.com/api/download?os=linux&arch=$(dpkg --print-architecture)"
+  - chmod +x /usr/local/bin/caddy
+  - mkdir -p /etc/caddy /var/lib/caddy
+  - sh -c 'echo "$(curl -s https://ifconfig.me | tr . -).sslip.io {\n  reverse_proxy 127.0.0.1:8080\n}" > /etc/caddy/Caddyfile'
+  - sh -c 'echo "https://$(curl -s https://ifconfig.me | tr . -).sslip.io" > /root/engine-url.txt'
+  - systemctl daemon-reload
+  - systemctl enable --now wizard-engine caddy wizard-engine-update.timer
