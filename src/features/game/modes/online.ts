@@ -4,6 +4,7 @@ import { Flag, Handshake } from 'lucide-react';
 import { STAKES, type StakeId } from '#shared/economy.ts';
 import { CONTROLS, FIRST_MOVE_MS, controlLabel } from '#shared/play.ts';
 import { api, type PublicProfile } from '../../../api';
+import { analyseGame, analysisOf, onAnalysis, type Analysis } from '../../../ai/analysis';
 import { OnlineError, type GameRow } from '../../../net/online';
 import { inviteUrl, online } from '../../../net/client';
 import { confirmDialog, formatNumber, toast } from '../../../ui/kit';
@@ -33,6 +34,7 @@ export class OnlineMode implements Mode {
   private pending = 0;
   private disposed = false;
   private dismiss: Record<'offer' | 'rematch', (() => void) | null> = { offer: null, rematch: null };
+  private stopAnalysis: (() => void) | null = null;
 
   constructor(
     private readonly ctx: ModeContext,
@@ -101,6 +103,8 @@ export class OnlineMode implements Mode {
     if (this.claimTimer) clearTimeout(this.claimTimer);
     this.dismiss.offer?.();
     this.dismiss.rematch?.();
+    this.stopAnalysis?.();
+    this.stopAnalysis = null;
   }
 
   // ---------------------------------------------------------------- actions
@@ -331,10 +335,32 @@ export class OnlineMode implements Mode {
       const data = await api.matchmaking.result(row.id);
       if (this.disposed) return;
       store.set({ result: { loading: false, data, accuracy: null, error: null } });
+      // ranked and casual games: Stockfish analyses the game here and the opponent's
+      // browser; the performance part follows when both agree
+      if (data && this.side && (row.kind === 'ranked' || row.kind === 'casual')) {
+        this.followAnalysis(row.id);
+        analyseGame(row.id, row.moves, this.side);
+      }
       await this.ctx.refreshProfile();
     } catch (err) {
       if (!this.disposed) store.set({ result: { loading: false, data: null, accuracy: null, error: t((err as Error).message) } });
     }
+  }
+
+  /** Show the analysis of this game on the result card as it goes. */
+  private followAnalysis(gameId: string): void {
+    const { store } = this.ctx.engine;
+    const show = (state: Analysis) => {
+      const result = store.get().result;
+      if (this.disposed || !result) return;
+      store.set({
+        result: { ...result, accuracy: state.accuracy, data: state.result ?? result.data, analysis: { status: state.status, progress: state.progress } },
+      });
+    };
+    const now = analysisOf(gameId);
+    if (now) show(now);
+    this.stopAnalysis?.();
+    this.stopAnalysis = onAnalysis((id, state) => id === gameId && show(state));
   }
 
   private refresh(): void {

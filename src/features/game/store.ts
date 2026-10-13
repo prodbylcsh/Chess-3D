@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
 import type { MatchResult, RankInfo } from '../../api';
+import type { Analysis } from '../../ai/analysis';
 
 export interface PlayerView {
   name: string;
@@ -21,6 +22,8 @@ export interface ResultState {
   data: MatchResult | null;
   accuracy: number | null;
   error: string | null;
+  /** ranked and casual online games: the engine analysis in this browser (performance part) */
+  analysis?: { status: Analysis['status']; progress: number } | null;
 }
 
 /** Server clocks of a timed game. The running side's time is counted down on screen. */

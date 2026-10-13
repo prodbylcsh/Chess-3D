@@ -369,6 +369,21 @@ from 0 to 100 for the game (the same model lichess uses). The performance factor
 70% accuracy is "neutral" because that is roughly typical club-level play; with 50% as
 neutral nearly everyone would get a bonus and ratings would inflate.
 
+**How accuracy is measured (ranked and casual games).** A finished game is settled at once
+with neutral accuracy. Then both players' browsers analyse it in the background with the
+same Stockfish build (Stockfish 19, lite network, one thread, 30,000 nodes per position,
+`supabase/functions/_shared/analysis.ts`) and send a score for every position to the
+server. With these fixed settings Stockfish gives exactly the same scores on every
+device, so two honest reports are identical. Only when both reports agree does the
+server compute each player's accuracy and add the performance part to MMR and coins
+(`performanceAdjustment`: the same settlement with the accuracy, minus the neutral one;
+streaks and stats don't change). If the reports differ, one never arrives (tab closed,
+no WebAssembly) or a day passes, the game keeps neutral accuracy. A cheater can therefore
+only cancel the performance part, never gain from it. The result screen shows the
+analysis progress, the player's accuracy and whether the performance part was added;
+the analysis keeps running when the player leaves the game screen and resumes after a
+reload (for a day). It takes about 5–15 s per game on a computer, longer on a phone.
+
 **Win streak.** Ranked wins in a row. The 3rd consecutive win gives **+10%** of the
 baseline (+2), each further win **+2%** more (4th: +12%, 5th: +14%, …), capped at **+30%**
 (the 13th win and beyond). A loss resets the streak. A draw neither extends nor breaks it.
@@ -543,9 +558,14 @@ The 3D board fills the screen. Around it:
 - **One Supabase client** (`src/net/supabase.ts`, PKCE flow so returning links work with
   hash routes) is shared by accounts and online games.
 - **AI opponent:** a small alpha-beta engine in a Web Worker (5 levels, move generator
-  verified with perft). The same worker estimates accuracy for the result screen until
-  server-side analysis exists. On the mock back-end, matchmade opponents are played by this
+  verified with perft). The same worker estimates accuracy for the result screen of AI
+  games and demo matches. On the mock back-end, matchmade opponents are played by this
   engine and marked "Demo".
+- **Engine analysis:** Stockfish 19 compiled to WebAssembly (lite, single-threaded,
+  `public/engine/`, GPL v3 with its licence and source links next to it) runs in a Web
+  Worker (`src/ai/stockfish.ts`). `src/ai/analysis.ts` queues the player's finished ranked
+  and casual games, keeps the queue in `localStorage` for a day, and reports to the server
+  (5.2).
 - **Cosmetics:** `src/cosmetics/looks.ts` describes how every item looks (plain data, shared
   by the 3D engine and the 2D shop previews). `src/game/Wardrobe.ts` applies a game's
   looks: board and background directly, piece sets as each piece is created, and tells
@@ -564,7 +584,7 @@ The 3D board fills the screen. Around it:
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
 | Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`) |
 | Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
-| Engine analysis | Stockfish in a small worker service (Edge Functions are too CPU-limited) computes accuracy after each ranked game; run server-side only (Stockfish is GPL, which is fine for server use) |
+| Engine analysis | ✅ in the players' browsers (5.2): the `play` function takes each player's report (`analysis`), the `game_analysis` table (server only) keeps the settlement's input and both reports for two days, and `apply_analysis` adds the performance part once both agree (ledger reason `performance`). Edge Functions are too CPU-limited for Stockfish; a server of our own (`engine/`, Oracle Cloud) is ready but unused |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
 
 Wizard Chess has its own Supabase project, `wizard-chess` (ref `yhzgrorvjfvbqshneipc`,
@@ -678,6 +698,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ live (October 2026) |
 | M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ live (October 2026) |
 | M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ in code, tested locally; live when merged |
+| Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ in code, tested locally; live when merged |
 | Later | Tournaments, Puzzles, Learn, more sets, boards, backgrounds and effects, real-money coins, boosts | ⏸ |
 
 ## 10. Decisions and open questions
@@ -731,10 +752,12 @@ Decided:
   game is aborted (both October 2026).
 - **Order of the back-end milestones:** social (friends, chat) before competitive
   (matchmaking, server MMR and coins), October 2026.
-- **Accuracy on the server:** until an engine server exists (Stockfish needs more CPU than
-  Edge Functions give; about $5/month), every server-side game counts as neutral 70%
-  accuracy, so only the result, rating gap and streak change MMR and coins. Switching it
-  on later needs no rule change.
+- **Accuracy from Stockfish in the players' browsers** (October 2026), counted only when
+  both players' analyses agree (5.2); no engine server, so it costs nothing. The Oracle
+  Cloud server in `engine/` stays as an option (Oracle's free tier is now 2 OCPU / 12 GB
+  and often out of capacity).
+  The legal pages say so (Privacy §2, §3 and §6; Terms §4, §6 and §7 with the Stockfish
+  licence; effective 13 October 2026).
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.

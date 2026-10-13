@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Eye, Sparkles, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Button, Coins, ProgressBar, Spinner, cx } from '../../ui/kit';
+import type { Analysis } from '../../ai/analysis';
 import type { Mode } from './modes/types';
 import type { GameState } from './store';
 
@@ -16,6 +17,16 @@ const REASON: Record<string, string> = {
   'fifty-move rule': tk('by the fifty-move rule'),
   abandoned: tk('by abandonment'),
   timeout: tk('on time'),
+};
+
+/** What the engine analysis means for this game's performance part. */
+const ANALYSIS_NOTE: Partial<Record<Analysis['status'], string>> = {
+  running: tk('Stockfish analyses the game in your browser; you can leave this screen meanwhile.'),
+  waiting: tk('Your performance counts once your opponent\'s analysis agrees.'),
+  applied: tk('Your performance from the engine analysis is included.'),
+  mismatch: tk('The two analyses did not agree, so your performance counts as average.'),
+  expired: tk('Your opponent\'s analysis did not arrive, so your performance counts as average.'),
+  failed: tk('This device could not analyse the game, so your performance counts as average.'),
 };
 
 function signed(n: number): string {
@@ -84,6 +95,14 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
           </section>
         )}
 
+        {result && !result.loading && result.analysis?.status === 'running' && result.accuracy == null && (
+          <section className="result-block result-accuracy">
+            <Target size={18} />
+            <span className="result-label">{t('Analysing the game…')}</span>
+            <strong>{Math.round(result.analysis.progress * 100)}%</strong>
+            <ProgressBar value={result.analysis.progress} />
+          </section>
+        )}
         {result && !result.loading && result.accuracy != null && (
           <section className="result-block result-accuracy">
             <Target size={18} />
@@ -92,6 +111,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
             <ProgressBar value={result.accuracy / 100} tone={result.accuracy >= 70 ? 'success' : 'gold'} />
           </section>
         )}
+        {result?.analysis && ANALYSIS_NOTE[result.analysis.status] && <p className="faint result-note">{t(ANALYSIS_NOTE[result.analysis.status]!)}</p>}
 
         {mode.endNote?.(s) && <p className="faint result-note">{mode.endNote(s)}</p>}
 

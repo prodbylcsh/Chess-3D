@@ -7,8 +7,9 @@ import type { CoinReward, GameKind, StakeId } from '#shared/economy.ts';
 import type { ItemCategory, Rarity } from '#shared/shop.ts';
 import type { SeasonReward } from '#shared/seasons.ts';
 import type { ControlId } from '#shared/play.ts';
+import type { AnalysisReport, AnalysisStatus } from '#shared/analysis.ts';
 
-export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId };
+export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId, AnalysisReport, AnalysisStatus };
 
 // ------------------------------------------------------------------ accounts and profiles
 
@@ -309,6 +310,11 @@ export interface MatchmakingService {
   report(matchId: string, report: MatchReport): Promise<MatchResult>;
   /** server games: the player's result once the game is over (null: aborted, nothing changed) */
   result?(matchId: string): Promise<MatchResult | null>;
+  /**
+   * server games: this player's engine report of a finished ranked or casual game, or
+   * without one how its analysis stands; `result` once the performance part was added
+   */
+  analysis?(matchId: string, report?: AnalysisReport): Promise<{ status: AnalysisStatus; result: MatchResult | null }>;
 }
 
 export interface Api {

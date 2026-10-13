@@ -5,6 +5,9 @@
 // POST { action: 'leave' }                          → { left: true } (or { gameId } if matched meanwhile)
 // POST { action: 'result', gameId }                 → { result } the player's result (settles if needed)
 // POST { action: 'history' }                        → { games } the player's own games with MMR and coins
+// POST { action: 'analysis', gameId, report? }       → { status, result? } the player's engine report of a
+//      finished ranked or casual game (see _shared/analysis.ts); without a report just the status.
+//      `result` (as for 'result') once both reports agreed and the performance part was added.
 //
 // Errors: { error, code } with an HTTP error status. Registered, onboarded players only.
 // Rules: ../_shared/play.ts; matching itself is the SQL function mm_poll (atomic).
@@ -14,7 +17,7 @@ import { STAKES, type StakeId } from '../_shared/economy.ts';
 import { CONTROLS, isControl, type MatchKind } from '../_shared/play.ts';
 import * as rules from '../_shared/rules.ts';
 import type { GameRow } from '../_shared/rules.ts';
-import { ensurePlayer, settleGame } from '../_shared/server/competitive.ts';
+import { ensurePlayer, recordAnalysis, settleGame } from '../_shared/server/competitive.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -119,6 +122,25 @@ async function result(me: string, gameId: unknown): Promise<unknown> {
   return { result: { ...mine, player } };
 }
 
+async function analysis(me: string, gameId: unknown, report: unknown): Promise<unknown> {
+  if (typeof gameId !== 'string') throw fail('not_found', 'Game not found.', 404);
+  const { data: row, error } = await admin.from('games').select('*').eq('id', gameId).maybeSingle();
+  if (error) throw error;
+  const color = row && rules.seatOf(row as GameRow, me);
+  if (!row || !color) throw fail('not_found', 'Game not found.', 404);
+  if (row.status !== 'finished') throw fail('not_finished', 'The game is still running.', 409);
+  await settleGame(admin, row as GameRow);
+  let status;
+  try {
+    status = await recordAnalysis(admin, row as GameRow, color, report);
+  } catch (err) {
+    if ((err as Error).message === 'bad_report') throw fail('bad_request', 'That analysis does not fit the game.');
+    throw err;
+  }
+  if (status !== 'applied') return { status };
+  return { status, ...(await result(me, gameId)) };
+}
+
 async function history(me: string): Promise<unknown> {
   const { data, error } = await admin.from('game_results').select('*').eq('player_id', me).order('played_at', { ascending: false }).limit(100);
   if (error) throw error;
@@ -138,6 +160,8 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return result(user.id, body.gameId);
     case 'history':
       return history(user.id);
+    case 'analysis':
+      return analysis(user.id, body.gameId, body.report);
     default:
       throw fail('bad_request', 'Unknown action.');
   }

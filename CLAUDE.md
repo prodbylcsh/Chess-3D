@@ -39,6 +39,9 @@ server state is copied in) and the whole back-end in `npm run dev:mock`. Online 
 Supabase too (`src/net`, `game` Edge Function). Wizard Chess has its own Supabase project
 (`wizard-chess`); its auth settings and email templates come from `supabase/config.toml`
 on deploy (`supabase/auth-config.ts`). One Supabase client: `src/net/supabase.ts`.
+Ranked and casual games are analysed by Stockfish (WebAssembly, `public/engine/`, GPL) in
+both players' browsers (`src/ai/analysis.ts`); the server adds the performance part only
+when both reports agree (`_shared/analysis.ts`).
 Rules shared by app and server: `supabase/functions/_shared/*.ts`, imported as
 `#shared/...` (explicit `.ts` extensions; Node runs them in tests).
 

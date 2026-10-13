@@ -153,6 +153,64 @@ test('casual: a full game pays coins; the history has it', async () => {
   assert.equal((await play(white, { action: 'search', kind: 'ranked', control: 'fast' })).code, 'bad_request', 'fast blitz is casual only');
 });
 
+test('engine analysis: identical reports add the performance part; different ones change nothing', async () => {
+  const { ANALYSIS, accuracies } = await import('../supabase/functions/_shared/analysis.ts');
+  const { mmrChange } = await import('../supabase/functions/_shared/rating.ts');
+  const { coinReward } = await import('../supabase/functions/_shared/economy.ts');
+  const a = await player('ivy');
+  const b = await player('tom');
+  const row = await match(a, b, 'ranked');
+  const [white, black] = seats(row, a, b);
+  await playPlies(row, white, black, 20);
+  await game(black, { action: 'resign', id: row.id });
+  assert.equal((await state(white)).mmr, 1020);
+
+  // White plays steadily; Black gives away a piece on its fifth move
+  const scores = Array.from({ length: 21 }, (_, i) => (i < 10 ? 20 : 400));
+  const report = { engine: ANALYSIS.engine, scores };
+  assert.equal((await play(white, { action: 'analysis', gameId: row.id })).status, 'waiting');
+  assert.equal((await play(white, { action: 'analysis', gameId: row.id, report: { ...report, scores: scores.slice(1) } })).code, 'bad_request');
+  assert.equal((await play(white, { action: 'analysis', gameId: row.id, report })).status, 'waiting', 'one report is not enough');
+  const done = await play(black, { action: 'analysis', gameId: row.id, report });
+  assert.equal(done.status, 'applied', JSON.stringify(done));
+
+  const acc = accuracies(scores);
+  const win = mmrChange({ outcome: 'win', mmr: 1000, opponentMmr: 1000, accuracy: acc.w, winStreak: 0 });
+  const loss = mmrChange({ outcome: 'loss', mmr: 1000, opponentMmr: 1000, accuracy: acc.b, winStreak: 0 });
+  assert.ok(win.performance > 0 && loss.performance > 0, `both played above 70%: ${acc.w} / ${acc.b}`);
+  assert.equal((await state(white)).mmr, 1000 + win.total);
+  assert.equal((await state(black)).mmr, 1000 + loss.total);
+  const coins = coinReward({ kind: 'ranked', outcome: 'loss', accuracy: acc.b, mmr: 1000, opponentMmr: 1000, winStreak: 0 });
+  assert.equal((await state(black)).coins, 500 + coins.total);
+  assert.equal(done.result.mmr_delta, loss.total, 'the result shows the whole change');
+  assert.equal(done.result.accuracy, Math.round(acc.b!));
+  assert.equal(done.result.breakdown.mmr.performance, loss.performance);
+
+  const ledger = (await admin.from('coin_ledger').select('amount').eq('player_id', black.id).eq('reason', 'performance')).data!;
+  assert.equal(ledger.length, 1);
+  const pub = (await black.client.from('game_results').select('accuracy').eq('game_id', row.id).eq('player_id', white.id).single()).data!;
+  assert.equal(pub.accuracy, Math.round(acc.w!), 'accuracy is public like the rest of the result');
+  assert.equal((await play(black, { action: 'analysis', gameId: row.id, report })).status, 'applied', 'once only');
+  assert.equal((await state(black)).mmr, 1000 + loss.total);
+
+  // a casual game whose reports differ: nothing changes
+  const c = await match(a, b, 'casual', 'blitz');
+  const [cw, cb] = seats(c, a, b);
+  await playPlies(c, cw, cb, 20);
+  await game(cw, { action: 'resign', id: c.id });
+  const before = [(await state(cw)).coins, (await state(cb)).coins];
+  await play(cw, { action: 'analysis', gameId: c.id, report });
+  const mismatch = await play(cb, { action: 'analysis', gameId: c.id, report: { ...report, scores: scores.map((s) => s + 1) } });
+  assert.equal(mismatch.status, 'mismatch');
+  assert.deepEqual([(await state(cw)).coins, (await state(cb)).coins], before);
+  const mine = (await admin.from('game_results').select('accuracy').eq('game_id', c.id)).data!;
+  assert.deepEqual(mine.map((r) => r.accuracy), [null, null]);
+
+  // friend games, coin games and other people's games have no analysis
+  const outsider = await player('uma');
+  assert.equal((await play(outsider, { action: 'analysis', gameId: row.id, report })).code, 'not_found');
+});
+
 test('coin games: stakes are taken at the start; the winner gets the pot minus 10%', async () => {
   const a = await player('fin');
   const b = await player('gil');

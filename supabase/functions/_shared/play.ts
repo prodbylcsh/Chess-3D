@@ -160,12 +160,17 @@ export interface FinishedGame {
   plies: number;
   white: PlayerState;
   black: PlayerState;
+  /** each player's accuracy once the engine analysis is in; null or missing counts as neutral */
+  accuracy?: Record<Side, number | null>;
 }
 
 const outcomeFor = (result: Result, color: Side): Outcome =>
   result === '1/2-1/2' ? 'draw' : (result === '1-0') === (color === 'w') ? 'win' : 'loss';
 
-/** What the finished game does to both players. Accuracy counts as neutral (no engine server yet). */
+/**
+ * What the finished game does to both players. The game is settled at once with neutral
+ * accuracy; the engine analysis adds the performance part later (`performanceAdjustment`).
+ */
 export function settle(game: FinishedGame): [Settlement, Settlement] {
   const one = (color: Side): Settlement => {
     const me = color === 'w' ? game.white : game.black;
@@ -185,7 +190,7 @@ export function settle(game: FinishedGame): [Settlement, Settlement] {
     let credit = 0;
 
     if (game.kind === 'ranked') {
-      mmr = mmrChange({ outcome, mmr: me.mmr, opponentMmr: opponent.mmr, accuracy: null, winStreak: me.ranked_streak });
+      mmr = mmrChange({ outcome, mmr: me.mmr, opponentMmr: opponent.mmr, accuracy: game.accuracy?.[color], winStreak: me.ranked_streak });
       after.mmr = mmr.mmrAfter;
       after.ranked_streak = mmr.winStreakAfter;
       after.season_peak_mmr = Math.max(me.season_peak_mmr, after.mmr);
@@ -195,7 +200,7 @@ export function settle(game: FinishedGame): [Settlement, Settlement] {
       wager = wagerNet(stake, outcome);
       credit = stake + wager; // the stake was already taken
     } else if (game.plies >= MIN_PAID_PLIES) {
-      coins = coinReward({ kind: game.kind, outcome, accuracy: null, mmr: me.mmr, opponentMmr: opponent.mmr, winStreak: me.win_streak });
+      coins = coinReward({ kind: game.kind, outcome, accuracy: game.accuracy?.[color], mmr: me.mmr, opponentMmr: opponent.mmr, winStreak: me.win_streak });
       credit = coins.total;
     } else {
       coins = { baseline: 0, performance: 0, difference: 0, streak: 0, total: 0 };
@@ -215,6 +220,38 @@ export function settle(game: FinishedGame): [Settlement, Settlement] {
     return { playerId: me.id, color, outcome, mmr, coins, wager, credit, coinsDelta: wager ?? coins?.total ?? 0, after };
   };
   return [one('w'), one('b')];
+}
+
+/** What the engine analysis changes for one player of a settled game. */
+export interface Adjustment {
+  playerId: string;
+  color: Side;
+  accuracy: number | null;
+  /** added to the MMR and coins the game already gave */
+  mmrDelta: number;
+  coinsDelta: number;
+  /** the game's MMR and coins with the performance part, as the result shows them */
+  mmr: MmrChange | null;
+  coins: CoinReward | null;
+}
+
+/**
+ * The performance part of a settled game: the same settlement with the players' accuracy,
+ * minus the neutral one it was settled with. Streaks and stats do not change.
+ */
+export function performanceAdjustment(game: FinishedGame, accuracy: Record<Side, number | null>): [Adjustment, Adjustment] {
+  const before = settle({ ...game, accuracy: undefined });
+  const after = settle({ ...game, accuracy });
+  const one = (i: 0 | 1): Adjustment => ({
+    playerId: after[i].playerId,
+    color: after[i].color,
+    accuracy: accuracy[after[i].color],
+    mmrDelta: (after[i].mmr?.total ?? 0) - (before[i].mmr?.total ?? 0),
+    coinsDelta: after[i].credit - before[i].credit,
+    mmr: after[i].mmr,
+    coins: after[i].coins,
+  });
+  return [one(0), one(1)];
 }
 
 /** The stake of a coin game. */

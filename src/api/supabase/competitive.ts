@@ -9,6 +9,7 @@ import { DEFAULT_LOADOUT } from '#shared/shop.ts';
 import { t } from '../../i18n';
 import {
   ApiError,
+  type AnalysisStatus,
   type GameRecord,
   type MatchFound,
   type MatchKind,
@@ -183,15 +184,23 @@ export function createCompetitive(
     },
 
     async result(matchId) {
-      const { result } = await play<{ result: (ResultRecord & { player: PlayerRecord }) | { aborted: true; player: PlayerRecord } }>('result', {
-        gameId: matchId,
-      });
-      const profile = structuredClone(deps.adopt(result.player));
-      if ('aborted' in result) return null;
-      const b = result.breakdown!;
-      return { outcome: result.outcome, mmr: b.mmr, coins: b.coins, wager: b.wager, rankBefore: b.rankBefore, rankAfter: b.rankAfter, profile };
+      const { result } = await play<{ result: ServerResult }>('result', { gameId: matchId });
+      return toMatchResult(result);
+    },
+
+    async analysis(matchId, report) {
+      const { status, result } = await play<{ status: AnalysisStatus; result?: ServerResult }>('analysis', { gameId: matchId, report });
+      return { status, result: result ? toMatchResult(result) : null };
     },
   };
+
+  type ServerResult = (ResultRecord & { player: PlayerRecord }) | { aborted: true; player: PlayerRecord };
+  function toMatchResult(result: ServerResult): MatchResult | null {
+    const profile = structuredClone(deps.adopt(result.player));
+    if ('aborted' in result) return null;
+    const b = result.breakdown!;
+    return { outcome: result.outcome, mmr: b.mmr, coins: b.coins, wager: b.wager, rankBefore: b.rankBefore, rankAfter: b.rankAfter, profile };
+  }
 
   const shop: Pick<ShopService, 'buy' | 'equip'> = {
     async buy(itemId) {

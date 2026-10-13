@@ -2,7 +2,8 @@
 // loading a player's state with the lazy season rollover, and settling finished
 // matchmade games. The numbers come from the pure rules in ../play.ts.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { newPlayer, rollSeasons, settle, type PlayerState, type SeasonGrant } from '../play.ts';
+import { ANALYSIS, accuracies, isReport, sameReport, type AnalysisReport, type AnalysisStatus } from '../analysis.ts';
+import { newPlayer, performanceAdjustment, rollSeasons, settle, type FinishedGame, type PlayerState, type SeasonGrant, type Side } from '../play.ts';
 import { rankOf } from '../rating.ts';
 import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
@@ -80,14 +81,15 @@ export async function settleGame(admin: SupabaseClient, row: GameRow): Promise<v
   if (error) throw error;
   const profile = (id: string) => profiles!.find((p) => p.id === id);
 
-  const settlements = settle({
+  const game: FinishedGame = {
     kind: row.kind,
     stake: row.stake ?? null,
     result: row.result,
     plies: row.moves.length,
-    white,
-    black,
-  });
+    white: stateOf(white),
+    black: stateOf(black),
+  };
+  const settlements = settle(game);
 
   const rows = settlements.map((s) => {
     const me = s.color === 'w' ? white : black;
@@ -116,6 +118,88 @@ export async function settleGame(admin: SupabaseClient, row: GameRow): Promise<v
     };
   });
 
-  const { error: rpcError } = await admin.rpc('settle_game', { p_game: row.id, p_rows: rows });
+  const { data: settled, error: rpcError } = await admin.rpc('settle_game', { p_game: row.id, p_rows: rows });
   if (rpcError) throw rpcError;
+  // the players' browsers analyse the game next; their reports add the performance part
+  if (settled && row.result && (row.kind === 'ranked' || row.kind === 'casual')) {
+    const { error } = await admin.from('game_analysis').insert({ game_id: row.id, game });
+    if (error && error.code !== UNIQUE_VIOLATION) throw error;
+  }
+}
+
+/** The settlement's view of a player (no inventory, loadout or badges). */
+const stateOf = (p: PlayerRow): PlayerState => ({
+  id: p.id,
+  mmr: p.mmr,
+  coins: p.coins,
+  wins: p.wins,
+  losses: p.losses,
+  draws: p.draws,
+  win_streak: p.win_streak,
+  ranked_streak: p.ranked_streak,
+  best_streak: p.best_streak,
+  season: p.season,
+  season_peak_mmr: p.season_peak_mmr,
+});
+
+interface AnalysisRow {
+  game_id: string;
+  game: FinishedGame;
+  reports: Partial<Record<Side, AnalysisReport>>;
+  status: 'waiting' | 'applied' | 'mismatch';
+  created_at: string;
+}
+
+/**
+ * A player's engine report for a settled game (or, without a report, just the state of
+ * its analysis). When both reports are in, the game is decided: identical reports add each
+ * player's performance part (MMR, coins, accuracy on the result), different ones change
+ * nothing. Returns the state as the player sees it.
+ */
+export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color: Side, report: unknown): Promise<AnalysisStatus> {
+  const read = async (): Promise<AnalysisRow | null> => {
+    if (report === undefined) {
+      const { data, error } = await admin.from('game_analysis').select('*').eq('game_id', row.id).maybeSingle();
+      if (error) throw error;
+      return data as AnalysisRow | null;
+    }
+    if (!isReport(report, row.moves.length)) throw new Error('bad_report');
+    const { data, error } = await admin.rpc('analysis_report', { p_game: row.id, p_color: color, p_report: report });
+    if (error) throw error;
+    return ((data as AnalysisRow[])[0] ?? null);
+  };
+  const analysis = await read();
+  if (!analysis) return 'none';
+  if (analysis.status !== 'waiting') return analysis.status;
+  const { w, b } = analysis.reports;
+  if (!w || !b) return Date.now() - Date.parse(analysis.created_at) > ANALYSIS.windowMs ? 'expired' : 'waiting';
+
+  if (!sameReport(w, b)) {
+    await admin.rpc('apply_analysis', { p_game: row.id, p_status: 'mismatch', p_rows: [] });
+    return 'mismatch';
+  }
+  const accuracy = accuracies(w.scores);
+  const rounded = { w: accuracy.w === null ? null : Math.round(accuracy.w), b: accuracy.b === null ? null : Math.round(accuracy.b) };
+  const game = analysis.game;
+  const rows = performanceAdjustment(game, accuracy).map((a) => {
+    const me = a.color === 'w' ? game.white : game.black;
+    return {
+      player_id: a.playerId,
+      season: me.season,
+      accuracy: rounded[a.color],
+      mmr_delta: a.mmrDelta,
+      coins_delta: a.coinsDelta,
+      result: {
+        mmr_delta: a.mmr?.total ?? null,
+        coins_delta: a.coins?.total ?? 0,
+        breakdown: { mmr: a.mmr, coins: a.coins, ...(a.mmr ? { rankAfter: rankInfo(a.mmr.mmrAfter) } : {}) },
+      },
+    };
+  });
+  const { data: applied, error: applyError } = await admin.rpc('apply_analysis', { p_game: row.id, p_status: 'applied', p_rows: rows });
+  if (applyError) throw applyError;
+  if (applied) {
+    await Promise.all([game.white.id, game.black.id].map(async (id) => publishShowcase(admin, await getPlayer(admin, id))));
+  }
+  return 'applied';
 }

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { api, type Account, type Profile } from '../api';
+import { onAnalysis, resumeAnalysis } from '../ai/analysis';
 
 type Status = 'loading' | 'signedOut' | 'ready';
 
@@ -40,6 +41,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setStatus('signedOut');
     });
   }, [signedIn]);
+
+  // finish game analyses a reload interrupted; the performance part changes coins and MMR
+  useEffect(() => {
+    if (status !== 'ready') return;
+    resumeAnalysis();
+    return onAnalysis((_, state) => {
+      if (state.result) void api.profiles.me().then(setProfile, () => {});
+    });
+  }, [status]);
 
   const value = useMemo<SessionValue>(
     () => ({
