@@ -437,3 +437,6 @@ verify_jwt = false
 
 [functions.play]
 verify_jwt = false
+
+[functions.payments]
+verify_jwt = false

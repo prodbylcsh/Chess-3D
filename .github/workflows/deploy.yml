@@ -23,6 +23,10 @@ jobs:
       R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      # Paddle (buying coins): the client-side token is public; without it the shop sells
+      # no coins. PADDLE_ENV 'sandbox' (test payments, default) or 'production'.
+      VITE_PADDLE_CLIENT_TOKEN: ${{ vars.PADDLE_CLIENT_TOKEN }}
+      VITE_PADDLE_ENV: ${{ vars.PADDLE_ENV }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

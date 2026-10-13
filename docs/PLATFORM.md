@@ -203,8 +203,27 @@ items). Piece sets and boards have a **3D view** in their item dialog (Shop and 
 your items): pick a piece and a colour, drag to rotate, scroll or pinch to zoom,
 right-drag or two fingers to move (`src/features/shop/ModelViewer.tsx`, loaded only when
 opened). The shop lists only categories with something to buy; the others hold just
-their standard item until real items arrive. Later: real-money coin packs and temporary
-coin boosts (e.g. +50% coins for 24 h).
+their standard item until real items arrive. Later: temporary coin boosts (e.g. +50% coins
+for 24 h).
+
+**Buying coins** (October 2026; `supabase/functions/_shared/payments.ts`, "Buy coins" in the
+Shop header):
+
+| Pack | Coins | Price (VAT included) | Extra coins per euro |
+| --- | --- | --- | --- |
+| Small | 15,000 | €4.99 | – |
+| Medium | 35,000 | €9.99 | +16% |
+| Large | 75,000 | €19.99 | +24% |
+| Huge | 200,000 | €49.99 | +33% |
+
+For scale: the Monolith set costs 68,000 coins (about the Large pack), a win pays 100.
+Paddle sells the coins as merchant of record (payment, VAT, receipts, payouts to us);
+Paddle's fee is 5% + $0.50 per payment, which is why the smallest pack is about €5.
+Before paying, the player ticks that they want the coins at once and lose the right of
+withdrawal once delivered (EU digital content). Refunds: within 14 days on request if the
+balance still holds all the pack's coins (they are removed), later only where the law
+requires; a refund or chargeback through Paddle removes the coins (down to zero).
+Players under 18 need a parent's consent (Terms §6). Registered, onboarded players only.
 
 Price ranges per category (enforced by `tests/shop.test.ts`):
 
@@ -584,6 +603,7 @@ The 3D board fills the screen. Around it:
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
 | Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`) |
 | Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
+| Payments | ✅ in code: the `payments` function creates a Paddle transaction for a pack (price given inline, nothing set up in Paddle's catalogue; `custom_data` = player and pack) that the app opens in Paddle's overlay checkout (Paddle.js, loaded only then); Paddle's signed webhook (`transaction.completed`, refunds and chargebacks as `adjustment.*`) credits or takes back the coins once (`purchases`, `complete_purchase`, `reverse_purchase`, ledger `coins_bought` / `coins_refunded`). Sandbox (test payments) until the live account is approved; in sandbox the Shop shows "Buy coins" only with `#/shop?buy=coins` |
 | Engine analysis | ✅ in the players' browsers (5.2): the `play` function takes each player's report (`analysis`), the `game_analysis` table (server only) keeps the settlement's input and both reports for two days, and `apply_analysis` adds the performance part once both agree (ledger reason `performance`). Edge Functions are too CPU-limited for Stockfish; a server of our own (`engine/`, Oracle Cloud) is ready but unused |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
 
@@ -682,6 +702,18 @@ These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`)
    "Sign in with Apple" and the same callback URL, plus a key, entered in the Apple
    provider. The generated secret expires every 6 months and must be renewed.
 
+4. **Paddle (buying coins).** Sandbox first (sandbox-vendors.paddle.com, separate from the
+   live account): Developer tools → Authentication: an **API key** (permission to write
+   transactions) → GitHub secret `PADDLE_API_KEY`; a **client-side token** → GitHub variable
+   `PADDLE_CLIENT_TOKEN` (public). Developer tools → Notifications: a destination
+   `https://yhzgrorvjfvbqshneipc.supabase.co/functions/v1/payments` with the events
+   `transaction.completed`, `adjustment.created` and `adjustment.updated`; its secret key →
+   GitHub secret `PADDLE_WEBHOOK_SECRET`. Checkout → Checkout settings: default payment
+   link `https://prodbylcsh.github.io/Chess-3D/`. GitHub variable `PADDLE_ENV` = `sandbox`.
+   Then run both deploy workflows by hand. Going live: the same in the live account, plus
+   Paddle's account and domain review (needs our own domain, the Terms with prices and the
+   refund policy), then `PADDLE_ENV` = `production`.
+
 Online invite games from before the move (in the old shared project) are not carried over,
 and neither are players' demo accounts (stored in their browsers).
 
@@ -699,7 +731,8 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ live (October 2026) |
 | M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ in code, tested locally; live when merged |
 | Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ in code, tested locally; live when merged |
-| Later | Tournaments, Puzzles, Learn, more sets, boards, backgrounds and effects, real-money coins, boosts | ⏸ |
+| Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ in code, tested locally; test payments once the Paddle sandbox settings exist (8.4) |
+| Later | Tournaments, Puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -752,6 +785,12 @@ Decided:
   game is aborted (both October 2026).
 - **Order of the back-end milestones:** social (friends, chat) before competitive
   (matchmaking, server MMR and coins), October 2026.
+- **Buying coins** (October 2026): Paddle as merchant of record, web only (App Store
+  later); four packs from €4.99 (4.5); withdrawal waiver ticked before paying; refunds
+  within 14 days while the coins are unspent. Legal pages (Terms §1 address and §6
+  "Buying coins", Privacy §2–§6 with Paddle) effective 14 October 2026. Whether Paddle
+  accepts in-game currency is confirmed with Paddle's support before going live; the
+  operator has no IČO yet, which Paddle's live review and Czech tax law may require.
 - **Accuracy from Stockfish in the players' browsers** (October 2026), counted only when
   both players' analyses agree (5.2); no engine server, so it costs nothing. The Oracle
   Cloud server in `engine/` stays as an option (Oracle's free tier is now 2 OCPU / 12 GB

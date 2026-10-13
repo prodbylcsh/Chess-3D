@@ -3,3 +3,5 @@ dist
 *.local
 # original 3D models (large): kept locally, built into public/assets by scripts/assets
 assets-src
+# local secrets for `supabase functions serve` (written by the local-supabase start script)
+supabase/functions/.env

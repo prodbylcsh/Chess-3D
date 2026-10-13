@@ -20,6 +20,7 @@ server and the app. The app only previews and displays; the server applies.
 | Coin rewards, stakes, fee | `economy.ts` | `tests/rating.test.ts` | §6 |
 | Season calendar, resets, brackets, reward picking | `seasons.ts` | `tests/seasons.test.ts` | §5.5 |
 | Shop prices and purchase rules | `shop.ts` | `tests/shop.test.ts` | §4.5 |
+| Coin packs for real money (sizes, euro prices), refund window | `payments.ts` | `tests/payments.test.ts`, `tests/payments.e2e.ts` | §4.5 |
 | Usernames, reserved names, the 30-day limit, onboarding | `accounts.ts` | `tests/accounts.test.ts`, `tests/accounts.e2e.ts` | §2 |
 | Time controls, clocks, first move, timeouts, settling a game, season rollover | `play.ts` | `tests/play.test.ts`, `tests/competitive.e2e.ts` | §4.1, §6.3 |
 

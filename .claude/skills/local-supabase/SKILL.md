@@ -6,7 +6,7 @@ description: Run the Wizard Chess Supabase back-end (Postgres, auth with emails,
 # Local Supabase
 
 The live project is `wizard-chess` (`yhzgrorvjfvbqshneipc`). It deploys from `main`
-through `.github/workflows/supabase.yml`: migrations, the `game`, `account`, `social` and `play` functions,
+through `.github/workflows/supabase.yml`: migrations, the `game`, `account`, `social`, `play` and `payments` functions,
 and the auth settings and email templates from `supabase/config.toml`
 (`supabase/auth-config.ts` adds the live URLs). **Never deploy or touch the live project
 from a session** unless the user asks; test locally instead. Settings that hold secrets
@@ -38,6 +38,17 @@ The first run pulls images and takes several minutes, so start it with
 
 Logs: `/tmp/supabase-local/*.log`. After a container restart, run the script again
 (Docker images survive, processes don't).
+
+## Payments (Paddle) locally
+
+The start script writes `supabase/functions/.env` (gitignored) with test values:
+`PADDLE_API_URL` points at the host's `:4875` through the Docker gateway, and the webhook
+secret is `local-test-webhook-secret`. Nothing reaches Paddle. `tests/payments.e2e.ts`
+runs a fake Paddle API on `:4875` and sends webhooks signed with that secret
+(`signWebhook` in `_shared/payments.ts`). Without the fake server running, "Buy coins"
+answers "The payment could not be started". The app shows "Buy coins" only when
+`VITE_PADDLE_CLIENT_TOKEN` is set (any value locally), and in sandbox mode only on
+`#/shop?buy=coins`; Paddle.js itself cannot load from this container.
 
 ## Auth emails
 

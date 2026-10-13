@@ -900,3 +900,101 @@
     grid-column: 2 / -1;
   }
 }
+
+/* ------------------------------------------------------------------ buying coins */
+
+.shop-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.coin-packs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 4px 0 18px;
+}
+
+@media (max-width: 560px) {
+  .coin-packs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.coin-pack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.coin-pack:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.coin-pack.is-active {
+  border-color: var(--gold-line);
+  background: var(--gold-soft);
+}
+
+.coin-pack strong {
+  font-size: 17px;
+}
+
+.coin-pack-price {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.coin-pack-bonus {
+  position: absolute;
+  top: -9px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gold-gradient);
+  color: #2a1a06;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.coin-waiver {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.coin-waiver input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--gold-strong);
+}
+
+.coin-note {
+  margin: 12px 0 16px;
+  font-size: 12.5px;
+}
+
+.coin-test {
+  margin: 14px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-size: 12.5px;
+}

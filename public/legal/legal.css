@@ -66,3 +66,15 @@ li { margin: 4px 0; }
 }
 .muted { color: var(--text-2); }
 footer { margin-top: 48px; color: var(--text-2); font-size: 14px; }
+
+table {
+  border-collapse: collapse;
+  margin: 8px 0 14px;
+}
+
+th,
+td {
+  padding: 6px 18px 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+}

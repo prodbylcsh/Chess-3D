@@ -148,6 +148,12 @@ export function createMockApi(): Api {
     shop,
     seasons,
     events: { subscribe },
+    // coins for money need the real back-end (Paddle's checkout and webhooks)
+    payments: {
+      available: false,
+      checkout: () => Promise.reject(new ApiError('unavailable', t('Buying coins is not available yet.'))),
+      status: () => Promise.reject(new ApiError('unavailable', t('Buying coins is not available yet.'))),
+    },
 
     matchmaking: {
       find(kind, stake) {

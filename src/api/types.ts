@@ -317,6 +317,19 @@ export interface MatchmakingService {
   analysis?(matchId: string, report?: AnalysisReport): Promise<{ status: AnalysisStatus; result: MatchResult | null }>;
 }
 
+// ------------------------------------------------------------------ buying coins
+
+export type PurchaseStatus = 'created' | 'completed' | 'refunded';
+
+export interface PaymentsService {
+  /** buying coins is set up in this build (Supabase back-end and Paddle settings) */
+  available: boolean;
+  /** start buying a coin pack: the id of the Paddle transaction to open in the checkout */
+  checkout(packId: string): Promise<string>;
+  /** where a purchase stands; the profile is updated once its coins arrived */
+  status(transactionId: string): Promise<PurchaseStatus>;
+}
+
 export interface Api {
   auth: AuthService;
   profiles: ProfileService;
@@ -327,6 +340,7 @@ export interface Api {
   matchmaking: MatchmakingService;
   shop: ShopService;
   seasons: SeasonsService;
+  payments: PaymentsService;
   /** which parts still run on the in-browser demo back-end */
   demo: { accounts: boolean; social: boolean };
 }

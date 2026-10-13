@@ -7,6 +7,7 @@ import { DEFAULT_CONTROL } from '#shared/play.ts';
 import { TIERS, DIVISION_SIZE } from '#shared/rating.ts';
 import { DEFAULT_LOADOUT } from '#shared/shop.ts';
 import { t } from '../../i18n';
+import { paddleConfigured } from '../../net/paddle';
 import {
   ApiError,
   type AnalysisStatus,
@@ -15,7 +16,9 @@ import {
   type MatchKind,
   type MatchmakingService,
   type MatchResult,
+  type PaymentsService,
   type Profile,
+  type PurchaseStatus,
   type ProfileService,
   type PublicProfile,
   type ShopService,
@@ -231,5 +234,40 @@ export function createCompetitive(
     },
   };
 
-  return { matchmaking, shop, history };
+  // ---------------------------------------------------------------- buying coins (Paddle)
+
+  async function payments<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
+    const { data, error } = await client.functions.invoke<T>('payments', { body: { action, ...body } });
+    if (!error) return data!;
+    if (error instanceof FunctionsHttpError) {
+      const payload = await (error.context as Response).json().catch(() => null);
+      switch (payload?.code) {
+        case 'unavailable':
+          throw new ApiError('unavailable', t('Buying coins is not available yet.'));
+        case 'unauthorized':
+        case 'guest':
+          throw new ApiError('unauthorized', t('Please sign in again.'));
+        case 'not_ready':
+          throw new ApiError('not_ready', t('Choose a username and an icon first.'));
+        default:
+          throw new ApiError('payment_failed', t('The payment could not be started. Please try again.'));
+      }
+    }
+    throw new ApiError('network', t('Could not reach the server. Check your connection.'));
+  }
+
+  const coinPayments: PaymentsService = {
+    available: paddleConfigured(),
+    async checkout(packId) {
+      const { transactionId } = await payments<{ transactionId: string }>('checkout', { pack: packId, waiver: true });
+      return transactionId;
+    },
+    async status(transactionId) {
+      const { status, player } = await payments<{ status: PurchaseStatus; player: PlayerRecord }>('status', { transactionId });
+      deps.adopt(player);
+      return status;
+    },
+  };
+
+  return { matchmaking, shop, history, payments: coinPayments };
 }

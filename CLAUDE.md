@@ -32,8 +32,9 @@ React 19 + Vite + TypeScript UI (`src/app`, `src/features/*`, `src/ui`), Three.j
 real item models in `public/assets/`, built from the user's originals by
 `scripts/assets/build-models.ts`),
 typed service contracts (`src/api/types.ts`). In real-account mode everything a player has
-runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`):
-accounts, profile, friends, chat, coins, rank, items, history, matchmaking and timed games.
+runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`, `payments`):
+accounts, profile, friends, chat, coins, rank, items, history, matchmaking and timed games;
+coins for money through Paddle (`payments`, `src/net/paddle.ts`).
 The in-browser mock (`src/api/mock`, localStorage) is the store the screens read (the
 server state is copied in) and the whole back-end in `npm run dev:mock`. Online invite games are on
 Supabase too (`src/net`, `game` Edge Function). Wizard Chess has its own Supabase project

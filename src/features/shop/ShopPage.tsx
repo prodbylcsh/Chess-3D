@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Check } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
 import { api, type ShopItem } from '../../api';
 import { SHOP_CATEGORIES, CATEGORY_NAMES, CATEGORY_PLURALS, RARITY_NAMES, itemName, type ItemCategory } from '../../api/catalog';
 import { Page } from '../../app/AppLayout';
 import { useSession } from '../../app/session';
 import { t } from '../../i18n';
-import { Badge, Coins, EmptyState, Segmented, Spinner, cx } from '../../ui/kit';
+import { Badge, Button, Coins, EmptyState, Segmented, Spinner, cx } from '../../ui/kit';
+import { paddleSandbox } from '../../net/paddle';
+import { BuyCoins } from './BuyCoins';
 import { ItemDialog } from './ItemDialog';
 import { ItemPreview } from './previews';
 import { SeasonPanel } from './SeasonPanel';
@@ -31,6 +33,9 @@ export function ShopPage() {
   const [filter, setFilter] = useState<Filter>('all');
   const [openId, setOpenId] = useState<string | null>(null);
   const open = items?.find((i) => i.id === openId) ?? null;
+  const [buying, setBuying] = useState(params.get('buy') === 'coins');
+  // test payments (Paddle's sandbox) are only for those who open the shop with ?buy=coins
+  const [canBuy] = useState(() => api.payments.available && (!paddleSandbox || params.get('buy') === 'coins'));
 
   const shown = useMemo(
     () =>
@@ -52,13 +57,21 @@ export function ShopPage() {
       wide
       actions={
         profile && (
-          <div className="shop-balance">
-            <span className="faint">{t('Balance')}</span>
-            <Coins amount={profile.coins} size={20} />
+          <div className="shop-head-actions">
+            <div className="shop-balance">
+              <span className="faint">{t('Balance')}</span>
+              <Coins amount={profile.coins} size={20} />
+            </div>
+            {canBuy && (
+              <Button variant="primary" icon={<Plus size={16} />} onClick={() => setBuying(true)}>
+                {t('Buy coins')}
+              </Button>
+            )}
           </div>
         )
       }
     >
+      {canBuy && <BuyCoins open={buying} onClose={() => setBuying(false)} />}
       <SeasonPanel onShowItem={setOpenId} />
 
       <div className="shop-bar">

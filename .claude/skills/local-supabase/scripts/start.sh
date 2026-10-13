@@ -95,6 +95,15 @@ EOF
   docker rm -f supabase_edge_runtime_chess-3d >/dev/null 2>&1 || true
 fi
 
+# 4b. Local function secrets: test values for payments (tests/payments.e2e.ts runs a fake
+#     Paddle API on the host's :4875, which the functions reach through the gateway).
+cat >supabase/functions/.env <<ENV
+PADDLE_ENV=sandbox
+PADDLE_API_URL=http://$GATEWAY:4875
+PADDLE_API_KEY=local-test-key
+PADDLE_WEBHOOK_SECRET=local-test-webhook-secret
+ENV
+
 # 5. Edge Functions
 if ! fn_up; then
   step "serving edge functions"
