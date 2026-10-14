@@ -446,3 +446,9 @@ button.loadout-item:hover {
     height: 96px;
   }
 }
+
+.award-date {
+  margin-top: 4px;
+  color: var(--gold);
+  font-size: 11.5px;
+}

@@ -197,12 +197,12 @@ export function createCompetitive(
     },
   };
 
-  type ServerResult = (ResultRecord & { player: PlayerRecord }) | { aborted: true; player: PlayerRecord };
+  type ServerResult = (ResultRecord & { player: PlayerRecord; awards?: string[] }) | { aborted: true; player: PlayerRecord };
   function toMatchResult(result: ServerResult): MatchResult | null {
     const profile = structuredClone(deps.adopt(result.player));
     if ('aborted' in result) return null;
     const b = result.breakdown!;
-    return { outcome: result.outcome, mmr: b.mmr, coins: b.coins, wager: b.wager, rankBefore: b.rankBefore, rankAfter: b.rankAfter, profile };
+    return { outcome: result.outcome, mmr: b.mmr, coins: b.coins, wager: b.wager, rankBefore: b.rankBefore, rankAfter: b.rankAfter, profile, awards: result.awards ?? [] };
   }
 
   const shop: Pick<ShopService, 'buy' | 'equip'> = {
@@ -216,7 +216,12 @@ export function createCompetitive(
     },
   };
 
-  const history: Pick<ProfileService, 'history' | 'publicHistory'> = {
+  const history: Pick<ProfileService, 'history' | 'publicHistory' | 'awards'> = {
+    async awards(userId) {
+      const { data, error } = await client.from('player_awards').select('award_id, earned_at').eq('player_id', userId);
+      if (error) throw new ApiError('network', t('Could not reach the server. Check your connection.'));
+      return data.map((a) => ({ id: a.award_id as string, earnedAt: a.earned_at as string }));
+    },
     async history() {
       const { games } = await play<{ games: ResultRecord[] }>('history');
       return games.map(toRecord);

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { Link, Navigate, useParams } from 'react-router';
 import { Crown, Flame, Gem, Pencil, Settings, Swords, Target, Trophy, Zap, type LucideIcon } from 'lucide-react';
 import { TIERS } from '#shared/rating.ts';
-import { api, type GameRecord, type PublicProfile } from '../../api';
+import { api, type EarnedAward, type GameRecord, type PublicProfile } from '../../api';
 import { awardsFor, type AwardIcon } from '../../api/awards';
 import { CATEGORY_NAMES, LOADOUT_CATEGORIES, itemName, type ItemCategory } from '../../api/catalog';
 import { Locker } from '../shop/Locker';
@@ -12,7 +12,7 @@ import { Page } from '../../app/AppLayout';
 import { useSession } from '../../app/session';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, Card, Coins, EmptyState, ProgressBar, Segmented, Spinner, cx } from '../../ui/kit';
-import { memberSince, timeAgo, winRate } from '../../ui/format';
+import { memberSince, shortDate, timeAgo, winRate } from '../../ui/format';
 import { ChallengeButton, FriendButton, FriendsOnly, MessageButton } from '../social/social';
 import './profile.css';
 
@@ -25,18 +25,26 @@ export function ProfilePage() {
   const { profile: me } = useSession();
   const [player, setPlayer] = useState<PublicProfile | null | undefined>(undefined);
   const [history, setHistory] = useState<GameRecord[] | null>(null);
+  const [earned, setEarned] = useState<EarnedAward[] | null>(null);
   const own = !username || username.toLowerCase() === me?.username?.toLowerCase();
 
   useEffect(() => {
     setPlayer(undefined);
     setHistory(null);
+    setEarned(null);
+    // the server's record of awards (real accounts); the demo works them out from the profile
+    const loadAwards = (id: string) => void api.profiles.awards?.(id).then(setEarned, () => {});
     if (own) {
       void api.profiles.get(me!.id).then(setPlayer);
       void api.profiles.history().then(setHistory);
+      loadAwards(me!.id);
     } else {
       void api.profiles.get(username!).then((p) => {
         setPlayer(p);
-        if (p) void api.profiles.publicHistory(p.id).then(setHistory);
+        if (p) {
+          void api.profiles.publicHistory(p.id).then(setHistory);
+          loadAwards(p.id);
+        }
       });
     }
     // reload when your own profile changes (icon, results)
@@ -59,10 +67,10 @@ export function ProfilePage() {
       </div>
     );
   }
-  return <ProfileView player={player} history={history} own={own} />;
+  return <ProfileView player={player} history={history} earnedAwards={earned} own={own} />;
 }
 
-function ProfileView({ player, history, own }: { player: PublicProfile; history: GameRecord[] | null; own: boolean }) {
+function ProfileView({ player, history, earnedAwards, own }: { player: PublicProfile; history: GameRecord[] | null; earnedAwards: EarnedAward[] | null; own: boolean }) {
   const { profile } = useSession();
   const [tab, setTab] = useState<'overview' | 'games'>('overview');
   const [locker, setLocker] = useState<ItemCategory | null>(null);
@@ -70,7 +78,7 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
   const games = wins + losses + draws;
   const rate = winRate(wins, losses, draws);
   const tier = TIERS.find((x) => x.id === player.rank.tier)!;
-  const awards = useMemo(() => awardsFor(player.stats, player.rank, history ?? []), [player, history]);
+  const awards = useMemo(() => awardsFor(player.stats, player.rank, history ?? [], earnedAwards), [player, history, earnedAwards]);
   const earned = awards.filter((a) => a.earned).length;
 
   return (
@@ -162,6 +170,7 @@ function ProfileView({ player, history, own }: { player: PublicProfile; history:
                     </span>
                     <strong>{a.name}</strong>
                     <span className="faint">{a.description}</span>
+                    {a.earnedAt && <span className="award-date">{t('Earned {date}', { date: shortDate(new Date(a.earnedAt)) })}</span>}
                     {!a.earned && a.progress && (
                       <span className="award-progress">
                         <ProgressBar value={a.progress[0] / a.progress[1]} tone="violet" />

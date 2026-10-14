@@ -117,9 +117,13 @@ async function result(me: string, gameId: unknown): Promise<unknown> {
   await settleGame(admin, row as GameRow);
   const { player } = await ensurePlayer(admin, me);
   if (row.result === null) return { result: { aborted: true, player } };
-  const { data: mine, error: e2 } = await admin.from('game_results').select('*').eq('game_id', gameId).eq('player_id', me).single();
+  const [{ data: mine, error: e2 }, { data: awards, error: e3 }] = await Promise.all([
+    admin.from('game_results').select('*').eq('game_id', gameId).eq('player_id', me).single(),
+    admin.from('player_awards').select('award_id').eq('game_id', gameId).eq('player_id', me),
+  ]);
   if (e2) throw e2;
-  return { result: { ...mine, player } };
+  if (e3) throw e3;
+  return { result: { ...mine, player, awards: awards.map((a) => a.award_id) } };
 }
 
 async function analysis(me: string, gameId: unknown, report: unknown): Promise<unknown> {

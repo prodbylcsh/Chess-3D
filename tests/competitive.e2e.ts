@@ -128,6 +128,10 @@ test('ranked: matched by the queue, clocks run, the result changes MMR (no coins
   assert.equal(res.result.outcome, 'win');
   assert.equal(res.result.mmr_delta, 20);
   assert.equal(res.result.breakdown.rankBefore.label, 'Silver II');
+  assert.deepEqual(res.result.awards, ['first-win'], 'the first win earns an award, kept on the server');
+  const kept = (await white.client.from('player_awards').select('award_id, game_id').eq('player_id', white.id)).data;
+  assert.deepEqual(kept, [{ award_id: 'first-win', game_id: row.id }]);
+  assert.ok((await white.client.from('player_awards').insert({ player_id: white.id, award_id: 'wins-100' })).error, 'players cannot give themselves awards');
 
   const theirs = await white.client.from('game_results').select('outcome, moves').eq('player_id', black.id);
   assert.deepEqual(theirs.data, [{ outcome: 'loss', moves: 4 }], 'recent games are public');
@@ -190,6 +194,8 @@ test('engine analysis: identical reports add the performance part; different one
   assert.equal(ledger.length, 1);
   const pub = (await black.client.from('game_results').select('accuracy').eq('game_id', row.id).eq('player_id', white.id).single()).data!;
   assert.equal(pub.accuracy, Math.round(acc.w!), 'accuracy is public like the rest of the result');
+  const precise = (await admin.from('player_awards').select('award_id').eq('player_id', white.id).eq('award_id', 'accuracy-90')).data!;
+  assert.equal(precise.length, acc.w! >= 90 ? 1 : 0, 'precision is awarded from the agreed analysis');
   assert.equal((await play(black, { action: 'analysis', gameId: row.id, report })).status, 'applied', 'once only');
   assert.equal((await state(black)).mmr, 1000 + loss.total);
 

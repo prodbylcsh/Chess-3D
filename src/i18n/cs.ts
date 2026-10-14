@@ -1,7 +1,6 @@
 // Czech interface strings, keyed by the English text in the code.
 // `<text>#few` entries are the 2–4 plural forms used by tn().
 export const cs: Record<string, string> = {
-  'Reach {tier} in ranked': 'Dosáhni úrovně {tier} v hodnocených hrách',
   'First Blood': 'První krev',
   'Win your first game': 'Vyhraj svou první hru',
   'Seasoned': 'Ostřílený',
@@ -21,6 +20,7 @@ export const cs: Record<string, string> = {
   'Play a game with 90% accuracy or more': 'Odehraj hru s přesností 90 % nebo vyšší',
   'Swift Strike': 'Bleskový úder',
   'Win by checkmate in 20 moves or fewer': 'Vyhraj matem do 20 tahů',
+  'Reach {tier} in ranked': 'Dosáhni úrovně {tier} v hodnocených hrách',
   'Piece set': 'Sada figur',
   'Board': 'Šachovnice',
   'Background': 'Pozadí',
@@ -299,6 +299,7 @@ export const cs: Record<string, string> = {
   '{name} wins': 'Vyhrává {name}',
   'vs': 'vs',
   'Calculating your results…': 'Počítám tvé výsledky…',
+  'New award: {name}': 'Nové ocenění: {name}',
   'Coins': 'Mince',
   'Base': 'Základ',
   'Performance': 'Výkon',
@@ -501,6 +502,7 @@ export const cs: Record<string, string> = {
   'Overview': 'Přehled',
   'Awards': 'Ocenění',
   '{n} of {total}': '{n} z {total}',
+  'Earned {date}': 'Získáno {date}',
   'In use': 'Používáš',
   'Change': 'Změnit',
   'No games yet': 'Zatím žádné hry',

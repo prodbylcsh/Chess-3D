@@ -323,8 +323,15 @@ win/loss/draw record, current win streak, game history (opponent, result, mode, 
 visible only to the owner), awards, and the equipped cosmetics. The owner can change the
 icon and equip owned items here. MMR itself is never shown, only the rank.
 
-Awards (first ideas): first win, 10/100/1000 wins, win streaks of 5/10, reach each tier,
-a game with 90%+ accuracy, checkmate in under 20 moves.
+Awards: first win, 10 and 100 wins, 500 games, win streaks of 5 and 10, reaching Gold,
+Platinum and Diamond, a game with 90%+ accuracy, checkmate in 20 moves or fewer
+(`supabase/functions/_shared/awards.ts`). On real accounts the server grants them when a
+game is settled or its analysis applied and keeps each with its date and game
+(`player_awards`, readable by signed-in players), so an award stays after a season reset
+or when the game leaves the history; the result card shows the awards a game earned and
+the profile shows when each was earned. Progress bars (e.g. 4/10 wins) come from the
+stats. Existing progress was carried over when this started (14 October 2026). The demo
+back-end works the awards out from the profile instead.
 
 ### 4.7 Messages
 
@@ -645,7 +652,7 @@ price_paid, season, acquired_at; private to the player) has one row per owned it
 `buy_item` checks the price against `items` too. The rest is the plan:
 
 ```
-awards          id, name, rule;  player_awards  player_id, award_id, earned_at
+player_awards   player_id, award_id, earned_at, game_id  (✅; definitions in code)
 puzzle_progress player_id, level, stars, completed_at   (later)
 ```
 

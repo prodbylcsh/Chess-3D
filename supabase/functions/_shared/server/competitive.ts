@@ -4,6 +4,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ANALYSIS, accuracies, isReport, sameReport, type AnalysisReport, type AnalysisStatus } from '../analysis.ts';
 import { newPlayer, performanceAdjustment, rollSeasons, settle, type FinishedGame, type PlayerState, type SeasonGrant, type Side } from '../play.ts';
+import { awardsMet } from '../awards.ts';
 import { rankOf } from '../rating.ts';
 import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
@@ -120,11 +121,24 @@ export async function settleGame(admin: SupabaseClient, row: GameRow): Promise<v
 
   const { data: settled, error: rpcError } = await admin.rpc('settle_game', { p_game: row.id, p_rows: rows });
   if (rpcError) throw rpcError;
+  if (settled) {
+    for (const st of settlements) {
+      if (!st.outcome) continue;
+      await grantAwards(admin, st.playerId, awardsMet(st.after, { outcome: st.outcome, reason: row.reason ?? '', plies: row.moves.length }), row.id);
+    }
+  }
   // the players' browsers analyse the game next; their reports add the performance part
   if (settled && row.result && (row.kind === 'ranked' || row.kind === 'casual')) {
     const { error } = await admin.from('game_analysis').insert({ game_id: row.id, game });
     if (error && error.code !== UNIQUE_VIOLATION) throw error;
   }
+}
+
+/** Give a player the awards they have met (each once, kept with the game that earned it). */
+export async function grantAwards(admin: SupabaseClient, playerId: string, awards: string[], gameId: string | null): Promise<void> {
+  if (!awards.length) return;
+  const { error } = await admin.rpc('grant_awards', { p_player: playerId, p_awards: awards, p_game: gameId });
+  if (error) throw error;
 }
 
 /** The settlement's view of a player (no inventory, loadout or badges). */
@@ -199,7 +213,14 @@ export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color:
   const { data: applied, error: applyError } = await admin.rpc('apply_analysis', { p_game: row.id, p_status: 'applied', p_rows: rows });
   if (applyError) throw applyError;
   if (applied) {
-    await Promise.all([game.white.id, game.black.id].map(async (id) => publishShowcase(admin, await getPlayer(admin, id))));
+    await Promise.all(
+      rows.map(async (r) => {
+        const player = await getPlayer(admin, r.player_id);
+        await publishShowcase(admin, player);
+        // precision, and a rank the performance part may have reached
+        await grantAwards(admin, r.player_id, awardsMet(player, { accuracy: r.accuracy }), row.id);
+      }),
+    );
   }
   return 'applied';
 }

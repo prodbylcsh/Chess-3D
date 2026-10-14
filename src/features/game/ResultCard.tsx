@@ -1,6 +1,7 @@
 import { rankText, t, tk } from '../../i18n';
 import { useEffect, useState } from 'react';
-import { Eye, Sparkles, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { Award, Eye, Sparkles, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { awardName } from '../../api/awards';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Button, Coins, ProgressBar, Spinner, cx } from '../../ui/kit';
 import type { Analysis } from '../../ai/analysis';
@@ -75,6 +76,16 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
           </div>
         )}
         {result?.error && <p className="form-error">{result.error}</p>}
+
+        {data?.awards && data.awards.length > 0 && (
+          <div className="result-awards">
+            {data.awards.map((id) => (
+              <span key={id} className="result-award">
+                <Award size={15} /> {t('New award: {name}', { name: awardName(id) })}
+              </span>
+            ))}
+          </div>
+        )}
 
         {data?.mmr && <MmrBlock data={data} />}
 

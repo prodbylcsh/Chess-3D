@@ -151,6 +151,13 @@ export interface MatchResult {
   rankBefore: RankInfo;
   rankAfter: RankInfo;
   profile: Profile;
+  /** awards this game earned (real accounts) */
+  awards?: string[];
+}
+
+export interface EarnedAward {
+  id: string;
+  earnedAt: string;
 }
 
 export interface GameRecord {
@@ -243,6 +250,8 @@ export interface ProfileService {
   get(usernameOrId: string): Promise<PublicProfile | null>;
   /** a player's recent games (no MMR changes: those are private) */
   publicHistory(userId: string): Promise<GameRecord[]>;
+  /** the awards the server has given a player, with when (real accounts; the demo computes them) */
+  awards?(userId: string): Promise<EarnedAward[]>;
   search(query: string): Promise<PublicProfile[]>;
   /** players near your rank you may want to add */
   suggestions(): Promise<PublicProfile[]>;
