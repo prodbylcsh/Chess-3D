@@ -1,0 +1,62 @@
+name: Build puzzle data
+
+# Picks each module's puzzles from the Lichess puzzle database (CC0) with
+# scripts/puzzles/build.ts and commits supabase/functions/_shared/puzzle-data/ to the branch
+# it ran on. Only when that data is missing (a new module), or when run by hand with
+# "rebuild": the puzzles of a live module must not change under players' progress.
+
+on:
+  push:
+    paths: ['scripts/puzzles/**', 'supabase/functions/_shared/puzzles.ts', '.github/workflows/puzzles.yml']
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        description: Pick every module's puzzles again (changes live modules!)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: puzzles-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Which modules need puzzles
+        id: missing
+        run: |
+          missing=$(node -e "
+            const fs = require('fs');
+            import('./supabase/functions/_shared/puzzles.ts').then(({ MODULES }) => {
+              const rebuild = process.env.REBUILD === 'true';
+              console.log(MODULES.filter((m) => rebuild || !fs.existsSync('supabase/functions/_shared/puzzle-data/' + m.id + '.json')).map((m) => m.id).join(' '));
+            });")
+          echo "modules=$missing" >> "$GITHUB_OUTPUT"
+          echo "missing: ${missing:-none}"
+        env:
+          REBUILD: ${{ inputs.rebuild }}
+      - name: Build from the Lichess database
+        if: steps.missing.outputs.modules != ''
+        run: |
+          curl -sSfL https://database.lichess.org/lichess_db_puzzle.csv.zst | zstd -dc | node scripts/puzzles/build.ts
+          # keep the puzzles of modules that already had them (unless rebuilding)
+          if [ "${{ inputs.rebuild }}" != "true" ]; then git checkout -- supabase/functions/_shared/puzzle-data/ 2>/dev/null || true; fi
+      - name: Commit
+        if: steps.missing.outputs.modules != ''
+        run: |
+          git add supabase/functions/_shared/puzzle-data/
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Puzzle data from the Lichess puzzle database (CC0): ${{ steps.missing.outputs.modules }}"
+          git push
