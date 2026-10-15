@@ -7,6 +7,7 @@ import { STAKES, coinReward, wagerNet } from '#shared/economy.ts';
 import { ApiError, type Api, type MatchFound, type MatchKind, type MatchReport, type MatchResult } from '../types';
 import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../validation';
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
+import { puzzles } from './puzzles';
 import { SEED_PLAYERS, type SeedPlayer } from './seed';
 import { account, friends, messages, profileLookups } from './social';
 import { notePeak, owns, seasons, shop } from './shop';
@@ -148,6 +149,7 @@ export function createMockApi(): Api {
     shop,
     seasons,
     events: { subscribe },
+    puzzles,
     // coins for money need the real back-end (Paddle's checkout and webhooks)
     payments: {
       available: false,

@@ -12,6 +12,8 @@ import { AiMode } from './modes/ai';
 import { LocalMode } from './modes/local';
 import { MatchMode } from './modes/match';
 import { OnlineMode } from './modes/online';
+import { PuzzleMode } from './modes/puzzle';
+import { PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import type { Mode, ModeContext } from './modes/types';
 import './game.css';
 import { api } from '../../api';
@@ -52,6 +54,7 @@ export default function GamePage() {
 
   const level = Number(params.get('level') ?? 3);
   const color = params.get('color');
+  const puzzleIndex = params.get('n') ?? '0';
   const mode = useMemo<Mode | null>(() => {
     if (!engine) return null;
     const ctx: ModeContext = {
@@ -76,10 +79,14 @@ export default function GamePage() {
       }
       case 'online':
         return id ? new OnlineMode(ctx, id) : null;
+      case 'puzzle': {
+        const n = Number(puzzleIndex);
+        return id && moduleOf(id) && Number.isInteger(n) && n >= 0 && n < PUZZLES_PER_MODULE ? new PuzzleMode(ctx, id, n) : null;
+      }
       default:
         return new LocalMode(ctx);
     }
-  }, [engine, modeId, id, level, color, navigate]);
+  }, [engine, modeId, id, level, color, puzzleIndex, navigate]);
 
   useEffect(() => {
     if (!mode) return;

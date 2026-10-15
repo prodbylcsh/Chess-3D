@@ -1,0 +1,350 @@
+/* Puzzles: module cards, the module's level map. Each module colours its own page (--module). */
+
+.puzzles-loading {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+}
+
+.puzzle-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.puzzle-module {
+  --module: var(--gold);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--module) 40%, var(--border));
+  border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--module) 14%, var(--panel-solid)) 0%, var(--panel-solid) 60%);
+  animation: rise-in 0.4s both;
+}
+
+.puzzle-module.is-locked {
+  border-color: var(--border);
+}
+
+.puzzle-module-glow {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--module) 35%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.puzzle-module header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.puzzle-module header > :nth-child(2) {
+  margin-left: auto;
+}
+
+.puzzle-module h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+
+.puzzle-module p {
+  margin: 0;
+}
+
+.puzzle-module .btn {
+  margin-top: auto;
+}
+
+.puzzle-module-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--module) 22%, transparent);
+  color: var(--module);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--module) 30%, transparent);
+}
+
+.puzzle-module-icon.is-large {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+}
+
+.puzzle-module.is-locked .puzzle-module-icon {
+  filter: saturate(0.4);
+  opacity: 0.75;
+}
+
+.puzzle-module-progress {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0;
+  font-size: 12.5px;
+}
+
+.puzzle-module-progress .faint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.puzzle-module-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+/* ------------------------------------------------------------------ module page */
+
+.puzzle-hero {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  margin-bottom: 26px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--module) 40%, var(--border));
+  border-radius: var(--radius-xl);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--module) 16%, var(--panel-solid)) 0%, var(--panel-solid) 70%);
+}
+
+.puzzle-hero-glow {
+  position: absolute;
+  inset: -40% -10% auto auto;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--module) 30%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.puzzle-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.puzzle-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.puzzle-hero-main h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.puzzle-hero-main p {
+  margin: 4px 0 0;
+}
+
+.puzzle-hero-progress {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+}
+
+.puzzle-map {
+  --gap-x: 8px;
+  --gap-y: 10px;
+  --chest: 40px;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--gap-y) var(--gap-x);
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+/* a step is exactly as tall as its node, so 50% is the node's centre */
+.puzzle-step {
+  --path: var(--border-strong);
+  position: relative;
+  grid-column: var(--col);
+  grid-row: var(--row);
+  display: grid;
+  place-items: center;
+}
+
+.puzzle-step.is-done {
+  --path: color-mix(in srgb, var(--module) 65%, transparent);
+}
+
+.puzzle-step.is-along::before,
+.puzzle-step.is-down::before {
+  content: '';
+  position: absolute;
+  background: var(--path);
+  border-radius: 2px;
+}
+
+.puzzle-step.is-along::before {
+  top: calc(50% - 1.5px);
+  left: 50%;
+  width: calc(100% + var(--gap-x));
+  height: 3px;
+}
+
+.puzzle-step.is-along.is-reversed::before {
+  left: auto;
+  right: 50%;
+}
+
+.puzzle-step.is-down::before {
+  top: 50%;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  height: calc(100% + 2 * var(--gap-y) + var(--chest));
+}
+
+.puzzle-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 54px;
+  aspect-ratio: 1;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--panel-solid);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.puzzle-node:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.puzzle-node.is-solved {
+  border-color: color-mix(in srgb, var(--module) 60%, transparent);
+  background: color-mix(in srgb, var(--module) 20%, var(--panel-solid));
+  color: var(--text);
+}
+
+.puzzle-node.is-next {
+  border: 2px solid var(--module);
+  background: color-mix(in srgb, var(--module) 30%, var(--panel-solid));
+  color: var(--text);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--module) 18%, transparent), 0 0 24px color-mix(in srgb, var(--module) 45%, transparent);
+  animation: pop-in 0.4s both;
+}
+
+.puzzle-node.is-locked {
+  border-color: var(--border);
+  background: var(--bg-raised);
+  color: var(--text-3);
+  cursor: default;
+}
+
+.puzzle-node-stars {
+  position: absolute;
+  bottom: -7px;
+  display: flex;
+  gap: 1px;
+  color: var(--text-3);
+}
+
+.puzzle-node-stars .is-lit {
+  color: var(--gold);
+  fill: var(--gold);
+}
+
+.puzzle-chest {
+  grid-column: var(--col);
+  grid-row: var(--row);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  height: var(--chest);
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.puzzle-chest-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 3px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--panel-solid);
+  white-space: nowrap;
+}
+
+.puzzle-chest.is-open {
+  color: var(--gold);
+}
+
+.puzzle-chest.is-open .puzzle-chest-badge {
+  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
+  background: color-mix(in srgb, var(--gold) 12%, var(--panel-solid));
+}
+
+.puzzle-chest.is-final {
+  grid-column: 1 / -1;
+  height: auto;
+  margin-top: 8px;
+  color: var(--module);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.puzzle-chest.is-final .puzzle-chest-badge {
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 1px dashed color-mix(in srgb, var(--module) 50%, var(--border));
+  border-radius: var(--radius-lg);
+  white-space: normal;
+  text-align: center;
+}
+
+@media (max-width: 820px) {
+  .puzzle-hero {
+    padding: 18px;
+  }
+
+  .puzzle-hero-main h1 {
+    font-size: 24px;
+  }
+
+  .puzzle-hero-progress {
+    grid-template-columns: 1fr auto;
+  }
+
+  .puzzle-hero-progress .btn {
+    grid-column: 1 / -1;
+  }
+
+  .puzzle-map {
+    --gap-x: 4px;
+    --gap-y: 8px;
+  }
+
+  .puzzle-node {
+    font-size: 12px;
+  }
+}

@@ -951,3 +951,42 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------------ puzzles */
+
+.puzzle-stars {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 2px 0 14px;
+  color: var(--text-3);
+}
+
+.puzzle-stars .is-lit {
+  color: var(--gold);
+  fill: var(--gold);
+  filter: drop-shadow(0 0 10px rgba(242, 194, 122, 0.55));
+  animation: pop-in 0.45s both;
+}
+
+.puzzle-stars .is-lit:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.puzzle-stars .is-lit:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.puzzle-reward {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-color: var(--gold-line);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.puzzle-reward div {
+  display: grid;
+  gap: 2px;
+}

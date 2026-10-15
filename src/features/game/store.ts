@@ -2,7 +2,7 @@ import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
-import type { MatchResult, RankInfo } from '../../api';
+import type { MatchResult, PuzzleSolve, RankInfo } from '../../api';
 import type { Analysis } from '../../ai/analysis';
 
 export interface PlayerView {
@@ -14,6 +14,18 @@ export interface PlayerView {
   you?: boolean;
   /** connected (online games); undefined when not applicable */
   present?: boolean;
+}
+
+/** A puzzle being played (Puzzles): its module, mistakes and hints, and the server's answer. */
+export interface PuzzleView {
+  module: string;
+  index: number;
+  color: string;
+  mistakes: number;
+  hints: number;
+  result: PuzzleSolve | null;
+  saving: boolean;
+  error: string | null;
 }
 
 export interface ResultState {
@@ -64,6 +76,7 @@ export interface GameState {
   note: string | null;
   drawOffered: boolean;
   clock: ClockView | null;
+  puzzle: PuzzleView | null;
 }
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -89,6 +102,7 @@ export function initialState(): GameState {
     note: null,
     drawOffered: false,
     clock: null,
+    puzzle: null,
   };
 }
 

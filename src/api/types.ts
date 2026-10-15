@@ -326,6 +326,42 @@ export interface MatchmakingService {
   analysis?(matchId: string, report?: AnalysisReport): Promise<{ status: AnalysisStatus; result: MatchResult | null }>;
 }
 
+// ------------------------------------------------------------------ puzzles
+
+export interface PuzzleModuleProgress {
+  id: string;
+  /** free, or unlocked with coins */
+  unlocked: boolean;
+  /** best stars per puzzle (1–3), 0 while unsolved */
+  stars: number[];
+  completedAt: string | null;
+  /** what finishing the module gave: an item, or coins */
+  reward: { item: string | null; coins: number | null } | null;
+}
+
+export interface PuzzleSolve {
+  /** the first time this puzzle was solved (only that pays) */
+  first: boolean;
+  coins: number;
+  /** the bonus for every 10 solved */
+  bonus: number;
+  stars: 1 | 2 | 3;
+  /** puzzles solved in the module now */
+  solved: number;
+  /** finishing the module */
+  reward: { item: string | null; coins: number | null } | null;
+}
+
+export interface PuzzlesService {
+  progress(): Promise<PuzzleModuleProgress[]>;
+  /** the player opened a puzzle (the server times the solve from here) */
+  start(module: string, index: number): Promise<void>;
+  /** the player's moves (UCI) for a puzzle; the server checks them and pays the rewards */
+  solve(module: string, index: number, moves: string[], mistakes: number, hints: number): Promise<PuzzleSolve>;
+  /** unlock a paid module with coins */
+  unlock(module: string): Promise<PuzzleModuleProgress[]>;
+}
+
 // ------------------------------------------------------------------ buying coins
 
 export type PurchaseStatus = 'created' | 'completed' | 'refunded';
@@ -350,6 +386,7 @@ export interface Api {
   shop: ShopService;
   seasons: SeasonsService;
   payments: PaymentsService;
+  puzzles: PuzzlesService;
   /** which parts still run on the in-browser demo back-end */
   demo: { accounts: boolean; social: boolean };
 }

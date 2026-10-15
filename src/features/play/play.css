@@ -190,6 +190,10 @@
   --tone: #f2c27a;
   --tone-soft: rgba(242, 194, 122, 0.15);
 }
+.tone-teal {
+  --tone: #6fd3c7;
+  --tone-soft: rgba(111, 211, 199, 0.14);
+}
 .tone-red {
   --tone: #ff8a7e;
   --tone-soft: rgba(255, 138, 126, 0.13);

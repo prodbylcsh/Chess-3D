@@ -57,6 +57,8 @@ export class Game {
   private seat: Seat | null = null;
   /** board work runs strictly in order: moves, remote updates and resets never interleave */
   private queue: Promise<void> = Promise.resolve();
+  /** the position games start from (puzzles); null: the standard starting position */
+  private start: string | null = null;
   /** the camera's distance from the board at the start of a game on a wide screen */
   private readonly classicDistance: number;
   /** loading of the next game's items (`prepare`); `begin` waits for it */
@@ -78,12 +80,14 @@ export class Game {
   /**
    * Start a game: local hotseat with a null seat, otherwise a seat that sends
    * this player's moves somewhere (server, AI). The first game plays the intro.
+   * `start` is a position (FEN) to start from instead of the usual one (puzzles).
    */
-  begin(seat: Seat | null, moves: string[] = []): Promise<void> {
+  begin(seat: Seat | null, moves: string[] = [], start: string | null = null): Promise<void> {
     this.setBusy(true);
     return this.run(async () => {
       await this.preparing; // the players' piece sets and board
       this.seat = seat;
+      this.start = start;
       const side = seat?.side ?? 'w';
       if (this.introduced) return this.resetBoard(moves, side);
       this.introduced = true;
@@ -181,6 +185,17 @@ export class Game {
       this.targets.some((m) => m.to === sq || castlingRook(m) === sq);
     this.view.setHover(interesting ? sq : null);
     el.style.cursor = interesting ? 'pointer' : '';
+  }
+
+  /** Make a move as if the player had clicked it (dev tools and browser checks). */
+  input(uci: string): void {
+    if (this.busy || this.over || !this.isMyTurn()) return;
+    const candidates = this.chess
+      .moves({ verbose: true })
+      .filter((m) => m.from === uci.slice(0, 2) && m.to === uci.slice(2, 4) && (!uci[4] || m.promotion === uci[4]));
+    if (!candidates.length) return;
+    this.setBusy(true);
+    void this.run(() => this.commit(candidates));
   }
 
   private onSquareClick(sq: Square | null): void {
@@ -464,7 +479,8 @@ export class Game {
   }
 
   private replay(moves: string[]): void {
-    this.chess.reset();
+    if (this.start) this.chess.load(this.start);
+    else this.chess.reset();
     for (const uci of moves) this.chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
   }
 

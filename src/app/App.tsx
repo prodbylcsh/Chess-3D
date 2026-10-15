@@ -7,6 +7,8 @@ import { Onboarding } from '../features/onboarding/Onboarding';
 import { PlayHub } from '../features/play/PlayHub';
 import { ShopPage } from '../features/shop/ShopPage';
 import { CommunityPage } from '../features/community/CommunityPage';
+import { ModulePage } from '../features/puzzles/ModulePage';
+import { PuzzlesPage } from '../features/puzzles/PuzzlesPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { SettingsPage } from '../features/settings/SettingsPage';
@@ -67,6 +69,8 @@ function Routed() {
         <Route path="/game/:mode/:id?" element={<GamePage />} />
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/play" element={<PlayHub />} />
+          <Route path="/puzzles" element={<PuzzlesPage />} />
+          <Route path="/puzzles/:module" element={<ModulePage />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/profile" element={<ProfilePage />} />

@@ -1,7 +1,7 @@
 import { rankText, t } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Bot, ChevronRight, Coins as CoinsIcon, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
+import { Bot, ChevronRight, Coins as CoinsIcon, Puzzle, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
 import { CONTROLS, controlLabel, type ControlId } from '#shared/play.ts';
@@ -124,6 +124,14 @@ export function PlayHub() {
           onClick={() => setSheet('stake')}
           disabled={casualOnly}
         />
+        <ModeCard
+          icon={Puzzle}
+          tone="teal"
+          title={t('Puzzles')}
+          text={t('Themed modules of 100 puzzles. Coins for every new solve.')}
+          meta={t('First module free')}
+          onClick={() => navigate('/puzzles')}
+        />
         <ModeCard icon={Trophy} tone="red" title={t('Tournaments')} text={t('Brackets with entry fees and big prizes.')} meta={t('Coming soon')} disabled />
       </div>
 
@@ -152,7 +160,7 @@ function ModeCard({
   disabled,
 }: {
   icon: LucideIcon;
-  tone: 'blue' | 'green' | 'violet' | 'gold' | 'red';
+  tone: 'blue' | 'green' | 'violet' | 'gold' | 'teal' | 'red';
   title: string;
   text: string;
   meta: string;

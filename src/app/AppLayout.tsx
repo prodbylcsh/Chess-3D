@@ -30,7 +30,7 @@ interface NavItem {
 
 export const NAV: NavItem[] = [
   { to: '/play', label: tk('Play'), icon: Swords, mobile: true },
-  { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle, soon: true },
+  { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle },
   { to: '/learn', label: tk('Learn'), icon: GraduationCap, soon: true },
   { to: '/community', label: tk('Community'), icon: Users, mobile: true },
   { to: '/shop', label: tk('Shop'), icon: Store, mobile: true },

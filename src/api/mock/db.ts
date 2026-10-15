@@ -35,6 +35,13 @@ export interface StoredConversation {
   readAt: Record<string, string>;
 }
 
+export interface MockPuzzleModule {
+  stars: number[];
+  unlocked: boolean;
+  completedAt: string | null;
+  reward: { item: string | null; coins: number | null } | null;
+}
+
 export interface Db {
   version: 1;
   accounts: StoredAccount[];
@@ -45,6 +52,8 @@ export interface Db {
   conversations: Record<string, StoredConversation>;
   /** per player: highest MMR reached in each season ("2" → mmr) */
   seasonPeak: Record<string, Record<string, number>>;
+  /** per player and module: puzzle progress */
+  puzzles: Record<string, Record<string, MockPuzzleModule>>;
   sessionId: string | null;
 }
 
@@ -68,6 +77,7 @@ function load(): Db {
     social: {},
     conversations: {},
     seasonPeak: {},
+    puzzles: {},
     sessionId: null,
     ...data,
   };

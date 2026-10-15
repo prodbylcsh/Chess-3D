@@ -19,6 +19,9 @@ import {
   type PaymentsService,
   type Profile,
   type PurchaseStatus,
+  type PuzzleModuleProgress,
+  type PuzzleSolve,
+  type PuzzlesService,
   type ProfileService,
   type PublicProfile,
   type ShopService,
@@ -274,5 +277,49 @@ export function createCompetitive(
     },
   };
 
-  return { matchmaking, shop, history, payments: coinPayments };
+  // ---------------------------------------------------------------- puzzles
+
+  async function puzzleCall<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
+    const { data, error } = await client.functions.invoke<T>('puzzles', { body: { action, ...body } });
+    if (!error) return data!;
+    if (error instanceof FunctionsHttpError) {
+      const payload = await (error.context as Response).json().catch(() => null);
+      switch (payload?.code) {
+        case 'insufficient_coins':
+          throw new ApiError('insufficient_coins', t('You do not have enough coins for this module.'));
+        case 'locked':
+          throw new ApiError('locked', t('Solve the puzzles before this one first.'));
+        case 'wrong':
+          throw new ApiError('wrong', t('That is not the solution.'));
+        case 'not_started':
+          throw new ApiError('not_started', t('Something went wrong. Please try again.'));
+        default:
+          throw playError(payload?.code ?? 'server_error');
+      }
+    }
+    throw new ApiError('network', t('Could not reach the server. Check your connection.'));
+  }
+
+  const puzzles: PuzzlesService = {
+    async progress() {
+      const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('progress');
+      deps.adopt(player);
+      return modules;
+    },
+    async start(module, index) {
+      await puzzleCall('start', { module, index });
+    },
+    async solve(module, index, moves, mistakes, hints) {
+      const { player, ...result } = await puzzleCall<PuzzleSolve & { player: PlayerRecord }>('solve', { module, index, moves, mistakes, hints });
+      deps.adopt(player);
+      return result;
+    },
+    async unlock(module) {
+      const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('unlock', { module });
+      deps.adopt(player);
+      return modules;
+    },
+  };
+
+  return { matchmaking, shop, history, payments: coinPayments, puzzles };
 }

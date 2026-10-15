@@ -185,13 +185,19 @@ export class Stage {
     const sky = new THREE.Color(look.sky);
     this.scene.background = sky;
     this.scene.fog = new THREE.FogExp2(sky, look.fog);
+    this.paintTable(look.table);
+    this.applyLights();
+  }
+
+  private applyLights(): void {
+    const look = this.backdrop;
+    if (!look) return;
     this.lights.key.color.set(look.keyLight);
     this.lights.rim.color.set(look.rim);
     this.lights.fill.color.set(look.fill.color);
     this.lights.fill.intensity = look.fill.intensity;
     this.lights.hemisphere.color.set(look.hemisphere[0]);
     this.lights.hemisphere.groundColor.set(look.hemisphere[1]);
-    this.paintTable(look.table);
   }
 
   private addLights() {

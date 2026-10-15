@@ -8,6 +8,7 @@ import {
   destructionStyle,
   moveStyle,
   pieceSetLook,
+  type BackgroundLook,
   type DestructionStyle,
   type GameLooks,
   type MoveStyle,
@@ -86,10 +87,27 @@ export class Wardrobe {
     }
     for (const m of this.boardMaterials) m.roughness = board?.roughness ?? SOURCE.roughness;
 
-    const bg = backgroundLook(looks.background);
-    this.stage.setBackdrop(bg);
-    this.fx.motes.configure(bg.motes);
+    this.showBackground();
     return this.loadModels(looks);
+  }
+
+  /**
+   * Colour the scene in a theme (a puzzle module's colour), or back to the background's
+   * own (null): the sky, the table, the coloured side lights and the floating motes. The
+   * pieces, the board and the key light stay as they are.
+   */
+  setMood(color: string | null): void {
+    this.mood = color;
+    this.showBackground();
+  }
+
+  private mood: string | null = null;
+
+  private showBackground(): void {
+    const bg = backgroundLook(this.looks?.background ?? '');
+    const look = this.mood ? themed(bg, this.mood) : bg;
+    this.stage.setBackdrop(look);
+    this.fx.motes.configure(look.motes);
   }
 
   /** The model a new piece is made from: its owner's set, or the classic one. */
@@ -173,4 +191,21 @@ export class Wardrobe {
 function fallback<T>(err: unknown, value: T): T {
   console.warn('Could not load a shop item model; using the classic look.', err);
   return value;
+}
+
+/** A background tinted towards a theme colour. */
+function themed(bg: BackgroundLook, color: string): BackgroundLook {
+  const theme = new THREE.Color(color);
+  const mix = (c: string, k: number) => `#${new THREE.Color(c).lerp(theme, k).getHexString()}`;
+  // the motes glow in the theme's colour (linear HDR, as bright as the background's own)
+  const glow = theme.clone().multiplyScalar(1.6);
+  return {
+    ...bg,
+    sky: mix(bg.sky, 0.09),
+    table: [mix(bg.table[0], 0.22), mix(bg.table[1], 0.14), bg.table[2]],
+    fill: { ...bg.fill, color: mix(bg.fill.color, 0.75) },
+    rim: mix(bg.rim, 0.75),
+    hemisphere: [mix(bg.hemisphere[0], 0.35), bg.hemisphere[1]],
+    motes: { ...bg.motes, color: [glow.r, glow.g, glow.b], count: Math.round(bg.motes.count * 1.4) },
+  };
 }

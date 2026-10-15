@@ -1,9 +1,10 @@
 import { rankText, t, tk } from '../../i18n';
 import { useEffect, useState } from 'react';
-import { Award, Eye, Sparkles, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { Award, Eye, Gift, Sparkles, Star, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { itemName } from '../../api/catalog';
 import { awardName } from '../../api/awards';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
-import { Button, Coins, ProgressBar, Spinner, cx } from '../../ui/kit';
+import { Button, Coins, ProgressBar, Spinner, cx, formatNumber } from '../../ui/kit';
 import type { Analysis } from '../../ai/analysis';
 import type { Mode } from './modes/types';
 import type { GameState } from './store';
@@ -19,6 +20,50 @@ const REASON: Record<string, string> = {
   abandoned: tk('by abandonment'),
   timeout: tk('on time'),
 };
+
+/** A solved puzzle: stars, coins, the bonus every 10 and the module's finishing reward. */
+function PuzzleBlock({ puzzle }: { puzzle: NonNullable<GameState['puzzle']> }) {
+  const r = puzzle.result;
+  return (
+    <>
+      <div className="puzzle-stars" aria-label={r ? t('{n} of 3 stars', { n: r.stars }) : undefined}>
+        {[1, 2, 3].map((n) => (
+          <Star key={n} size={34} className={cx(r && n <= r.stars && 'is-lit')} />
+        ))}
+      </div>
+      {puzzle.saving && (
+        <div className="result-loading">
+          <Spinner size={18} /> {t('Saving your progress…')}
+        </div>
+      )}
+      {puzzle.error && <p className="form-error">{puzzle.error}</p>}
+      {r && (
+        <section className="result-block">
+          <div className="result-row">
+            <span className="result-label">{t('Coins')}</span>
+            <Coins amount={r.coins + r.bonus} signed size={20} />
+          </div>
+          <div className="result-chips">
+            {r.first ? <span>{t('Puzzle')} +{r.coins}</span> : <span>{t('Already solved: no coins this time')}</span>}
+            {r.bonus > 0 && <span>{t('Bonus for {n} solved', { n: r.solved })} +{r.bonus}</span>}
+            <span>{t('{n} of {total} solved', { n: r.solved, total: 100 })}</span>
+          </div>
+        </section>
+      )}
+      {r?.reward && (
+        <section className="result-block puzzle-reward">
+          <Gift size={20} />
+          <div>
+            <strong>{t('Module complete!')}</strong>
+            <span className="muted">
+              {r.reward.item ? t('Your reward: {item}', { item: itemName(r.reward.item) }) : t('Your reward: {coins} coins', { coins: formatNumber(r.reward.coins ?? 0) })}
+            </span>
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
 
 /** What the engine analysis means for this game's performance part. */
 const ANALYSIS_NOTE: Partial<Record<Analysis['status'], string>> = {
@@ -40,7 +85,8 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
   const outcome = !me ? null : end.winner === null ? 'draw' : end.winner === me ? 'win' : 'loss';
   // an aborted game has no result: say so instead of "Draw"
   const aborted = end.reason === 'aborted';
-  const title = aborted ? end.title : outcome === 'win' ? t('Victory') : outcome === 'loss' ? t('Defeat') : outcome === 'draw' ? t('Draw') : end.winner ? t('{name} wins', { name: s.players[end.winner].name }) : t('Draw');
+  const custom = mode.endTitle?.(s);
+  const title = custom ? custom.title : aborted ? end.title : outcome === 'win' ? t('Victory') : outcome === 'loss' ? t('Defeat') : outcome === 'draw' ? t('Draw') : end.winner ? t('{name} wins', { name: s.players[end.winner].name }) : t('Draw');
   const sub = REASON[end.reason] ? t(REASON[end.reason]) : end.text;
   const opp = me ? s.players[me === 'w' ? 'b' : 'w'] : null;
   const result = s.result;
@@ -53,10 +99,12 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
         <header className="result-head">
           <span className="result-kicker">{mode.label}</span>
           <h1 className="display">{title}</h1>
-          <p className="muted">{aborted ? end.text : outcome ? `${end.text} · ${sub}` : sub}</p>
+          <p className="muted">{custom ? custom.text : aborted ? end.text : outcome ? `${end.text} · ${sub}` : sub}</p>
         </header>
 
-        {me && opp && (
+        {s.puzzle && <PuzzleBlock puzzle={s.puzzle} />}
+
+        {me && opp && !s.puzzle && (
           <div className="result-vs">
             <div className={cx('result-player', outcome === 'win' && 'is-winner')}>
               <ProfileIcon icon={s.players[me].iconId} size={52} />

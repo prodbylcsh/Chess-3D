@@ -31,6 +31,8 @@ export interface Mode {
   endActions(state: GameState): EndAction[];
   /** an extra line on the result card (e.g. inviting guests to register) */
   endNote?(state: GameState): string | null;
+  /** the result card's heading instead of Victory/Defeat (puzzles) */
+  endTitle?(state: GameState): { title: string; text: string };
   act(id: string): void;
 }
 
