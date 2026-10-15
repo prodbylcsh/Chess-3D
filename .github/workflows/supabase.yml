@@ -1,6 +1,6 @@
 name: Deploy Supabase backend
 
-# Applies database migrations, copies the shop catalogue into the database (supabase/catalog.ts), deploys the Edge Functions (`game`, `account`, `social`, `play`, `payments`) and sets the
+# Applies database migrations, copies the shop catalogue into the database (supabase/catalog.ts), deploys the Edge Functions (`game`, `account`, `social`, `play`, `payments`, `puzzles`) and sets the
 # auth settings and email templates from supabase/config.toml (supabase/auth-config.ts)
 # whenever anything under supabase/ changes on main, then smoke-tests the live project
 # (tests/live.smoke.ts; leaves a few anonymous guests and one finished game behind). Needs, in Settings → Secrets and
@@ -48,6 +48,7 @@ jobs:
       - run: npx supabase functions deploy social --project-ref "$PROJECT_ID" --use-api
       - run: npx supabase functions deploy play --project-ref "$PROJECT_ID" --use-api
       - run: npx supabase functions deploy payments --project-ref "$PROJECT_ID" --use-api
+      - run: npx supabase functions deploy puzzles --project-ref "$PROJECT_ID" --use-api
       # the payments function's Paddle secrets (never printed); without them it sells nothing
       - name: Paddle secrets
         if: env.PADDLE_API_KEY != ''
