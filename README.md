@@ -20,7 +20,8 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   reset by email), Apple or Google (once set up on the server), and a 4-step onboarding
   (username with live availability check, one of six profile icons). Guests can still
   play invite games and are invited to register afterwards.
-- **Puzzles**: six themed modules of 100 Lichess puzzles (First Steps free, the others
+- **Puzzles**: seven themed modules of 100 puzzles, mostly from Lichess, including Openings with
+  hand-made opening lines and traps (First Steps free, the others
   unlocked for coins), a map of levels played in order, stars, coins for every new solve,
   500 for every 10, a random shop item for finishing a module; the 3D scene takes the
   module's colour while you play.

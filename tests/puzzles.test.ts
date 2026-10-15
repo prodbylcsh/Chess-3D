@@ -8,7 +8,10 @@ import {
   moduleOf,
   playerSide,
   puzzleCoins,
+  replyAfter,
   rightMove,
+  setupMove,
+  solution,
   solves,
   stars,
   type Puzzle,
@@ -17,10 +20,10 @@ import {
 // the example in the Lichess puzzle database's documentation: Black's king steps up, White mates in two
 const mateIn2: Puzzle = { id: '00sHx', fen: 'q3k1nr/1pp1nQpp/3p4/1P2p3/4P3/B1PP1b2/B5PP/5K2 b k - 0 17', moves: 'e8d7 a2e6 d7d8 f7f8', rating: 1760 };
 
-test('modules: six, only the first free, each with its own colour', () => {
-  assert.equal(MODULES.length, 6);
+test('modules: seven, only the first free, each with its own colour', () => {
+  assert.equal(MODULES.length, 7);
   assert.deepEqual(MODULES.filter((m) => m.free).map((m) => m.id), ['first-steps']);
-  assert.equal(new Set(MODULES.map((m) => m.color)).size, 6);
+  assert.equal(new Set(MODULES.map((m) => m.color)).size, 7);
   assert.equal(moduleOf('forks')?.name, 'Forks');
   assert.equal(moduleOf('nope'), null);
 });
@@ -56,6 +59,33 @@ test('solutions: the right moves, or any checkmate at the end', () => {
   assert.ok(rightMove(mateIn2, ['a2e6'], 'f7f8'));
 });
 
+test('a mate before the end of the line solves the puzzle too', () => {
+  // the line wants Qh5 first, but Qxf7 is already mate
+  const p: Puzzle = { id: 'x', fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1', moves: 'a7a6 h5h4 a6a5 h4h5', rating: 500 };
+  assert.ok(rightMove(p, [], 'h5f7'));
+  assert.ok(solves(p, ['h5f7']));
+  assert.ok(!solves(p, ['h5h4']), 'not finished');
+});
+
+test('openings: the player may move first, from the starting position', async () => {
+  const { curatedPuzzles } = await import('./../scripts/puzzles/curated.ts');
+  const lines = curatedPuzzles('openings');
+  assert.equal(lines.length, 40);
+  const italian = lines.find((p) => p.goal === 'Italian Game')!;
+  assert.equal(italian.playerFirst, true);
+  assert.equal(playerSide(italian), 'w');
+  assert.equal(setupMove(italian), null);
+  assert.deepEqual(solution(italian), ['e2e4', 'g1f3', 'f1c4', 'c2c3', 'd2d4']);
+  assert.equal(replyAfter(italian, 1), 'e7e5');
+  assert.ok(rightMove(italian, [], 'e2e4'));
+  assert.ok(!rightMove(italian, [], 'd2d4'), 'another good move, but not this opening');
+  const sicilian = lines.find((p) => p.goal === 'Sicilian Defence: Najdorf')!;
+  assert.equal(playerSide(sicilian), 'b');
+  assert.equal(setupMove(sicilian), 'e2e4');
+  for (const p of lines) assert.ok(solves(p, solution(p)), p.goal);
+  assert.equal(new Set(lines.map((p) => p.id)).size, lines.length);
+});
+
 test('the finishing reward: one of the items the player lacks, at random', () => {
   assert.equal(completionItem(['a', 'b', 'c'], 0), 'a');
   assert.equal(completionItem(['a', 'b', 'c'], 0.99), 'c');
@@ -68,9 +98,16 @@ test('every puzzle of every module is solved by its own solution', async () => {
     const list = PUZZLES[m.id];
     assert.equal(list.length, 100, m.id);
     assert.ok(list.every((p, i) => i === 0 || list[i - 1].rating <= p.rating), `${m.id}: easiest first`);
-    for (const p of list) {
-      const answers = p.moves.split(' ').filter((_, i) => i % 2 === 1);
-      assert.ok(solves(p, answers), `${m.id} ${p.id}`);
-    }
+    for (const p of list) assert.ok(solves(p, solution(p)), `${m.id} ${p.id}`);
+    assert.equal(new Set(list.map((p) => p.id)).size, 100, `${m.id}: no puzzle twice`);
   }
+  const all = MODULES.flatMap((m) => PUZZLES[m.id].map((p) => p.id));
+  assert.equal(new Set(all).size, all.length, 'no puzzle in two modules');
+});
+
+test('the goals of hand-made puzzles are translated', async () => {
+  const [{ PUZZLES }, { cs }] = await Promise.all([import('../supabase/functions/_shared/server/puzzle-data.ts'), import('../src/i18n/cs.ts')]);
+  const goals = Object.values(PUZZLES).flatMap((list) => list.flatMap((p) => (p.goal ? [p.goal] : [])));
+  assert.ok(goals.length >= 40);
+  assert.deepEqual(goals.filter((g) => !(g in cs)), []);
 });

@@ -1,7 +1,7 @@
 import { t, tk } from '../../../i18n';
 import { Chess, type Color as Side, type Move, type Square } from 'chess.js';
 import { Lightbulb, RotateCcw } from 'lucide-react';
-import { PUZZLES_PER_MODULE, moduleOf, playerSide, rightMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import { PUZZLES_PER_MODULE, answerAt, mates, moduleOf, playerSide, replyAfter, rightMove, setupMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
 import { api, ApiError } from '../../../api';
 import { modulePuzzles } from '../../../api/puzzleData';
 import { toast } from '../../../ui/kit';
@@ -71,21 +71,30 @@ export class PuzzleMode implements Mode {
     dressGame(this.ctx.engine, { [side]: this.ctx.profile?.loadout ?? null }, this.seed);
     this.ctx.engine.wardrobe.setMood(this.module.color);
     await game.begin({ side, active: true, send: (m) => void this.onMove(m, token) }, [], puzzle.fen);
-    await sleep(450);
-    if (this.disposed || token !== this.token) return;
-    await game.sync([puzzle.moves.split(' ')[0]]);
-    store.set({ note: side === 'w' ? t('White to move: find the best move.') : t('Black to move: find the best move.') });
+    const setup = setupMove(puzzle);
+    if (setup) {
+      await sleep(450);
+      if (this.disposed || token !== this.token) return;
+      await game.sync([setup]);
+    }
+    store.set({ note: this.prompt(puzzle, side) });
+  }
+
+  /** What to do: the puzzle's goal (an opening, a trap) or find the best move. */
+  private prompt(puzzle: Puzzle, side: Side): string {
+    if (puzzle.goal) return side === 'w' ? t('{goal}: play it as White.', { goal: t(puzzle.goal) }) : t('{goal}: play it as Black.', { goal: t(puzzle.goal) });
+    return side === 'w' ? t('White to move: find the best move.') : t('Black to move: find the best move.');
   }
 
   private async onMove(move: Move, token: number): Promise<void> {
     const puzzle = this.puzzle;
     const { game, store } = this.ctx.engine;
     if (!puzzle || token !== this.token) return;
-    const line = puzzle.moves.split(' ');
     if (rightMove(puzzle, this.played, move.lan)) {
+      const mate = mates(puzzle, this.played, move.lan);
       this.played.push(move.lan);
-      const reply = line[2 * this.played.length];
-      if (!reply) return this.solved(token);
+      const reply = replyAfter(puzzle, this.played.length);
+      if (!reply || mate) return this.solved(token);
       store.set({ note: t('Correct! Keep going.') });
       await game.idle();
       await sleep(350);
@@ -122,7 +131,7 @@ export class PuzzleMode implements Mode {
     const puzzle = this.puzzle;
     const { game, store } = this.ctx.engine;
     if (!puzzle || game.isOver) return;
-    const answer = puzzle.moves.split(' ')[2 * this.played.length + 1];
+    const answer = answerAt(puzzle, this.played.length);
     if (!answer) return;
     const piece = new Chess(game.fen).get(answer.slice(0, 2) as Square);
     this.hints++;
@@ -155,7 +164,7 @@ export class PuzzleMode implements Mode {
   }
 
   endTitle(): { title: string; text: string } {
-    return { title: t('Solved!'), text: t(this.module.name) };
+    return { title: t('Solved!'), text: this.puzzle?.goal ? t(this.puzzle.goal) : t(this.module.name) };
   }
 
   act(id: string): void {

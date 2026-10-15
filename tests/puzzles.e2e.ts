@@ -4,7 +4,7 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
-import { BONUS_COINS, MODULE_PRICE, puzzleCoins } from '../supabase/functions/_shared/puzzles.ts';
+import { BONUS_COINS, MODULE_PRICE, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
 import { PUZZLES } from '../supabase/functions/_shared/server/puzzle-data.ts';
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -39,7 +39,7 @@ async function call(client: SupabaseClient, body: Record<string, unknown>, fn = 
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const answer = (module: string, index: number) => PUZZLES[module][index].moves.split(' ').filter((_, i) => i % 2 === 1);
+const answer = (module: string, index: number) => solution(PUZZLES[module][index]);
 const coins = async (id: string) => (await admin.from('players').select('coins').eq('id', id).single()).data!.coins;
 
 /** Open a puzzle, think for the minimum time, send the moves. */
@@ -53,7 +53,7 @@ async function solve(p: { client: SupabaseClient }, module: string, index: numbe
 test('progress: the first module is free and open, the others locked', async () => {
   const p = await player('pza');
   const { modules, player: state } = await call(p.client, { action: 'progress' });
-  assert.equal(modules.length, 6);
+  assert.equal(modules.length, 7);
   assert.deepEqual(modules.filter((m: { unlocked: boolean }) => m.unlocked).map((m: { id: string }) => m.id), ['first-steps']);
   assert.equal(modules[0].stars.length, 100);
   assert.equal(state.coins, 500);
@@ -117,4 +117,18 @@ test('unlocking a module costs 100,000 coins, once', async () => {
   assert.equal(await coins(p.id), 1_000, 'paid once');
   assert.equal((await call(p.client, { action: 'unlock', module: 'first-steps' })).code, 'bad_request', 'the free one');
   assert.equal((await solve(p, 'forks', 0)).first, true);
+});
+
+test('openings: hand-made lines where the player moves first are checked too', async () => {
+  const p = await player('pze');
+  await call(p.client, { action: 'progress' });
+  await admin.from('players').update({ coins: MODULE_PRICE }).eq('id', p.id);
+  await call(p.client, { action: 'unlock', module: 'openings' });
+  const list = PUZZLES.openings;
+  const first = list.findIndex((x) => x.playerFirst);
+  await admin.from('puzzle_solves').insert(Array.from({ length: first }, (_, i) => ({ player_id: p.id, module: 'openings', idx: i, stars: 3 })));
+  const wrong = [...answer('openings', first)];
+  wrong[0] = wrong[0] === 'd2d4' ? 'e2e4' : 'd2d4';
+  assert.equal((await solve(p, 'openings', first, wrong)).code, 'wrong');
+  assert.equal((await solve(p, 'openings', first)).first, true);
 });

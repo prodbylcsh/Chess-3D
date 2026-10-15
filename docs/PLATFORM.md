@@ -172,6 +172,7 @@ Decided (October 2026):
   | Module | Themes | Ratings |
   | --- | --- | --- |
   | First Steps (free) | short puzzles, up to 2 player moves | 400–1300 |
+  | Openings | 40 hand-made puzzles + 60 Lichess puzzles with the opening theme | 400–1800 |
   | Mate in Two | mateIn2 | 600–2000 |
   | Forks | fork | 600–2200 |
   | Pins & Skewers | pin, skewer | 600–2200 |
@@ -179,6 +180,14 @@ Decided (October 2026):
   | Endgames | endgame | 700–2300 |
 
   More modules (fantasy and other themes) come later.
+- **Openings** (added October 2026 at the user's request): the main lines for White,
+  played from the first move, and Black's answers to 1.e4, 1.d4 and their follow-ups; the
+  fastest mates (Fool's, Scholar's, Légal's); gambits; and the classic traps
+  (Blackburne Shilling, Lasker, Elephant, Siberian, …). These 40 are hand-made in
+  `scripts/puzzles/curated.ts` (each line checked by the tests) and named on the board
+  ("Italian Game: play it as White."); only the line's move counts, the hint shows it.
+  The other 60 are Lichess puzzles with the opening theme. Same price as the other
+  modules (100,000 coins).
 - **Unlocking:** only the first module is free. The others cost **100,000 coins** each and
   stay unlocked. A subscription that opens all modules comes later.
 - **Coins:** 25–50 coins the first time a puzzle is solved, by its rating
@@ -778,7 +787,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ live (October 2026) |
 | Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ live (October 2026) |
 | Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
-| Puzzles | Six themed modules of 100 Lichess puzzles, level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins | ✅ in code, tested locally; live when merged |
+| Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins | ✅ in code, tested locally; live when merged |
 | Later | Tournaments, puzzle subscription and more puzzle themes, guests in puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
 
 ## 10. Decisions and open questions
@@ -847,7 +856,8 @@ Decided:
 - **Puzzles** (October 2026, 4.2): themed modules of 100, only the first free, the others
   100,000 coins each (a subscription later); 25–50 coins per first solve, 500 for every 10
   solved in a module, a random unowned shop item (or 25,000 coins) for finishing one; six
-  tactics modules first, fantasy and other themes later. The legal pages say so (Privacy
+  tactics modules first, then Openings (40 hand-made lines and traps, 60 Lichess opening
+  puzzles); fantasy and other themes later. The legal pages say so (Privacy
   §2 and §6, Terms §6; effective 15 October 2026).
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
