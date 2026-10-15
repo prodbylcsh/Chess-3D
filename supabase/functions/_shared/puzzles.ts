@@ -5,7 +5,8 @@
 import { Chess } from 'chess.js';
 
 export const PUZZLES_PER_MODULE = 100;
-/** Unlocking a module that is not free (decided October 2026; a subscription comes later). */
+/** Unlocking a module that is not free (decided October 2026; a subscription comes later).
+ *  Openings is the free one; players who had started First Steps while it was free keep it. */
 export const MODULE_PRICE = 100_000;
 /** Every 10 puzzles solved in a module pay a bonus. */
 export const BONUS_EVERY = 10;
@@ -31,22 +32,22 @@ export interface PuzzleModule {
 
 export const MODULES: readonly PuzzleModule[] = [
   {
-    id: 'first-steps',
-    name: 'First Steps',
-    description: 'Short, friendly puzzles to warm up: win material, spot the mate.',
-    free: true,
-    color: '#6fd3c7',
-    icon: 'sprout',
-    select: { min: 400, max: 1300, maxPlies: 4 },
-  },
-  {
     id: 'openings',
     name: 'Openings',
     description: 'The best first moves for White and Black, the fastest mates and the traps to know.',
-    free: false,
+    free: true,
     color: '#ff9a4d',
     icon: 'book',
     select: { min: 600, max: 1800, maxPlies: 6, themes: ['opening'], curated: true },
+  },
+  {
+    id: 'first-steps',
+    name: 'First Steps',
+    description: 'Short, friendly puzzles to warm up: win material, spot the mate.',
+    free: false,
+    color: '#6fd3c7',
+    icon: 'sprout',
+    select: { min: 400, max: 1300, maxPlies: 4 },
   },
   {
     id: 'mate-in-2',

@@ -20,9 +20,10 @@ import {
 // the example in the Lichess puzzle database's documentation: Black's king steps up, White mates in two
 const mateIn2: Puzzle = { id: '00sHx', fen: 'q3k1nr/1pp1nQpp/3p4/1P2p3/4P3/B1PP1b2/B5PP/5K2 b k - 0 17', moves: 'e8d7 a2e6 d7d8 f7f8', rating: 1760 };
 
-test('modules: seven, only the first free, each with its own colour', () => {
+test('modules: seven, only Openings free, each with its own colour', () => {
   assert.equal(MODULES.length, 7);
-  assert.deepEqual(MODULES.filter((m) => m.free).map((m) => m.id), ['first-steps']);
+  assert.deepEqual(MODULES.filter((m) => m.free).map((m) => m.id), ['openings']);
+  assert.equal(MODULES[0].id, 'openings', 'the free one comes first');
   assert.equal(new Set(MODULES.map((m) => m.color)).size, 7);
   assert.equal(moduleOf('forks')?.name, 'Forks');
   assert.equal(moduleOf('nope'), null);

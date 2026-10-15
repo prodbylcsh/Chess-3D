@@ -71,8 +71,8 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   Items start with season 2 (`FIRST_ITEM_SEASON`); with fewer items than brackets the most
   expensive go to the highest brackets (season 2: Challenger the Monolith set, Master &
   Grandmaster the Monolith board).
-- **Puzzles (§4.2):** modules of 100 puzzles (`PUZZLES_PER_MODULE`); only the first is
-  free, the others cost **100,000 coins** each (`MODULE_PRICE`; a subscription comes
+- **Puzzles (§4.2):** modules of 100 puzzles (`PUZZLES_PER_MODULE`); only Openings is
+  free (players who started First Steps while it was free keep it), the others cost **100,000 coins** each (`MODULE_PRICE`; a subscription comes
   later). The first solve of a puzzle pays 25–50 coins by its rating (`puzzleCoins`);
   every 10 solved in a module pay **500** (`BONUS_EVERY`, `BONUS_COINS`); finishing a
   module gives a random shop item the player doesn't own, or **25,000** coins

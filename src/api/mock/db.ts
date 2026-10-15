@@ -97,6 +97,11 @@ function migrate(data: Db): Db {
       if (renamed) p.loadout[key] = renamed;
     }
   }
+  // First Steps was free until Openings took its place: who started it keeps it
+  for (const modules of Object.values(data.puzzles ?? {})) {
+    const steps = modules['first-steps'];
+    if (steps?.stars.some((s) => s > 0)) steps.unlocked = true;
+  }
   return data;
 }
 

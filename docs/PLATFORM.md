@@ -171,8 +171,8 @@ Decided (October 2026):
 
   | Module | Themes | Ratings |
   | --- | --- | --- |
-  | First Steps (free) | short puzzles, up to 2 player moves | 400–1300 |
-  | Openings | 40 hand-made puzzles + 60 Lichess puzzles with the opening theme | 400–1800 |
+  | Openings (free) | 40 hand-made puzzles + 60 Lichess puzzles with the opening theme | 400–1800 |
+  | First Steps | short puzzles, up to 2 player moves | 400–1300 |
   | Mate in Two | mateIn2 | 600–2000 |
   | Forks | fork | 600–2200 |
   | Pins & Skewers | pin, skewer | 600–2200 |
@@ -186,9 +186,10 @@ Decided (October 2026):
   (Blackburne Shilling, Lasker, Elephant, Siberian, …). These 40 are hand-made in
   `scripts/puzzles/curated.ts` (each line checked by the tests) and named on the board
   ("Italian Game: play it as White."); only the line's move counts, the hint shows it.
-  The other 60 are Lichess puzzles with the opening theme. Same price as the other
-  modules (100,000 coins).
-- **Unlocking:** only the first module is free. The others cost **100,000 coins** each and
+  The other 60 are Lichess puzzles with the opening theme. It is the free module.
+- **Unlocking:** only Openings, shown first, is free (since 15 October 2026, the user's
+  choice; First Steps was the free one on the first day, and players who had solved a
+  First Steps puzzle by then keep it unlocked, migration `20261015170000`). The others cost **100,000 coins** each and
   stay unlocked. A subscription that opens all modules comes later.
 - **Coins:** 25–50 coins the first time a puzzle is solved, by its rating
   (25 at 400, 50 at 2400 and above). Solving it again pays nothing, so puzzles cannot be
@@ -853,7 +854,7 @@ Decided:
   and often out of capacity).
   The legal pages say so (Privacy §2, §3 and §6; Terms §4, §6 and §7 with the Stockfish
   licence; effective 13 October 2026).
-- **Puzzles** (October 2026, 4.2): themed modules of 100, only the first free, the others
+- **Puzzles** (October 2026, 4.2): themed modules of 100, only Openings free, the others
   100,000 coins each (a subscription later); 25–50 coins per first solve, 500 for every 10
   solved in a module, a random unowned shop item (or 25,000 coins) for finishing one; six
   tactics modules first, then Openings (40 hand-made lines and traps, 60 Lichess opening

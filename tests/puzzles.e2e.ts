@@ -50,52 +50,52 @@ async function solve(p: { client: SupabaseClient }, module: string, index: numbe
   return call(p.client, { action: 'solve', module, index, moves, mistakes: 0, hints: 0, ...extra });
 }
 
-test('progress: the first module is free and open, the others locked', async () => {
+test('progress: Openings is free and open, the others locked', async () => {
   const p = await player('pza');
   const { modules, player: state } = await call(p.client, { action: 'progress' });
   assert.equal(modules.length, 7);
-  assert.deepEqual(modules.filter((m: { unlocked: boolean }) => m.unlocked).map((m: { id: string }) => m.id), ['first-steps']);
+  assert.deepEqual(modules.filter((m: { unlocked: boolean }) => m.unlocked).map((m: { id: string }) => m.id), ['openings']);
   assert.equal(modules[0].stars.length, 100);
   assert.equal(state.coins, 500);
   assert.equal((await call(p.client, { action: 'start', module: 'forks', index: 0 })).code, 'locked');
-  assert.equal((await call(p.client, { action: 'start', module: 'first-steps', index: 1 })).code, 'locked', 'one after another');
+  assert.equal((await call(p.client, { action: 'start', module: 'openings', index: 1 })).code, 'locked', 'one after another');
 });
 
 test('solving: checked by the server, coins only the first time, stars kept at their best', async () => {
   const p = await player('pzb');
-  assert.equal((await call(p.client, { action: 'solve', module: 'first-steps', index: 0, moves: answer('first-steps', 0) })).code, 'not_started');
-  await call(p.client, { action: 'start', module: 'first-steps', index: 0 });
-  assert.equal((await call(p.client, { action: 'solve', module: 'first-steps', index: 0, moves: answer('first-steps', 0) })).code, 'not_started', 'too fast');
-  assert.equal((await solve(p, 'first-steps', 0, ['a1a2'])).code, 'wrong');
+  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0, moves: answer('openings', 0) })).code, 'not_started');
+  await call(p.client, { action: 'start', module: 'openings', index: 0 });
+  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0, moves: answer('openings', 0) })).code, 'not_started', 'too fast');
+  assert.equal((await solve(p, 'openings', 0, ['a1a2'])).code, 'wrong');
 
-  const first = await solve(p, 'first-steps', 0, answer('first-steps', 0), { mistakes: 1 });
+  const first = await solve(p, 'openings', 0, answer('openings', 0), { mistakes: 1 });
   assert.equal(first.first, true, JSON.stringify(first));
   assert.equal(first.stars, 2);
-  assert.equal(first.coins, puzzleCoins(PUZZLES['first-steps'][0].rating));
+  assert.equal(first.coins, puzzleCoins(PUZZLES['openings'][0].rating));
   assert.equal(first.player.coins, 500 + first.coins);
 
-  const again = await solve(p, 'first-steps', 0);
+  const again = await solve(p, 'openings', 0);
   assert.equal(again.first, false);
   assert.equal(again.coins, 0);
   assert.equal(await coins(p.id), 500 + first.coins, 'no farming');
   const rows = (await p.client.from('puzzle_solves').select('idx, stars')).data;
   assert.deepEqual(rows, [{ idx: 0, stars: 3 }], 'the best stars stay');
-  assert.ok((await p.client.from('puzzle_solves').insert({ player_id: p.id, module: 'first-steps', idx: 1, stars: 3 })).error, 'clients cannot write progress');
+  assert.ok((await p.client.from('puzzle_solves').insert({ player_id: p.id, module: 'openings', idx: 1, stars: 3 })).error, 'clients cannot write progress');
 });
 
 test('every tenth solve pays a bonus; the hundredth gives an item from the shop', async () => {
   const p = await player('pzc');
   const fill = (from: number, to: number) =>
-    admin.from('puzzle_solves').insert(Array.from({ length: to - from }, (_, i) => ({ player_id: p.id, module: 'first-steps', idx: from + i, stars: 3 })));
+    admin.from('puzzle_solves').insert(Array.from({ length: to - from }, (_, i) => ({ player_id: p.id, module: 'openings', idx: from + i, stars: 3 })));
   await call(p.client, { action: 'progress' });
   assert.ifError((await fill(0, 9)).error);
-  const tenth = await solve(p, 'first-steps', 9);
+  const tenth = await solve(p, 'openings', 9);
   assert.equal(tenth.solved, 10);
   assert.equal(tenth.bonus, BONUS_COINS);
   assert.equal(tenth.player.coins, 500 + tenth.coins + BONUS_COINS);
 
   assert.ifError((await fill(10, 99)).error);
-  const last = await solve(p, 'first-steps', 99);
+  const last = await solve(p, 'openings', 99);
   assert.equal(last.solved, 100);
   assert.ok(last.reward?.item, JSON.stringify(last.reward));
   const owned = (await admin.from('player_items').select('item_id, source').eq('player_id', p.id)).data;
@@ -115,15 +115,13 @@ test('unlocking a module costs 100,000 coins, once', async () => {
   assert.ok(unlocked.modules.find((m: { id: string }) => m.id === 'forks').unlocked);
   await call(p.client, { action: 'unlock', module: 'forks' });
   assert.equal(await coins(p.id), 1_000, 'paid once');
-  assert.equal((await call(p.client, { action: 'unlock', module: 'first-steps' })).code, 'bad_request', 'the free one');
+  assert.equal((await call(p.client, { action: 'unlock', module: 'openings' })).code, 'bad_request', 'the free one');
   assert.equal((await solve(p, 'forks', 0)).first, true);
 });
 
 test('openings: hand-made lines where the player moves first are checked too', async () => {
   const p = await player('pze');
   await call(p.client, { action: 'progress' });
-  await admin.from('players').update({ coins: MODULE_PRICE }).eq('id', p.id);
-  await call(p.client, { action: 'unlock', module: 'openings' });
   const list = PUZZLES.openings;
   const first = list.findIndex((x) => x.playerFirst);
   await admin.from('puzzle_solves').insert(Array.from({ length: first }, (_, i) => ({ player_id: p.id, module: 'openings', idx: i, stars: 3 })));

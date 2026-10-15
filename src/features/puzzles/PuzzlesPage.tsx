@@ -1,4 +1,4 @@
-// Puzzles: the themed modules (docs/PLATFORM.md §4.2). The first is free; the others are
+// Puzzles: the themed modules (docs/PLATFORM.md §4.2). Openings, the first, is free; the others are
 // unlocked with coins. Each has 100 puzzles, a bonus every 10 and a reward at the end.
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router';
