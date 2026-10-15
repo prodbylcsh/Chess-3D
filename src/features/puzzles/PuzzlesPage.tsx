@@ -10,6 +10,7 @@ import { Page } from '../../app/AppLayout';
 import { useSession } from '../../app/session';
 import { t } from '../../i18n';
 import { Badge, Button, Coins, EmptyState, ProgressBar, Spinner, confirmDialog, formatNumber, useToast } from '../../ui/kit';
+import { WORLD_THEMES } from './map/themes';
 import { MODULE_ICONS } from './modules';
 import './puzzles.css';
 
@@ -80,7 +81,11 @@ export function PuzzlesPage() {
             const stars = p.stars.reduce((a, b) => a + b, 0);
             const name = t(m.name);
             return (
-              <article key={m.id} className={`puzzle-module${p.unlocked ? '' : ' is-locked'}`} style={{ '--module': m.color } as CSSProperties}>
+              <article
+                key={m.id}
+                className={`puzzle-module${p.unlocked ? '' : ' is-locked'}`}
+                style={{ '--module': m.color, '--sky-top': WORLD_THEMES[m.id]?.sky[0], '--sky-horizon': WORLD_THEMES[m.id]?.sky[1], '--ground': WORLD_THEMES[m.id]?.ground[0] } as CSSProperties}
+              >
                 <div className="puzzle-module-glow" />
                 <header>
                   <span className="puzzle-module-icon">

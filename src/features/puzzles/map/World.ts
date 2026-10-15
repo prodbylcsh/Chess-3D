@@ -40,6 +40,14 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
+/** Height of the ground: flat along the path, hills further out. */
+function groundHeight(x: number, z: number): number {
+  const d = Math.abs(x - pathPoint(-z / SPACING).x);
+  const hills = Math.sin(x * 0.11 + z * 0.05) * 1.6 + Math.sin(x * 0.27 - z * 0.13) * 0.7 + Math.sin(z * 0.04 + x * 0.02) * 2.2 + d * 0.06 * Math.max(0, d - 10);
+  const away = smooth(2.6, 9, d);
+  return -0.55 - (1 - away) * 0.15 + away * (hills + 1.4);
+}
+
 function ease(k: number) {
   return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 }
@@ -94,6 +102,10 @@ export class World {
   private readonly offset: THREE.Vector3;
   /** looks a little right of the path on wide screens, so the card on the right doesn't cover it */
   private readonly lookShift: number;
+  /** how far ahead of the focused stone the camera looks */
+  private readonly lookAhead: number;
+  /** shifts the picture up by this share of the height (a phone's card covers the bottom) */
+  private readonly lift: number;
 
   private stars: number[] = Array(PUZZLES_PER_MODULE).fill(0);
   private next = 0;
@@ -120,9 +132,11 @@ export class World {
     host.appendChild(this.canvas);
 
     this.camera = new THREE.PerspectiveCamera(opts.compact ? 52 : 44, 1, 0.1, 600);
-    this.offset = opts.compact ? new THREE.Vector3(0, 13.5, 14) : new THREE.Vector3(0, 12.5, 15);
-    this.lookShift = opts.compact ? 0 : 3.2;
-    this.scene.fog = new THREE.Fog(this.theme.fog, 26, 95);
+    this.offset = opts.compact ? new THREE.Vector3(0, 8.5, 12.5) : new THREE.Vector3(0, 7, 11.5);
+    this.lookAhead = opts.compact ? 3.6 : 4.5;
+    this.lift = opts.compact ? 0.17 : 0;
+    this.lookShift = opts.compact ? 0 : 2.6;
+    this.scene.fog = new THREE.Fog(new THREE.Color(this.theme.fog).lerp(new THREE.Color(this.theme.sky[1]), 0.35), 26, 95);
 
     this.buildSky();
     this.buildLights();
@@ -363,12 +377,8 @@ export class World {
     for (let v = 0; v < pos.count; v++) {
       const x = pos.getX(v);
       const z = pos.getZ(v);
-      const i = -z / SPACING;
-      const d = Math.abs(x - pathPoint(i).x);
-      const hills =
-        Math.sin(x * 0.11 + z * 0.05) * 1.6 + Math.sin(x * 0.27 - z * 0.13) * 0.7 + Math.sin(z * 0.04 + x * 0.02) * 2.2 + d * 0.06 * Math.max(0, d - 10);
-      const away = smooth(2.6, 9, d);
-      const y = -0.55 - (1 - away) * 0.15 + away * (hills + 1.4);
+      const away = smooth(2.6, 9, Math.abs(x - pathPoint(-z / SPACING).x));
+      const y = groundHeight(x, z);
       pos.setY(v, y);
       c.copy(low).lerp(high, Math.min(1, Math.max(0, (y + 0.6) / 4.5)) * 0.85 + (1 - away) * 0.15);
       colors.set([c.r, c.g, c.b], v * 3);
@@ -422,8 +432,11 @@ export class World {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = 4;
       const sprite = new THREE.Sprite(this.own(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })));
-      pathPoint(i, sprite.position).y = 1.25;
-      sprite.scale.set(1.55, 1.08, 1);
+      // beside the stone, on the outside of the bend, so the piece never hides it
+      const side = new THREE.Vector3(0, 1, 0).cross(pathDir(i)).normalize();
+      const out = pathPoint(i).x > pathPoint(i + 1).x ? 1 : -1;
+      pathPoint(i, sprite.position).addScaledVector(side, 1.9 * out).setY(0.75);
+      sprite.scale.set(1.45, 1.01, 1);
       sprite.renderOrder = 2;
       this.labels.push(sprite);
       this.scene.add(sprite);
@@ -510,7 +523,7 @@ export class World {
     gift.name = 'gift';
     const beam = new THREE.Mesh(
       this.own(new THREE.CylinderGeometry(1.1, 1.6, 40, 24, 1, true)),
-      this.own(new THREE.MeshBasicMaterial({ color: this.color, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })),
+      this.own(new THREE.MeshBasicMaterial({ color: this.color, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false })),
     );
     beam.position.y = 20;
     group.add(base, step, gift, beam);
@@ -522,7 +535,7 @@ export class World {
     const color = new THREE.Color(this.theme.decorColor);
     const accent = new THREE.Color(this.theme.accent);
     const parts = decorParts(kind, color, accent, (t) => this.own(t));
-    const count = kind === 'trees' ? 170 : kind === 'crystals' ? 150 : 120;
+    const count = kind === 'trees' ? 260 : kind === 'crystals' ? 220 : 180;
     const meshes = parts.map((p) => {
       const mesh = new THREE.InstancedMesh(p.geometry, p.material, count);
       this.scene.add(mesh);
@@ -536,10 +549,10 @@ export class World {
     for (let n = 0; n < count; n++) {
       const i = -6 + this.rand() * (PUZZLES_PER_MODULE + 18);
       const side = this.rand() < 0.5 ? -1 : 1;
-      const far = (kind === 'statues' || kind === 'towers' || kind === 'pillars' ? 7 : 5) + Math.pow(this.rand(), 1.4) * 30;
+      const far = (kind === 'statues' || kind === 'towers' || kind === 'pillars' ? 6 : 4.8) + Math.pow(this.rand(), 2) * 32;
       pathPoint(i, pos);
       pos.x += side * far;
-      pos.y = -0.4;
+      pos.y = groundHeight(pos.x, pos.z) - 0.25;
       const size = (0.55 + this.rand() * 0.75) * (0.8 + far / 22);
       const yaw = this.rand() * Math.PI * 2;
       const tilt = (this.rand() - 0.5) * (kind === 'crystals' || kind === 'obsidian' ? 0.6 : kind === 'statues' ? 0.04 : 0.08);
@@ -654,6 +667,7 @@ export class World {
     if (!w || !h) return;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
+    if (this.lift) this.camera.setViewOffset(w, h, 0, h * this.lift, w, h);
     this.camera.updateProjectionMatrix();
   }
 
@@ -665,9 +679,9 @@ export class World {
     // the camera glides after its goal along the path
     this.camAt += (this.camGoal - this.camAt) * Math.min(1, dt * (this.hopping ? 7 : 4.5));
     const focus = pathPoint(this.camAt);
-    const look = pathPoint(this.camAt + 2.2);
+    const look = pathPoint(this.camAt + this.lookAhead);
     this.camera.position.set(focus.x * 0.7 + this.lookShift, this.offset.y, focus.z + this.offset.z);
-    this.camera.lookAt(look.x * 0.85 + this.lookShift, 0, look.z);
+    this.camera.lookAt(look.x * 0.85 + this.lookShift, 0.6, look.z);
 
     // the next stone's ring breathes, the piece bobs while it waits
     const pulse = 0.5 + 0.5 * Math.sin(this.time * 3);

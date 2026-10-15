@@ -22,7 +22,10 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--module) 40%, var(--border));
   border-radius: var(--radius-xl);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--module) 14%, var(--panel-solid)) 0%, var(--panel-solid) 60%);
+  /* a glimpse of the module's world: its sky down to the horizon, then the ground */
+  background:
+    linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--panel-solid) 55%, transparent) 38%, var(--panel-solid) 70%),
+    linear-gradient(180deg, var(--sky-top, var(--panel-solid)) 0%, var(--sky-horizon, var(--panel-solid)) 34%, var(--ground, var(--panel-solid)) 36%);
   animation: rise-in 0.4s both;
 }
 

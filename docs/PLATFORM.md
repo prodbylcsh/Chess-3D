@@ -200,7 +200,29 @@ Decided (October 2026):
 - **Stars:** 3 for a clean solve, 2 with one mistake or hint, 1 otherwise. They are for
   motivation only; the best stars are kept.
 - **Wrong moves** are taken back and count as a mistake; any checkmate counts as the right
-  last move. A hint names the piece to move and its square.
+  move (and ends the puzzle). A hint first lifts the piece to move on the board and names it;
+  a second hint shows only the square it goes to. Each counts against the stars.
+- **Every puzzle says what it wants** (October 2026, the user's request: puzzles must be fun,
+  guide the player and teach something). Before the first move a briefing card shows the
+  goal ("Italian Game", "Checkmate in 2 moves", "Win material"), the side and the number of
+  moves to find, what to look for, and how to get three stars. During play a coach card in
+  place of the opponent's card keeps the goal in view, marks the moves found, and answers
+  every move: the hand-made lines explain each right move ("Bc4: the Italian bishop, eyeing
+  the weak f7 square"), the others cheer; a wrong move says so and is taken back. The goal of
+  a Lichess puzzle comes from what its solution achieves (mate, material) and its motifs
+  (fork, pin, sacrifice, …) from its Lichess themes, the module's own motif first
+  (`features/puzzles/describe.ts`, `lessons.ts`; the themes were added to the puzzles
+  already picked without changing them, `scripts/puzzles/enrich.ts`).
+- **The map is a 3D world** (October 2026, the user's request): each module has its own
+  landscape around a winding path of 100 stepping stones (Openings: dawn among giant stone
+  pawns; First Steps: a meadow with fireflies; Mate in Two: a royal court at night; Forks: a
+  golden canyon; Pins & Skewers: a glacier under snow; Sacrifices: a volcanic altar;
+  Endgames: misty towers; `features/puzzles/map/`). A chest stands at every 10th stone and
+  opens when its bonus is earned; the reward waits on a pedestal at the end under a beam of
+  light. The player's own piece (the knight of their piece set) stands on the next puzzle;
+  "Next puzzle" after a solve goes back to the map, where it hops on to the next stone before
+  the next puzzle's card appears. Drag or scroll to travel, tap a stone to see its card.
+  Without WebGL the levels are a plain grid.
 - **Progress:** the next level opens when the previous one is solved; solved levels can be
   replayed.
 - **Server checks** (`puzzles` function): a puzzle must be opened before it is solved

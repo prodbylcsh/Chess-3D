@@ -21,7 +21,9 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   (username with live availability check, one of six profile icons). Guests can still
   play invite games and are invited to register afterwards.
 - **Puzzles**: seven themed modules of 100 puzzles, mostly from Lichess, including Openings with
-  hand-made opening lines and traps (Openings free, the others
+  hand-made opening lines and traps explained move by move; each module's map is a 3D world
+  where your piece hops from stone to stone, and every puzzle opens with what it wants from
+  you (Openings free, the others
   unlocked for coins), a map of levels played in order, stars, coins for every new solve,
   500 for every 10, a random shop item for finishing a module; the 3D scene takes the
   module's colour while you play.
