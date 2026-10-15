@@ -43,19 +43,31 @@ jobs:
             });")
           echo "modules=$missing" >> "$GITHUB_OUTPUT"
           echo "missing: ${missing:-none}"
+          # puzzles picked before themes were stored get them added (same puzzles)
+          themeless=$(node -e "
+            const fs = require('fs'), dir = 'supabase/functions/_shared/puzzle-data/';
+            const n = fs.readdirSync(dir).flatMap((f) => JSON.parse(fs.readFileSync(dir + f))).filter((p) => !p.goal && !p.themes).length;
+            console.log(n);")
+          echo "themeless=$themeless" >> "$GITHUB_OUTPUT"
+          echo "puzzles without themes: $themeless"
         env:
           REBUILD: ${{ inputs.rebuild }}
-      - name: Build from the Lichess database
+      - name: Download the Lichess database
+        if: steps.missing.outputs.modules != '' || steps.missing.outputs.themeless != '0'
+        run: curl -sSfL -o "$RUNNER_TEMP/puzzles.csv.zst" https://database.lichess.org/lichess_db_puzzle.csv.zst
+      - name: Build the missing modules
         if: steps.missing.outputs.modules != ''
-        run: |
-          # only the missing modules; they avoid the puzzles the others already have
-          curl -sSfL https://database.lichess.org/lichess_db_puzzle.csv.zst | zstd -dc | MODULES="${{ steps.missing.outputs.modules }}" node scripts/puzzles/build.ts
+        # only the missing modules; they avoid the puzzles the others already have
+        run: zstd -dc "$RUNNER_TEMP/puzzles.csv.zst" | MODULES="${{ steps.missing.outputs.modules }}" node scripts/puzzles/build.ts
+      - name: Add themes
+        if: steps.missing.outputs.themeless != '0'
+        run: zstd -dc "$RUNNER_TEMP/puzzles.csv.zst" | node scripts/puzzles/enrich.ts
       - name: Commit
-        if: steps.missing.outputs.modules != ''
+        if: steps.missing.outputs.modules != '' || steps.missing.outputs.themeless != '0'
         run: |
           git add supabase/functions/_shared/puzzle-data/
           if git diff --cached --quiet; then echo "no changes"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Puzzle data from the Lichess puzzle database (CC0): ${{ steps.missing.outputs.modules }}"
+          git commit -m "Puzzle data from the Lichess puzzle database (CC0): ${{ steps.missing.outputs.modules || 'themes' }}"
           git push

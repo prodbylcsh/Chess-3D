@@ -111,6 +111,8 @@ export interface Puzzle {
   playerFirst?: boolean;
   /** what to play, shown to the player (English; the app translates it), e.g. an opening's name */
   goal?: string;
+  /** the Lichess themes (fork, pin, mateIn2, endgame, …): the app explains the puzzle with them */
+  themes?: string[];
 }
 
 const lineOf = (p: Puzzle) => p.moves.split(' ');
