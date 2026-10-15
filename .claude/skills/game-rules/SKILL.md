@@ -21,6 +21,7 @@ server and the app. The app only previews and displays; the server applies.
 | Season calendar, resets, brackets, reward picking | `seasons.ts` | `tests/seasons.test.ts` | §5.5 |
 | Shop prices and purchase rules | `shop.ts` | `tests/shop.test.ts` | §4.5 |
 | Coin packs for real money (sizes, euro prices), refund window | `payments.ts` | `tests/payments.test.ts`, `tests/payments.e2e.ts` | §4.5 |
+| Puzzle modules, prices, puzzle coins, bonus, stars, module reward, solution check | `puzzles.ts` | `tests/puzzles.test.ts`, `tests/puzzles.e2e.ts` | §4.2 |
 | Usernames, reserved names, the 30-day limit, onboarding | `accounts.ts` | `tests/accounts.test.ts`, `tests/accounts.e2e.ts` | §2 |
 | Time controls, clocks, first move, timeouts, settling a game, season rollover | `play.ts` | `tests/play.test.ts`, `tests/competitive.e2e.ts` | §4.1, §6.3 |
 
@@ -70,6 +71,13 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   Items start with season 2 (`FIRST_ITEM_SEASON`); with fewer items than brackets the most
   expensive go to the highest brackets (season 2: Challenger the Monolith set, Master &
   Grandmaster the Monolith board).
+- **Puzzles (§4.2):** modules of 100 puzzles (`PUZZLES_PER_MODULE`); only the first is
+  free, the others cost **100,000 coins** each (`MODULE_PRICE`; a subscription comes
+  later). The first solve of a puzzle pays 25–50 coins by its rating (`puzzleCoins`);
+  every 10 solved in a module pay **500** (`BONUS_EVERY`, `BONUS_COINS`); finishing a
+  module gives a random shop item the player doesn't own, or **25,000** coins
+  (`COMPLETION_COINS`) if they own them all. Stars (3 / 2 / 1 by mistakes and hints)
+  change nothing but the look. Solving again pays nothing.
 - **Shop prices:** see §4.5 and the shop-items skill.
 - **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
   names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.
@@ -77,10 +85,9 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   Shop and seasons.
 - **Accounts:** email sign-ups must confirm their address before playing; guests (invite
   links) play without a profile and are invited to register afterwards.
-- **Coins have no real-money value** (Terms of Service §5): no cash-out, no transfers
-  between players, no refunds. Buying coins with real money comes later; before it does,
-  the Terms (`public/legal/`, both languages) get the purchase conditions and the
-  operator's business details.
+- **Coins have no real-money value** (Terms of Service §6): no cash-out, no transfers
+  between players, no refunds. Coins can be bought with real money through Paddle
+  (`payments.ts`, Terms §6 "Buying coins"); refunds within 14 days while unspent.
 - **Languages:** English is the default; Czech is complete. Which language comes next is
   still open.
 

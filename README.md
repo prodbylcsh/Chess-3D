@@ -20,7 +20,11 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   reset by email), Apple or Google (once set up on the server), and a 4-step onboarding
   (username with live availability check, one of six profile icons). Guests can still
   play invite games and are invited to register afterwards.
-- **Sidebar** with the eight modules (Puzzles and Learn marked "Soon") and badges for unread
+- **Puzzles**: six themed modules of 100 Lichess puzzles (First Steps free, the others
+  unlocked for coins), a map of levels played in order, stars, coins for every new solve,
+  500 for every 10, a random shop item for finishing a module; the 3D scene takes the
+  module's colour while you play.
+- **Sidebar** with the eight modules (Learn marked "Soon") and badges for unread
   messages and friend requests.
 - **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile
   icons with prices and rarities; buy with coins, use from the Shop or your Profile. Your

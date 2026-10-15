@@ -149,23 +149,57 @@ close ratings when several players are waiting). Leaving a running game counts a
 When nobody fits, the search keeps going: it shows how many players are online and
 offers a game against the AI while waiting (which pays nothing, as decided).
 
-### 4.2 Puzzles ⏸
+### 4.2 Puzzles ✅
 
-A roadmap of 100 levels, easiest to hardest, with progress saved to the account. A puzzle
-puts the player in a position (a mid-game scenario or a forced line) where the opponent's
-replies are pre-programmed. Later: more packs and community-made puzzles.
+Puzzles are meant to be fun first. They come in **themed modules of 100 puzzles**, easiest
+first, played one after another on a map of levels. A puzzle puts the player in a position
+after the opponent's move; the player finds the solution move by move and the opponent's
+replies are played back. Later: fantasy and other themes, community-made puzzles.
 
-Decided (October 2026, before building it):
+Decided (October 2026):
 
-- **Source:** the 100 levels are picked from the Lichess puzzle database (CC0, millions of
-  puzzles with a difficulty rating and themes), sorted from easiest to hardest.
-- **Coins:** a small reward only the first time a level is solved, about 25–50 coins by
-  difficulty (exact numbers set with the economy when building it). Solving it again pays
-  nothing, so puzzles cannot be farmed.
-- **Stars:** 1–3 per level by mistakes and hints used. They are for motivation only and do
-  not change the coins.
-- **Progress:** a map of levels; the next one unlocks when the previous one is solved.
-- **Guests** can try the first few levels; progress is saved only for signed-in players.
+- **Source:** the Lichess puzzle database (CC0). `scripts/puzzles/build.ts` picks the 100
+  puzzles of each module in a GitHub Action (`.github/workflows/puzzles.yml`, which
+  streams the database): well-tested puzzles only (rating deviation ≤ 90, popularity ≥ 80,
+  ≥ 300 plays), one per rating step across the module's range, by the module's Lichess
+  themes. The result is committed to `supabase/functions/_shared/puzzle-data/`, so app
+  and server use the same puzzles; the workflow builds only missing modules unless run
+  with "rebuild" (rebuilding changes puzzles players have already solved).
+- **Modules** (`_shared/puzzles.ts`), each with its own colour and icon, used on its card,
+  its map and in the scene while playing (the sky, table, lights and floating motes take
+  the colour):
+
+  | Module | Themes | Ratings |
+  | --- | --- | --- |
+  | First Steps (free) | short puzzles, up to 2 player moves | 400–1300 |
+  | Mate in Two | mateIn2 | 600–2000 |
+  | Forks | fork | 600–2200 |
+  | Pins & Skewers | pin, skewer | 600–2200 |
+  | Sacrifices | sacrifice | 900–2400 |
+  | Endgames | endgame | 700–2300 |
+
+  More modules (fantasy and other themes) come later.
+- **Unlocking:** only the first module is free. The others cost **100,000 coins** each and
+  stay unlocked. A subscription that opens all modules comes later.
+- **Coins:** 25–50 coins the first time a puzzle is solved, by its rating
+  (25 at 400, 50 at 2400 and above). Solving it again pays nothing, so puzzles cannot be
+  farmed. **Every 10 solved puzzles in a module pay a bonus of 500 coins.**
+- **Finishing a module** (all 100 solved) gives a random item from the shop that the
+  player doesn't own yet (piece set, board, background, effect, icon); a player who owns
+  everything gets 25,000 coins instead.
+- **Stars:** 3 for a clean solve, 2 with one mistake or hint, 1 otherwise. They are for
+  motivation only; the best stars are kept.
+- **Wrong moves** are taken back and count as a mistake; any checkmate counts as the right
+  last move. A hint names the piece to move and its square.
+- **Progress:** the next level opens when the previous one is solved; solved levels can be
+  replayed.
+- **Server checks** (`puzzles` function): a puzzle must be opened before it is solved
+  (`puzzle_attempts`), at least 2 seconds pass between the two, the moves must solve it,
+  levels go in order, and the coins, bonus, unlock and reward are paid in one transaction
+  (`solve_puzzle`, `unlock_module`, `complete_module`; ledger reasons `puzzle`,
+  `puzzle_bonus`, `puzzle_unlock`, `puzzle_reward`; reward items in `player_items` with
+  source `puzzle`).
+- **Guests** were to try the first few levels; for now puzzles need an account (open).
 
 ### 4.3 Learn ⏸
 
@@ -608,7 +642,7 @@ The 3D board fills the screen. Around it:
 | --- | --- |
 | Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
-| Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`) |
+| Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`), coins for money (✅ `payments`), puzzles (✅ `puzzles`) |
 | Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
 | Payments | ✅ in code: the `payments` function creates a Paddle transaction for a pack (price given inline, nothing set up in Paddle's catalogue; `custom_data` = player and pack) that the app opens in Paddle's overlay checkout (Paddle.js, loaded only then); Paddle's signed webhook (`transaction.completed`, refunds and chargebacks as `adjustment.*`) credits or takes back the coins once (`purchases`, `complete_purchase`, `reverse_purchase`, ledger `coins_bought` / `coins_refunded`). Sandbox (test payments) until the live account is approved; in sandbox the Shop shows "Buy coins" only with `#/shop?buy=coins` |
 | Engine analysis | ✅ in the players' browsers (5.2): the `play` function takes each player's report (`analysis`), the `game_analysis` table (server only) keeps the settlement's input and both reports for two days, and `apply_analysis` adds the performance part once both agree (ledger reason `performance`). Edge Functions are too CPU-limited for Stockfish; a server of our own (`engine/`, Oracle Cloud) is ready but unused |
@@ -653,8 +687,13 @@ price_paid, season, acquired_at; private to the player) has one row per owned it
 
 ```
 player_awards   player_id, award_id, earned_at, game_id  (✅; definitions in code)
-puzzle_progress player_id, level, stars, completed_at   (later)
 ```
+
+Puzzles (✅): `puzzle_solves` (player_id, module, idx, best stars, first solved_at),
+`puzzle_modules` (player_id, module, unlocked_at, completed_at, reward_item,
+reward_coins) and `puzzle_attempts` (the puzzle a player has open and since when; server
+only). Players read their own solves and modules; every write goes through the `puzzles`
+function.
 
 Coins and MMR are only ever changed by server functions, in the same transaction that
 records the reason (ledger, game result).
@@ -736,10 +775,11 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M4 Back-end: accounts | Supabase Auth (email with confirmation and reset, Apple, Google), profiles, onboarding, usernames, account deletion, guest invitation | ✅ live (October 2026); Google sign-in limited to test users until the privacy policy exists (8.4) |
 | M5 Back-end: social | Friends and requests, real chat between players, challenges from chat, who is online, the showcase (built before the competitive back-end: with few players, friends bring each other in) | ✅ live (October 2026) |
 | M6 Back-end: competitive and shop | Matchmaking queues, game kinds, server clocks, results with MMR and coins, ledger, seasons, shop purchases, inventory, loadout | ✅ live (October 2026) |
-| M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ in code, tested locally; live when merged |
-| Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ in code, tested locally; live when merged |
-| Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ in code, tested locally; test payments once the Paddle sandbox settings exist (8.4) |
-| Later | Tournaments, Puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
+| M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ live (October 2026) |
+| Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ live (October 2026) |
+| Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
+| Puzzles | Six themed modules of 100 Lichess puzzles, level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins | ✅ in code, tested locally; live when merged |
+| Later | Tournaments, puzzle subscription and more puzzle themes, guests in puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -804,6 +844,11 @@ Decided:
   and often out of capacity).
   The legal pages say so (Privacy §2, §3 and §6; Terms §4, §6 and §7 with the Stockfish
   licence; effective 13 October 2026).
+- **Puzzles** (October 2026, 4.2): themed modules of 100, only the first free, the others
+  100,000 coins each (a subscription later); 25–50 coins per first solve, 500 for every 10
+  solved in a module, a random unowned shop item (or 25,000 coins) for finishing one; six
+  tactics modules first, fantasy and other themes later. The legal pages say so (Privacy
+  §2 and §6, Terms §6; effective 15 October 2026).
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.
