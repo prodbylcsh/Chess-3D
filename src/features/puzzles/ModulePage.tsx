@@ -1,57 +1,37 @@
-// One puzzle module: its map of 100 levels, played one after another, with the bonus every
-// 10 levels and the reward at the end (docs/PLATFORM.md §4.2).
-import { type CSSProperties } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Gift, Lock, Play, Star } from 'lucide-react';
-import { BONUS_COINS, BONUS_EVERY, PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
+// One puzzle module: its world, with a path of 100 levels played one after another, a chest
+// of coins every 10 and the reward at the end (docs/PLATFORM.md §4.2). The player's piece
+// stands on the next puzzle and hops on after each solve (`?from=<level>`). Without WebGL
+// the levels are a plain grid.
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
+import { ArrowLeft, Gift, Lock, Play, RotateCcw, Star } from 'lucide-react';
+import { BONUS_COINS, BONUS_EVERY, PUZZLES_PER_MODULE, moduleOf, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import type { PuzzleModuleProgress } from '../../api';
 import { itemName } from '../../api/catalog';
+import { modulePuzzles } from '../../api/puzzleData';
+import { useProfile } from '../../app/session';
 import { t } from '../../i18n';
 import { Button, Coins, EmptyState, ProgressBar, Spinner, cx } from '../../ui/kit';
+import { modelFor } from '../shop/ModelViewer';
+import { briefOf } from './brief';
+import { WORLD_THEMES } from './map/themes';
+import { World } from './map/World';
 import { MODULE_ICONS } from './modules';
 import { solvedCount, usePuzzleProgress } from './PuzzlesPage';
 import './puzzles.css';
 
+const compact = () => typeof matchMedia === 'function' && matchMedia('(max-width: 820px)').matches;
+
 export function ModulePage() {
   const { module: id } = useParams();
-  const navigate = useNavigate();
   const module = moduleOf(id);
   const [progress, reload] = usePuzzleProgress();
   if (!module) return <Navigate to="/puzzles" replace />;
-
   const mine = Array.isArray(progress) ? progress.find((p) => p.id === module.id)! : null;
   if (mine && !mine.unlocked) return <Navigate to="/puzzles" replace />;
-  const Icon = MODULE_ICONS[module.icon];
-  const solved = mine ? solvedCount(mine) : 0;
-  const next = mine ? mine.stars.findIndex((s) => s === 0) : -1;
-  const play = (n: number) => navigate(`/game/puzzle/${module.id}?n=${n}`);
 
   return (
-    <div className="page page-wide puzzle-page" style={{ '--module': module.color } as CSSProperties}>
-      <header className="puzzle-hero">
-        <div className="puzzle-hero-glow" />
-        <Link to="/puzzles" className="link-btn puzzle-back">
-          <ArrowLeft size={16} /> {t('All modules')}
-        </Link>
-        <div className="puzzle-hero-main">
-          <span className="puzzle-module-icon is-large">
-            <Icon size={34} />
-          </span>
-          <div>
-            <h1 className="display">{t(module.name)}</h1>
-            <p className="muted">{t(module.description)}</p>
-          </div>
-        </div>
-        <div className="puzzle-hero-progress">
-          <ProgressBar value={solved / PUZZLES_PER_MODULE} />
-          <span className="faint">{t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })}</span>
-          {mine && next !== -1 && (
-            <Button variant="primary" icon={<Play size={16} />} onClick={() => play(next)}>
-              {solved === 0 ? t('Start') : t('Continue: puzzle {n}', { n: next + 1 })}
-            </Button>
-          )}
-        </div>
-      </header>
-
+    <div className="world-page" style={{ '--module': module.color } as CSSProperties}>
       {progress === null && (
         <div className="puzzles-loading">
           <Spinner size={28} />
@@ -62,53 +42,198 @@ export function ModulePage() {
           <Button onClick={() => reload()}>{t('Try again')}</Button>
         </EmptyState>
       )}
+      {mine && <ModuleWorld module={module} mine={mine} />}
+    </div>
+  );
+}
 
-      {mine && (
-        <ol className="puzzle-map" aria-label={t('Levels')}>
-          {mine.stars.map((stars, i) => {
-            const open = next === -1 || i <= next;
-            const row = Math.floor(i / BONUS_EVERY);
-            // the path to the next level: along the row, or down past the chest at its end
-            const link = i === PUZZLES_PER_MODULE - 1 ? null : i % BONUS_EVERY === BONUS_EVERY - 1 ? 'is-down' : 'is-along';
-            return (
-              <li key={i} className={cx('puzzle-step', row % 2 === 1 && 'is-reversed', link, stars > 0 && 'is-done')} style={{ '--col': (row % 2 === 1 ? 9 - (i % 10) : i % 10) + 1, '--row': row * 2 + 1 } as CSSProperties}>
-                <button
-                  type="button"
-                  className={cx('puzzle-node', stars > 0 && 'is-solved', i === next && 'is-next', !open && 'is-locked')}
-                  disabled={!open}
-                  onClick={() => play(i)}
-                  aria-label={t('Puzzle {n}', { n: i + 1 })}
-                >
-                  {open ? <span>{i + 1}</span> : <Lock size={14} />}
-                  {stars > 0 && (
-                    <span className="puzzle-node-stars" aria-label={t('{n} of 3 stars', { n: stars })}>
-                      {[1, 2, 3].map((n) => (
-                        <Star key={n} size={9} className={cx(n <= stars && 'is-lit')} />
-                      ))}
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-          {Array.from({ length: PUZZLES_PER_MODULE / BONUS_EVERY }, (_, k) => {
-            const reached = solved >= (k + 1) * BONUS_EVERY;
-            const last = k === PUZZLES_PER_MODULE / BONUS_EVERY - 1;
-            return (
-              <li key={`b${k}`} className={cx('puzzle-chest', reached && 'is-open', last && 'is-final')} style={{ '--row': k * 2 + 2, '--col': k % 2 === 0 ? 10 : 1 } as CSSProperties}>
-                <span className="puzzle-chest-badge">
-                  <Gift size={last ? 20 : 14} />
-                  {last ? (
-                    <span>{mine.reward?.item ? itemName(mine.reward.item) : mine.reward?.coins ? <Coins amount={mine.reward.coins} size={12} /> : t('A surprise from the shop')}</span>
-                  ) : (
-                    <Coins amount={BONUS_COINS} size={12} />
-                  )}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
+function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModuleProgress }) {
+  const navigate = useNavigate();
+  const profile = useProfile();
+  const [params, setParams] = useSearchParams();
+  const host = useRef<HTMLDivElement>(null);
+  const world = useRef<World | null>(null);
+  const [webgl, setWebgl] = useState(true);
+  const [puzzles, setPuzzles] = useState<Puzzle[] | null>(null);
+  const next = mine.stars.findIndex((s) => s === 0);
+  const solved = solvedCount(mine);
+  const from = params.get('from');
+  const [selected, setSelected] = useState(() => (next === -1 ? 0 : next));
+  const [hopping, setHopping] = useState(from !== null);
+  const Icon = MODULE_ICONS[module.icon];
+
+  useEffect(() => {
+    void modulePuzzles(module.id).then(setPuzzles, () => setPuzzles([]));
+  }, [module.id]);
+
+  // the world: built once per module
+  useEffect(() => {
+    let w: World;
+    try {
+      w = new World(host.current!, { id: module.id, color: module.color, theme: WORLD_THEMES[module.id] ?? WORLD_THEMES.openings, compact: compact() });
+    } catch {
+      setWebgl(false);
+      return;
+    }
+    world.current = w;
+    w.onPick = (i) => {
+      setSelected(i);
+      w.select(i);
+    };
+    let live = true;
+    void modelFor(profile?.loadout.pieces ?? 'marble-set', false, 'n', 'w').then(
+      (model) => live && w.setToken(model),
+      () => {},
+    );
+    return () => {
+      live = false;
+      w.dispose();
+      world.current = null;
+    };
+    // the piece set only matters when the world is built
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [module.id, module.color]);
+
+  // progress, and the hop after a solved puzzle
+  useEffect(() => {
+    const w = world.current;
+    if (!w) return;
+    const target = next === -1 ? PUZZLES_PER_MODULE - 1 : next;
+    const start = from === null ? NaN : Number(from);
+    if (Number.isInteger(start) && start >= 0 && start < target && mine.stars[start] > 0) {
+      setHopping(true);
+      w.setProgress(mine.stars, next, solved - 1);
+      w.select(-1);
+      void w.hop(start, target).then(() => {
+        w.openChests(solved);
+        setSelected(target);
+        w.select(target);
+        setHopping(false);
+        setParams({}, { replace: true });
+      });
+      return;
+    }
+    setHopping(false);
+    w.setProgress(mine.stars, next);
+    w.placeToken(target);
+    w.focus(selected, true);
+    w.select(selected);
+    // run when progress arrives, not on every pick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mine, webgl]);
+
+  const play = (n: number) => navigate(`/game/puzzle/${module.id}?n=${n}`);
+
+  return (
+    <>
+      <div className="world-stage" ref={host} />
+      <header className="world-top">
+        <Link to="/puzzles" className="world-back" aria-label={t('All modules')}>
+          <ArrowLeft size={18} />
+        </Link>
+        <span className="coach-icon world-icon">
+          <Icon size={20} />
+        </span>
+        <div className="world-title">
+          <h1 className="display">{t(module.name)}</h1>
+          <div className="world-progress">
+            <ProgressBar value={solved / PUZZLES_PER_MODULE} />
+            <span>{t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })}</span>
+          </div>
+        </div>
+      </header>
+
+      {!webgl && <LevelGrid module={module} mine={mine} onPlay={play} />}
+
+      {webgl && !hopping && (
+        <LevelCard
+          key={selected}
+          module={module}
+          mine={mine}
+          index={selected}
+          puzzle={puzzles?.[selected] ?? null}
+          next={next}
+          onPlay={() => play(selected)}
+          onNext={next >= 0 && selected !== next ? () => (setSelected(next), world.current?.select(next)) : undefined}
+        />
       )}
+    </>
+  );
+}
+
+/** The picked level: what it is about, the stars earned, and the way in. */
+function LevelCard(props: {
+  module: PuzzleModule;
+  mine: PuzzleModuleProgress;
+  index: number;
+  puzzle: Puzzle | null;
+  next: number;
+  onPlay: () => void;
+  onNext?: () => void;
+}) {
+  const { module, mine, index, puzzle, next } = props;
+  const stars = mine.stars[index];
+  const brief = useMemo(() => (puzzle ? briefOf(puzzle, module.select.themes) : null), [puzzle, module]);
+  const solvedNow = solvedCount(mine);
+  const toChest = BONUS_EVERY - (solvedNow % BONUS_EVERY);
+  const isNext = index === next;
+  return (
+    <section className="level-card" aria-live="polite">
+      <div className="level-card-head">
+        <span className="level-card-kicker">{t('Puzzle {n} of {total}', { n: index + 1, total: PUZZLES_PER_MODULE })}</span>
+        <span className="level-card-stars" aria-label={t('{n} of 3 stars', { n: stars })}>
+          {[1, 2, 3].map((n) => (
+            <Star key={n} size={15} className={cx(n <= stars && 'is-lit')} />
+          ))}
+        </span>
+      </div>
+      <h2 className="display">{brief?.title ?? '…'}</h2>
+      {brief && <p className="level-card-task">{brief.task}</p>}
+      {isNext && next >= 0 && (
+        <p className="level-card-note">
+          <Gift size={14} />{' '}
+          {solvedNow >= PUZZLES_PER_MODULE - BONUS_EVERY
+            ? t('{n} more to the surprise from the shop.', { n: PUZZLES_PER_MODULE - solvedNow })
+            : t('{n} more to the next chest: {coins} coins.', { n: toChest, coins: BONUS_COINS })}
+        </p>
+      )}
+      {mine.completedAt && mine.reward && (
+        <p className="level-card-note">
+          <Gift size={14} />{' '}
+          {mine.reward.item ? t('Your reward: {item}', { item: itemName(mine.reward.item) }) : <Coins amount={mine.reward.coins ?? 0} size={13} />}
+        </p>
+      )}
+      <div className="level-card-actions">
+        <Button variant="primary" block icon={stars > 0 ? <RotateCcw size={16} /> : <Play size={16} />} onClick={props.onPlay}>
+          {stars > 0 ? t('Play again') : t('Play')}
+        </Button>
+        {props.onNext && <Button onClick={props.onNext}>{t('Next puzzle')}</Button>}
+      </div>
+    </section>
+  );
+}
+
+/** Without WebGL: the levels as a grid, a chest after every 10. */
+function LevelGrid({ module, mine, onPlay }: { module: PuzzleModule; mine: PuzzleModuleProgress; onPlay: (n: number) => void }) {
+  const next = mine.stars.findIndex((s) => s === 0);
+  const solved = solvedCount(mine);
+  return (
+    <div className="level-grid-wrap">
+      <ol className="puzzle-map" aria-label={t('Levels')} style={{ '--module': module.color } as CSSProperties}>
+        {mine.stars.map((stars, i) => {
+          const open = next === -1 || i <= next;
+          return (
+            <li key={i} className="puzzle-step">
+              <button type="button" className={cx('puzzle-node', stars > 0 && 'is-solved', i === next && 'is-next', !open && 'is-locked')} disabled={!open} onClick={() => onPlay(i)}>
+                {open ? <span>{i + 1}</span> : <Lock size={14} />}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="faint">
+        <Gift size={13} /> {t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })}
+      </p>
     </div>
   );
 }

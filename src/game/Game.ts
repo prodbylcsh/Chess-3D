@@ -187,6 +187,21 @@ export class Game {
     el.style.cursor = interesting ? 'pointer' : '';
   }
 
+  /**
+   * A puzzle hint: pick up the piece on `from` as if the player had clicked it; with `to`,
+   * show only that target. Returns false when the board isn't taking moves right now.
+   */
+  suggest(from: Square, to?: Square): boolean {
+    if (this.busy || this.over || !this.isMyTurn() || !this.view.pieces.get(from)) return false;
+    this.select(from);
+    if (to) {
+      this.targets = this.targets.filter((m) => m.to === to);
+      this.view.clearTargets();
+      this.view.showTargets(this.targets);
+    }
+    return true;
+  }
+
   /** Make a move as if the player had clicked it (dev tools and browser checks). */
   input(uci: string): void {
     if (this.busy || this.over || !this.isMyTurn()) return;

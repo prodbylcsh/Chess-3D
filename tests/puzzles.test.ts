@@ -112,3 +112,32 @@ test('the goals of hand-made puzzles are translated', async () => {
   assert.ok(goals.length >= 40);
   assert.deepEqual(goals.filter((g) => !(g in cs)), []);
 });
+
+test('every puzzle explains itself: lessons for hand-made lines, themes for the rest', async () => {
+  const [{ PUZZLES }, { LESSONS, MOTIFS }, { describe }] = await Promise.all([
+    import('../supabase/functions/_shared/server/puzzle-data.ts'),
+    import('../src/features/puzzles/lessons.ts'),
+    import('../src/features/puzzles/describe.ts'),
+  ]);
+  for (const m of MODULES) {
+    for (const p of PUZZLES[m.id]) {
+      if (p.goal) {
+        assert.ok(LESSONS[p.id], `${p.id}: no lesson`);
+        assert.equal(LESSONS[p.id].why.length, solution(p).length, `${p.id}: one explanation per move`);
+      } else {
+        assert.ok(p.themes?.length, `${m.id} ${p.id}: no themes`);
+      }
+      const d = describe(p);
+      assert.ok(d.intro, `${m.id} ${p.id}: nothing to say`);
+      if ('mateIn' in d.goal) assert.ok(p.themes?.some((x) => x.startsWith('mate')), `${p.id}: a mate the themes don't know`);
+    }
+  }
+  // a themed module names its own motif first
+  for (const module of ['forks', 'pins', 'sacrifices']) {
+    const themes = moduleOf(module)!.select.themes!;
+    const named = PUZZLES[module].filter((p) => themes.includes(describe(p, themes).motifs[0]?.theme));
+    assert.equal(named.length, 100, module);
+  }
+  assert.ok(MOTIFS.length > 40);
+  assert.equal(Object.keys(LESSONS).length, 40);
+});

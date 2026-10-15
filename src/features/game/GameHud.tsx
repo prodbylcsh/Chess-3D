@@ -10,6 +10,7 @@ import { Badge, Button, IconButton, Modal, cx } from '../../ui/kit';
 import type { Engine } from './engine';
 import type { Mode } from './modes/types';
 import { SearchPill } from '../play/SearchWatcher';
+import { PuzzleBriefing, PuzzleCoach } from './PuzzleCoach';
 import { ResultCard } from './ResultCard';
 import { useGameState, type ClockView, type GameState, type PlayerView } from './store';
 
@@ -34,7 +35,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
       <TurnPill s={s} />
 
       <aside className="gs-panel">
-        <PlayerCard side={top} player={s.players[top]} s={s} />
+        {s.puzzle ? <PuzzleCoach s={s} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
         <section className="gs-side">
           <MoveList moves={s.moves} />
           <div className="gs-actions">
@@ -77,6 +78,8 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
         </section>
         <PlayerCard side={s.bottom} player={s.players[s.bottom]} s={s} />
       </aside>
+
+      {s.puzzle?.briefing && !s.end && <PuzzleBriefing s={s} mode={mode} />}
 
       {s.invite && <InviteCard url={s.invite} onCancel={() => mode.act('exit')} />}
 

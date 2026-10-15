@@ -1,14 +1,19 @@
 import { t, tk } from '../../../i18n';
 import { Chess, type Color as Side, type Move, type Square } from 'chess.js';
-import { Lightbulb, RotateCcw } from 'lucide-react';
+import { Info, Lightbulb, RotateCcw } from 'lucide-react';
 import { PUZZLES_PER_MODULE, answerAt, mates, moduleOf, playerSide, replyAfter, rightMove, setupMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import { briefOf, moveName, type Brief } from '../../puzzles/brief';
 import { api, ApiError } from '../../../api';
 import { modulePuzzles } from '../../../api/puzzleData';
 import { toast } from '../../../ui/kit';
-import type { GameState } from '../store';
+import type { GameState, PuzzleView } from '../store';
 import { dressGame, playerFromProfile, randomSeed, sleep, type EndAction, type Mode, type ModeAction, type ModeContext } from './types';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
+const toMove = (m: string) => ({ from: m.slice(0, 2), to: m.slice(2, 4), promotion: m[4] });
+const PRAISE = [tk('Nice!'), tk('Exactly!'), tk('Sharp!'), tk('Great move!'), tk('Spot on!')];
+/** A cheer for a right move that has no lesson, different each move. */
+const praise = (n: number) => t(PRAISE[(n * 3 + Math.floor(Math.random() * 2)) % PRAISE.length]);
 const PIECE_NAMES: Record<string, string> = { p: tk('pawn'), n: tk('knight'), b: tk('bishop'), r: tk('rook'), q: tk('queen'), k: tk('king') };
 
 /**
@@ -19,9 +24,13 @@ const PIECE_NAMES: Record<string, string> = { p: tk('pawn'), n: tk('knight'), b:
 export class PuzzleMode implements Mode {
   private readonly module: PuzzleModule;
   private puzzle: Puzzle | null = null;
+  private brief: Brief | null = null;
   private played: string[] = [];
   private mistakes = 0;
   private hints = 0;
+  /** hints asked for the current move: the first lifts the piece, the second shows the square */
+  private hintLevel = 0;
+  private setupDone = false;
   private token = 0;
   private disposed = false;
   private readonly seed = randomSeed();
@@ -38,25 +47,29 @@ export class PuzzleMode implements Mode {
     return `${t(this.module.name)} · ${t('Puzzle {n} of {total}', { n: this.index + 1, total: PUZZLES_PER_MODULE })}`;
   }
 
-  start(): void {
+  /** `again`: a restart, which skips the briefing */
+  start(again = false): void {
     this.disposed = false;
     const token = ++this.token;
     this.played = [];
     this.mistakes = 0;
     this.hints = 0;
-    void this.open(token).catch((err) => {
+    this.hintLevel = 0;
+    this.setupDone = false;
+    void this.open(token, again).catch((err) => {
       if (this.disposed || token !== this.token) return;
       toast(err instanceof ApiError ? err.message : t('Something went wrong. Please try again.'), { tone: 'danger' });
       this.ctx.navigate(`/puzzles/${this.module.id}`);
     });
   }
 
-  private async open(token: number): Promise<void> {
+  private async open(token: number, again: boolean): Promise<void> {
     const { store, game } = this.ctx.engine;
     const [puzzles] = await Promise.all([modulePuzzles(this.module.id), api.puzzles.start(this.module.id, this.index)]);
     const puzzle = puzzles[this.index];
     if (!puzzle || this.disposed || token !== this.token) return;
     this.puzzle = puzzle;
+    const brief = (this.brief = briefOf(puzzle, this.module.select.themes));
     const side = playerSide(puzzle);
     store.reset({
       players: {
@@ -65,44 +78,79 @@ export class PuzzleMode implements Mode {
       } as GameState['players'],
       bottom: side,
       mySide: side,
-      puzzle: { module: this.module.id, index: this.index, color: this.module.color, mistakes: 0, hints: 0, result: null, saving: false, error: null },
+      puzzle: {
+        module: this.module.id,
+        index: this.index,
+        color: this.module.color,
+        brief,
+        briefing: !again,
+        step: 0,
+        message: null,
+        mistakes: 0,
+        hints: 0,
+        result: null,
+        saving: false,
+        error: null,
+      },
     });
     store.onGameOver = () => {}; // a mating solution ends the game on the board; the solve is handled in onMove
     dressGame(this.ctx.engine, { [side]: this.ctx.profile?.loadout ?? null }, this.seed);
     this.ctx.engine.wardrobe.setMood(this.module.color);
     await game.begin({ side, active: true, send: (m) => void this.onMove(m, token) }, [], puzzle.fen);
-    const setup = setupMove(puzzle);
-    if (setup) {
-      await sleep(450);
-      if (this.disposed || token !== this.token) return;
-      await game.sync([setup]);
-    }
-    store.set({ note: this.prompt(puzzle, side) });
+    if (again) await this.go(token);
   }
 
-  /** What to do: the puzzle's goal (an opening, a trap) or find the best move. */
-  private prompt(puzzle: Puzzle, side: Side): string {
-    if (puzzle.goal) return side === 'w' ? t('{goal}: play it as White.', { goal: t(puzzle.goal) }) : t('{goal}: play it as Black.', { goal: t(puzzle.goal) });
-    return side === 'w' ? t('White to move: find the best move.') : t('Black to move: find the best move.');
+  private setPuzzle(patch: Partial<PuzzleView>): void {
+    const { store } = this.ctx.engine;
+    const now = store.get().puzzle;
+    if (now) store.set({ puzzle: { ...now, ...patch } });
+  }
+
+  /** The briefing is closed: the opponent's setup move, then the player's turn. */
+  private async go(token: number): Promise<void> {
+    const puzzle = this.puzzle;
+    if (!puzzle) return;
+    this.setPuzzle({ briefing: false });
+    if (this.setupDone) return;
+    this.setupDone = true;
+    const setup = setupMove(puzzle);
+    if (setup) {
+      await sleep(350);
+      if (this.disposed || token !== this.token) return;
+      const { game } = this.ctx.engine;
+      const san = new Chess(game.fen).move(toMove(setup)).san;
+      await game.sync([setup]);
+      if (this.disposed || token !== this.token) return;
+      this.setPuzzle({ message: { tone: 'info', text: t('Your opponent played {move}. Your turn!', { move: moveName(san) }) } });
+    } else {
+      this.setPuzzle({ message: { tone: 'info', text: this.brief?.side === 'w' ? t('White begins. Your move!') : t('Black begins. Your move!') } });
+    }
   }
 
   private async onMove(move: Move, token: number): Promise<void> {
     const puzzle = this.puzzle;
-    const { game, store } = this.ctx.engine;
+    const { game } = this.ctx.engine;
     if (!puzzle || token !== this.token) return;
     if (rightMove(puzzle, this.played, move.lan)) {
       const mate = mates(puzzle, this.played, move.lan);
       this.played.push(move.lan);
+      this.hintLevel = 0;
+      const why = this.brief?.lesson?.why[this.played.length - 1];
+      this.setPuzzle({ step: this.played.length, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
       const reply = replyAfter(puzzle, this.played.length);
       if (!reply || mate) return this.solved(token);
-      store.set({ note: t('Correct! Keep going.') });
       await game.idle();
-      await sleep(350);
+      await sleep(why ? 700 : 350);
       if (token === this.token && !this.disposed) await game.sync([...game.history, reply]);
       return;
     }
     this.mistakes++;
-    store.set({ note: t('Not this move. Try again.'), puzzle: { ...store.get().puzzle!, mistakes: this.mistakes } });
+    this.hintLevel = 0;
+    const goal = this.puzzle?.goal;
+    this.setPuzzle({
+      mistakes: this.mistakes,
+      message: { tone: 'bad', text: goal ? t('{goal}: not this move. Try again.', { goal: t(goal) }) : t('Not this move. Try again.') },
+    });
     await game.idle();
     await sleep(600);
     if (token === this.token && !this.disposed && !game.isOver) await game.sync(game.history.slice(0, -1));
@@ -112,32 +160,39 @@ export class PuzzleMode implements Mode {
     const { game, store } = this.ctx.engine;
     await game.idle();
     if (token !== this.token || this.disposed) return;
-    store.set({ note: null, puzzle: { ...store.get().puzzle!, saving: true } });
+    this.setPuzzle({ saving: true });
     // a mate has already ended the game on the board
     if (!game.isOver) await game.finish({ winner: store.get().mySide, reason: 'puzzle', title: t('Solved!'), text: t('Puzzle solved') });
     try {
       const result = await api.puzzles.solve(this.module.id, this.index, this.played, this.mistakes, this.hints);
       if (token !== this.token || this.disposed) return;
-      store.set({ puzzle: { ...store.get().puzzle!, saving: false, result } });
+      this.setPuzzle({ saving: false, result });
       await this.ctx.refreshProfile();
     } catch (err) {
-      if (token === this.token && !this.disposed) {
-        store.set({ puzzle: { ...store.get().puzzle!, saving: false, error: err instanceof ApiError ? err.message : t('Could not save the result.') } });
-      }
+      if (token === this.token && !this.disposed) this.setPuzzle({ saving: false, error: err instanceof ApiError ? err.message : t('Could not save the result.') });
     }
   }
 
+  /** First the piece to move (lifted on the board), then the square it goes to. */
   private hint(): void {
     const puzzle = this.puzzle;
-    const { game, store } = this.ctx.engine;
+    const { game } = this.ctx.engine;
     if (!puzzle || game.isOver) return;
     const answer = answerAt(puzzle, this.played.length);
     if (!answer) return;
-    const piece = new Chess(game.fen).get(answer.slice(0, 2) as Square);
+    const from = answer.slice(0, 2) as Square;
+    const to = answer.slice(2, 4) as Square;
+    const piece = t(PIECE_NAMES[new Chess(game.fen).get(from)?.type ?? 'p']);
     this.hints++;
-    store.set({
-      note: t('Hint: move your {piece} on {square}.', { piece: t(PIECE_NAMES[piece?.type ?? 'p']), square: answer.slice(0, 2) }),
-      puzzle: { ...store.get().puzzle!, hints: this.hints },
+    this.hintLevel = Math.min(2, this.hintLevel + 1);
+    const deep = this.hintLevel >= 2;
+    game.suggest(from, deep ? to : undefined);
+    this.setPuzzle({
+      hints: this.hints,
+      message: {
+        tone: 'hint',
+        text: deep ? t('Hint: {piece} from {from} to {to}.', { piece, from, to }) : t('Hint: move your {piece} on {square}.', { piece, square: from }),
+      },
     });
   }
 
@@ -149,7 +204,8 @@ export class PuzzleMode implements Mode {
 
   actions(s: GameState): ModeAction[] {
     return [
-      { id: 'hint', label: t('Hint'), icon: Lightbulb, disabled: !!s.end || !this.puzzle },
+      { id: 'hint', label: t('Hint'), icon: Lightbulb, disabled: !!s.end || !this.puzzle || !!s.puzzle?.briefing },
+      { id: 'brief', label: t('Task'), icon: Info, disabled: !this.puzzle },
       { id: 'retry', label: t('Restart'), icon: RotateCcw, disabled: !this.puzzle },
     ];
   }
@@ -164,13 +220,15 @@ export class PuzzleMode implements Mode {
   }
 
   endTitle(): { title: string; text: string } {
-    return { title: t('Solved!'), text: this.puzzle?.goal ? t(this.puzzle.goal) : t(this.module.name) };
+    return { title: t('Solved!'), text: this.brief?.title ?? t(this.module.name) };
   }
 
   act(id: string): void {
     if (id === 'hint') this.hint();
-    else if (id === 'retry') this.start();
-    else if (id === 'next') this.ctx.navigate(`/game/puzzle/${this.module.id}?n=${this.index + 1}`);
+    else if (id === 'brief') this.setPuzzle({ briefing: true });
+    else if (id === 'go') void this.go(this.token);
+    else if (id === 'retry') this.start(true);
+    else if (id === 'next') this.ctx.navigate(`/puzzles/${this.module.id}?from=${this.index}`); // the piece hops on the map first
     else if (id === 'exit') this.ctx.navigate(`/puzzles/${this.module.id}`);
   }
 }

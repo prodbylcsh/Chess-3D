@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
 import type { MatchResult, PuzzleSolve, RankInfo } from '../../api';
+import type { Brief } from '../puzzles/brief';
 import type { Analysis } from '../../ai/analysis';
 
 export interface PlayerView {
@@ -16,11 +17,24 @@ export interface PlayerView {
   present?: boolean;
 }
 
+/** What the puzzle coach says right now. */
+export interface PuzzleMessage {
+  tone: 'info' | 'good' | 'bad' | 'hint';
+  text: string;
+}
+
 /** A puzzle being played (Puzzles): its module, mistakes and hints, and the server's answer. */
 export interface PuzzleView {
   module: string;
   index: number;
   color: string;
+  /** what the puzzle asks (features/puzzles/brief.ts) */
+  brief: Brief;
+  /** the briefing card is open (before the first move, or reopened) */
+  briefing: boolean;
+  /** right moves played so far, of brief.moves */
+  step: number;
+  message: PuzzleMessage | null;
   mistakes: number;
   hints: number;
   result: PuzzleSolve | null;

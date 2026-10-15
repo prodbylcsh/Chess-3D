@@ -123,8 +123,8 @@ export function ModelViewer({ itemId, name, onBack }: { itemId: string; name: st
   );
 }
 
-/** The object to show: the detailed model of a piece or board, or a part of the classic set. */
-async function modelFor(itemId: string, isBoard: boolean, piece: PieceSymbol, side: Side): Promise<THREE.Object3D> {
+/** The object to show: the detailed model of a piece or board, or a part of the classic set (also the puzzle map's piece). */
+export async function modelFor(itemId: string, isBoard: boolean, piece: PieceSymbol, side: Side): Promise<THREE.Object3D> {
   if (isBoard) {
     const file = boardLook(itemId).model?.file;
     if (file) return (await loadModel(assetUrl(file))).clone();

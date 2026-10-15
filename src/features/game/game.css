@@ -990,3 +990,311 @@
   display: grid;
   gap: 2px;
 }
+
+/* ------------------------------------------------------------ puzzle coach */
+
+.coach {
+  --module: var(--gold);
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--module) 45%, transparent);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(260px 120px at 100% 0%, color-mix(in srgb, var(--module) 22%, transparent), transparent 70%),
+    rgba(16, 17, 24, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: rise-in 0.4s both;
+}
+
+.coach-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.coach-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--module) 24%, transparent);
+  color: var(--module);
+}
+
+.coach-kicker {
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.coach-steps {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.coach-steps i {
+  width: 9px;
+  height: 9px;
+  border: 1px solid color-mix(in srgb, var(--module) 55%, transparent);
+  border-radius: 50%;
+  transition:
+    background 0.3s,
+    transform 0.3s;
+}
+
+.coach-steps i.is-done {
+  background: var(--module);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--module) 70%, transparent);
+}
+
+.coach-steps i.is-now {
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.coach-title {
+  margin: 2px 0 0;
+  font-size: 21px;
+  line-height: 1.15;
+}
+
+.coach-task {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.coach-motifs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.coach-motif {
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--module) 40%, transparent);
+  border-radius: 99px;
+  color: var(--module);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: help;
+}
+
+.coach-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 9px 11px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.4;
+  animation: pop-in 0.35s var(--ease-spring) both;
+}
+
+.coach-msg svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.coach-msg.is-good {
+  background: rgba(63, 207, 142, 0.12);
+}
+
+.coach-msg.is-good svg {
+  color: #3fcf8e;
+}
+
+.coach-msg.is-bad {
+  background: rgba(255, 106, 122, 0.12);
+  animation: pop-in 0.35s var(--ease-spring) both, shake 0.4s 0.05s;
+}
+
+.coach-msg.is-bad svg {
+  color: #ff6a7a;
+}
+
+.coach-msg.is-hint {
+  background: var(--gold-soft);
+}
+
+.coach-msg.is-hint svg {
+  color: var(--gold);
+}
+
+@keyframes shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+}
+
+/* the briefing before a puzzle */
+.brief-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 50%, rgba(8, 9, 14, 0.35), rgba(8, 9, 14, 0.7));
+  animation: fade-in 0.3s both;
+}
+
+.brief {
+  --module: var(--gold);
+  position: relative;
+  display: grid;
+  gap: 12px;
+  width: min(440px, 100%);
+  padding: 24px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--module) 50%, transparent);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--module) 16%, var(--panel-solid)) 0%, var(--panel-solid) 65%);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 60px color-mix(in srgb, var(--module) 20%, transparent);
+  animation: pop-in 0.45s var(--ease-spring) both;
+}
+
+.brief-glow {
+  position: absolute;
+  top: -120px;
+  right: -80px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--module) 35%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.brief-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.brief h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.brief-task {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.brief-intro {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.brief-motif {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--module);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13.5px;
+}
+
+.brief-motif strong {
+  color: var(--module);
+}
+
+.brief-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+
+.brief-stars span {
+  display: flex;
+  gap: 2px;
+  color: var(--gold);
+}
+
+.brief-stars svg {
+  fill: var(--gold);
+}
+
+@media (max-width: 820px) {
+  .gs-panel > .coach {
+    position: absolute;
+    top: 70px;
+    left: 12px;
+    right: 12px;
+    gap: 4px;
+    padding: 10px 12px;
+  }
+
+  .game-screen:has(.gs-turn .search-pill) .gs-panel > .coach {
+    top: 116px;
+  }
+
+  .coach-title {
+    font-size: 17px;
+  }
+
+  .coach-task,
+  .coach-motifs {
+    display: none;
+  }
+
+  .coach-msg {
+    margin: 2px 0 0;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .brief-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .brief {
+    padding: 20px;
+    gap: 10px;
+  }
+
+  .brief h2 {
+    font-size: 24px;
+  }
+
+  .brief-intro {
+    font-size: 14px;
+  }
+}
