@@ -21,9 +21,12 @@ export interface PuzzleModule {
   free: boolean;
   /** the module's colour, on its card and in the scene while playing it */
   color: string;
-  icon: 'sprout' | 'crown' | 'swords' | 'pin' | 'flame' | 'castle';
-  /** how scripts/puzzles/build.ts picks its puzzles from the Lichess database */
-  select: { min: number; max: number; maxPlies: number; themes?: string[]; without?: string[] };
+  icon: 'sprout' | 'book' | 'crown' | 'swords' | 'pin' | 'flame' | 'castle';
+  /**
+   * how scripts/puzzles/build.ts picks its puzzles from the Lichess database; `curated`:
+   * the module starts with hand-made puzzles (scripts/puzzles/curated.ts) and Lichess fills the rest
+   */
+  select: { min: number; max: number; maxPlies: number; themes?: string[]; without?: string[]; curated?: boolean };
 }
 
 export const MODULES: readonly PuzzleModule[] = [
@@ -35,6 +38,15 @@ export const MODULES: readonly PuzzleModule[] = [
     color: '#6fd3c7',
     icon: 'sprout',
     select: { min: 400, max: 1300, maxPlies: 4 },
+  },
+  {
+    id: 'openings',
+    name: 'Openings',
+    description: 'The best first moves for White and Black, the fastest mates and the traps to know.',
+    free: false,
+    color: '#ff9a4d',
+    icon: 'book',
+    select: { min: 600, max: 1800, maxPlies: 6, themes: ['opening'], curated: true },
   },
   {
     id: 'mate-in-2',
@@ -85,14 +97,32 @@ export const MODULES: readonly PuzzleModule[] = [
 
 export const moduleOf = (id: unknown): PuzzleModule | null => MODULES.find((m) => m.id === id) ?? null;
 
-/** A puzzle as stored: the position before the opponent's move, then the moves (UCI). */
+/**
+ * A puzzle as stored: a position and a line of moves (UCI). Usually the line starts with the
+ * opponent's move that sets the puzzle up, then the solution and the replies alternate;
+ * with `playerFirst` the player moves first (an opening from the starting position).
+ */
 export interface Puzzle {
   id: string;
   fen: string;
-  /** the opponent's move that sets the puzzle up, then the solution, alternating */
   moves: string;
   rating: number;
+  playerFirst?: boolean;
+  /** what to play, shown to the player (English; the app translates it), e.g. an opening's name */
+  goal?: string;
 }
+
+const lineOf = (p: Puzzle) => p.moves.split(' ');
+const firstAnswer = (p: Puzzle) => (p.playerFirst ? 0 : 1);
+
+/** The opponent's move that sets the puzzle up, or null when the player moves first. */
+export const setupMove = (p: Puzzle): string | null => (p.playerFirst ? null : lineOf(p)[0]);
+/** The player's moves of the solution. */
+export const solution = (p: Puzzle): string[] => lineOf(p).filter((_, i) => i >= firstAnswer(p) && (i - firstAnswer(p)) % 2 === 0);
+/** The solution's move after the player has played `n` right moves (undefined when solved). */
+export const answerAt = (p: Puzzle, n: number): string | undefined => lineOf(p)[firstAnswer(p) + 2 * n];
+/** The opponent's reply to the player's `n`th move (from 1), if the line goes on. */
+export const replyAfter = (p: Puzzle, n: number): string | undefined => lineOf(p)[firstAnswer(p) + 2 * n - 1];
 
 /** Coins for solving a puzzle the first time: 25 for the easiest, up to 50 for the hardest. */
 export function puzzleCoins(rating: number): number {
@@ -108,49 +138,58 @@ export function stars(mistakes: number, hints: number): 1 | 2 | 3 {
   return slips === 0 ? 3 : slips === 1 ? 2 : 1;
 }
 
-/** The side the player plays in a puzzle (the one to move after the opponent's first move). */
+/** The side the player plays in a puzzle (the one to move after the opponent's setup move). */
 export function playerSide(p: Puzzle): 'w' | 'b' {
-  return p.fen.split(' ')[1] === 'w' ? 'b' : 'w';
+  const toMove = p.fen.split(' ')[1] === 'w' ? 'w' : 'b';
+  return p.playerFirst ? toMove : toMove === 'w' ? 'b' : 'w';
 }
 
 const uci = (m: { from: string; to: string; promotion?: string }) => `${m.from}${m.to}${m.promotion ?? ''}`;
 
+/** The position after the setup move and the player's right moves so far, with the replies. */
+function replay(p: Puzzle, playedSoFar: string[]): Chess {
+  const chess = new Chess(p.fen);
+  const setup = setupMove(p);
+  if (setup) chess.move(toMove(setup));
+  playedSoFar.forEach((m, i) => {
+    chess.move(toMove(m));
+    const reply = replyAfter(p, i + 1);
+    if (reply) chess.move(toMove(reply));
+  });
+  return chess;
+}
+
 /**
  * Whether the player's moves solve the puzzle: each one must be the solution's move, except
- * that any move that checkmates is right too (puzzles often have more than one mate).
+ * that any move that checkmates is right too (puzzles often have more than one mate), and a
+ * mate ends the puzzle.
  */
 export function solves(p: Puzzle, played: string[]): boolean {
-  const line = p.moves.split(' ');
-  const answers = line.filter((_, i) => i % 2 === 1);
-  if (played.length !== answers.length) return false;
-  const chess = new Chess(p.fen);
-  try {
-    chess.move(toMove(line[0]));
-    for (let i = 0; i < answers.length; i++) {
-      const move = chess.move(toMove(played[i]));
-      if (uci(move) !== answers[i] && !chess.isCheckmate()) return false;
-      if (chess.isCheckmate()) return i === answers.length - 1;
-      if (line[2 * i + 2]) chess.move(toMove(line[2 * i + 2]));
-    }
-  } catch {
-    return false; // an illegal move
+  const answers = solution(p);
+  if (!played.length || played.length > answers.length) return false;
+  for (let i = 0; i < played.length; i++) {
+    if (!rightMove(p, played.slice(0, i), played[i])) return false;
   }
-  return true;
+  return played.length === answers.length || mates(p, played.slice(0, -1), played.at(-1)!);
 }
 
 /** Whether `move` (UCI) is right at this point of the puzzle: the solution's move, or a mate. */
 export function rightMove(p: Puzzle, playedSoFar: string[], move: string): boolean {
-  const line = p.moves.split(' ');
-  const answer = line[2 * playedSoFar.length + 1];
+  const answer = answerAt(p, playedSoFar.length);
   if (!answer) return false;
-  if (move === answer) return true;
-  const chess = new Chess(p.fen);
   try {
-    chess.move(toMove(line[0]));
-    playedSoFar.forEach((m, i) => {
-      chess.move(toMove(m));
-      if (line[2 * i + 2]) chess.move(toMove(line[2 * i + 2]));
-    });
+    const chess = replay(p, playedSoFar);
+    const made = chess.move(toMove(move));
+    return uci(made) === answer || chess.isCheckmate();
+  } catch {
+    return false; // an illegal move
+  }
+}
+
+/** Whether `move` (UCI) checkmates at this point of the puzzle. */
+export function mates(p: Puzzle, playedSoFar: string[], move: string): boolean {
+  try {
+    const chess = replay(p, playedSoFar);
     chess.move(toMove(move));
     return chess.isCheckmate();
   } catch {

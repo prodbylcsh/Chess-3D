@@ -48,9 +48,8 @@ jobs:
       - name: Build from the Lichess database
         if: steps.missing.outputs.modules != ''
         run: |
-          curl -sSfL https://database.lichess.org/lichess_db_puzzle.csv.zst | zstd -dc | node scripts/puzzles/build.ts
-          # keep the puzzles of modules that already had them (unless rebuilding)
-          if [ "${{ inputs.rebuild }}" != "true" ]; then git checkout -- supabase/functions/_shared/puzzle-data/ 2>/dev/null || true; fi
+          # only the missing modules; they avoid the puzzles the others already have
+          curl -sSfL https://database.lichess.org/lichess_db_puzzle.csv.zst | zstd -dc | MODULES="${{ steps.missing.outputs.modules }}" node scripts/puzzles/build.ts
       - name: Commit
         if: steps.missing.outputs.modules != ''
         run: |
