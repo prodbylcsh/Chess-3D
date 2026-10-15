@@ -12,7 +12,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { MODULES, PUZZLES_PER_MODULE, type PuzzleModule } from '../../supabase/functions/_shared/puzzles.ts';
 
 const OUT = 'supabase/functions/_shared/puzzle-data';
-const KEEP = 4; // candidates kept per rating band, so modules can avoid sharing puzzles
+const KEEP = 8; // candidates kept per rating band, so modules can avoid sharing puzzles
 
 interface Candidate {
   id: string;
@@ -53,9 +53,14 @@ for await (const line of rl) {
 mkdirSync(OUT, { recursive: true });
 const used = new Set<string>();
 for (const m of MODULES) {
-  const picked = bands.get(m.id)!.map((band, i) => {
-    const pick = band.find((c) => !used.has(c.id));
-    if (!pick) throw new Error(`${m.id}: no puzzle for rating band ${i}`);
+  const all = bands.get(m.id)!;
+  const picked = all.map((_, i) => {
+    // this band's best unused puzzle, or the nearest band's when this one has none left
+    let pick: Candidate | undefined;
+    for (let d = 0; !pick && d < all.length; d++) {
+      pick = [all[i - d], all[i + d]].flatMap((b) => b ?? []).find((c) => !used.has(c.id));
+    }
+    if (!pick) throw new Error(`${m.id}: not enough puzzles`);
     used.add(pick.id);
     return { id: pick.id, fen: pick.fen, moves: pick.moves, rating: pick.rating };
   });
