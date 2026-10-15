@@ -207,8 +207,10 @@ Decided (October 2026):
   goal ("Italian Game", "Checkmate in 2 moves", "Win material"), the side and the number of
   moves to find, what to look for, and how to get three stars. During play a coach card in
   place of the opponent's card keeps the goal in view, marks the moves found, and answers
-  every move: the hand-made lines explain each right move ("Bc4: the Italian bishop, eyeing
-  the weak f7 square"), the others cheer; a wrong move says so and is taken back. The goal of
+  every move: the hand-made lines explain each right move ("The Italian bishop, eyeing the
+  weak pawn beside Black's king"), the others cheer; a wrong move says so and is taken back.
+  Texts speak of pieces, not squares (the user's wish: "the bishop", "the pawn beside the
+  king", not "f7"); hints show the piece and its square on the board instead. The goal of
   a Lichess puzzle comes from what its solution achieves (mate, material) and its motifs
   (fork, pin, sacrifice, …) from its Lichess themes, the module's own motif first
   (`features/puzzles/describe.ts`, `lessons.ts`; the themes were added to the puzzles
@@ -223,6 +225,8 @@ Decided (October 2026):
   "Next puzzle" after a solve goes back to the map, where it hops on to the next stone before
   the next puzzle's card appears. Drag or scroll to travel, tap a stone to see its card.
   Without WebGL the levels are a plain grid.
+  The decorations are simple shapes for now; the user wants them refined later (they look
+  amateurish), possibly with real models.
 - **Progress:** the next level opens when the previous one is solved; solved levels can be
   replayed.
 - **Server checks** (`puzzles` function): a puzzle must be opened before it is solved

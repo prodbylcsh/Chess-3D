@@ -1,7 +1,6 @@
 // What a puzzle asks of the player, in their language (docs/PLATFORM.md §4.2): a title, the
 // task, the line's story or what to look for, and the motifs. See describe.ts.
 import type { Puzzle } from '#shared/puzzles.ts';
-import { getPrefs } from '../../app/prefs';
 import { t, tk, tn } from '../../i18n';
 import { describe } from './describe';
 import type { Lesson, Motif } from './lessons';
@@ -42,11 +41,4 @@ export function briefOf(p: Puzzle, prefer: readonly string[] = []): Brief {
     moves: d.moves,
     lesson: d.lesson,
   };
-}
-
-const CZECH_PIECES: Record<string, string> = { N: 'J', B: 'S', R: 'V', Q: 'D', K: 'K' };
-
-/** A move in the player's language: Czech names the pieces J, S, V, D, K (Nf3 → Jf3). */
-export function moveName(san: string): string {
-  return getPrefs().language === 'cs' ? san.replace(/[NBRQK]/g, (c) => CZECH_PIECES[c]) : san;
 }

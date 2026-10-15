@@ -2,7 +2,7 @@ import { t, tk } from '../../../i18n';
 import { Chess, type Color as Side, type Move, type Square } from 'chess.js';
 import { Info, Lightbulb, RotateCcw } from 'lucide-react';
 import { PUZZLES_PER_MODULE, answerAt, mates, moduleOf, playerSide, replyAfter, rightMove, setupMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
-import { briefOf, moveName, type Brief } from '../../puzzles/brief';
+import { briefOf, type Brief } from '../../puzzles/brief';
 import { api, ApiError } from '../../../api';
 import { modulePuzzles } from '../../../api/puzzleData';
 import { toast } from '../../../ui/kit';
@@ -118,10 +118,12 @@ export class PuzzleMode implements Mode {
       await sleep(350);
       if (this.disposed || token !== this.token) return;
       const { game } = this.ctx.engine;
-      const san = new Chess(game.fen).move(toMove(setup)).san;
+      const moved = new Chess(game.fen).move(toMove(setup));
       await game.sync([setup]);
       if (this.disposed || token !== this.token) return;
-      this.setPuzzle({ message: { tone: 'info', text: t('Your opponent played {move}. Your turn!', { move: moveName(san) }) } });
+      this.setPuzzle({ message: { tone: 'info', text: moved.captured
+              ? t('Your opponent took with a {piece}. Your turn!', { piece: t(PIECE_NAMES[moved.piece]) })
+              : t('Your opponent moved a {piece}. Your turn!', { piece: t(PIECE_NAMES[moved.piece]) }) } });
     } else {
       this.setPuzzle({ message: { tone: 'info', text: this.brief?.side === 'w' ? t('White begins. Your move!') : t('Black begins. Your move!') } });
     }
@@ -191,7 +193,7 @@ export class PuzzleMode implements Mode {
       hints: this.hints,
       message: {
         tone: 'hint',
-        text: deep ? t('Hint: {piece} from {from} to {to}.', { piece, from, to }) : t('Hint: move your {piece} on {square}.', { piece, square: from }),
+        text: deep ? t('Hint: move it to the marked square.') : t('Hint: move your {piece}, the one glowing on the board.', { piece }),
       },
     });
   }
