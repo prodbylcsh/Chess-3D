@@ -343,6 +343,8 @@ export interface PuzzleSolve {
   /** the first time this puzzle was solved (only that pays) */
   first: boolean;
   coins: number;
+  /** coins the hints took off (first solve only) */
+  hintCost: number;
   /** the bonus for every 10 solved */
   bonus: number;
   stars: 1 | 2 | 3;

@@ -4,6 +4,8 @@ import {
   BONUS_COINS,
   MODULES,
   bonusFor,
+  hintPenalty,
+  solveCoins,
   completionItem,
   moduleOf,
   playerSide,
@@ -35,6 +37,16 @@ test('coins: 25 to 50 by difficulty, 500 for every tenth solve', () => {
   assert.equal(puzzleCoins(2400), 50);
   assert.equal(puzzleCoins(3000), 50);
   assert.deepEqual([bonusFor(9), bonusFor(10), bonusFor(11), bonusFor(100)], [0, BONUS_COINS, 0, BONUS_COINS]);
+});
+
+test('hints cost up to 10 coins, in proportion to the hints the puzzle offers', () => {
+  // two hints per move: a 2-move puzzle offers 4
+  assert.deepEqual([0, 1, 2, 3, 4, 9].map((h) => hintPenalty(h, 2)), [0, 3, 5, 8, 10, 10]);
+  assert.equal(hintPenalty(2, 1), 10, 'every hint of a one-move puzzle');
+  assert.equal(hintPenalty(1, 5), 1);
+  assert.equal(solveCoins(400, 0, 1), 25);
+  assert.equal(solveCoins(400, 2, 1), 15);
+  assert.equal(solveCoins(2400, 1, 1), 45);
 });
 
 test('stars: three for a clean solve, fewer with mistakes or hints', () => {

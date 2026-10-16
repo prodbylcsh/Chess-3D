@@ -199,6 +199,10 @@ Decided (October 2026):
   everything gets 25,000 coins instead.
 - **Stars:** 3 for a clean solve, 2 with one mistake or hint, 1 otherwise. They are for
   motivation only; the best stars are kept.
+- **Hints cost coins** (October 2026, the user's decision): a puzzle offers two hints per
+  move of its solution (the piece, then the square); using all of them takes **10 coins**
+  off the first-solve reward, fewer hints take off a share of that, rounded
+  (`hintPenalty`, `solveCoins`). The result card shows "Hints −n".
 - **Wrong moves** are taken back and count as a mistake; any checkmate counts as the right
   move (and ends the puzzle). A hint first lifts the piece to move on the board and names it;
   a second hint shows only the square it goes to. Each counts against the stars.

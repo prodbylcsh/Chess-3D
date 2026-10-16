@@ -44,7 +44,8 @@ function PuzzleBlock({ puzzle }: { puzzle: NonNullable<GameState['puzzle']> }) {
             <Coins amount={r.coins + r.bonus} signed size={20} />
           </div>
           <div className="result-chips">
-            {r.first ? <span>{t('Puzzle')} +{r.coins}</span> : <span>{t('Already solved: no coins this time')}</span>}
+            {r.first ? <span>{t('Puzzle')} +{r.coins + r.hintCost}</span> : <span>{t('Already solved: no coins this time')}</span>}
+            {r.hintCost > 0 && <span>{t('Hints')} −{r.hintCost}</span>}
             {r.bonus > 0 && <span>{t('Bonus for {n} solved', { n: r.solved })} +{r.bonus}</span>}
             <span>{t('{n} of {total} solved', { n: r.solved, total: 100 })}</span>
           </div>

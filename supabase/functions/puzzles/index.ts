@@ -2,7 +2,7 @@
 //
 // POST { action: 'progress' }                                  → { modules, player }
 // POST { action: 'start', module, index }                      → { ok } the player opened a puzzle
-// POST { action: 'solve', module, index, moves, mistakes, hints } → { first, coins, bonus, stars, solved, reward, player }
+// POST { action: 'solve', module, index, moves, mistakes, hints } → { first, coins, hintCost, bonus, stars, solved, reward, player }
 //      `moves`: the player's moves (UCI); the server checks them. Coins only for the first
 //      solve, a bonus every 10 solved, and a reward (an item, or coins) for the 100th.
 // POST { action: 'unlock', module }                            → { modules, player } pay MODULE_PRICE coins
@@ -18,7 +18,9 @@ import {
   PUZZLES_PER_MODULE,
   completionItem,
   moduleOf,
-  puzzleCoins,
+  solveCoins,
+  solution,
+  hintPenalty,
   solves,
   stars,
   MODULES,
@@ -95,7 +97,8 @@ async function solve(me: string, body: Record<string, unknown>) {
   const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
   if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
   const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
-  const earned = stars(count(body.mistakes), count(body.hints));
+  const hints = count(body.hints);
+  const earned = stars(count(body.mistakes), hints);
 
   await ensurePlayer(admin, me);
   const { data: result, error: e2 } = await admin.rpc('solve_puzzle', {
@@ -103,7 +106,7 @@ async function solve(me: string, body: Record<string, unknown>) {
     p_module: module.id,
     p_idx: index,
     p_stars: earned,
-    p_coins: puzzleCoins(puzzle.rating),
+    p_coins: solveCoins(puzzle.rating, hints, solution(puzzle).length),
     p_every: BONUS_EVERY,
     p_bonus: BONUS_COINS,
   });
@@ -123,7 +126,8 @@ async function solve(me: string, body: Record<string, unknown>) {
   }
   const player = await getPlayer(admin, me);
   if (reward?.item) await publishShowcase(admin, player);
-  return { first: result.first, coins: result.coins, bonus: result.bonus, stars: earned, solved: result.solved, reward, player };
+  const hintCost = result.first ? hintPenalty(hints, solution(puzzle).length) : 0;
+  return { first: result.first, coins: result.coins, hintCost, bonus: result.bonus, stars: earned, solved: result.solved, reward, player };
 }
 
 async function unlock(me: string, body: Record<string, unknown>) {

@@ -132,6 +132,20 @@ export function puzzleCoins(rating: number): number {
   return 25 + Math.round(25 * Math.min(1, Math.max(0, (rating - 400) / 2000)));
 }
 
+/** Hints a puzzle offers per move of the solution: the piece, then the square. */
+export const HINTS_PER_MOVE = 2;
+/** Using every hint of a puzzle takes this many coins off its reward (decided October 2026). */
+export const HINT_PENALTY = 10;
+
+/** Coins the hints cost: up to HINT_PENALTY, in proportion to the hints available. */
+export function hintPenalty(hints: number, moves: number): number {
+  const available = Math.max(1, HINTS_PER_MOVE * moves);
+  return Math.round((HINT_PENALTY * Math.min(Math.max(0, hints), available)) / available);
+}
+
+/** Coins for a first solve: the puzzle's coins less what the hints cost. */
+export const solveCoins = (rating: number, hints: number, moves: number) => Math.max(0, puzzleCoins(rating) - hintPenalty(hints, moves));
+
 /** The bonus a solve pays when it brings the module's count to `solved` (every 10th). */
 export const bonusFor = (solved: number) => (solved > 0 && solved % BONUS_EVERY === 0 ? BONUS_COINS : 0);
 

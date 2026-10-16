@@ -9,7 +9,9 @@ import {
   bonusFor,
   completionItem,
   moduleOf,
-  puzzleCoins,
+  solveCoins,
+  solution,
+  hintPenalty,
   solves,
   stars,
 } from '#shared/puzzles.ts';
@@ -53,7 +55,8 @@ export const puzzles: PuzzlesService = {
     const first = p.stars[index] === 0;
     p.stars[index] = Math.max(p.stars[index], earned);
     const solved = p.stars.filter((s) => s > 0).length;
-    const coins = first ? puzzleCoins(puzzle.rating) : 0;
+    const coins = first ? solveCoins(puzzle.rating, hints, solution(puzzle).length) : 0;
+    const hintCost = first ? hintPenalty(hints, solution(puzzle).length) : 0;
     const bonus = first ? bonusFor(solved) : 0;
     profile.coins += coins + bonus;
     let reward: PuzzleModuleProgress['reward'] = null;
@@ -67,7 +70,7 @@ export const puzzles: PuzzlesService = {
     }
     save();
     emit({ type: 'profile' });
-    return { first, coins, bonus: bonus === BONUS_COINS ? bonus : 0, stars: earned, solved, reward };
+    return { first, coins, hintCost, bonus: bonus === BONUS_COINS ? bonus : 0, stars: earned, solved, reward };
   },
 
   async unlock(module) {

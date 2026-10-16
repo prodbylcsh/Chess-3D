@@ -1,7 +1,7 @@
 import { t, tk } from '../../../i18n';
 import { Chess, type Color as Side, type Move, type Square } from 'chess.js';
 import { Info, Lightbulb, RotateCcw } from 'lucide-react';
-import { PUZZLES_PER_MODULE, answerAt, mates, moduleOf, playerSide, replyAfter, rightMove, setupMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import { PUZZLES_PER_MODULE, answerAt, hintPenalty, solution, mates, moduleOf, playerSide, replyAfter, rightMove, setupMove, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
 import { briefOf, type Brief } from '../../puzzles/brief';
 import { api, ApiError } from '../../../api';
 import { modulePuzzles } from '../../../api/puzzleData';
@@ -193,7 +193,7 @@ export class PuzzleMode implements Mode {
       hints: this.hints,
       message: {
         tone: 'hint',
-        text: deep ? t('Hint: move it to the marked square.') : t('Hint: move your {piece}, the one glowing on the board.', { piece }),
+        text: `${deep ? t('Hint: move it to the marked square.') : t('Hint: move your {piece}, the one glowing on the board.', { piece })} ${t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, solution(puzzle).length) })}`,
       },
     });
   }

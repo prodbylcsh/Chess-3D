@@ -74,6 +74,8 @@ test('solving: checked by the server, coins only the first time, stars kept at t
   assert.equal(first.coins, puzzleCoins(PUZZLES['openings'][0].rating));
   assert.equal(first.player.coins, 500 + first.coins);
 
+  assert.equal(first.hintCost, 0);
+
   const again = await solve(p, 'openings', 0);
   assert.equal(again.first, false);
   assert.equal(again.coins, 0);
@@ -89,7 +91,11 @@ test('every tenth solve pays a bonus; the hundredth gives an item from the shop'
     admin.from('puzzle_solves').insert(Array.from({ length: to - from }, (_, i) => ({ player_id: p.id, module: 'openings', idx: from + i, stars: 3 })));
   await call(p.client, { action: 'progress' });
   assert.ifError((await fill(0, 9)).error);
-  const tenth = await solve(p, 'openings', 9);
+  // every hint and more: the coins lose 10 at most
+  const tenth = await solve(p, 'openings', 9, answer('openings', 9), { hints: 99 });
+  assert.equal(tenth.hintCost, 10);
+  assert.equal(tenth.coins, puzzleCoins(PUZZLES.openings[9].rating) - 10);
+  assert.equal(tenth.stars, 1);
   assert.equal(tenth.solved, 10);
   assert.equal(tenth.bonus, BONUS_COINS);
   assert.equal(tenth.player.coins, 500 + tenth.coins + BONUS_COINS);

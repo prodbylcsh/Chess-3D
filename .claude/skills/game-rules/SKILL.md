@@ -74,6 +74,7 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
 - **Puzzles (§4.2):** modules of 100 puzzles (`PUZZLES_PER_MODULE`); only Openings is
   free (players who started First Steps while it was free keep it), the others cost **100,000 coins** each (`MODULE_PRICE`; a subscription comes
   later). The first solve of a puzzle pays 25–50 coins by its rating (`puzzleCoins`);
+  hints take up to **10** off a first solve's coins, in proportion to the hints the puzzle offers (`hintPenalty`, two per move);
   every 10 solved in a module pay **500** (`BONUS_EVERY`, `BONUS_COINS`); finishing a
   module gives a random shop item the player doesn't own, or **25,000** coins
   (`COMPLETION_COINS`) if they own them all. Stars (3 / 2 / 1 by mistakes and hints)
