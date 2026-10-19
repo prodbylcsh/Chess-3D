@@ -316,13 +316,16 @@ expensive placeholder set, 40,000 → 68,000; the board follows the same rule, 2
 At roughly 10 games a day this means a new icon every 2–3 days and a piece set every few
 weeks, which keeps the shop meaningful without feeling out of reach.
 
+**Names** of piece sets and boards are the same in every language (the user's rule, October
+2026: Classic Marble, Monolith, Squircle); their Czech entries repeat the English.
+
 **Catalogue.** Every category has one free standard item that everyone owns; profile
 icons have six free starters. Piece sets and boards are separate items (a set never
 includes a board).
 
 | Category | Items (price, rarity) |
 | --- | --- |
-| Piece sets | Classic Marble (free) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) |
+| Piece sets | Classic Marble (free) · **Squircle** 25,000 common (own models in both colours: pieces that melt from circle to square; low-mid tier) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) |
 | Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) |
 | Backgrounds | Candlelit Study (free) |
 | Move animations | Glide (free) |

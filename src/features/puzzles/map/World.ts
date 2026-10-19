@@ -272,7 +272,8 @@ export class World {
     const start = pathPoint(a);
     const end = pathPoint(b);
     const dir = end.clone().sub(start);
-    const yaw = Math.atan2(dir.x, dir.z);
+    // the piece looks along the path, the way faceAlongPath turns it
+    const yaw = Math.atan2(dir.x, dir.z) + Math.PI;
     return new Promise((resolve) => {
       const duration = 0.72;
       let t = 0;

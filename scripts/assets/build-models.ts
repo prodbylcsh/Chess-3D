@@ -28,6 +28,8 @@ interface PieceSetModels {
   source: string;
   /** output folder under public/assets/pieces/ */
   dir: string;
+  /** turn pieces round the vertical axis, in degrees, when they face the wrong way (the knight must look to −z) */
+  turn?: Partial<Record<PieceName, number>>;
   /** height of each piece in board squares (the classic set: pawn 0.93 … king 1.64) */
   heights: Record<PieceName, number>;
   /**
@@ -82,6 +84,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     dir: 'squircle',
     // broad pieces (half as wide as tall): a little shorter than Monolith so they fit their squares
     heights: { pawn: 0.95, rook: 1.1, knight: 1.2, bishop: 1.32, queen: 1.45, king: 1.55 },
+    turn: { knight: 180 },
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
@@ -123,7 +126,7 @@ async function main(itemId: string, sourceDir: string) {
     for (const piece of PIECES) {
       for (const [lod, suffix] of [['game', ''], ['hd', '-hd']] as const) {
         const triangles = config.triangles[lod];
-        const place = (doc: Document) => fitPiece(doc, config.heights[piece]);
+        const place = (doc: Document) => fitPiece(doc, config.heights[piece], config.turn?.[piece] ?? 0);
         if (config.delivered === 'both') {
           for (const colour of ['white', 'black'] as const) {
             await write(config.textureSize, await prepare(find(sourceDir, [piece, colour]), place, triangles), join(out, `${piece}-${colour}${suffix}.glb`));
@@ -172,14 +175,18 @@ async function prepare(file: string, place: (doc: Document) => void, maxTriangle
   return doc;
 }
 
-/** Base centred at the origin on y = 0, `height` board squares tall. */
-function fitPiece(doc: Document, height: number): void {
+/** Base centred at the origin on y = 0, `height` board squares tall, turned by `degrees`. */
+function fitPiece(doc: Document, height: number, degrees = 0): void {
   const scene = doc.getRoot().listScenes()[0];
   const b = getBounds(scene);
   const s = height / (b.max[1] - b.min[1]);
   const cx = (b.min[0] + b.max[0]) / 2;
   const cz = (b.min[2] + b.max[2]) / 2;
-  bake(doc, [s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, -cx * s, -b.min[1] * s, -cz * s, 1]);
+  const a = (degrees * Math.PI) / 180;
+  const c = Math.cos(a);
+  const n = Math.sin(a);
+  // centre and scale, then turn about y (column-major)
+  bake(doc, [s * c, 0, -s * n, 0, 0, s, 0, 0, s * n, 0, s * c, 0, s * (-c * cx - n * cz), -b.min[1] * s, s * (n * cx - c * cz), 1]);
 }
 
 /** The playing grid becomes exactly 8×8 units around the origin, its surface at `top`. */

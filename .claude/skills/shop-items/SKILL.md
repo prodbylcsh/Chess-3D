@@ -82,7 +82,8 @@ locally.
 4. Build: the `build` request above, or `node scripts/assets/build-models.ts <item-id>
    assets-src/<name>` locally; either writes
    `public/assets/pieces/<dir>/` or `public/assets/boards/<dir>/`.
-5. Add the item to `ITEMS`, the look (`model`) to `looks.ts`, the texts and Czech, a card
+5. Add the item to `ITEMS`, the look (`model`) to `looks.ts`, the texts and Czech (the
+   names of sets and boards stay the same in every language: the Czech entry repeats it), a card
    picture in `public/assets/shop/` and `PREVIEW_IMAGES`: with the mock dev server on :5174,
    `node scripts/assets/card/shoot.mjs <item-id> pieces/<set>` renders king, queen and
    knight of both colours (`scripts/assets/card/`) into a 16:10 WebP ≤ 50 KB.

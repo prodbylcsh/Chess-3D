@@ -345,8 +345,10 @@ export class Choreographer {
     sfx.whoosh(0.5);
     this.fx.dustPuff(start, 14, 0.4, 0.8);
 
-    // leap to above the victim
+    // leap to above the victim; the rook spins a full turn and ends facing where it did
+    // (model sets face their own way per colour: White's knight looks forward at 0, not π)
     const spinTurns = attacker.type === 'r' ? Math.PI * 2 : 0;
+    const facing = attacker.model.rotation.y;
     await animator.tween(0.6, (_, raw) => {
       const h = ease.inOutSine(raw);
       attacker.root.position.x = lerp(start.x, vpos.x, h);
@@ -355,10 +357,10 @@ export class Choreographer {
       const s = Math.min(1, raw * 4);
       attacker.root.scale.set(lerp(1.08, 1, s), lerp(0.86, 1, s) + 0.06 * Math.sin(raw * Math.PI), lerp(1.08, 1, s));
       if (attacker.type === 'n') lean(attacker, dir, 0.5 * Math.sin(raw * Math.PI));
-      attacker.model.rotation.y = Math.PI + spinTurns * ease.inOutCubic(raw);
+      attacker.model.rotation.y = facing + spinTurns * ease.inOutCubic(raw);
     }, ease.linear);
     attacker.root.scale.set(1, 1, 1);
-    attacker.model.rotation.y = Math.PI;
+    attacker.model.rotation.y = facing;
 
     // hang in the air for a heartbeat
     attacker.glow = 0.6;
