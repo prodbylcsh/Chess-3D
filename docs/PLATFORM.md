@@ -225,12 +225,14 @@ Decided (October 2026):
   when both are.
 - **Why not?** (20 October 2026, the user's choice): after a wrong move Stockfish (in the
   browser, `src/features/puzzles/whyNot.ts`, 80,000 nodes per move) compares it with the
-  right one. Nearly as good (under 40 centipawns): "A good move too, but this puzzle is
-  after a different one". A little weaker (under 120): "weaker than the move this puzzle
+  right one. Nearly as good (under 40 centipawns, or both winning by far): "A good move
+  too! But this puzzle goes on with a different one", **not a mistake** (the user's
+  decision, 20 Oct 2026): it is taken back without costing a star and the square of the
+  puzzle's move is marked. A little weaker (under 120): "weaker than the move this puzzle
   wants". Still winning where the puzzle has a mate: "there is a checkmate here". Otherwise
   the board plays the opponent's answer with a red arrow and says what it does (mates,
-  takes your queen, checks, takes over), then both moves are taken back. All of these still
-  count as a mistake. Without WebAssembly the old "not this move" stays.
+  takes your queen, checks, takes over), then both moves are taken back. These count as
+  a mistake. Without WebAssembly the old "not this move" stays.
 - **Arrows** (20 October 2026): once the piece and its square are both shown, a green
   arrow joins them (a knight's arrow bends like its jump); the opponent's moves get a
   soft gold arrow until the player moves; refutations a red one (`Game.arrows`, puzzles
@@ -255,8 +257,7 @@ Decided (October 2026):
   wait again, so practising just before a review doesn't help. The module map shows
   "Review (n)" for puzzles past the wait (each "Next" goes to the next one) or when the
   next ones are ready; a puzzle's card says when its stars can improve.
-- **The daily puzzle and the streak** (20 October 2026, the user's choice; amounts proposed,
-  to confirm): one puzzle a day for everyone (UTC date), from any module, locked ones too (a
+- **The daily puzzle and the streak** (20 October 2026, the user's choice and amounts): one puzzle a day for everyone (UTC date), from any module, locked ones too (a
   taste of them), easy on Monday and harder towards Sunday (`dailyPuzzle`). It pays
   **40 coins** less what the hints cost (`DAILY_COINS`), once a day. Solving it on days in
   a row builds a streak (a missed UTC day ends it, the best is kept). Milestones pay extra:

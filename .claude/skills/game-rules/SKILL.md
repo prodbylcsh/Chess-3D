@@ -83,7 +83,7 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   (`REVIEW_AFTER_HOURS`); before that it is practice. **Showing the solution** (offered
   only when stuck, `stuck.ts`) makes a puzzle "seen": no coins or stars, the next one
   opens; a later review solve pays the first-solve coins then.
-- **Daily puzzle (§4.2, amounts proposed 20 Oct 2026, awaiting the user's yes):** **40**
+- **Daily puzzle (§4.2, decided 20 Oct 2026):** **40**
   coins once a day less the hint cost (`DAILY_COINS`); a streak of UTC days in a row with
   milestones 3: 100, 7: 300, 14: 600, 30: 1,500, 50: 2,500, 100: 5,000, 200: 10,000,
   365: 25,000 + a shop item, 500: 40,000, 1000: 100,000 + an item, then 10,000 every

@@ -304,13 +304,13 @@ export function streakTier(days: number): number {
   return tier;
 }
 
-/** Coins for solving the daily puzzle, less what the hints cost (proposed 20 Oct 2026, to confirm). */
+/** Coins for solving the daily puzzle, less what the hints cost (decided 20 Oct 2026). */
 export const DAILY_COINS = 40;
 export const dailyCoins = (hints: number, moves: number) => Math.max(0, DAILY_COINS - hintPenalty(hints, moves));
 
 /**
  * Streak milestones: coins, and at a year and at 1000 days also a shop item the player lacks
- * (proposed 20 Oct 2026, to confirm). After 1000, every further 100 days pay 10,000.
+ * (decided 20 Oct 2026). After 1000, every further 100 days pay 10,000.
  */
 export const STREAK_MILESTONES: readonly { days: number; coins: number; item?: boolean }[] = [
   { days: 3, coins: 100 },

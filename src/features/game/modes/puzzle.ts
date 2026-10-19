@@ -41,8 +41,7 @@ const WHY_NODES = 80_000;
 const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** What the coach says about a wrong move (whyNot.ts). */
-const WHY_TEXT: Record<Exclude<WhyNot['kind'], 'takes'>, string> = {
-  alternative: tk('A good move too, but this puzzle is after a different one.'),
+const WHY_TEXT: Record<Exclude<WhyNot['kind'], 'takes' | 'alternative'>, string> = {
   weaker: tk('Not bad, but weaker than the move this puzzle wants.'),
   missedMate: tk('Strong, but there is a checkmate here. Look for it!'),
   mate: tk('Watch: then your opponent mates you.'),
@@ -284,14 +283,32 @@ export class PuzzleMode implements Mode {
       game.arrows([{ from: reply.slice(0, 2) as Square, to: reply.slice(2, 4) as Square, kind: 'line' }]);
       return;
     }
-    // a wrong move: the engine shows why, it is taken back, and the board shows where the
-    // right one ends (free); three in a row also show the piece to move, which counts as a
-    // hint (docs/PLATFORM.md §4.2)
+    // another move: the engine judges it first. As good as the puzzle's move (another way
+    // to the same goal) it is no mistake, just taken back. Otherwise it is shown refuted,
+    // taken back and counts as a mistake; the board shows where the right one ends (free),
+    // and three in a row also show the piece to move, which counts as a hint
+    // (docs/PLATFORM.md §4.2)
     const before = game.history.slice(0, -1);
     const fenBefore = new Chess(puzzle.fen);
     for (const m of before) fenBefore.move(toMove(m));
     const answer = answerAt(puzzle, this.played.length)!;
     const verdict = this.whyNot(fenBefore.fen(), move.lan, answer);
+    await game.idle();
+    // a phone takes well under a second; without an answer in time it counts as a mistake
+    const why = await Promise.race([verdict, sleep(6000).then(() => null)]);
+    if (token !== this.token || this.disposed || game.isOver) return;
+    if (why?.kind === 'alternative') {
+      haptics.play(FEEL.right);
+      this.setPuzzle({ message: { tone: 'good', text: t('A good move too! But this puzzle goes on with a different one: find it.') } });
+      await sleep(1100);
+      if (token !== this.token || this.disposed) return;
+      await game.sync(before);
+      if (token !== this.token || this.disposed) return;
+      this.shown = { ...this.shown, square: true };
+      this.showGuide();
+      this.setPuzzle({ message: { tone: 'good', text: `${t('A good move too! But this puzzle goes on with a different one: find it.')} ${t('It ends on the marked square.')}` } });
+      return;
+    }
     this.mistakes++;
     this.misses++;
     const auto = this.misses >= MISSES_FOR_HINT && !this.shown.piece;
@@ -300,18 +317,14 @@ export class PuzzleMode implements Mode {
     const goal = this.puzzle?.goal;
     const missed = goal ? t('{goal}: not this move.', { goal: t(goal) }) : t('Not this move.');
     const guideText = this.shown.piece ? t('Move the glowing piece to the marked square.') : t('The right move ends on the marked square.');
-    this.setPuzzle({ mistakes: this.mistakes, hints: this.hints, message: { tone: 'bad', text: missed } });
-    await game.idle();
     haptics.play(FEEL.wrong);
-    const why = await Promise.race([verdict, sleep(4000).then(() => null)]);
-    if (token !== this.token || this.disposed || game.isOver) return;
     const refute = why && 'reply' in why ? why.reply : null;
     const whyText = why ? (why.kind === 'takes' ? t(TAKES_TEXT[why.piece]) : t(WHY_TEXT[why.kind])) : '';
+    this.setPuzzle({ mistakes: this.mistakes, hints: this.hints, message: { tone: 'bad', text: refute ? `${missed} ${whyText}` : missed } });
     if (refute) {
       // play the opponent's answer, then take both moves back
       const { store } = this.ctx.engine;
       game.hold(true);
-      this.setPuzzle({ message: { tone: 'bad', text: `${missed} ${whyText}` } });
       await sleep(300);
       if (token !== this.token || this.disposed) return;
       store.suppressEnd = true; // a mating answer ends the game on the board, not the puzzle
