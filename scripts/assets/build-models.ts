@@ -12,8 +12,8 @@
 //
 // The settings for every item live in MODELS below; adding an item = adding an entry.
 
-import { mkdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, readdirSync, statSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import { Document, NodeIO, getBounds, type Texture } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { dedup, meshopt, prune, simplify, textureCompress, transformMesh, weld } from '@gltf-transform/functions';
@@ -30,14 +30,17 @@ interface PieceSetModels {
   dir: string;
   /** height of each piece in board squares (the classic set: pawn 0.93 … king 1.64) */
   heights: Record<PieceName, number>;
-  /** the delivered models are this colour; the other one is made by `recolor` */
-  delivered: 'black' | 'white';
+  /**
+   * the colour of the delivered models; the other one is made by `recolor`. `both`: every
+   * piece comes in both colours (files named …<piece>…<white|black>…), nothing is recoloured
+   */
+  delivered: 'black' | 'white' | 'both';
   /**
    * How the other colour is made: the parts that are not metal (metallicRoughness
    * texture, blue channel) turn into `tone`, keeping their detail inverted (dark veins
    * on a light body); metal parts (chrome) stay as they are.
    */
-  recolor: { tone: [number, number, number]; contrast: number };
+  recolor?: { tone: [number, number, number]; contrast: number };
   /**
    * At most this many triangles per piece: `game` for the board (32 pieces at once),
    * `hd` for the close-up 3D preview in the shop (`<piece>-<colour>-hd.glb`).
@@ -52,6 +55,8 @@ interface BoardModels {
   /** folder of the originals in the R2 originals bucket (.github/workflows/models.yml) */
   source: string;
   dir: string;
+  /** words in the file's name, when the folder holds more than this board */
+  match?: string[];
   /** the 8×8 playing grid inside the model, in model units (measured from a top view) */
   grid: { x: [number, number]; z: [number, number] };
   /** where the playing surface ends up (the classic board's top, `layout.boardTop`) */
@@ -71,9 +76,19 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
   },
+  'squircle-set': {
+    kind: 'pieces',
+    source: 'pieces/squircle',
+    dir: 'squircle',
+    heights: { pawn: 1.1, rook: 1.25, knight: 1.35, bishop: 1.5, queen: 1.65, king: 1.75 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
   'monolith-board': {
     kind: 'board',
-    source: 'boards/monolith',
+    source: 'boards',
+    match: ['monolith', 'chessboard'],
     dir: 'monolith',
     grid: { x: [-0.915, 0.914], z: [-0.645, 0.646] },
     top: 0.3,
@@ -104,23 +119,38 @@ async function main(itemId: string, sourceDir: string) {
   if (config.kind === 'pieces') {
     const out = join(OUT, 'pieces', config.dir);
     mkdirSync(out, { recursive: true });
-    const other = config.delivered === 'black' ? 'white' : 'black';
     for (const piece of PIECES) {
-      const src = join(sourceDir, `${piece}.glb`);
       for (const [lod, suffix] of [['game', ''], ['hd', '-hd']] as const) {
         const triangles = config.triangles[lod];
         const place = (doc: Document) => fitPiece(doc, config.heights[piece]);
+        if (config.delivered === 'both') {
+          for (const colour of ['white', 'black'] as const) {
+            await write(config.textureSize, await prepare(find(sourceDir, [piece, colour]), place, triangles), join(out, `${piece}-${colour}${suffix}.glb`));
+          }
+          continue;
+        }
+        const src = find(sourceDir, [piece]);
+        const other = config.delivered === 'black' ? 'white' : 'black';
         await write(config.textureSize, await prepare(src, place, triangles), join(out, `${piece}-${config.delivered}${suffix}.glb`));
         const recoloured = await prepare(src, place, triangles);
-        await recolor(recoloured, config.recolor, config.textureSize);
+        await recolor(recoloured, config.recolor!, config.textureSize);
         await write(config.textureSize, recoloured, join(out, `${piece}-${other}${suffix}.glb`));
       }
     }
   } else {
     const out = join(OUT, 'boards', config.dir);
     mkdirSync(out, { recursive: true });
-    await write(config.textureSize, await prepare(join(sourceDir, 'chessboard.glb'), (doc) => fitBoard(doc, config), config.triangles), join(out, 'board.glb'));
+    const src = find(sourceDir, config.match ?? ['chessboard']);
+    await write(config.textureSize, await prepare(src, (doc) => fitBoard(doc, config), config.triangles), join(out, 'board.glb'));
   }
+}
+
+/** The one .glb in the folder (or below it) whose name has all these words. */
+function find(dir: string, words: string[]): string {
+  const all = (d: string): string[] => readdirSync(d).flatMap((n) => (statSync(join(d, n)).isDirectory() ? all(join(d, n)) : [join(d, n)]));
+  const hits = all(dir).filter((f) => f.toLowerCase().endsWith('.glb') && words.every((w) => basename(f).toLowerCase().includes(w)));
+  if (hits.length !== 1) throw new Error(`${dir}: ${hits.length} files named with ${words.join(' + ')}${hits.length ? `: ${hits.join(', ')}` : ''}`);
+  return hits[0];
 }
 
 /** Read a model, place it, simplify it. Textures are resized when written. */
