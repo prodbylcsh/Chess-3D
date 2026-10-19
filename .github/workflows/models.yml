@@ -16,6 +16,8 @@ name: Models from R2
 
 on:
   push:
+    # requests run on development branches; a merge into main carries the result already
+    branches-ignore: [main]
     paths: ['scripts/assets/request.json']
   workflow_dispatch:
     inputs:
