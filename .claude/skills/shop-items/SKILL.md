@@ -48,16 +48,30 @@ board. Keep item **ids** stable: they are stored in players' loadouts and in the
 
 ## Adding a real piece set or board (the user's models)
 
-Delivery: one GLB per piece named `king.glb queen.glb rook.glb bishop.glb knight.glb
-pawn.glb` (either colour, any scale) and `chessboard.glb` for a board. Big files may come
-zipped; unzip into a clean folder.
+Delivery: the user uploads the originals to the R2 bucket `wizard-chess-originals`, one
+folder per item by type (`pieces/<set>/king.glb … pawn.glb`, either colour, any scale;
+`boards/<board>/chessboard.glb`; see PLATFORM §4.5) and tells you the folder. This
+session cannot reach Cloudflare; the workflow `.github/workflows/models.yml` does it for
+you: commit `scripts/assets/request.json` on the development branch and push, it runs,
+commits its result to the branch, and you pull.
 
-1. Put the originals in `assets-src/<name>/` (git-ignored; they are large).
+- `{ "task": "inspect", "target": "pieces/<set>" }` lists the bucket into
+  `scripts/assets/reports/originals.txt` and reports the folder's models (size, triangles,
+  bounds, materials, textures) into `scripts/assets/reports/pieces-<set>.json`.
+- `{ "task": "build", "target": "<item-id>" }` pulls the item's `source` folder and runs
+  the build (step 4) on GitHub's machine; the files land in `public/assets/`.
+
+Watch the run with the GitHub tools (actions_list on `models.yml`), then `git pull`.
+Files the user sends in the chat still work: put them in `assets-src/<name>/` and build
+locally.
+
+1. Inspect the originals (the `inspect` request above, or locally in `assets-src/<name>/`).
 2. Look at them first: `npx gltf-transform inspect` (via `@gltf-transform/core` in a Node
    script) for size, triangles and textures, and render them (any three.js page with
    `GLTFLoader` + `MeshoptDecoder`). Check which way the knight faces (the build expects
    −z, the way White looks; Black is turned round at runtime) and which colour arrived.
-3. Add an entry to `MODELS` in `scripts/assets/build-models.ts`:
+3. Add an entry to `MODELS` in `scripts/assets/build-models.ts` (`source`: its folder in
+   the originals bucket):
    - piece set: `heights` per piece in board squares (the classic set: pawn 0.93 …
      king 1.64; Monolith uses 1.1 … 1.75), `delivered` colour, `recolor` for the other
      colour (non-metal parts turn into `tone`, chrome is kept: uses the metallic texture),
@@ -65,7 +79,8 @@ zipped; unzip into a clean folder.
    - board: measure the 8×8 grid in a top-down orthographic render of the original
      (`grid.x`, `grid.z` in model units; the build stretches it to exactly 8×8 units and
      puts the surface at the classic board's top, so `layout` does not change).
-4. `node scripts/assets/build-models.ts <item-id> assets-src/<name>` writes
+4. Build: the `build` request above, or `node scripts/assets/build-models.ts <item-id>
+   assets-src/<name>` locally; either writes
    `public/assets/pieces/<dir>/` or `public/assets/boards/<dir>/`.
 5. Add the item to `ITEMS`, the look (`model`) to `looks.ts`, the texts and Czech, a card
    picture (render the `-hd` models on a dark background, 16:10, WebP ≤ 50 KB) in

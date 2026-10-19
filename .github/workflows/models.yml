@@ -1,0 +1,91 @@
+name: Models from R2
+
+# Works with the user's original models in the R2 originals bucket, so a Claude session
+# (which cannot reach Cloudflare) can add shop items (shop-items skill):
+#
+#   inspect  lists the originals bucket and, for `target` (a folder such as pieces/squircle),
+#            reports every model (size, triangles, bounds, textures) into
+#            scripts/assets/reports/, to write the item's build settings from
+#   build    pulls the originals of `target` (an item id in scripts/assets/build-models.ts,
+#            whose `source` names its folder) and builds the game files into public/assets/
+#
+# Both commit their result to the branch they run on. Run it by hand, or commit
+# scripts/assets/request.json ({ "task": "inspect", "target": "pieces/squircle" }) on any
+# branch: a session can do that, and it works before this file reaches main.
+# Needs the secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY.
+
+on:
+  push:
+    paths: ['scripts/assets/request.json']
+  workflow_dispatch:
+    inputs:
+      task:
+        description: inspect or build
+        type: choice
+        options: [inspect, build]
+        default: inspect
+      target:
+        description: 'inspect: an originals folder (e.g. pieces/squircle), empty lists all; build: an item id (e.g. squircle-set)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: models-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  models:
+    runs-on: ubuntu-latest
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: What to do
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            task=$(node -p "require('./scripts/assets/request.json').task")
+            target=$(node -p "require('./scripts/assets/request.json').target ?? ''")
+          else
+            task="${{ inputs.task }}"
+            target="${{ inputs.target }}"
+          fi
+          echo "TASK=$task" >> "$GITHUB_ENV"
+          echo "TARGET=$target" >> "$GITHUB_ENV"
+          echo "$task $target"
+
+      - name: Inspect
+        if: env.TASK == 'inspect'
+        run: |
+          mkdir -p scripts/assets/reports
+          node scripts/assets/r2.ts list originals | tee scripts/assets/reports/originals.txt
+          if [ -n "$TARGET" ]; then
+            node scripts/assets/r2.ts pull-originals "$TARGET" "$RUNNER_TEMP/originals"
+            node scripts/assets/inspect.ts "$RUNNER_TEMP/originals" "scripts/assets/reports/$(echo "$TARGET" | tr '/' '-').json"
+          fi
+
+      - name: Build
+        if: env.TASK == 'build'
+        run: |
+          source=$(node -e "import('./scripts/assets/build-models.ts').then(({ MODELS }) => console.log(MODELS[process.env.TARGET]?.source ?? ''))")
+          if [ -z "$source" ]; then echo "::error::no item $TARGET with a source in build-models.ts"; exit 1; fi
+          node scripts/assets/r2.ts pull-originals "$source" "$RUNNER_TEMP/originals"
+          node scripts/assets/build-models.ts "$TARGET" "$RUNNER_TEMP/originals"
+
+      - name: Commit
+        run: |
+          git add scripts/assets/reports public/assets
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Models from R2: $TASK $TARGET"
+          git push

@@ -24,6 +24,8 @@ type PieceName = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
 
 interface PieceSetModels {
   kind: 'pieces';
+  /** folder of the originals in the R2 originals bucket (.github/workflows/models.yml) */
+  source: string;
   /** output folder under public/assets/pieces/ */
   dir: string;
   /** height of each piece in board squares (the classic set: pawn 0.93 … king 1.64) */
@@ -47,6 +49,8 @@ interface PieceSetModels {
 
 interface BoardModels {
   kind: 'board';
+  /** folder of the originals in the R2 originals bucket (.github/workflows/models.yml) */
+  source: string;
   dir: string;
   /** the 8×8 playing grid inside the model, in model units (measured from a top view) */
   grid: { x: [number, number]; z: [number, number] };
@@ -56,9 +60,10 @@ interface BoardModels {
   textureSize: number;
 }
 
-const MODELS: Record<string, PieceSetModels | BoardModels> = {
+export const MODELS: Record<string, PieceSetModels | BoardModels> = {
   'monolith-set': {
     kind: 'pieces',
+    source: 'pieces/monolith',
     dir: 'monolith',
     heights: { pawn: 1.1, rook: 1.25, knight: 1.35, bishop: 1.5, queen: 1.65, king: 1.75 },
     delivered: 'black',
@@ -68,6 +73,7 @@ const MODELS: Record<string, PieceSetModels | BoardModels> = {
   },
   'monolith-board': {
     kind: 'board',
+    source: 'boards/monolith',
     dir: 'monolith',
     grid: { x: [-0.915, 0.914], z: [-0.645, 0.646] },
     top: 0.3,
@@ -79,36 +85,42 @@ const MODELS: Record<string, PieceSetModels | BoardModels> = {
 const PIECES: PieceName[] = ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'];
 const OUT = 'public/assets';
 
-const [itemId, sourceDir] = process.argv.slice(2);
-const config = MODELS[itemId];
-if (!config || !sourceDir) {
-  console.error(`usage: node scripts/assets/build-models.ts <${Object.keys(MODELS).join('|')}> <folder with the original .glb files>`);
-  process.exit(1);
-}
+let io: NodeIO;
 
-await MeshoptEncoder.ready;
-await MeshoptSimplifier.ready;
-const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
+// run as a script (the models workflow only imports MODELS)
+if (process.argv[1]?.endsWith('build-models.ts')) await main(process.argv[2], process.argv[3]);
 
-if (config.kind === 'pieces') {
-  const out = join(OUT, 'pieces', config.dir);
-  mkdirSync(out, { recursive: true });
-  const other = config.delivered === 'black' ? 'white' : 'black';
-  for (const piece of PIECES) {
-    const src = join(sourceDir, `${piece}.glb`);
-    for (const [lod, suffix] of [['game', ''], ['hd', '-hd']] as const) {
-      const triangles = config.triangles[lod];
-      const place = (doc: Document) => fitPiece(doc, config.heights[piece]);
-      await write(await prepare(src, place, triangles), join(out, `${piece}-${config.delivered}${suffix}.glb`));
-      const recoloured = await prepare(src, place, triangles);
-      await recolor(recoloured, config.recolor, config.textureSize);
-      await write(recoloured, join(out, `${piece}-${other}${suffix}.glb`));
-    }
+async function main(itemId: string, sourceDir: string) {
+  const config = MODELS[itemId];
+  if (!config || !sourceDir) {
+    console.error(`usage: node scripts/assets/build-models.ts <${Object.keys(MODELS).join('|')}> <folder with the original .glb files>`);
+    process.exit(1);
   }
-} else {
-  const out = join(OUT, 'boards', config.dir);
-  mkdirSync(out, { recursive: true });
-  await write(await prepare(join(sourceDir, 'chessboard.glb'), (doc) => fitBoard(doc, config), config.triangles), join(out, 'board.glb'));
+
+  await MeshoptEncoder.ready;
+  await MeshoptSimplifier.ready;
+  io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
+
+  if (config.kind === 'pieces') {
+    const out = join(OUT, 'pieces', config.dir);
+    mkdirSync(out, { recursive: true });
+    const other = config.delivered === 'black' ? 'white' : 'black';
+    for (const piece of PIECES) {
+      const src = join(sourceDir, `${piece}.glb`);
+      for (const [lod, suffix] of [['game', ''], ['hd', '-hd']] as const) {
+        const triangles = config.triangles[lod];
+        const place = (doc: Document) => fitPiece(doc, config.heights[piece]);
+        await write(config.textureSize, await prepare(src, place, triangles), join(out, `${piece}-${config.delivered}${suffix}.glb`));
+        const recoloured = await prepare(src, place, triangles);
+        await recolor(recoloured, config.recolor, config.textureSize);
+        await write(config.textureSize, recoloured, join(out, `${piece}-${other}${suffix}.glb`));
+      }
+    }
+  } else {
+    const out = join(OUT, 'boards', config.dir);
+    mkdirSync(out, { recursive: true });
+    await write(config.textureSize, await prepare(join(sourceDir, 'chessboard.glb'), (doc) => fitBoard(doc, config), config.triangles), join(out, 'board.glb'));
+  }
 }
 
 /** Read a model, place it, simplify it. Textures are resized when written. */
@@ -194,8 +206,7 @@ async function raw(texture: Texture, size: number): Promise<Buffer> {
   return sharp(Buffer.from(texture.getImage()!)).resize(size, size).removeAlpha().raw().toBuffer();
 }
 
-async function write(doc: Document, file: string): Promise<void> {
-  const size = MODELS[itemId].textureSize;
+async function write(size: number, doc: Document, file: string): Promise<void> {
   await doc.transform(
     textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [size, size], quality: 88 }),
     meshopt({ encoder: MeshoptEncoder, level: 'medium' }),

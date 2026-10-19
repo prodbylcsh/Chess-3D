@@ -385,11 +385,16 @@ animations/<id>/…                     move animations: a reference video or GI
 sounds/<id>/…                         WAV or OGG
 ```
 
-(Monolith predates this and sits in `monolith/`.) Turning originals into game files is a
-step Claude does in a session, once per item: inspect the model, set heights, the knight's
-direction, the recolour and the triangle budget, build, check it in the browser, add the
-shop item. Effects and animations are written as code from the reference. The deploy then
-uploads the result to `wizard-chess-assets`.
+(Monolith's originals are in `pieces/monolith/` and `boards/`.) Turning originals into
+game files is a step Claude does in a session, once per item: inspect the model, set
+heights, the knight's direction, the recolour and the triangle budget, build, check it in
+the browser, add the shop item. The session cannot reach Cloudflare, so the workflow
+`.github/workflows/models.yml` pulls the originals on GitHub's machine: a commit of
+`scripts/assets/request.json` (`inspect` a folder, or `build` an item) starts it, and it
+commits the report (`scripts/assets/reports/`) or the built files (`public/assets/`) to
+the branch. Effects and animations are written as code from the reference. The deploy
+then uploads the result to `wizard-chess-assets`, whose folders match the originals'
+(`pieces/<set>/`, `boards/<board>/`, `shop/`); nobody uploads there by hand.
 
 The originals the user delivers (large: 4K textures, up to 450k triangles) are not in
 git; they go to `assets-src/<item>/` locally (and to the originals bucket) and `scripts/assets/build-models.ts` turns
