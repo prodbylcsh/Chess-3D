@@ -21,6 +21,8 @@ import {
   type PurchaseStatus,
   type PuzzleModuleProgress,
   type PuzzleSolve,
+  type DailyPuzzle,
+  type DailySolve,
   type PuzzlesService,
   type ProfileService,
   type PublicProfile,
@@ -318,6 +320,21 @@ export function createCompetitive(
       const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('unlock', { module });
       deps.adopt(player);
       return modules;
+    },
+    async reveal(module, index) {
+      const { modules } = await puzzleCall<{ modules: PuzzleModuleProgress[] }>('reveal', { module, index });
+      return modules;
+    },
+    daily() {
+      return puzzleCall<DailyPuzzle>('daily');
+    },
+    async dailyStart() {
+      await puzzleCall('daily_start');
+    },
+    async dailySolve(moves, mistakes, hints) {
+      const { player, ...result } = await puzzleCall<DailySolve & { player: PlayerRecord }>('daily_solve', { moves, mistakes, hints });
+      deps.adopt(player);
+      return result;
     },
   };
 

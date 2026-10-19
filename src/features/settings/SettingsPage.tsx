@@ -2,7 +2,7 @@ import { t, tk } from '../../i18n';
 import { shortDate } from '../../ui/format';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { AtSign, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, X, RefreshCw } from 'lucide-react';
+import { AtSign, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, Vibrate, X, RefreshCw } from 'lucide-react';
 import { api, ApiError, type UsernameCheck } from '../../api';
 import { USERNAME_COOLDOWN_DAYS, USERNAME_MAX, emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../../api/validation';
 import { Page } from '../../app/AppLayout';
@@ -86,6 +86,12 @@ export function SettingsPage() {
 
         <Section title={t('Game')}>
           <Row icon={<Volume2 size={18} />} title={t('Sound effects')} text={t('Moves, captures and spells')} action={<Switch label={t('Sound effects')} checked={prefs.sound} onChange={(sound) => setPrefs({ sound })} />} />
+          <Row
+            icon={<Vibrate size={18} />}
+            title={t('Vibration')}
+            text={t('On phones: moves, captures, check and puzzles')}
+            action={<Switch label={t('Vibration')} checked={prefs.haptics} onChange={(haptics) => setPrefs({ haptics })} />}
+          />
           <Row
             icon={<RefreshCw size={18} />}
             title={t('Turn the board for each player')}

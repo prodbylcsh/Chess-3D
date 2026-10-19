@@ -1136,6 +1136,46 @@
   color: var(--gold);
 }
 
+.coach-practice,
+.brief-practice {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.coach-practice svg,
+.brief-practice svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--module);
+}
+
+.brief-practice {
+  font-size: 13.5px;
+}
+
+.coach-stuck {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 9px 11px;
+  border: 1px dashed color-mix(in srgb, var(--module) 45%, transparent);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--text-2);
+  animation: rise-in 0.4s ease both;
+}
+
+.coach-stuck .btn {
+  flex: none;
+}
+
 @keyframes shake {
   25% {
     transform: translateX(-4px);

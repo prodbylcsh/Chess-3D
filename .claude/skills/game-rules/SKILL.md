@@ -79,6 +79,15 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   module gives a random shop item the player doesn't own, or **25,000** coins
   (`COMPLETION_COINS`) if they own them all. Stars (3 / 2 / 1 by mistakes and hints)
   change nothing but the look. Solving again pays nothing.
+  **Reviews:** a replay improves the stars only 20 hours after the last finished attempt
+  (`REVIEW_AFTER_HOURS`); before that it is practice. **Showing the solution** (offered
+  only when stuck, `stuck.ts`) makes a puzzle "seen": no coins or stars, the next one
+  opens; a later review solve pays the first-solve coins then.
+- **Daily puzzle (§4.2, amounts proposed 20 Oct 2026, awaiting the user's yes):** **40**
+  coins once a day less the hint cost (`DAILY_COINS`); a streak of UTC days in a row with
+  milestones 3: 100, 7: 300, 14: 600, 30: 1,500, 50: 2,500, 100: 5,000, 200: 10,000,
+  365: 25,000 + a shop item, 500: 40,000, 1000: 100,000 + an item, then 10,000 every
+  100 days (`STREAK_MILESTONES`). A missed day ends the streak.
 - **Shop prices:** see §4.5 and the shop-items skill.
 - **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
   names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.

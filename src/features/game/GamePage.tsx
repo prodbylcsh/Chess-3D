@@ -55,6 +55,7 @@ export default function GamePage() {
   const level = Number(params.get('level') ?? 3);
   const color = params.get('color');
   const puzzleIndex = params.get('n') ?? '0';
+  const review = params.get('review') === '1';
   const mode = useMemo<Mode | null>(() => {
     if (!engine) return null;
     const ctx: ModeContext = {
@@ -81,12 +82,13 @@ export default function GamePage() {
         return id ? new OnlineMode(ctx, id) : null;
       case 'puzzle': {
         const n = Number(puzzleIndex);
-        return id && moduleOf(id) && Number.isInteger(n) && n >= 0 && n < PUZZLES_PER_MODULE ? new PuzzleMode(ctx, id, n) : null;
+        if (id === 'daily') return new PuzzleMode(ctx, 'daily', 0);
+        return id && moduleOf(id) && Number.isInteger(n) && n >= 0 && n < PUZZLES_PER_MODULE ? new PuzzleMode(ctx, id, n, { review }) : null;
       }
       default:
         return new LocalMode(ctx);
     }
-  }, [engine, modeId, id, level, color, puzzleIndex, navigate]);
+  }, [engine, modeId, id, level, color, puzzleIndex, review, navigate]);
 
   useEffect(() => {
     if (!mode) return;

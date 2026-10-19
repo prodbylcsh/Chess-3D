@@ -4,8 +4,9 @@ import { Chess, type Color as Side, type Move, type PieceSymbol, type Square } f
 import { animator, ease, lerp } from '../core/animator';
 import { TEAMS, layout, other } from '../core/layout';
 import { sfx } from '../audio/sfx';
+import { FEEL, haptics, moveFeel } from '../audio/haptics';
 import type { Stage } from '../scene/Stage';
-import type { BoardView } from './BoardView';
+import type { ArrowKind, BoardView } from './BoardView';
 import type { Choreographer } from './Choreographer';
 import type { Piece } from './Piece';
 import type { GameEnd, GameUi } from './ui';
@@ -210,6 +211,18 @@ export class Game {
     this.view.setGuide(from, to);
   }
 
+  /** Arrows on the board (puzzles); an empty list clears them. */
+  arrows(list: { from: Square; to: Square; kind: ArrowKind }[]): void {
+    this.view.setArrows(list);
+  }
+
+  /** Stop taking the player's moves for a while (a puzzle showing a line), or take them again. */
+  hold(on: boolean): void {
+    if (!this.seat) return;
+    this.seat.active = !on;
+    if (on) this.deselect();
+  }
+
   /** Make a move as if the player had clicked it (dev tools and browser checks). */
   input(uci: string): void {
     if (this.busy || this.over || !this.isMyTurn()) return;
@@ -255,6 +268,11 @@ export class Game {
   setAutoFlip(on: boolean): void {
     this.autoFlip = on;
     if (on && !this.busy) void this.faceSide(this.chess.turn());
+  }
+
+  /** Whether `side` is the player here (on a shared device, both are). */
+  private isMine(side: Side): boolean {
+    return !this.seat || this.seat.side === side;
   }
 
   private isMyTurn(): boolean {
@@ -382,6 +400,7 @@ export class Game {
 
     await this.choreo.play(move);
     this.view.setLastMove(move.from, move.to);
+    haptics.play(moveFeel(move, this.isMine(move.color)));
     await this.afterMove();
   }
 
@@ -422,6 +441,7 @@ export class Game {
           this.view.setCheck(null);
         }
         sfx.fanfare();
+        haptics.play(this.isMine(other(c.turn())) ? FEEL.win : FEEL.lose);
       }
       this.endGame(end);
       return;
@@ -444,7 +464,10 @@ export class Game {
       this.view.setCheck(king.square);
       this.stopCheck = this.pulseCheck(king);
     }
-    if (withSound) sfx.check();
+    if (withSound) {
+      sfx.check();
+      haptics.play(this.isMine(c.turn()) ? FEEL.inCheck : FEEL.giveCheck);
+    }
     this.ui.update(c, t('Check!'));
   }
 
@@ -515,6 +538,7 @@ export class Game {
     this.ui.hideGameOver();
     this.view.setLastMove(null, null);
     this.view.setGuide(null, null);
+    this.view.setArrows([]);
   }
 
   /** After a reset or jump: highlight the last move and show check or a finished game. */

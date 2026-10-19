@@ -223,3 +223,114 @@ function toMove(m: string) {
 export function completionItem(candidates: readonly string[], random = Math.random()): string | null {
   return candidates.length ? candidates[Math.floor(random * candidates.length) % candidates.length] : null;
 }
+
+// ---------------------------------------------------------------- review (docs/PLATFORM.md §4.2)
+
+/**
+ * A puzzle solved with fewer than three stars (or whose solution was shown) can be replayed
+ * any time, but its stars only improve when the player hasn't touched it for this long:
+ * then the solve shows understanding, not a fresh memory of the moves (decided 20 Oct 2026).
+ * Every finished attempt (a solve, or showing the solution) starts the wait again.
+ */
+export const REVIEW_AFTER_HOURS = 20;
+const REVIEW_MS = REVIEW_AFTER_HOURS * 3600_000;
+
+/** When a replay of a puzzle tried at `triedAt` can improve its stars (null: it can't, three stars). */
+export function reviewFrom(stars: number, triedAt: string | null): string | null {
+  if (stars >= 3 || !triedAt) return null;
+  return new Date(Date.parse(triedAt) + REVIEW_MS).toISOString();
+}
+
+/** Whether a solve now counts for the stars of a puzzle that was last tried at `triedAt`. */
+export const reviewCounts = (triedAt: string | null, now = Date.now()): boolean => !triedAt || now >= Date.parse(triedAt) + REVIEW_MS;
+
+// ---------------------------------------------------------------- daily puzzle and streak
+
+/** The day a daily puzzle belongs to: the UTC date, so it is the same for everyone. */
+export const dayOf = (at: number | Date = Date.now()): string => new Date(at).toISOString().slice(0, 10);
+
+const daysSinceEpoch = (day: string) => Math.round(Date.parse(`${day}T00:00:00Z`) / 86_400_000);
+
+/**
+ * The daily puzzle: the same for everyone, from any module (locked ones too: a taste of
+ * them), easy at the start of the week and harder towards Sunday.
+ */
+export function dailyPuzzle(day: string): { module: string; index: number } {
+  const d = daysSinceEpoch(day);
+  const weekday = (new Date(`${day}T00:00:00Z`).getUTCDay() + 6) % 7; // Monday 0 … Sunday 6
+  const module = MODULES[(d * 3) % MODULES.length].id;
+  const spread = (d * 7919) % 14;
+  return { module, index: Math.min(PUZZLES_PER_MODULE - 1, weekday * 14 + spread) };
+}
+
+export interface Streak {
+  /** days in a row with the daily puzzle solved, up to `lastDay` */
+  current: number;
+  best: number;
+  lastDay: string | null;
+}
+
+/** The streak after solving the daily puzzle of `day`. */
+export function nextStreak(prev: Streak | null, day: string): Streak {
+  const p = prev ?? { current: 0, best: 0, lastDay: null };
+  if (p.lastDay === day) return p;
+  const current = p.lastDay && daysSinceEpoch(day) - daysSinceEpoch(p.lastDay) === 1 ? p.current + 1 : 1;
+  return { current, best: Math.max(p.best, current), lastDay: day };
+}
+
+/** The streak as it stands on `today`: broken when yesterday's puzzle wasn't solved. */
+export function liveStreak(s: Streak | null, today: string): number {
+  if (!s?.lastDay) return 0;
+  const gap = daysSinceEpoch(today) - daysSinceEpoch(s.lastDay);
+  return gap <= 1 ? s.current : 0;
+}
+
+/** How a streak looks: the flame grows and changes with it (the app draws each tier). */
+export const STREAK_TIERS = [
+  { from: 1, id: 'spark', name: 'Spark' },
+  { from: 7, id: 'flame', name: 'Flame' },
+  { from: 30, id: 'blaze', name: 'Blaze' },
+  { from: 100, id: 'azure', name: 'Azure Fire' },
+  { from: 365, id: 'phoenix', name: 'Phoenix' },
+  { from: 1000, id: 'star', name: 'Starfire' },
+] as const;
+
+/** The tier of a streak (0 = spark … 5 = starfire), -1 without one. */
+export function streakTier(days: number): number {
+  let tier = -1;
+  STREAK_TIERS.forEach((x, i) => {
+    if (days >= x.from) tier = i;
+  });
+  return tier;
+}
+
+/** Coins for solving the daily puzzle, less what the hints cost (proposed 20 Oct 2026, to confirm). */
+export const DAILY_COINS = 40;
+export const dailyCoins = (hints: number, moves: number) => Math.max(0, DAILY_COINS - hintPenalty(hints, moves));
+
+/**
+ * Streak milestones: coins, and at a year and at 1000 days also a shop item the player lacks
+ * (proposed 20 Oct 2026, to confirm). After 1000, every further 100 days pay 10,000.
+ */
+export const STREAK_MILESTONES: readonly { days: number; coins: number; item?: boolean }[] = [
+  { days: 3, coins: 100 },
+  { days: 7, coins: 300 },
+  { days: 14, coins: 600 },
+  { days: 30, coins: 1_500 },
+  { days: 50, coins: 2_500 },
+  { days: 100, coins: 5_000 },
+  { days: 200, coins: 10_000 },
+  { days: 365, coins: 25_000, item: true },
+  { days: 500, coins: 40_000 },
+  { days: 1000, coins: 100_000, item: true },
+];
+
+/** The milestone a streak of `days` reaches, if it is one. */
+export function streakMilestone(days: number): { days: number; coins: number; item?: boolean } | null {
+  const m = STREAK_MILESTONES.find((x) => x.days === days);
+  if (m) return m;
+  return days > 1000 && days % 100 === 0 ? { days, coins: 10_000 } : null;
+}
+
+/** The next milestone ahead of a streak. */
+export const nextMilestone = (days: number) => STREAK_MILESTONES.find((x) => x.days > days) ?? { days: Math.floor(days / 100) * 100 + 100, coins: 10_000 };

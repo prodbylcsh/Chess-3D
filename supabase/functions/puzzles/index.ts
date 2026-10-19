@@ -6,6 +6,13 @@
 //      `moves`: the player's moves (UCI); the server checks them. Coins only for the first
 //      solve, a bonus every 10 solved, and a reward (an item, or coins) for the 100th.
 // POST { action: 'unlock', module }                            → { modules, player } pay MODULE_PRICE coins
+// POST { action: 'reveal', module, index }                     → { modules } show the solution: the puzzle
+//      counts as seen (no coins, no stars), the next one opens; a later solve (a review) pays
+// POST { action: 'daily' }                                     → { day, module, index, solved, streak }
+// POST { action: 'daily_start' }                               → { ok }
+// POST { action: 'daily_solve', moves, mistakes, hints }        → { coins, hintCost, stars, already, streak, milestone, player }
+//
+// Stars of a replayed puzzle improve only after REVIEW_AFTER_HOURS without trying it (`counted`).
 //
 // Registered, onboarded players only. Errors: { error, code } with an HTTP error status.
 import { createClient, type User } from '@supabase/supabase-js';
@@ -15,6 +22,14 @@ import {
   BONUS_EVERY,
   COMPLETION_COINS,
   MODULE_PRICE,
+  REVIEW_AFTER_HOURS,
+  STREAK_MILESTONES,
+  dailyCoins,
+  dailyPuzzle,
+  dayOf,
+  liveStreak,
+  reviewFrom,
+  type Streak,
   PUZZLES_PER_MODULE,
   completionItem,
   moduleOf,
@@ -48,7 +63,7 @@ const MIN_SOLVE_MS = 2_000;
 
 async function progress(me: string) {
   const [solves_, modules_] = await Promise.all([
-    admin.from('puzzle_solves').select('module, idx, stars').eq('player_id', me),
+    admin.from('puzzle_solves').select('module, idx, stars, tried_at').eq('player_id', me),
     admin.from('puzzle_modules').select('*').eq('player_id', me),
   ]);
   if (solves_.error) throw solves_.error;
@@ -56,11 +71,20 @@ async function progress(me: string) {
   return MODULES.map((m) => {
     const row = modules_.data.find((r) => r.module === m.id);
     const starsByIdx = Array.from({ length: PUZZLES_PER_MODULE }, () => 0);
-    for (const s of solves_.data) if (s.module === m.id) starsByIdx[s.idx] = s.stars;
+    const seen = Array.from({ length: PUZZLES_PER_MODULE }, () => false);
+    const review = Array.from({ length: PUZZLES_PER_MODULE }, (): string | null => null);
+    for (const s of solves_.data) {
+      if (s.module !== m.id) continue;
+      starsByIdx[s.idx] = s.stars;
+      seen[s.idx] = s.stars === 0;
+      review[s.idx] = reviewFrom(s.stars, s.tried_at);
+    }
     return {
       id: m.id,
       unlocked: m.free || !!row?.unlocked_at,
       stars: starsByIdx,
+      seen,
+      reviewFrom: review,
       completedAt: row?.completed_at ?? null,
       reward: row?.completed_at ? { item: row.reward_item, coins: row.reward_coins } : null,
     };
@@ -74,8 +98,8 @@ async function playable(me: string, body: Record<string, unknown>) {
   if (!module || !Number.isInteger(index) || index < 0 || index >= PUZZLES_PER_MODULE) throw fail('bad_request', 'Unknown puzzle.');
   const mine = (await progress(me)).find((m) => m.id === module.id)!;
   if (!mine.unlocked) throw fail('locked', 'Unlock this module first.', 403);
-  // one after another: solved puzzles can be replayed, the next one is open
-  const next = mine.stars.findIndex((s) => s === 0);
+  // one after another: solved (or seen) puzzles can be replayed, the next one is open
+  const next = mine.stars.findIndex((s, i) => s === 0 && !mine.seen[i]);
   if (next !== -1 && index > next) throw fail('locked', 'Solve the puzzles before this one first.', 403);
   return { module, index, puzzle: PUZZLES[module.id][index] };
 }
@@ -109,6 +133,7 @@ async function solve(me: string, body: Record<string, unknown>) {
     p_coins: solveCoins(puzzle.rating, hints, solution(puzzle).length),
     p_every: BONUS_EVERY,
     p_bonus: BONUS_COINS,
+    p_review: REVIEW_AFTER_HOURS * 3600,
   });
   if (e2) throw e2;
   await admin.from('puzzle_attempts').delete().eq('player_id', me);
@@ -127,7 +152,109 @@ async function solve(me: string, body: Record<string, unknown>) {
   const player = await getPlayer(admin, me);
   if (reward?.item) await publishShowcase(admin, player);
   const hintCost = result.first ? hintPenalty(hints, solution(puzzle).length) : 0;
-  return { first: result.first, coins: result.coins, hintCost, bonus: result.bonus, stars: earned, solved: result.solved, reward, player };
+  return {
+    first: result.first,
+    coins: result.coins,
+    hintCost,
+    bonus: result.bonus,
+    stars: earned,
+    counted: result.counted,
+    best: result.stars,
+    reviewFrom: reviewFrom(result.stars, result.tried_at),
+    solved: result.solved,
+    reward,
+    player,
+  };
+}
+
+/** A puzzle opened this long ago at least before its solution can be shown. */
+const MIN_REVEAL_MS = 20_000;
+
+async function reveal(me: string, body: Record<string, unknown>) {
+  const { module, index } = await playable(me, body);
+  const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
+  if (error) throw error;
+  if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_REVEAL_MS) {
+    throw fail('not_started', 'Open the puzzle first.', 409);
+  }
+  const { error: e2 } = await admin.rpc('reveal_puzzle', { p_player: me, p_module: module.id, p_idx: index });
+  if (e2) throw e2;
+  await admin.from('puzzle_attempts').delete().eq('player_id', me);
+  return { modules: await progress(me) };
+}
+
+// ---------------------------------------------------------------- daily puzzle
+
+/** The attempt row of the daily puzzle (one attempt at a time, like the modules). */
+const DAILY = 'daily';
+
+async function dailyState(me: string) {
+  const day = dayOf();
+  const { module, index } = dailyPuzzle(day);
+  const [solved_, streak_] = await Promise.all([
+    admin.from('puzzle_daily').select('stars, coins').eq('player_id', me).eq('day', day).maybeSingle(),
+    admin.from('puzzle_streaks').select('current, best, last_day').eq('player_id', me).maybeSingle(),
+  ]);
+  if (solved_.error) throw solved_.error;
+  if (streak_.error) throw streak_.error;
+  const s: Streak | null = streak_.data ? { current: streak_.data.current, best: streak_.data.best, lastDay: streak_.data.last_day } : null;
+  return { day, module, index, solved: solved_.data, streak: { current: liveStreak(s, day), best: s?.best ?? 0, lastDay: s?.lastDay ?? null } };
+}
+
+async function dailyStart(me: string) {
+  const { module, index } = dailyPuzzle(dayOf());
+  const { error } = await admin.from('puzzle_attempts').upsert({ player_id: me, module: `${DAILY}:${module}`, idx: index, started_at: new Date().toISOString() });
+  if (error) throw error;
+  return { ok: true };
+}
+
+// milestones as the database gets them: the table, then every 100 days after 1000
+const MILESTONES = [...STREAK_MILESTONES, ...Array.from({ length: 90 }, (_, i) => ({ days: 1100 + i * 100, coins: 10_000 }))];
+
+async function dailySolve(me: string, body: Record<string, unknown>) {
+  const day = dayOf();
+  const { module, index } = dailyPuzzle(day);
+  const puzzle = PUZZLES[module][index];
+  const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
+  if (error) throw error;
+  if (!attempt || attempt.module !== `${DAILY}:${module}` || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_SOLVE_MS) {
+    throw fail('not_started', 'Open the puzzle first.', 409);
+  }
+  const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
+  if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
+  const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
+  const hints = count(body.hints);
+  const earned = stars(count(body.mistakes), hints);
+  const coins = dailyCoins(hints, solution(puzzle).length);
+
+  await ensurePlayer(admin, me);
+  // an item for the milestones that give one: one the player lacks
+  const { data: owned, error: e3 } = await admin.from('player_items').select('item_id').eq('player_id', me);
+  if (e3) throw e3;
+  const item = completionItem(ITEMS.filter((i) => i.forSale && !owned.some((o) => o.item_id === i.id)).map((i) => i.id));
+  const { data: result, error: e2 } = await admin.rpc('solve_daily', {
+    p_player: me,
+    p_day: day,
+    p_module: module,
+    p_idx: index,
+    p_stars: earned,
+    p_coins: coins,
+    p_milestones: MILESTONES,
+    p_item: item,
+  });
+  if (e2) throw e2;
+  await admin.from('puzzle_attempts').delete().eq('player_id', me);
+  const player = await getPlayer(admin, me);
+  if (result.milestone?.item) await publishShowcase(admin, player);
+  return {
+    already: result.already,
+    coins: result.coins,
+    hintCost: result.already ? 0 : hintPenalty(hints, solution(puzzle).length),
+    stars: earned,
+    streak: { current: result.streak.current, best: result.streak.best, lastDay: result.streak.last_day },
+    milestone: result.milestone,
+    player,
+  };
 }
 
 async function unlock(me: string, body: Record<string, unknown>) {
@@ -158,6 +285,14 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return solve(user.id, body);
     case 'unlock':
       return unlock(user.id, body);
+    case 'reveal':
+      return reveal(user.id, body);
+    case 'daily':
+      return dailyState(user.id);
+    case 'daily_start':
+      return dailyStart(user.id);
+    case 'daily_solve':
+      return dailySolve(user.id, body);
     default:
       throw fail('bad_request', 'Unknown action.');
   }

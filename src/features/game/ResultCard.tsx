@@ -8,6 +8,8 @@ import { Button, Coins, ProgressBar, Spinner, cx, formatNumber } from '../../ui/
 import type { Analysis } from '../../ai/analysis';
 import type { Mode } from './modes/types';
 import type { GameState } from './store';
+import { DailyResult } from '../puzzles/streak';
+import { timeUntil } from '../../ui/format';
 
 const REASON: Record<string, string> = {
   checkmate: tk('by checkmate'),
@@ -24,11 +26,35 @@ const REASON: Record<string, string> = {
 /** A solved puzzle: stars, coins, the bonus every 10 and the module's finishing reward. */
 function PuzzleBlock({ puzzle }: { puzzle: NonNullable<GameState['puzzle']> }) {
   const r = puzzle.result;
+  const daily = puzzle.daily;
+  if (daily) {
+    return (
+      <>
+        {puzzle.saving && (
+          <div className="result-loading">
+            <Spinner size={18} /> {t('Saving your progress…')}
+          </div>
+        )}
+        {puzzle.error && <p className="form-error">{puzzle.error}</p>}
+        {daily.result && <DailyResult before={daily.streak.current} result={daily.result} />}
+      </>
+    );
+  }
+  if (puzzle.revealed && !r) {
+    return (
+      <section className="result-block">
+        <p className="muted result-revealed">
+          <Eye size={16} /> {t('Seen, not solved: no coins or stars this time. The next puzzle is open, and this one comes back in your reviews tomorrow.')}
+        </p>
+      </section>
+    );
+  }
+  const lit = r ? (r.counted ? r.stars : r.best) : 0;
   return (
     <>
-      <div className="puzzle-stars" aria-label={r ? t('{n} of 3 stars', { n: r.stars }) : undefined}>
+      <div className="puzzle-stars" aria-label={r ? t('{n} of 3 stars', { n: lit }) : undefined}>
         {[1, 2, 3].map((n) => (
-          <Star key={n} size={34} className={cx(r && n <= r.stars && 'is-lit')} />
+          <Star key={n} size={34} className={cx(r && n <= lit && 'is-lit')} />
         ))}
       </div>
       {puzzle.saving && (
@@ -37,6 +63,13 @@ function PuzzleBlock({ puzzle }: { puzzle: NonNullable<GameState['puzzle']> }) {
         </div>
       )}
       {puzzle.error && <p className="form-error">{puzzle.error}</p>}
+      {r && !r.counted && (
+        <p className="faint result-note">
+          {r.reviewFrom
+            ? t('A practice round: your stars stay at {n}. They can improve in a review {when}, once the moves are no longer fresh in your mind.', { n: r.best, when: timeUntil(r.reviewFrom) })
+            : t('A practice round: you already have all three stars.')}
+        </p>
+      )}
       {r && (
         <section className="result-block">
           <div className="result-row">

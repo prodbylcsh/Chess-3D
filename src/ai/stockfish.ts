@@ -58,6 +58,24 @@ export class Stockfish {
     return score;
   }
 
+  /**
+   * The engine's view of a position for the side to move (puzzles): its best move, the
+   * score (centipawns; a mate as ±(10,000 − n)) and the line it expects. `only`: search just
+   * these moves (UCI). Calls must not overlap.
+   */
+  async search(fen: string, nodes: number, only?: string[]): Promise<{ best: string; score: number; pv: string[] }> {
+    await this.ready;
+    let score = 0;
+    let pv: string[] = [];
+    const line = await this.until('bestmove', ['ucinewgame', `position fen ${fen}`, `go nodes ${nodes}${only?.length ? ` searchmoves ${only.join(' ')}` : ''}`], (l) => {
+      const m = / score (cp|mate) (-?\d+)/.exec(l);
+      if (m) score = m[1] === 'cp' ? Number(m[2]) : Number(m[2]) > 0 ? 10_000 - Number(m[2]) : -10_000 - Number(m[2]);
+      const p = / pv (.+)$/.exec(l);
+      if (p) pv = p[1].trim().split(/\s+/);
+    });
+    return { best: line.split(' ')[1] ?? '', score, pv };
+  }
+
   dispose(): void {
     this.worker.terminate();
     this.failed?.(new Error('engine stopped'));

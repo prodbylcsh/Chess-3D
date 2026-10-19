@@ -37,9 +37,19 @@ export interface StoredConversation {
 
 export interface MockPuzzleModule {
   stars: number[];
+  /** the solution was shown (stars 0 until solved) */
+  seen: boolean[];
+  /** when each puzzle was last finished (a solve, or showing the solution) */
+  tried: (string | null)[];
   unlocked: boolean;
   completedAt: string | null;
   reward: { item: string | null; coins: number | null } | null;
+}
+
+export interface MockDaily {
+  /** solved days (UTC dates) */
+  days: Record<string, { stars: number; coins: number }>;
+  streak: { current: number; best: number; lastDay: string | null };
 }
 
 export interface Db {
@@ -54,6 +64,7 @@ export interface Db {
   seasonPeak: Record<string, Record<string, number>>;
   /** per player and module: puzzle progress */
   puzzles: Record<string, Record<string, MockPuzzleModule>>;
+  daily: Record<string, MockDaily>;
   sessionId: string | null;
 }
 
@@ -78,6 +89,7 @@ function load(): Db {
     conversations: {},
     seasonPeak: {},
     puzzles: {},
+    daily: {},
     sessionId: null,
     ...data,
   };
@@ -101,6 +113,10 @@ function migrate(data: Db): Db {
   for (const modules of Object.values(data.puzzles ?? {})) {
     const steps = modules['first-steps'];
     if (steps?.stars.some((s) => s > 0)) steps.unlocked = true;
+    for (const m of Object.values(modules)) {
+      m.seen ??= m.stars.map(() => false);
+      m.tried ??= m.stars.map(() => null);
+    }
   }
   return data;
 }

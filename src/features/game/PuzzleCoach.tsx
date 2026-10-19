@@ -1,18 +1,30 @@
 // The puzzle's guide during play (docs/PLATFORM.md §4.2): the briefing before the first
 // move, then a coach card that keeps the goal in view and answers every move.
 import { type CSSProperties } from 'react';
-import { Check, Lightbulb, MessageCircle, Play, Star, X } from 'lucide-react';
+import { Check, Eye, Flame, Lightbulb, MessageCircle, Play, Repeat, Star, X } from 'lucide-react';
 import { HINT_PENALTY, PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import { t } from '../../i18n';
 import { Button, cx } from '../../ui/kit';
+import { timeUntil } from '../../ui/format';
 import { MODULE_ICONS } from '../puzzles/modules';
 import type { Mode } from './modes/types';
 import type { GameState, PuzzleMessage } from './store';
 
 const TONE_ICON: Record<PuzzleMessage['tone'], typeof Check> = { info: MessageCircle, good: Check, bad: X, hint: Lightbulb };
 
+/** "Openings · 7/100", or the daily puzzle. */
+function Kicker({ s }: { s: GameState }) {
+  const p = s.puzzle!;
+  if (p.daily) return <>{t('Daily puzzle')}</>;
+  return (
+    <>
+      {t(moduleOf(p.module)!.name)} · {p.index + 1}/{PUZZLES_PER_MODULE}
+    </>
+  );
+}
+
 /** In place of the opponent's card: the goal, the moves found so far and what the coach says. */
-export function PuzzleCoach({ s }: { s: GameState }) {
+export function PuzzleCoach({ s, mode }: { s: GameState; mode: Mode }) {
   const p = s.puzzle!;
   const module = moduleOf(p.module)!;
   const Icon = MODULE_ICONS[module.icon];
@@ -21,11 +33,9 @@ export function PuzzleCoach({ s }: { s: GameState }) {
   return (
     <section className="coach" style={{ '--module': p.color } as CSSProperties} aria-live="polite">
       <header className="coach-head">
-        <span className="coach-icon">
-          <Icon size={16} />
-        </span>
+        <span className="coach-icon">{p.daily ? <Flame size={16} /> : <Icon size={16} />}</span>
         <span className="coach-kicker">
-          {t(module.name)} · {p.index + 1}/{PUZZLES_PER_MODULE}
+          <Kicker s={s} />
         </span>
         <span className="coach-steps" aria-label={t('{n} of {total} moves found', { n: p.step, total: b.moves })}>
           {Array.from({ length: b.moves }, (_, i) => (
@@ -34,7 +44,12 @@ export function PuzzleCoach({ s }: { s: GameState }) {
         </span>
       </header>
       <h2 className="coach-title display">{b.title}</h2>
-      <p className="coach-task">{b.task}</p>
+      <p className="coach-task">{p.replaying ? t('The solution, move by move') : b.task}</p>
+      {p.practiceUntil && !p.replaying && (
+        <p className="coach-practice">
+          <Repeat size={13} /> {t('Practice round: stars can improve {when}', { when: timeUntil(p.practiceUntil) })}
+        </p>
+      )}
       {b.motifs.length > 0 && (
         <div className="coach-motifs">
           {b.motifs.map((m) => (
@@ -49,6 +64,14 @@ export function PuzzleCoach({ s }: { s: GameState }) {
           <MsgIcon size={15} />
           <span>{p.message.text}</span>
         </p>
+      )}
+      {p.stuck && !s.end && !p.replaying && (
+        <div className="coach-stuck">
+          <span>{t('Stuck? There is no shame in looking at the solution.')}</span>
+          <Button size="sm" icon={<Eye size={14} />} onClick={() => mode.act('reveal')}>
+            {t('Show the solution')}
+          </Button>
+        </div>
       )}
     </section>
   );
@@ -69,7 +92,7 @@ export function PuzzleBriefing({ s, mode }: { s: GameState; mode: Mode }) {
           <span className="coach-icon">
             <Icon size={16} />
           </span>
-          {t(module.name)} · {t('Puzzle {n} of {total}', { n: p.index + 1, total: PUZZLES_PER_MODULE })}
+          {p.daily ? t('Daily puzzle') : `${t(module.name)} · ${t('Puzzle {n} of {total}', { n: p.index + 1, total: PUZZLES_PER_MODULE })}`}
         </span>
         <h2 id="brief-title" className="display">
           {b.title}
@@ -78,6 +101,11 @@ export function PuzzleBriefing({ s, mode }: { s: GameState; mode: Mode }) {
           <span className={`swatch swatch-${b.side}`} /> {b.task}
         </p>
         {b.intro && <p className="brief-intro">{b.intro}</p>}
+        {p.practiceUntil && (
+          <p className="brief-practice">
+            <Repeat size={14} /> {t('You tried this puzzle recently, so this is a practice round: your stars can improve {when}, when the moves are no longer fresh in your mind.', { when: timeUntil(p.practiceUntil) })}
+          </p>
+        )}
         {b.motifs.map((m) => (
           <div key={m.theme} className="brief-motif">
             <strong>{t(m.title)}</strong>

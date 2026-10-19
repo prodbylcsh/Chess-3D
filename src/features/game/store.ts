@@ -2,7 +2,7 @@ import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
-import type { MatchResult, PuzzleSolve, RankInfo } from '../../api';
+import type { DailySolve, MatchResult, PuzzleSolve, RankInfo, StreakView } from '../../api';
 import type { Brief } from '../puzzles/brief';
 import type { Analysis } from '../../ai/analysis';
 
@@ -40,6 +40,16 @@ export interface PuzzleView {
   result: PuzzleSolve | null;
   saving: boolean;
   error: string | null;
+  /** the player seems stuck: the solution can be shown (modes/puzzle.ts, `stuckness`) */
+  stuck: boolean;
+  /** the solution is being played back on the board */
+  replaying: boolean;
+  /** the solution was shown instead of solved */
+  revealed: boolean;
+  /** a replay within the review wait: the stars can improve only from this time (ISO) */
+  practiceUntil: string | null;
+  /** the daily puzzle: the streak before today, and today's result */
+  daily: { day: string; streak: StreakView; result: DailySolve | null } | null;
 }
 
 export interface ResultState {
@@ -180,7 +190,11 @@ export class GameStore implements GameUi {
     resolve?.(piece);
   }
 
+  /** a mode showing a line that ends the game (a puzzle's refutation): no result card */
+  suppressEnd = false;
+
   gameOver(end: GameEnd): void {
+    if (this.suppressEnd) return;
     this.set({ end, showEnd: true });
     this.onGameOver(end);
   }

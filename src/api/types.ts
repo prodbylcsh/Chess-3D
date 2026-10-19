@@ -334,6 +334,10 @@ export interface PuzzleModuleProgress {
   unlocked: boolean;
   /** best stars per puzzle (1–3), 0 while unsolved */
   stars: number[];
+  /** the solution was shown and the puzzle isn't solved yet (it counts as passed, without stars) */
+  seen: boolean[];
+  /** per puzzle under three stars: from when a replay can improve its stars (ISO), else null */
+  reviewFrom: (string | null)[];
   completedAt: string | null;
   /** what finishing the module gave: an item, or coins */
   reward: { item: string | null; coins: number | null } | null;
@@ -348,6 +352,12 @@ export interface PuzzleSolve {
   /** the bonus for every 10 solved */
   bonus: number;
   stars: 1 | 2 | 3;
+  /** whether this solve counted for the stars (a replay counts only after the review wait) */
+  counted: boolean;
+  /** the puzzle's best stars now */
+  best: number;
+  /** from when the next replay can improve the stars, null at three stars */
+  reviewFrom: string | null;
   /** puzzles solved in the module now */
   solved: number;
   /** finishing the module */
@@ -362,6 +372,41 @@ export interface PuzzlesService {
   solve(module: string, index: number, moves: string[], mistakes: number, hints: number): Promise<PuzzleSolve>;
   /** unlock a paid module with coins */
   unlock(module: string): Promise<PuzzleModuleProgress[]>;
+  /** show the solution of an open puzzle (after `start`): seen, the next one opens, no coins */
+  reveal(module: string, index: number): Promise<PuzzleModuleProgress[]>;
+  /** today's daily puzzle and the player's streak */
+  daily(): Promise<DailyPuzzle>;
+  dailyStart(): Promise<void>;
+  dailySolve(moves: string[], mistakes: number, hints: number): Promise<DailySolve>;
+}
+
+export interface StreakView {
+  /** days in a row, 0 when broken */
+  current: number;
+  best: number;
+  /** the last day solved (UTC date) */
+  lastDay: string | null;
+}
+
+export interface DailyPuzzle {
+  /** UTC date */
+  day: string;
+  module: string;
+  index: number;
+  /** today's solve, if done */
+  solved: { stars: number; coins: number } | null;
+  streak: StreakView;
+}
+
+export interface DailySolve {
+  /** today's puzzle had been solved already (nothing paid) */
+  already: boolean;
+  coins: number;
+  hintCost: number;
+  stars: 1 | 2 | 3;
+  streak: StreakView;
+  /** a milestone the streak reached today */
+  milestone: { days: number; coins: number; item: string | null } | null;
 }
 
 // ------------------------------------------------------------------ buying coins

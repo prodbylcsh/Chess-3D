@@ -12,6 +12,7 @@ import { t } from '../../i18n';
 import { Badge, Button, Coins, EmptyState, ProgressBar, Spinner, confirmDialog, formatNumber, useToast } from '../../ui/kit';
 import { WORLD_THEMES } from './map/themes';
 import { MODULE_ICONS } from './modules';
+import { DailyCard } from './streak';
 import './puzzles.css';
 
 /** The player's progress in every module; reloads after unlocking. */
@@ -72,6 +73,7 @@ export function PuzzlesPage() {
           <Button onClick={() => reload()}>{t('Try again')}</Button>
         </EmptyState>
       )}
+      {Array.isArray(progress) && <DailyCard />}
       {Array.isArray(progress) && (
         <div className="puzzle-modules">
           {MODULES.map((m) => {

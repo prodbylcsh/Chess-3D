@@ -30,3 +30,12 @@ export function winRate(wins: number, losses: number, draws: number): number | n
   const games = wins + losses + draws;
   return games ? Math.round(((wins + draws / 2) / games) * 100) : null;
 }
+
+/** How long until `iso`: "in 5 min", "in 3 h", "in 2 days" ("now" once past). */
+export function timeUntil(iso: string, now = Date.now()): string {
+  const s = (new Date(iso).getTime() - now) / 1000;
+  if (s <= 60) return t('in a minute');
+  if (s < 3600) return t('in {n} min', { n: Math.ceil(s / 60) });
+  if (s < 86_400) return t('in {n} h', { n: Math.ceil(s / 3600) });
+  return t('in {n} days', { n: Math.ceil(s / 86_400) });
+}

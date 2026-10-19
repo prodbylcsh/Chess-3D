@@ -4,7 +4,7 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
-import { BONUS_COINS, MODULE_PRICE, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
+import { BONUS_COINS, DAILY_COINS, MODULE_PRICE, dailyPuzzle, dayOf, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
 import { PUZZLES } from '../supabase/functions/_shared/server/puzzle-data.ts';
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -76,12 +76,27 @@ test('solving: checked by the server, coins only the first time, stars kept at t
 
   assert.equal(first.hintCost, 0);
 
+  // right after: practice, the stars stay (the moves are fresh in mind)
   const again = await solve(p, 'openings', 0);
   assert.equal(again.first, false);
   assert.equal(again.coins, 0);
+  assert.equal(again.counted, false);
+  assert.equal(again.best, 2);
+  assert.ok(Date.parse(again.reviewFrom) > Date.now() + 19 * 3600_000, again.reviewFrom);
   assert.equal(await coins(p.id), 500 + first.coins, 'no farming');
+  assert.deepEqual((await p.client.from('puzzle_solves').select('idx, stars')).data, [{ idx: 0, stars: 2 }]);
+  // a day later: a review, the stars improve (still no coins)
+  await admin.from('puzzle_solves').update({ tried_at: new Date(Date.now() - 21 * 3600_000).toISOString() }).eq('player_id', p.id);
+  const review = await solve(p, 'openings', 0);
+  assert.equal(review.counted, true);
+  assert.equal(review.coins, 0);
+  assert.equal(review.reviewFrom, null, 'three stars: nothing to review');
   const rows = (await p.client.from('puzzle_solves').select('idx, stars')).data;
   assert.deepEqual(rows, [{ idx: 0, stars: 3 }], 'the best stars stay');
+  // a weaker solve later never lowers them
+  await admin.from('puzzle_solves').update({ tried_at: new Date(Date.now() - 21 * 3600_000).toISOString() }).eq('player_id', p.id);
+  await solve(p, 'openings', 0, answer('openings', 0), { mistakes: 3 });
+  assert.deepEqual((await p.client.from('puzzle_solves').select('idx, stars')).data, [{ idx: 0, stars: 3 }]);
   assert.ok((await p.client.from('puzzle_solves').insert({ player_id: p.id, module: 'openings', idx: 1, stars: 3 })).error, 'clients cannot write progress');
 });
 
@@ -135,4 +150,84 @@ test('openings: hand-made lines where the player moves first are checked too', a
   wrong[0] = wrong[0] === 'd2d4' ? 'e2e4' : 'd2d4';
   assert.equal((await solve(p, 'openings', first, wrong)).code, 'wrong');
   assert.equal((await solve(p, 'openings', first)).first, true);
+});
+
+test('showing the solution: seen, the next one opens, no coins; a review later pays them', async () => {
+  const p = await player('pzf');
+  await call(p.client, { action: 'progress' });
+  await call(p.client, { action: 'start', module: 'openings', index: 0 });
+  assert.equal((await call(p.client, { action: 'reveal', module: 'openings', index: 0 })).code, 'not_started', 'not before 20 s');
+  await admin.from('puzzle_attempts').update({ started_at: new Date(Date.now() - 30_000).toISOString() }).eq('player_id', p.id);
+  const { modules } = await call(p.client, { action: 'reveal', module: 'openings', index: 0 });
+  assert.equal(modules[0].stars[0], 0);
+  assert.equal(modules[0].seen[0], true);
+  assert.ok(modules[0].reviewFrom[0]);
+  assert.equal(await coins(p.id), 500);
+  assert.equal((await call(p.client, { action: 'start', module: 'openings', index: 1 })).ok, true, 'the next one is open');
+  // solved right away from memory: nothing
+  const fresh = await solve(p, 'openings', 0);
+  assert.equal(fresh.counted, false);
+  assert.equal(fresh.coins, 0);
+  assert.equal(await coins(p.id), 500);
+  // in a review a day later: the stars and the coins of a first solve
+  await admin.from('puzzle_solves').update({ tried_at: new Date(Date.now() - 21 * 3600_000).toISOString() }).eq('player_id', p.id);
+  const later = await solve(p, 'openings', 0);
+  assert.equal(later.first, true);
+  assert.equal(later.counted, true);
+  assert.equal(later.coins, puzzleCoins(PUZZLES.openings[0].rating));
+  assert.equal(later.solved, 1);
+  const after = (await call(p.client, { action: 'progress' })).modules[0];
+  assert.equal(after.seen[0], false);
+  assert.equal(after.stars[0], 3);
+});
+
+test('the daily puzzle: once a day, a streak and its milestones', async () => {
+  const p = await player('pzg');
+  await call(p.client, { action: 'progress' });
+  const today = dayOf();
+  const { module, index } = dailyPuzzle(today);
+  const state = await call(p.client, { action: 'daily' });
+  assert.deepEqual({ day: state.day, module: state.module, index: state.index, solved: state.solved }, { day: today, module, index, solved: null });
+  assert.deepEqual(state.streak, { current: 0, best: 0, lastDay: null });
+  const moves = answer(module, index);
+  assert.equal((await call(p.client, { action: 'daily_solve', moves })).code, 'not_started');
+  const dailySolve = async (extra = {}) => {
+    await call(p.client, { action: 'daily_start' });
+    await wait(2100);
+    return call(p.client, { action: 'daily_solve', moves, mistakes: 0, hints: 0, ...extra });
+  };
+  assert.equal((await dailySolve({ moves: ['a1a2'] })).code, 'wrong');
+  const first = await dailySolve();
+  assert.equal(first.already, false, JSON.stringify(first));
+  assert.equal(first.coins, DAILY_COINS);
+  assert.deepEqual(first.streak, { current: 1, best: 1, lastDay: today });
+  assert.equal(first.milestone, null);
+  assert.equal(first.player.coins, 500 + DAILY_COINS);
+  const again = await dailySolve();
+  assert.equal(again.already, true);
+  assert.equal(await coins(p.id), 500 + DAILY_COINS, 'once a day');
+  // yesterday was day 6: today is the 7th and pays the milestone
+  const yesterday = dayOf(Date.now() - 86_400_000);
+  await admin.from('puzzle_daily').delete().eq('player_id', p.id);
+  await admin.from('puzzle_streaks').update({ current: 6, best: 6, last_day: yesterday }).eq('player_id', p.id);
+  const seventh = await dailySolve({ hints: 99 });
+  assert.deepEqual(seventh.streak, { current: 7, best: 7, lastDay: today });
+  assert.deepEqual(seventh.milestone, { days: 7, coins: 300, item: null });
+  assert.equal(seventh.coins, DAILY_COINS - 10, 'hints cost here too');
+  assert.equal(await coins(p.id), 500 + DAILY_COINS + DAILY_COINS - 10 + 300);
+  // a missed day breaks it; the best stays
+  await admin.from('puzzle_daily').delete().eq('player_id', p.id);
+  await admin.from('puzzle_streaks').update({ last_day: dayOf(Date.now() - 3 * 86_400_000) }).eq('player_id', p.id);
+  assert.equal((await call(p.client, { action: 'daily' })).streak.current, 0);
+  const restart = await dailySolve();
+  assert.deepEqual(restart.streak, { current: 1, best: 7, lastDay: today });
+  // a year in a row: an item from the shop as well
+  await admin.from('puzzle_daily').delete().eq('player_id', p.id);
+  await admin.from('puzzle_streaks').update({ current: 364, last_day: yesterday }).eq('player_id', p.id);
+  const year = await dailySolve();
+  assert.equal(year.milestone.days, 365);
+  assert.ok(year.milestone.item);
+  const owned = (await admin.from('player_items').select('item_id, source').eq('player_id', p.id)).data;
+  assert.deepEqual(owned, [{ item_id: year.milestone.item, source: 'streak' }]);
+  assert.ok((await p.client.from('puzzle_daily').insert({ player_id: p.id, day: '2020-01-01', module, idx: 0, stars: 3, coins: 0 })).error, 'clients cannot write it');
 });

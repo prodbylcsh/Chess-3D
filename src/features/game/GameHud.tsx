@@ -35,7 +35,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
       <TurnPill s={s} />
 
       <aside className="gs-panel">
-        {s.puzzle ? <PuzzleCoach s={s} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
+        {s.puzzle ? <PuzzleCoach s={s} mode={mode} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
         <section className="gs-side">
           <MoveList moves={s.moves} />
           <div className="gs-actions">

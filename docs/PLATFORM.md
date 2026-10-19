@@ -223,6 +223,53 @@ Decided (October 2026):
   asked for the piece. The marks stay until the right move is played (`Game.guide`); the
   Hint button then has only what isn't shown yet (the piece, or the square) and is off
   when both are.
+- **Why not?** (20 October 2026, the user's choice): after a wrong move Stockfish (in the
+  browser, `src/features/puzzles/whyNot.ts`, 80,000 nodes per move) compares it with the
+  right one. Nearly as good (under 40 centipawns): "A good move too, but this puzzle is
+  after a different one". A little weaker (under 120): "weaker than the move this puzzle
+  wants". Still winning where the puzzle has a mate: "there is a checkmate here". Otherwise
+  the board plays the opponent's answer with a red arrow and says what it does (mates,
+  takes your queen, checks, takes over), then both moves are taken back. All of these still
+  count as a mistake. Without WebAssembly the old "not this move" stays.
+- **Arrows** (20 October 2026): once the piece and its square are both shown, a green
+  arrow joins them (a knight's arrow bends like its jump); the opponent's moves get a
+  soft gold arrow until the player moves; refutations a red one (`Game.arrows`, puzzles
+  only, so the look of games is unchanged).
+- **Replay the solution** (20 October 2026): on the result card of a solved (or shown)
+  puzzle, in every module and the daily puzzle: the line plays from the start with arrows,
+  each of the player's moves explained (the lesson, or "Knight takes, with check!"). Skip
+  jumps to the end.
+- **Show the solution when stuck** (20 October 2026, the user asked for a real stuck
+  detection, not "five wrong moves"): mistakes and hints count a point each, and every
+  40 seconds on the current move (only while the page is visible) another; at 5 points,
+  never in the first minute and always after four minutes on one move (`stuck.ts`), the
+  coach offers the solution. Showing it (after a confirmation) plays the solution; the
+  puzzle counts as **seen**: no coins or stars, the next one opens (the server needs the
+  puzzle open for 20 seconds). Solving it later in a review pays its first-solve coins and
+  stars then. Not offered in the daily puzzle.
+- **Reviews** (20 October 2026; the user worried that a player could replay a 1-star
+  puzzle right away from memory): a puzzle with fewer than three stars, or seen, can be
+  replayed any time, but its stars only improve when it was last finished at least
+  **20 hours** before (`REVIEW_AFTER_HOURS`); a replay before that is a practice round,
+  said so in the briefing, the coach card and the result. Every finished attempt starts the
+  wait again, so practising just before a review doesn't help. The module map shows
+  "Review (n)" for puzzles past the wait (each "Next" goes to the next one) or when the
+  next ones are ready; a puzzle's card says when its stars can improve.
+- **The daily puzzle and the streak** (20 October 2026, the user's choice; amounts proposed,
+  to confirm): one puzzle a day for everyone (UTC date), from any module, locked ones too (a
+  taste of them), easy on Monday and harder towards Sunday (`dailyPuzzle`). It pays
+  **40 coins** less what the hints cost (`DAILY_COINS`), once a day. Solving it on days in
+  a row builds a streak (a missed UTC day ends it, the best is kept). Milestones pay extra:
+  3 days 100, 7 300, 14 600, 30 1,500, 50 2,500, 100 5,000, 200 10,000, 365 25,000 + a shop
+  item the player lacks, 500 40,000, 1000 100,000 + an item, then 10,000 every 100 days
+  (`STREAK_MILESTONES`). The streak's flame grows through six tiers, each more intense
+  than the last, so a 1000-day streak feels far bigger than a 10-day one: Spark (1), Flame
+  (7), Blaze (30, embers), Azure Fire (100, a ring of fire), Phoenix (365, wings), Starfire
+  (1000, circling stars) (`STREAK_TIERS`, `streak.tsx`). After the solve the result card
+  counts the streak up with a burst whose rays grow with the tier, and a bigger one with a
+  new tier or a milestone; the phone vibrates longer for longer streaks. The Puzzles page
+  shows the daily card with the streak and the next milestone. Server: `puzzle_daily`,
+  `puzzle_streaks`, `solve_daily` (migration `20261020090000`).
 - **Every puzzle says what it wants** (October 2026, the user's request: puzzles must be fun,
   guide the player and teach something). Before the first move a briefing card shows the
   goal ("Italian Game", "Checkmate in 2 moves", "Win material"), the side and the number of
@@ -682,6 +729,20 @@ The 3D board fills the screen. Around it:
 - **Camera:** drag to orbit, right-drag to pan, scroll or pinch to zoom; zooming out goes
   far enough (distance 42) to see the whole board on a phone, and beyond the earlier
   limit (26) the fog thins so the board stays clear.
+- **Vibration on phones** (20 October 2026, the user's request; `src/audio/haptics.ts`, off
+  in Settings). Designed after what haptics research and practice agree on: strength and
+  rhythm set how intense something feels, rising patterns read as good news and flat ones
+  as bad, frequent events stay subtle and haptics only add to sound and picture. So: your
+  own move is crisp and every piece has its character (a pawn ticks, a knight hops and
+  lands, a bishop glides, a rook thuds, the queen a graceful double, the king a slow heavy
+  step); the opponent's moves are the same at half strength; taking a piece is a firm hit
+  with a pleasant echo, bigger for bigger pieces, while losing one is a single dull buzz,
+  longer for bigger losses; castling two taps, promotion rising; giving check two pointed
+  taps, being in check a warning; a win a rising flourish, a loss a long low fade. In
+  puzzles a right move "da-DUM", a wrong one a flat buzz, a hint a tick, a solve a flourish,
+  and the daily streak a celebration that grows with its tier. Android browsers vibrate
+  with the full patterns; iPhones have no vibration for websites, so Safari (iOS 18+) gets
+  one system tick per beat through a hidden switch, which Apple may stop.
 
 ## 8. Technical architecture
 
@@ -862,7 +923,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | M7 Real items | Asset pipeline and folders, model piece sets and boards in games, 3D item view, item catalogue and ownership in the database, first set and board (Monolith), placeholders removed | ✅ live (October 2026) |
 | Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ live (October 2026) |
 | Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
-| Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins | ✅ in code, tested locally; live when merged |
+| Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins; daily puzzle and streak, reviews, why-not refutations, the solution when stuck, replays, arrows, vibration | ✅ in code, tested locally; live when merged |
 | Later | Tournaments, puzzle subscription and more puzzle themes, guests in puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
 
 ## 10. Decisions and open questions

@@ -1,9 +1,12 @@
 import { useSyncExternalStore } from 'react';
 import { DEFAULT_CONTROL, type ControlId } from '#shared/play.ts';
+import { haptics } from '../audio/haptics';
 
 // Per-device preferences (not synced to the account).
 export interface Prefs {
   sound: boolean;
+  /** vibration on phones (src/audio/haptics.ts) */
+  haptics: boolean;
   /** same-device games: turn the camera to the side to move */
   autoRotate: boolean;
   language: string;
@@ -12,7 +15,7 @@ export interface Prefs {
 }
 
 const KEY = 'wizard-chess.prefs';
-const DEFAULTS: Prefs = { sound: true, autoRotate: false, language: 'en', control: DEFAULT_CONTROL };
+const DEFAULTS: Prefs = { sound: true, haptics: true, autoRotate: false, language: 'en', control: DEFAULT_CONTROL };
 
 function read(): Prefs {
   try {
@@ -23,6 +26,7 @@ function read(): Prefs {
 }
 
 let current = read();
+haptics.enabled = current.haptics;
 const listeners = new Set<() => void>();
 
 export function getPrefs(): Prefs {
@@ -31,6 +35,7 @@ export function getPrefs(): Prefs {
 
 export function setPrefs(patch: Partial<Prefs>): void {
   current = { ...current, ...patch };
+  haptics.enabled = current.haptics;
   try {
     localStorage.setItem(KEY, JSON.stringify(current));
   } catch {

@@ -4,7 +4,7 @@
 // the levels are a plain grid.
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
-import { ArrowLeft, Gift, Lock, Play, RotateCcw, Star } from 'lucide-react';
+import { ArrowLeft, Eye, Gift, Lock, Play, Repeat, RotateCcw, Star } from 'lucide-react';
 import { BONUS_COINS, BONUS_EVERY, PUZZLES_PER_MODULE, moduleOf, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
 import type { PuzzleModuleProgress } from '../../api';
 import { itemName } from '../../api/catalog';
@@ -12,6 +12,8 @@ import { modulePuzzles } from '../../api/puzzleData';
 import { useProfile } from '../../app/session';
 import { t } from '../../i18n';
 import { Button, Coins, EmptyState, ProgressBar, Spinner, cx } from '../../ui/kit';
+import { timeUntil } from '../../ui/format';
+import { nextOpen, reviewReady, reviewWaiting } from './review';
 import { modelFor } from '../shop/ModelViewer';
 import { briefOf } from './brief';
 import { WORLD_THEMES } from './map/themes';
@@ -55,8 +57,10 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
   const world = useRef<World | null>(null);
   const [webgl, setWebgl] = useState(true);
   const [puzzles, setPuzzles] = useState<Puzzle[] | null>(null);
-  const next = mine.stars.findIndex((s) => s === 0);
+  const next = nextOpen(mine);
   const solved = solvedCount(mine);
+  const ready = reviewReady(mine);
+  const waiting = reviewWaiting(mine);
   const from = params.get('from');
   const [selected, setSelected] = useState(() => (next === -1 ? 0 : next));
   const [hopping, setHopping] = useState(from !== null);
@@ -100,7 +104,7 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
     if (!w) return;
     const target = next === -1 ? PUZZLES_PER_MODULE - 1 : next;
     const start = from === null ? NaN : Number(from);
-    if (Number.isInteger(start) && start >= 0 && start < target && mine.stars[start] > 0) {
+    if (Number.isInteger(start) && start >= 0 && start < target && (mine.stars[start] > 0 || mine.seen[start])) {
       setHopping(true);
       w.setProgress(mine.stars, next, solved - 1);
       w.select(-1);
@@ -141,6 +145,17 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
             <span>{t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })}</span>
           </div>
         </div>
+        {ready.length > 0 ? (
+          <Button className="world-review" icon={<Repeat size={16} />} onClick={() => navigate(`/game/puzzle/${module.id}?n=${ready[0]}&review=1`)}>
+            {t('Review ({n})', { n: ready.length })}
+          </Button>
+        ) : (
+          waiting.next && (
+            <span className="world-review-wait" title={t('Puzzles under three stars come back for a review once the moves are no longer fresh in your mind.')}>
+              <Repeat size={14} /> {t('{n} to review {when}', { n: waiting.count, when: timeUntil(waiting.next) })}
+            </span>
+          )
+        )}
       </header>
 
       {!webgl && <LevelGrid module={module} mine={mine} onPlay={play} />}
@@ -173,6 +188,8 @@ function LevelCard(props: {
 }) {
   const { module, mine, index, puzzle, next } = props;
   const stars = mine.stars[index];
+  const seen = mine.seen[index];
+  const reviewAt = mine.reviewFrom[index];
   const brief = useMemo(() => (puzzle ? briefOf(puzzle, module.select.themes) : null), [puzzle, module]);
   const solvedNow = solvedCount(mine);
   const toChest = BONUS_EVERY - (solvedNow % BONUS_EVERY);
@@ -189,6 +206,19 @@ function LevelCard(props: {
       </div>
       <h2 className="display">{brief?.title ?? '…'}</h2>
       {brief && <p className="level-card-task">{brief.task}</p>}
+      {seen && (
+        <p className="level-card-note">
+          <Eye size={14} /> {t('You saw the solution. Solve it in a review for its stars and coins.')}
+        </p>
+      )}
+      {(stars > 0 || seen) && stars < 3 && reviewAt && (
+        <p className="level-card-note">
+          <Repeat size={14} />{' '}
+          {Date.parse(reviewAt) > Date.now()
+            ? t('Stars can improve {when}; until then a replay is practice.', { when: timeUntil(reviewAt) })
+            : t('Ready for a review: try for more stars.')}
+        </p>
+      )}
       {isNext && next >= 0 && (
         <p className="level-card-note">
           <Gift size={14} />{' '}
@@ -204,8 +234,8 @@ function LevelCard(props: {
         </p>
       )}
       <div className="level-card-actions">
-        <Button variant="primary" block icon={stars > 0 ? <RotateCcw size={16} /> : <Play size={16} />} onClick={props.onPlay}>
-          {stars > 0 ? t('Play again') : t('Play')}
+        <Button variant="primary" block icon={stars > 0 || seen ? <RotateCcw size={16} /> : <Play size={16} />} onClick={props.onPlay}>
+          {stars > 0 || seen ? t('Play again') : t('Play')}
         </Button>
         {props.onNext && <Button onClick={props.onNext}>{t('Next puzzle')}</Button>}
       </div>
@@ -215,7 +245,7 @@ function LevelCard(props: {
 
 /** Without WebGL: the levels as a grid, a chest after every 10. */
 function LevelGrid({ module, mine, onPlay }: { module: PuzzleModule; mine: PuzzleModuleProgress; onPlay: (n: number) => void }) {
-  const next = mine.stars.findIndex((s) => s === 0);
+  const next = nextOpen(mine);
   const solved = solvedCount(mine);
   return (
     <div className="level-grid-wrap">

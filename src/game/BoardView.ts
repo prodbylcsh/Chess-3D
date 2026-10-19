@@ -65,6 +65,86 @@ const MARKER_COLORS: Record<MarkerKind, THREE.Color> = {
   [MarkerKind.Guide]: new THREE.Color(0.15, 1.6, 0.55),
 };
 
+/** An arrow drawn on the board (puzzles): a hint, an opponent's threat, or a move of a line. */
+export type ArrowKind = 'hint' | 'threat' | 'line';
+const ARROW_COLORS: Record<ArrowKind, THREE.Color> = {
+  hint: new THREE.Color(0.15, 1.6, 0.55),
+  threat: new THREE.Color(1.8, 0.28, 0.16),
+  line: new THREE.Color(1.4, 1.0, 0.4),
+};
+const ARROW_WIDTH = 0.2;
+const HEAD_WIDTH = 0.5;
+const HEAD_LENGTH = 0.42;
+
+/**
+ * The outline of an arrow from square to square, in board units (x, and z as y): straight,
+ * or for a knight an L along the longer leg first, with a mitred corner.
+ */
+function arrowShape(from: Square, to: Square): THREE.Shape {
+  const a = squareCenter(from);
+  const b = squareCenter(to);
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const knight = (Math.abs(dx) === 1 && Math.abs(dz) === 2) || (Math.abs(dx) === 2 && Math.abs(dz) === 1);
+  const pts = [new THREE.Vector2(a.x, a.z)];
+  if (knight) pts.push(Math.abs(dx) === 2 ? new THREE.Vector2(b.x, a.z) : new THREE.Vector2(a.x, b.z));
+  pts.push(new THREE.Vector2(b.x, b.z));
+  const dir = (i: number) => pts[i + 1].clone().sub(pts[i]).normalize();
+  const normal = (d: THREE.Vector2) => new THREE.Vector2(-d.y, d.x);
+  // start at the piece's edge, end a little before the square's centre
+  const d0 = dir(0);
+  const dl = dir(pts.length - 2);
+  const start = pts[0].clone().addScaledVector(d0, 0.3);
+  const tip = pts[pts.length - 1].clone().addScaledVector(dl, -0.12);
+  const base = tip.clone().addScaledVector(dl, -HEAD_LENGTH);
+  const hw = ARROW_WIDTH / 2;
+  const n0 = normal(d0);
+  const nl = normal(dl);
+  const left: THREE.Vector2[] = [start.clone().addScaledVector(n0, hw)];
+  const right: THREE.Vector2[] = [start.clone().addScaledVector(n0, -hw)];
+  if (knight) {
+    const corner = pts[1];
+    const miter = n0.clone().add(nl);
+    left.push(corner.clone().addScaledVector(miter, hw));
+    right.push(corner.clone().addScaledVector(miter, -hw));
+  }
+  left.push(base.clone().addScaledVector(nl, hw), base.clone().addScaledVector(nl, HEAD_WIDTH / 2));
+  right.push(base.clone().addScaledVector(nl, -hw), base.clone().addScaledVector(nl, -HEAD_WIDTH / 2));
+  return new THREE.Shape([...left, tip, ...right.reverse()]);
+}
+
+class Arrow {
+  readonly mesh: THREE.Mesh;
+  private readonly material: THREE.MeshBasicMaterial;
+
+  constructor(from: Square, to: Square, kind: ArrowKind) {
+    this.material = new THREE.MeshBasicMaterial({
+      color: ARROW_COLORS[kind],
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -3,
+    });
+    this.mesh = new THREE.Mesh(new THREE.ShapeGeometry(arrowShape(from, to)), this.material);
+    this.mesh.rotation.x = Math.PI / 2; // the shape's y becomes the board's z
+    this.mesh.position.y = layout.boardTop + 0.02;
+    this.mesh.renderOrder = 6;
+    void animator.tween(0.25, (k) => (this.material.opacity = 0.8 * k), ease.outCubic);
+  }
+
+  tick(time: number): void {
+    if (this.material.opacity >= 0.6) this.material.opacity = 0.72 + 0.1 * Math.sin(time * 3);
+  }
+
+  dispose(): void {
+    this.mesh.removeFromParent();
+    this.mesh.geometry.dispose();
+    this.material.dispose();
+  }
+}
+
 class Marker {
   readonly mesh: THREE.Mesh;
   private readonly material: THREE.ShaderMaterial;
@@ -134,6 +214,7 @@ export class BoardView {
   private readonly guideFrom: Marker;
   private readonly guideTo: Marker;
   private hoverSquare: Square | null = null;
+  private arrows: Arrow[] = [];
   private readonly plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   /** called for every new piece (the Wardrobe gives it its set) */
   dress: (piece: Piece) => void = () => {};
@@ -158,6 +239,7 @@ export class BoardView {
     animator.onFrame((_, time) => {
       for (const m of fixed) m.tick(time);
       for (const m of this.targetMarkers) m.tick(time);
+      for (const a of this.arrows) a.tick(time);
     });
   }
 
@@ -241,6 +323,16 @@ export class BoardView {
     else this.guideFrom.hide();
     if (to) this.guideTo.show(to, 0.95, 1);
     else this.guideTo.hide();
+  }
+
+  /** Arrows on the board (puzzles), replacing the ones shown before. */
+  setArrows(list: { from: Square; to: Square; kind: ArrowKind }[]): void {
+    for (const a of this.arrows) a.dispose();
+    this.arrows = list.map((x) => {
+      const arrow = new Arrow(x.from, x.to, x.kind);
+      this.scene.add(arrow.mesh);
+      return arrow;
+    });
   }
 
   setHover(sq: Square | null): void {
