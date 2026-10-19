@@ -80,7 +80,8 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     kind: 'pieces',
     source: 'pieces/squircle',
     dir: 'squircle',
-    heights: { pawn: 1.1, rook: 1.25, knight: 1.35, bishop: 1.5, queen: 1.65, king: 1.75 },
+    // broad pieces (half as wide as tall): a little shorter than Monolith so they fit their squares
+    heights: { pawn: 0.95, rook: 1.1, knight: 1.2, bishop: 1.32, queen: 1.45, king: 1.55 },
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
