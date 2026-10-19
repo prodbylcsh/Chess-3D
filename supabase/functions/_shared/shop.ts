@@ -32,6 +32,7 @@ export const ITEMS: readonly ShopItemDef[] = [
   // piece sets
   item('marble-set', 'pieces', 0, 'standard'),
   item('monolith-set', 'pieces', 68_000, 'legendary'),
+  item('squircle-set', 'pieces', 55_000, 'epic'),
   // boards
   item('marble-board', 'board', 0, 'standard'),
   item('monolith-board', 'board', 42_500, 'legendary'),

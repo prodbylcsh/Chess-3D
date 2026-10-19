@@ -58,6 +58,7 @@ export interface BackgroundLook {
 export const PIECE_SETS: Record<string, PieceSetLook> = {
   'marble-set': { light: null, dark: null },
   'monolith-set': { light: null, dark: null, model: { dir: 'pieces/monolith' } },
+  'squircle-set': { light: null, dark: null, model: { dir: 'pieces/squircle' } },
 };
 
 export const BOARDS: Record<string, BoardLook> = {

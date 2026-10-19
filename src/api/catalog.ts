@@ -45,6 +45,7 @@ export const CATEGORY_AUDIENCE: Record<ItemCategory, string> = {
 const TEXT: Record<string, [name: string, description: string]> = {
   'marble-set': [tk('Classic Marble'), tk('Polished ivory and obsidian marble.')],
   'monolith-set': [tk('Monolith'), tk('Faceted towers of black stone and ivory marble, crowned in polished chrome.')],
+  'squircle-set': [tk('Squircle'), tk('Pieces that melt from circle to square, in soft white and deep black.')],
   'marble-board': [tk('Classic Marble'), tk('Veined marble squares in a dark frame.')],
   'monolith-board': [tk('Monolith'), tk('Graphite oak and matte black squares on a polished chrome hull.')],
   'candlelit-study': [tk('Candlelit Study'), tk('A warm, dark study lit by candles.')],

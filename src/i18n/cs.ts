@@ -43,6 +43,8 @@ export const cs: Record<string, string> = {
   'Polished ivory and obsidian marble.': 'Leštěný mramor ze slonoviny a obsidiánu.',
   'Monolith': 'Monolit',
   'Faceted towers of black stone and ivory marble, crowned in polished chrome.': 'Fasetované věže z černého kamene a slonovinového mramoru, korunované lesklým chromem.',
+  'Squircle': 'Squircle',
+  'Pieces that melt from circle to square, in soft white and deep black.': 'Figury, které se přelévají z kruhu do čtverce, v jemné bílé a hluboké černé.',
   'Veined marble squares in a dark frame.': 'Žilkovaná mramorová pole v tmavém rámu.',
   'Graphite oak and matte black squares on a polished chrome hull.': 'Pole z grafitového dubu a matné černi na lesklém chromovaném trupu.',
   'Candlelit Study': 'Pracovna při svíčkách',
