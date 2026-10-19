@@ -145,6 +145,8 @@ switch (command) {
   case 'pull-originals': {
     if (!a || !b) throw new Error('usage: pull-originals <name> <folder>');
     for (const { key } of await list(s3, BUCKETS.originals, `${a}/`)) {
+      // folders made in the dashboard are empty objects named like the folder
+      if (key.endsWith('/')) continue;
       const object = await s3.send(new GetObjectCommand({ Bucket: BUCKETS.originals, Key: key }));
       const target = join(b, key.slice(a.length + 1));
       mkdirSync(dirname(target), { recursive: true });
