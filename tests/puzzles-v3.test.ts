@@ -147,3 +147,45 @@ test('haptics: own moves stronger than the opponent\'s, a capture rewards, a los
   // a longer streak celebrates longer
   for (let tier = 1; tier < 6; tier++) assert.ok(total(streakFeel(tier)) > total(streakFeel(tier - 1)));
 });
+
+test('the next move\'s aim: told before the move, from the position', async () => {
+  const { nextGoal } = await import('../src/features/puzzles/intent.ts');
+  const { Chess } = await import('chess.js');
+  const at = (moves: string) => {
+    const c = new Chess();
+    let last = null;
+    for (const san of moves.split(' ').filter(Boolean)) last = c.move(san);
+    return { fen: c.fen(), last };
+  };
+  const goal = (moves: string, uci: string, opening = true) => {
+    const p = at(moves);
+    return nextGoal(p.fen, uci, p.last, opening);
+  };
+  assert.deepEqual(goal('', 'e2e4'), { intent: 'centre' });
+  assert.deepEqual(goal('e4 e5', 'g1f3'), { intent: 'threat' }, 'the knight attacks the undefended pawn');
+  assert.deepEqual(goal('e4 e5 Nf3', 'b8c6'), { intent: 'defend', piece: 'p' });
+  assert.deepEqual(goal('e4 e5 Nf3 Nc6', 'f1c4'), { intent: 'develop' });
+  assert.deepEqual(goal('e4 e5 Bc4 Nc6', 'd1h5'), { intent: 'threatMate' });
+  assert.deepEqual(goal('e4 e5 Bc4 Nc6 Qh5', 'g7g6'), { intent: 'stopMate' });
+  assert.deepEqual(goal('e4 e5 Bc4 Nc6 Qh5 Nf6', 'h5f7'), { intent: 'mate' });
+  assert.deepEqual(goal('e4 e5 Nf3 Nc6 d4 exd4', 'f3d4'), { intent: 'recapture' });
+  assert.deepEqual(goal('e4 e5 Nf3 Nc6 Bc4 Nf6 Nc3', 'f6e4'), { intent: 'sacrifice' });
+  assert.deepEqual(goal('e4 e5 Nf3 Nc6 Bc4 Nf6 Nc3 Nxe4 Nxe4', 'd7d5'), { intent: 'fork' });
+  assert.deepEqual(goal('e4 e5 Nf3 Nc6 Bc4 Nf6 O-O Bc5 d3', 'e8g8'), { intent: 'castle' });
+  // a check, and a skewer through the king (counted with pins)
+  assert.deepEqual(nextGoal('4k3/8/8/8/8/8/8/4K2R w - - 0 1', 'h1h8', null, false), { intent: 'check' });
+  assert.deepEqual(nextGoal('8/8/8/q2k4/8/8/8/6KR w - - 0 1', 'h1h5', null, false), { intent: 'pin' });
+  // the forks module: its first moves are told as forks
+  const { PUZZLES } = await import('../supabase/functions/_shared/server/puzzle-data.ts');
+  let fork = 0;
+  for (const p of PUZZLES.forks) {
+    const c = new Chess(p.fen);
+    const line = p.moves.split(' ');
+    let last = null;
+    if (!p.playerFirst) last = c.move({ from: line[0].slice(0, 2), to: line[0].slice(2, 4), promotion: line[0][4] });
+    const first = line[p.playerFirst ? 0 : 1];
+    const g = nextGoal(c.fen(), first, last, false);
+    if (g.intent === 'fork') fork++;
+  }
+  assert.ok(fork >= 40, `forks named as forks: ${fork}`);
+});

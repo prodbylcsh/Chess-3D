@@ -1158,6 +1158,35 @@
   font-size: 13.5px;
 }
 
+.coach-next {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 8px 11px;
+  border-left: 3px solid var(--module);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--module) 12%, transparent);
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.4;
+  animation: rise-in 0.35s ease both;
+}
+
+.coach-next svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--module);
+}
+
+.coach-next strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--module);
+}
+
 .coach-stuck {
   display: flex;
   align-items: center;

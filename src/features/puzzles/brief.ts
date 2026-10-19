@@ -4,6 +4,8 @@ import type { Puzzle } from '#shared/puzzles.ts';
 import { t, tk, tn } from '../../i18n';
 import { describe } from './describe';
 import type { Lesson, Motif } from './lessons';
+import type { Intent, NextGoal } from './intent';
+import type { PieceSymbol } from 'chess.js';
 
 export interface Brief {
   title: string;
@@ -41,4 +43,41 @@ export function briefOf(p: Puzzle, prefer: readonly string[] = []): Brief {
     moves: d.moves,
     lesson: d.lesson,
   };
+}
+
+// what the next move is for (intent.ts), shown on the coach card before the player moves
+const NEXT_TEXT: Record<Exclude<Intent, 'defend'>, string> = {
+  mate: tk('Mate is on: find the move that gives it.'),
+  promote: tk('Bring a pawn to the last rank and promote it.'),
+  castle: tk('Bring your king to safety.'),
+  escape: tk('You are in check: get out of it in the most useful way.'),
+  stopMate: tk('Your opponent threatens mate: stop it.'),
+  recapture: tk('Your opponent has just taken: take back.'),
+  win: tk("Something of your opponent's is poorly defended: win it."),
+  trade: tk('A capture is the key here: find the right one.'),
+  sacrifice: tk('Look for a sacrifice: give material to get something bigger.'),
+  sacrificeCheck: tk('Look for a sacrifice with check that opens up the king.'),
+  check: tk('Put pressure on the king with a check.'),
+  threatMate: tk("Threaten mate: aim at the weak point next to the king."),
+  fork: tk('Attack two things at once.'),
+  pin: tk('Pin or skewer: attack a piece that has something more valuable behind it.'),
+  threat: tk("Create a threat: attack a weak point in your opponent's camp."),
+  develop: tk('Develop: bring a knight or a bishop into play.'),
+  centre: tk('Fight for the centre with a pawn.'),
+  improve: tk('Improve a piece: put it where it works best.'),
+  pawn: tk('Push a pawn: in the endgame every step counts.'),
+  quiet: tk('No capture or check this time: find the quiet move that strengthens your position.'),
+};
+const DEFEND_TEXT: Record<PieceSymbol, string> = {
+  p: tk('Your opponent attacks your pawn: protect it or move it to safety.'),
+  n: tk('Your opponent attacks your knight: protect it or move it to safety.'),
+  b: tk('Your opponent attacks your bishop: protect it or move it to safety.'),
+  r: tk('Your opponent attacks your rook: protect it or move it to safety.'),
+  q: tk('Your opponent attacks your queen: protect it or move it to safety.'),
+  k: tk('You are in check: get out of it in the most useful way.'),
+};
+
+/** The aim of the next move, in the player's language. */
+export function nextText(g: NextGoal): string {
+  return g.intent === 'defend' ? t(DEFEND_TEXT[g.piece ?? 'p']) : t(NEXT_TEXT[g.intent]);
 }

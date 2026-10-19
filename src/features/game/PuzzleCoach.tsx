@@ -1,7 +1,7 @@
 // The puzzle's guide during play (docs/PLATFORM.md §4.2): the briefing before the first
 // move, then a coach card that keeps the goal in view and answers every move.
 import { type CSSProperties } from 'react';
-import { Check, Eye, Flame, Lightbulb, MessageCircle, Play, Repeat, Star, X } from 'lucide-react';
+import { Check, Crosshair, Eye, Flame, Lightbulb, MessageCircle, Play, Repeat, Star, X } from 'lucide-react';
 import { HINT_PENALTY, PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import { t } from '../../i18n';
 import { Button, cx } from '../../ui/kit';
@@ -48,6 +48,15 @@ export function PuzzleCoach({ s, mode }: { s: GameState; mode: Mode }) {
       {p.practiceUntil && !p.replaying && (
         <p className="coach-practice">
           <Repeat size={13} /> {t('Practice round: stars can improve {when}', { when: timeUntil(p.practiceUntil) })}
+        </p>
+      )}
+      {p.next && !s.end && !p.replaying && (
+        <p key={p.next} className="coach-next">
+          <Crosshair size={15} />
+          <span>
+            <strong>{t('Your next move')}</strong>
+            {p.next}
+          </span>
         </p>
       )}
       {b.motifs.length > 0 && (

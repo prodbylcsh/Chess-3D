@@ -223,6 +223,17 @@ Decided (October 2026):
   asked for the piece. The marks stay until the right move is played (`Game.guide`); the
   Hint button then has only what isn't shown yet (the piece, or the square) and is off
   when both are.
+- **The aim of the next move** (20 October 2026, the user's request: make clearer what to
+  play): whenever it is the player's turn, the coach card shows "Your next move" with what
+  that move is for, worked out from the position and the solution's move for every puzzle
+  (`src/features/puzzles/intent.ts`), never naming squares or the move itself: mate is on;
+  the opponent threatens mate, stop it; the opponent attacks your knight, protect it or move
+  it; your opponent has just taken, take back; something is poorly defended, win it; attack
+  two things at once; pin or skewer; threaten mate; a sacrifice (with check); a check;
+  create a threat on a weak point; and in openings develop a knight or bishop, fight for the
+  centre with a pawn, bring the king to safety; in endgames push a pawn; otherwise a quiet
+  strengthening move. The forks module's first moves are named forks in more than half of
+  its puzzles, the pins module's pins (tested).
 - **Why not?** (20 October 2026, the user's choice): after a wrong move Stockfish (in the
   browser, `src/features/puzzles/whyNot.ts`, 80,000 nodes per move) compares it with the
   right one. Nearly as good (under 40 centipawns, or both winning by far): "A good move

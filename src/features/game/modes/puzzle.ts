@@ -16,7 +16,8 @@ import {
   type Puzzle,
   type PuzzleModule,
 } from '#shared/puzzles.ts';
-import { briefOf, type Brief } from '../../puzzles/brief';
+import { briefOf, nextText, type Brief } from '../../puzzles/brief';
+import { nextGoal } from '../../puzzles/intent';
 import { whyNot, type WhyNot } from '../../puzzles/whyNot';
 import { reviewReady } from '../../puzzles/review';
 import { stuckness } from '../../puzzles/stuck';
@@ -184,6 +185,7 @@ export class PuzzleMode implements Mode {
         result: null,
         saving: false,
         error: null,
+        next: null,
         stuck: false,
         replaying: false,
         revealed: false,
@@ -246,6 +248,7 @@ export class PuzzleMode implements Mode {
       await game.sync([setup]);
       if (this.disposed || token !== this.token) return;
       game.arrows([{ from: moved.from, to: moved.to, kind: 'line' }]);
+      this.showNext();
       this.setPuzzle({
         message: {
           tone: 'info',
@@ -255,6 +258,7 @@ export class PuzzleMode implements Mode {
         },
       });
     } else {
+      this.showNext();
       this.setPuzzle({ message: { tone: 'info', text: this.brief?.side === 'w' ? t('White begins. Your move!') : t('Black begins. Your move!') } });
     }
   }
@@ -272,7 +276,7 @@ export class PuzzleMode implements Mode {
       this.moveMs = 0;
       game.guide(null, null);
       const why = this.brief?.lesson?.why[this.played.length - 1];
-      this.setPuzzle({ step: this.played.length, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
+      this.setPuzzle({ step: this.played.length, next: null, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
       const reply = replyAfter(puzzle, this.played.length);
       if (!reply || mate) return this.solved(token, mate);
       await game.idle();
@@ -281,6 +285,7 @@ export class PuzzleMode implements Mode {
       if (token !== this.token || this.disposed) return;
       await game.sync([...game.history, reply]);
       game.arrows([{ from: reply.slice(0, 2) as Square, to: reply.slice(2, 4) as Square, kind: 'line' }]);
+      this.showNext();
       return;
     }
     // another move: the engine judges it first. As good as the puzzle's move (another way
@@ -366,6 +371,18 @@ export class PuzzleMode implements Mode {
     });
     this.engineQueue = run.catch(() => null);
     return run.catch(() => null);
+  }
+
+  /** What the player's next move is for, on the coach card (puzzles/intent.ts). */
+  private showNext(): void {
+    const puzzle = this.puzzle;
+    const answer = puzzle && answerAt(puzzle, this.played.length);
+    if (!puzzle || !answer) return this.setPuzzle({ next: null });
+    const chess = new Chess(puzzle.fen);
+    let last: Move | null = null;
+    for (const m of this.ctx.engine.game.history) last = chess.move(toMove(m));
+    const opening = this.module.id === 'openings' || chess.moveNumber() <= 10;
+    this.setPuzzle({ next: nextText(nextGoal(chess.fen(), answer, last, opening)) });
   }
 
   /** The marks for the current move: rings, or an arrow once both the piece and the square are known. */
@@ -470,7 +487,7 @@ export class PuzzleMode implements Mode {
     store.set({ showEnd: false });
     game.hold(true);
     game.guide(null, null);
-    this.setPuzzle({ replaying: true, step: 0, message: { tone: 'info', text: t('Watch the solution, move by move.') } });
+    this.setPuzzle({ replaying: true, step: 0, next: null, message: { tone: 'info', text: t('Watch the solution, move by move.') } });
     const alive = () => token === this.token && !this.disposed;
     const line = puzzle.moves.split(' ');
     const first = puzzle.playerFirst ? 0 : 1;

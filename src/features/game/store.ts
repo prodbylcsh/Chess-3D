@@ -40,6 +40,8 @@ export interface PuzzleView {
   result: PuzzleSolve | null;
   saving: boolean;
   error: string | null;
+  /** what the player's next move is for (puzzles/intent.ts), while it is their turn */
+  next: string | null;
   /** the player seems stuck: the solution can be shown (modes/puzzle.ts, `stuckness`) */
   stuck: boolean;
   /** the solution is being played back on the board */
