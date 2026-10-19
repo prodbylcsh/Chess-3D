@@ -372,6 +372,25 @@ Claude cloud environment cannot reach Cloudflare). The Pages deploy runs `r2.ts 
 in git (`public/assets/`, the source of each upload); the originals are uploaded to the
 originals bucket in the Cloudflare dashboard. The Privacy Policy names Cloudflare.
 
+**Where the user puts originals** (`wizard-chess-originals`, agreed October 2026), one
+folder per item, by type:
+
+```
+pieces/<set>/king.glb … pawn.glb      one colour is enough, any scale, full quality
+boards/<board>/chessboard.glb
+icons/<icon>.png|svg                  square, at least 512 px, transparent background
+backgrounds/<id>/…                    an HDR/EXR sky, a GLB scene or pictures, plus a reference
+effects/<id>/…                        capture effects: a reference video or GIF, textures, sounds
+animations/<id>/…                     move animations: a reference video or GIF, sounds
+sounds/<id>/…                         WAV or OGG
+```
+
+(Monolith predates this and sits in `monolith/`.) Turning originals into game files is a
+step Claude does in a session, once per item: inspect the model, set heights, the knight's
+direction, the recolour and the triangle budget, build, check it in the browser, add the
+shop item. Effects and animations are written as code from the reference. The deploy then
+uploads the result to `wizard-chess-assets`.
+
 The originals the user delivers (large: 4K textures, up to 450k triangles) are not in
 git; they go to `assets-src/<item>/` locally (and to the originals bucket) and `scripts/assets/build-models.ts` turns
 them into the files above: base at y = 0, size on the board (one square = one unit; each
