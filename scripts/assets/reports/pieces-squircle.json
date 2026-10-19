@@ -1,0 +1,518 @@
+[
+  {
+    "file": "circle-to-square-bishop-black.glb",
+    "kb": 15303,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 88682,
+    "vertices": 50431,
+    "bounds": {
+      "min": [
+        -0.422,
+        -0.952,
+        -0.421
+      ],
+      "max": [
+        0.42,
+        0.951,
+        0.42
+      ],
+      "size": [
+        0.842,
+        1.903,
+        0.841
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-bishop-white.glb",
+    "kb": 15696,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 88682,
+    "vertices": 50570,
+    "bounds": {
+      "min": [
+        -0.442,
+        -1,
+        -0.442
+      ],
+      "max": [
+        0.442,
+        1,
+        0.442
+      ],
+      "size": [
+        0.884,
+        2,
+        0.883
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-king-black.glb",
+    "kb": 14694,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 84388,
+    "vertices": 47784,
+    "bounds": {
+      "min": [
+        -0.362,
+        -0.952,
+        -0.362
+      ],
+      "max": [
+        0.361,
+        0.951,
+        0.361
+      ],
+      "size": [
+        0.724,
+        1.903,
+        0.723
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-king-white.glb",
+    "kb": 16220,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 84387,
+    "vertices": 47804,
+    "bounds": {
+      "min": [
+        -0.38,
+        -1,
+        -0.38
+      ],
+      "max": [
+        0.38,
+        1,
+        0.38
+      ],
+      "size": [
+        0.761,
+        2,
+        0.76
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-knight-black.glb",
+    "kb": 14056,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 80490,
+    "vertices": 45356,
+    "bounds": {
+      "min": [
+        -0.391,
+        -0.952,
+        -0.393
+      ],
+      "max": [
+        0.39,
+        0.951,
+        0.386
+      ],
+      "size": [
+        0.781,
+        1.903,
+        0.779
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-knight-white.glb",
+    "kb": 15440,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 80488,
+    "vertices": 45518,
+    "bounds": {
+      "min": [
+        -0.411,
+        -1,
+        -0.41
+      ],
+      "max": [
+        0.411,
+        1,
+        0.41
+      ],
+      "size": [
+        0.821,
+        2,
+        0.819
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-pawn-black.glb",
+    "kb": 17338,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 172356,
+    "vertices": 96751,
+    "bounds": {
+      "min": [
+        -0.474,
+        -0.952,
+        -0.474
+      ],
+      "max": [
+        0.473,
+        0.951,
+        0.473
+      ],
+      "size": [
+        0.946,
+        1.903,
+        0.946
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-pawn-white.glb",
+    "kb": 17086,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 172356,
+    "vertices": 97000,
+    "bounds": {
+      "min": [
+        -0.497,
+        -1,
+        -0.497
+      ],
+      "max": [
+        0.497,
+        1,
+        0.497
+      ],
+      "size": [
+        0.995,
+        2,
+        0.995
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-queen-black.glb",
+    "kb": 14180,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 75130,
+    "vertices": 43373,
+    "bounds": {
+      "min": [
+        -0.412,
+        -0.952,
+        -0.413
+      ],
+      "max": [
+        0.412,
+        0.951,
+        0.412
+      ],
+      "size": [
+        0.824,
+        1.903,
+        0.824
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-queen-white.glb",
+    "kb": 16285,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 75128,
+    "vertices": 43456,
+    "bounds": {
+      "min": [
+        -0.433,
+        -1,
+        -0.433
+      ],
+      "max": [
+        0.433,
+        1,
+        0.433
+      ],
+      "size": [
+        0.866,
+        2,
+        0.866
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-rook-black.glb",
+    "kb": 15095,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 110798,
+    "vertices": 61795,
+    "bounds": {
+      "min": [
+        -0.447,
+        -0.952,
+        -0.447
+      ],
+      "max": [
+        0.446,
+        0.951,
+        0.446
+      ],
+      "size": [
+        0.893,
+        1.903,
+        0.894
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "circle-to-square-rook-white.glb",
+    "kb": 15355,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 110798,
+    "vertices": 62011,
+    "bounds": {
+      "min": [
+        -0.469,
+        -1,
+        -0.47
+      ],
+      "max": [
+        0.469,
+        1,
+        0.47
+      ],
+      "size": [
+        0.938,
+        2,
+        0.939
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  }
+]
