@@ -202,6 +202,14 @@ export class Game {
     return true;
   }
 
+  /**
+   * Puzzle guidance that stays on the board until changed (unlike `suggest`, a click
+   * elsewhere doesn't clear it): the piece to move and/or the square it goes to.
+   */
+  guide(from: Square | null, to: Square | null): void {
+    this.view.setGuide(from, to);
+  }
+
   /** Make a move as if the player had clicked it (dev tools and browser checks). */
   input(uci: string): void {
     if (this.busy || this.over || !this.isMyTurn()) return;
@@ -506,6 +514,7 @@ export class Game {
     this.stage.controls.autoRotate = false;
     this.ui.hideGameOver();
     this.view.setLastMove(null, null);
+    this.view.setGuide(null, null);
   }
 
   /** After a reset or jump: highlight the last move and show check or a finished game. */

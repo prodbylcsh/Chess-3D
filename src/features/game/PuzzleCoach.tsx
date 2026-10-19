@@ -90,7 +90,7 @@ export function PuzzleBriefing({ s, mode }: { s: GameState; mode: Mode }) {
               <Star key={i} size={14} />
             ))}
           </span>
-          {t('No mistakes and no hints: three stars. Hints also cost coins, up to {n}.', { n: HINT_PENALTY })}
+          {t('No mistakes and no hints: three stars. After a wrong move the board shows where the right one ends, for free; after three in a row also the piece, as a hint. Hints cost coins, up to {n}.', { n: HINT_PENALTY })}
         </p>
         <Button variant="primary" block icon={<Play size={16} />} onClick={() => mode.act('go')}>
           {started ? t('Back to the board') : t("Let's go")}

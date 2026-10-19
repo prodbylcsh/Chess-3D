@@ -14,6 +14,8 @@ const toMove = (m: string) => ({ from: m.slice(0, 2), to: m.slice(2, 4), promoti
 const PRAISE = [tk('Nice!'), tk('Exactly!'), tk('Sharp!'), tk('Great move!'), tk('Spot on!')];
 /** A cheer for a right move that has no lesson, different each move. */
 const praise = (n: number) => t(PRAISE[(n * 3 + Math.floor(Math.random() * 2)) % PRAISE.length]);
+/** wrong moves in a row before the piece to move is shown (as a hint) */
+const MISSES_FOR_HINT = 3;
 const PIECE_NAMES: Record<string, string> = { p: tk('pawn'), n: tk('knight'), b: tk('bishop'), r: tk('rook'), q: tk('queen'), k: tk('king') };
 
 /**
@@ -28,8 +30,10 @@ export class PuzzleMode implements Mode {
   private played: string[] = [];
   private mistakes = 0;
   private hints = 0;
-  /** hints asked for the current move: the first lifts the piece, the second shows the square */
-  private hintLevel = 0;
+  /** what the board shows for the current move: the piece to move and the square it goes to */
+  private shown = { piece: false, square: false };
+  /** wrong moves in a row on the current move */
+  private misses = 0;
   private setupDone = false;
   private token = 0;
   private disposed = false;
@@ -54,7 +58,8 @@ export class PuzzleMode implements Mode {
     this.played = [];
     this.mistakes = 0;
     this.hints = 0;
-    this.hintLevel = 0;
+    this.shown = { piece: false, square: false };
+    this.misses = 0;
     this.setupDone = false;
     void this.open(token, again).catch((err) => {
       if (this.disposed || token !== this.token) return;
@@ -136,7 +141,9 @@ export class PuzzleMode implements Mode {
     if (rightMove(puzzle, this.played, move.lan)) {
       const mate = mates(puzzle, this.played, move.lan);
       this.played.push(move.lan);
-      this.hintLevel = 0;
+      this.shown = { piece: false, square: false };
+      this.misses = 0;
+      game.guide(null, null);
       const why = this.brief?.lesson?.why[this.played.length - 1];
       this.setPuzzle({ step: this.played.length, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
       const reply = replyAfter(puzzle, this.played.length);
@@ -146,16 +153,42 @@ export class PuzzleMode implements Mode {
       if (token === this.token && !this.disposed) await game.sync([...game.history, reply]);
       return;
     }
+    // a wrong move: taken back, and the board shows where the right one ends (free); three in
+    // a row also show the piece to move, which counts as a hint (docs/PLATFORM.md §4.2)
     this.mistakes++;
-    this.hintLevel = 0;
+    this.misses++;
+    const auto = this.misses >= MISSES_FOR_HINT && !this.shown.piece;
+    if (auto) this.hints++;
+    this.shown = { piece: this.shown.piece || auto, square: true };
     const goal = this.puzzle?.goal;
+    const missed = goal ? t('{goal}: not this move.', { goal: t(goal) }) : t('Not this move.');
     this.setPuzzle({
       mistakes: this.mistakes,
-      message: { tone: 'bad', text: goal ? t('{goal}: not this move. Try again.', { goal: t(goal) }) : t('Not this move. Try again.') },
+      hints: this.hints,
+      message: auto
+        ? { tone: 'hint', text: `${t('Three misses in a row, so the piece to move glows now too. It counts as a hint.')} ${this.hintCost(puzzle)}` }
+        : { tone: 'bad', text: `${missed} ${this.shown.piece ? t('Move the glowing piece to the marked square.') : t('The right move ends on the marked square.')}` },
     });
     await game.idle();
     await sleep(600);
-    if (token === this.token && !this.disposed && !game.isOver) await game.sync(game.history.slice(0, -1));
+    if (token !== this.token || this.disposed || game.isOver) return;
+    await game.sync(game.history.slice(0, -1));
+    if (token === this.token && !this.disposed) this.showGuide();
+  }
+
+  /** The marks for the current move, after a takeback or a hint. */
+  private showGuide(): void {
+    const answer = this.puzzle && answerAt(this.puzzle, this.played.length);
+    if (!answer) return;
+    const from = answer.slice(0, 2) as Square;
+    const to = answer.slice(2, 4) as Square;
+    const { game } = this.ctx.engine;
+    game.guide(this.shown.piece ? from : null, this.shown.square ? to : null);
+    if (this.shown.piece) game.suggest(from, this.shown.square ? to : undefined); // lift it, as a hint does
+  }
+
+  private hintCost(puzzle: Puzzle): string {
+    return t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, solution(puzzle).length) });
   }
 
   private async solved(token: number): Promise<void> {
@@ -175,27 +208,30 @@ export class PuzzleMode implements Mode {
     }
   }
 
-  /** First the piece to move (lifted on the board), then the square it goes to. */
+  /** First the piece to move (lifted on the board), then the square it goes to; each is shown once. */
   private hint(): void {
     const puzzle = this.puzzle;
     const { game } = this.ctx.engine;
-    if (!puzzle || game.isOver) return;
+    if (!puzzle || game.isOver || !this.canHint()) return;
     const answer = answerAt(puzzle, this.played.length);
     if (!answer) return;
     const from = answer.slice(0, 2) as Square;
-    const to = answer.slice(2, 4) as Square;
     const piece = t(PIECE_NAMES[new Chess(game.fen).get(from)?.type ?? 'p']);
+    const square = this.shown.piece; // the piece is known: the square comes next
     this.hints++;
-    this.hintLevel = Math.min(2, this.hintLevel + 1);
-    const deep = this.hintLevel >= 2;
-    game.suggest(from, deep ? to : undefined);
-    this.setPuzzle({
-      hints: this.hints,
-      message: {
-        tone: 'hint',
-        text: `${deep ? t('Hint: move it to the marked square.') : t('Hint: move your {piece}, the one glowing on the board.', { piece })} ${t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, solution(puzzle).length) })}`,
-      },
-    });
+    this.shown = square ? { piece: true, square: true } : { ...this.shown, piece: true };
+    this.showGuide();
+    const text = this.shown.square
+      ? square
+        ? t('Hint: move it to the marked square.')
+        : t('Hint: move your {piece}, the one glowing on the board, to the marked square.', { piece })
+      : t('Hint: move your {piece}, the one glowing on the board.', { piece });
+    this.setPuzzle({ hints: this.hints, message: { tone: 'hint', text: `${text} ${this.hintCost(puzzle)}` } });
+  }
+
+  /** Something left to show for the current move. */
+  private canHint(): boolean {
+    return !(this.shown.piece && this.shown.square);
   }
 
   dispose(): void {
@@ -206,7 +242,7 @@ export class PuzzleMode implements Mode {
 
   actions(s: GameState): ModeAction[] {
     return [
-      { id: 'hint', label: t('Hint'), icon: Lightbulb, disabled: !!s.end || !this.puzzle || !!s.puzzle?.briefing },
+      { id: 'hint', label: t('Hint'), icon: Lightbulb, disabled: !!s.end || !this.puzzle || !!s.puzzle?.briefing || !this.canHint() },
       { id: 'brief', label: t('Task'), icon: Info, disabled: !this.puzzle },
       { id: 'retry', label: t('Restart'), icon: RotateCcw, disabled: !this.puzzle },
     ];

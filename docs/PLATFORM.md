@@ -215,6 +215,14 @@ Decided (October 2026):
 - **Wrong moves** are taken back and count as a mistake; any checkmate counts as the right
   move (and ends the puzzle). A hint first lifts the piece to move on the board and names it;
   a second hint shows only the square it goes to. Each counts against the stars.
+- **Help after wrong moves** (19 October 2026, the user's decision): after every wrong move,
+  with any piece, a green ring marks the square where the right move ends, for free (no
+  coins; the mistake itself still costs the star as before). After **three wrong moves in a
+  row** on the same move (`MISSES_FOR_HINT` in `modes/puzzle.ts`) the piece to move is
+  marked too, and that counts as one hint (coins and stars) unless the player had already
+  asked for the piece. The marks stay until the right move is played (`Game.guide`); the
+  Hint button then has only what isn't shown yet (the piece, or the square) and is off
+  when both are.
 - **Every puzzle says what it wants** (October 2026, the user's request: puzzles must be fun,
   guide the player and teach something). Before the first move a briefing card shows the
   goal ("Italian Game", "Checkmate in 2 moves", "Win material"), the side and the number of

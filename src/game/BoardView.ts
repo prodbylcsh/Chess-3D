@@ -12,6 +12,7 @@ export const MarkerKind = {
   LastMove: 3,
   Check: 4,
   Hover: 5,
+  Guide: 6,
 } as const;
 export type MarkerKind = (typeof MarkerKind)[keyof typeof MarkerKind];
 
@@ -43,8 +44,12 @@ void main() {
     a = 0.16 + smoothstep(0.86, 1.0, box) * 0.2;
   } else if (uKind == 4) {
     a = (1.0 - smoothstep(0.0, 1.2, d)) * (0.65 + 0.35 * sin(uTime * 6.0));
-  } else {
+  } else if (uKind == 5) {
     a = smoothstep(0.86, 0.98, box) * 0.55 + 0.05;
+  } else {
+    float pulse = 0.7 + 0.3 * sin(uTime * 3.5);
+    a = smoothstep(0.42, 0.5, d) * (1.0 - smoothstep(0.7, 0.78, d)) * pulse;
+    a += smoothstep(0.82, 0.97, box) * 0.8 * pulse + 0.22;
   }
   gl_FragColor = vec4(uColor, clamp(a, 0.0, 1.0) * uAlpha);
 }
@@ -57,6 +62,7 @@ const MARKER_COLORS: Record<MarkerKind, THREE.Color> = {
   [MarkerKind.LastMove]: new THREE.Color(0.45, 0.75, 1.1),
   [MarkerKind.Check]: new THREE.Color(2.2, 0.15, 0.08),
   [MarkerKind.Hover]: new THREE.Color(1.0, 1.0, 1.0),
+  [MarkerKind.Guide]: new THREE.Color(0.15, 1.6, 0.55),
 };
 
 class Marker {
@@ -125,6 +131,8 @@ export class BoardView {
   private readonly lastTo: Marker;
   private readonly checkMarker: Marker;
   private readonly hoverMarker: Marker;
+  private readonly guideFrom: Marker;
+  private readonly guideTo: Marker;
   private hoverSquare: Square | null = null;
   private readonly plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   /** called for every new piece (the Wardrobe gives it its set) */
@@ -143,8 +151,10 @@ export class BoardView {
     this.lastTo = this.addMarker(MarkerKind.LastMove);
     this.checkMarker = this.addMarker(MarkerKind.Check);
     this.hoverMarker = this.addMarker(MarkerKind.Hover);
+    this.guideFrom = this.addMarker(MarkerKind.Guide);
+    this.guideTo = this.addMarker(MarkerKind.Guide);
 
-    const fixed = [this.selectedMarker, this.lastFrom, this.lastTo, this.checkMarker, this.hoverMarker];
+    const fixed = [this.selectedMarker, this.lastFrom, this.lastTo, this.checkMarker, this.hoverMarker, this.guideFrom, this.guideTo];
     animator.onFrame((_, time) => {
       for (const m of fixed) m.tick(time);
       for (const m of this.targetMarkers) m.tick(time);
@@ -223,6 +233,14 @@ export class BoardView {
   setCheck(sq: Square | null): void {
     if (sq) this.checkMarker.show(sq, 1, 1.25);
     else this.checkMarker.hide();
+  }
+
+  /** Puzzle guidance that stays until cleared: the piece to move and the square it goes to. */
+  setGuide(from: Square | null, to: Square | null): void {
+    if (from) this.guideFrom.show(from, 0.9, 1);
+    else this.guideFrom.hide();
+    if (to) this.guideTo.show(to, 0.95, 1);
+    else this.guideTo.hide();
   }
 
   setHover(sq: Square | null): void {
