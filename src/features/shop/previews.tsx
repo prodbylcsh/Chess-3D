@@ -11,6 +11,7 @@ import { PIECE_PATHS, type PieceId } from '../../ui/art/pieces';
 export const PREVIEW_IMAGES: Record<string, string> = {
   'monolith-set': assetUrl('shop/monolith-set.webp'),
   'monolith-board': assetUrl('shop/monolith-board.webp'),
+  'squircle-set': assetUrl('shop/squircle-set.webp'),
 };
 
 const CLASSIC: Record<'light' | 'dark', PieceTone> = {

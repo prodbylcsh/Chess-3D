@@ -83,8 +83,9 @@ locally.
    assets-src/<name>` locally; either writes
    `public/assets/pieces/<dir>/` or `public/assets/boards/<dir>/`.
 5. Add the item to `ITEMS`, the look (`model`) to `looks.ts`, the texts and Czech, a card
-   picture (render the `-hd` models on a dark background, 16:10, WebP ≤ 50 KB) in
-   `public/assets/shop/` and `PREVIEW_IMAGES`.
+   picture in `public/assets/shop/` and `PREVIEW_IMAGES`: with the mock dev server on :5174,
+   `node scripts/assets/card/shoot.mjs <item-id> pieces/<set>` renders king, queen and
+   knight of both colours (`scripts/assets/card/`) into a 16:10 WebP ≤ 50 KB.
 6. Check with the verify-in-browser skill (`gl: true`): a game in the set (pieces on
    their squares, the knight facing the enemy, a capture), the default look unchanged,
    the shop card and the 3D view (both colours). `npm test`; the e2e tests if prices or
