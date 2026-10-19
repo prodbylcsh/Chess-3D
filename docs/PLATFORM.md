@@ -171,7 +171,7 @@ Decided (October 2026):
 
   | Module | Themes | Ratings |
   | --- | --- | --- |
-  | Openings (free) | 40 hand-made puzzles + 60 Lichess puzzles with the opening theme | 400–1800 |
+  | Openings (free) | 100 hand-made opening lines, half for White and half for Black | 400–1588 |
   | First Steps | short puzzles, up to 2 player moves | 400–1300 |
   | Mate in Two | mateIn2 | 600–2000 |
   | Forks | fork | 600–2200 |
@@ -180,13 +180,22 @@ Decided (October 2026):
   | Endgames | endgame | 700–2300 |
 
   More modules (fantasy and other themes) come later.
-- **Openings** (added October 2026 at the user's request): the main lines for White,
-  played from the first move, and Black's answers to 1.e4, 1.d4 and their follow-ups; the
-  fastest mates (Fool's, Scholar's, Légal's); gambits; and the classic traps
-  (Blackburne Shilling, Lasker, Elephant, Siberian, …). These 40 are hand-made in
-  `scripts/puzzles/curated.ts` (each line checked by the tests) and named on the board
-  ("Italian Game: play it as White."); only the line's move counts, the hint shows it.
-  The other 60 are Lichess puzzles with the opening theme. It is the free module.
+- **Openings** (added October 2026 at the user's request, all hand-made since 19 October:
+  the Lichess "opening" puzzles were random middlegame positions, often with pawns
+  already gone, and the user wanted the module to be about the start of the game). 100
+  real games from the first move, 50 played as White and 50 as Black, in chapters of ten:
+  the first moves and quickest mates; the classical main lines from both sides; Black's
+  answers to 1.e4 and how White meets them; the attacks on the weak pawn beside the king;
+  queen's pawn openings; flank openings; the Sicilian world; gambits and how to answer
+  them; more systems; the traps the masters set. Every opening appears from both sides
+  where it makes sense ("Italian Game" and "Italian Game as Black"), weak first moves are
+  punished ("Punish the Wayward Queen", "Owen's Defence Trap"), and the "Answer the …"
+  lines teach what the opponent is after and how to counter it. A line starts at most a
+  few moves in, always from a real game, and the intro and the explanation after every
+  move say what the opponent intends. The lines live in `scripts/puzzles/curated.ts`
+  (SAN; each player move checked with Stockfish; the order is the difficulty, rating
+  400 + 12 per line) with their lessons in `src/features/puzzles/lessons.ts`; only the
+  line's move counts, the hint shows it. It is the free module.
 - **Unlocking:** only Openings, shown first, is free (since 15 October 2026, the user's
   choice; First Steps was the free one on the first day, and players who had solved a
   First Steps puzzle by then keep it unlocked, migration `20261015170000`). The others cost **100,000 coins** each and
@@ -914,8 +923,8 @@ Decided:
 - **Puzzles** (October 2026, 4.2): themed modules of 100, only Openings free, the others
   100,000 coins each (a subscription later); 25–50 coins per first solve, 500 for every 10
   solved in a module, a random unowned shop item (or 25,000 coins) for finishing one; six
-  tactics modules first, then Openings (40 hand-made lines and traps, 60 Lichess opening
-  puzzles); fantasy and other themes later. The legal pages say so (Privacy
+  tactics modules first, then Openings (100 hand-made lines from the first move, both
+  colours, since 19 October 2026); fantasy and other themes later. The legal pages say so (Privacy
   §2 and §6, Terms §6; effective 15 October 2026).
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.

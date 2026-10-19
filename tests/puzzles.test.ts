@@ -83,7 +83,8 @@ test('a mate before the end of the line solves the puzzle too', () => {
 test('openings: the player may move first, from the starting position', async () => {
   const { curatedPuzzles } = await import('./../scripts/puzzles/curated.ts');
   const lines = curatedPuzzles('openings');
-  assert.equal(lines.length, 40);
+  assert.equal(lines.length, 100, 'the whole module is hand-made');
+  assert.equal(lines.filter((p) => playerSide(p) === 'w').length, 50, 'half for White, half for Black');
   const italian = lines.find((p) => p.goal === 'Italian Game')!;
   assert.equal(italian.playerFirst, true);
   assert.equal(playerSide(italian), 'w');
@@ -121,7 +122,7 @@ test('every puzzle of every module is solved by its own solution', async () => {
 test('the goals of hand-made puzzles are translated', async () => {
   const [{ PUZZLES }, { cs }] = await Promise.all([import('../supabase/functions/_shared/server/puzzle-data.ts'), import('../src/i18n/cs.ts')]);
   const goals = Object.values(PUZZLES).flatMap((list) => list.flatMap((p) => (p.goal ? [p.goal] : [])));
-  assert.ok(goals.length >= 40);
+  assert.ok(goals.length >= 100);
   assert.deepEqual(goals.filter((g) => !(g in cs)), []);
 });
 
@@ -151,5 +152,8 @@ test('every puzzle explains itself: lessons for hand-made lines, themes for the 
     assert.equal(named.length, 100, module);
   }
   assert.ok(MOTIFS.length > 40);
-  assert.equal(Object.keys(LESSONS).length, 40);
+  assert.equal(Object.keys(LESSONS).length, 100);
+  // the lessons speak of pieces, not squares
+  const texts = Object.values(LESSONS).flatMap((l) => [l.intro, ...l.why]);
+  assert.deepEqual(texts.filter((x) => /\b[a-h][1-8]\b/.test(x)), []);
 });

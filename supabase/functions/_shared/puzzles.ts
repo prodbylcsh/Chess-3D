@@ -26,6 +26,7 @@ export interface PuzzleModule {
   /**
    * how scripts/puzzles/build.ts picks its puzzles from the Lichess database; `curated`:
    * the module starts with hand-made puzzles (scripts/puzzles/curated.ts) and Lichess fills the rest
+   * (Openings is all hand-made: real games from the first move, so it takes nothing from Lichess)
    */
   select: { min: number; max: number; maxPlies: number; themes?: string[]; without?: string[]; curated?: boolean };
 }
@@ -34,11 +35,11 @@ export const MODULES: readonly PuzzleModule[] = [
   {
     id: 'openings',
     name: 'Openings',
-    description: 'The best first moves for White and Black, the fastest mates and the traps to know.',
+    description: 'Real games from the first move, as White and as Black: the main lines and how to answer them, quick mates and the traps to spot.',
     free: true,
     color: '#ff9a4d',
     icon: 'book',
-    select: { min: 600, max: 1800, maxPlies: 6, themes: ['opening'], curated: true },
+    select: { min: 400, max: 1600, maxPlies: 0, curated: true },
   },
   {
     id: 'first-steps',

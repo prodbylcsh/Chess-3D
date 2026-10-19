@@ -20,8 +20,8 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   reset by email), Apple or Google (once set up on the server), and a 4-step onboarding
   (username with live availability check, one of six profile icons). Guests can still
   play invite games and are invited to register afterwards.
-- **Puzzles**: seven themed modules of 100 puzzles, mostly from Lichess, including Openings with
-  hand-made opening lines and traps explained move by move; each module's map is a 3D world
+- **Puzzles**: seven themed modules of 100 puzzles, mostly from Lichess, plus Openings: 100
+  hand-made games from the first move, as White and as Black, explained move by move; each module's map is a 3D world
   where your piece hops from stone to stone, and every puzzle opens with what it wants from
   you (Openings free, the others
   unlocked for coins), a map of levels played in order, stars, coins for every new solve,
