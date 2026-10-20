@@ -44,9 +44,9 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   (new players are Silver II). Master, Grandmaster and Challenger have no divisions.
   **MMR numbers are never shown**, only ranks and progress bars (the result card shows
   the MMR *change*).
-- **Ranked is closed** until the platform has enough players (`RANKED_OPEN = false` in
-  `play.ts`; the app shows "Soon", the `play` function refuses ranked searches). Opening it
-  is the user's call.
+- **Ranked is closed** until the platform has enough players (`SEASON_ONE = null` in
+  `seasons.ts`; the app shows "Soon", the `play` function refuses ranked searches). Opening
+  it is the user's call: set `SEASON_ONE` to the current month, which also starts season 1.
 - **Who pays what:** coins and MMR only from **ranked** and **casual** games (casual gives
   coins, not MMR). **No coins and no MMR** from friend, AI or same-device games.
 - **Coins:** win 100 / draw 75 / loss 50, adjusted for performance (±20%), rating gap
@@ -61,7 +61,8 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
 - **Short games:** fewer than 20 half-moves (10 moves each) pay no coins; MMR still counts.
 - **Fresh start on the server (M6):** 500 coins, 1,000 MMR, free items; browser data was
   not carried over.
-- **Seasons:** 3 months, season 1 started July 2026. At season end MMR is pulled towards
+- **Seasons:** 3 months; season 1 starts when ranked opens (`SEASON_ONE`), everyone at
+  1,000 MMR. Before that no season runs: no rewards, no resets. At season end MMR is pulled towards
   1,000 by 25%, by 50% every 4th season, and by 100% every 12th (everyone back to 1,000).
   Win streaks reset.
 - **Season rewards:** by the **highest** rank reached in the season. Ranks are grouped in
@@ -71,9 +72,9 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   effect). The item is random, but nothing from the previous 3 seasons repeats, brackets
   get different items, and a higher bracket never gets a cheaper item. A player who
   already owns the item gets its price in coins instead.
-  Items start with season 2 (`FIRST_ITEM_SEASON`); with fewer items than brackets the most
-  expensive go to the highest brackets (season 2: Challenger the Monolith set, Master &
-  Grandmaster the Monolith board).
+  With fewer items than brackets the most expensive go to the highest brackets (season 1
+  with today's pool: Challenger the Monolith set, Master & Grandmaster the Monolith board,
+  Emerald & Diamond the Squircle set).
 - **Puzzles (§4.2):** modules of 100 puzzles (`PUZZLES_PER_MODULE`); only Openings is
   free (players who started First Steps while it was free keep it), the others cost **100,000 coins** each (`MODULE_PRICE`; a subscription comes
   later). The first solve of a puzzle pays 25–50 coins by its rating (`puzzleCoins`);

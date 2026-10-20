@@ -1,6 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BRACKETS, NO_REPEAT_SEASONS, bracketOf, pickSeasonRewards, resetAfterSeason, resetShare, rewardHistory, seasonAt, type RewardCandidate } from '../supabase/functions/_shared/seasons.ts';
+import {
+  BRACKETS,
+  NO_REPEAT_SEASONS,
+  SEASON_ONE,
+  bracketOf,
+  parseMonth,
+  pickSeasonRewards,
+  rankedOpen,
+  resetAfterSeason,
+  resetShare,
+  rewardHistory,
+  seasonAt,
+  type RewardCandidate,
+} from '../supabase/functions/_shared/seasons.ts';
 import { seasonRewardPool } from '../supabase/functions/_shared/shop.ts';
 
 test('reset schedule: 25%, every 4th season 50%, every 12th a full reset', () => {
@@ -48,8 +61,10 @@ test('season rewards are deterministic and degrade gracefully with a small pool'
   assert.deepEqual(small, [null, null, null, 'item-0', 'item-1', 'item-2']);
 });
 
-test('season calendar: 3-month seasons from July 2026', () => {
-  const at = (iso: string) => seasonAt(new Date(iso));
+test('season calendar: 3-month seasons from the month ranked opens', () => {
+  const july = { year: 2026, month: 7 };
+  const at = (iso: string) => seasonAt(new Date(iso), july)!;
+  assert.equal(seasonAt(new Date('2026-06-30T23:59:59Z'), july), null, 'no season before season 1');
   assert.equal(at('2026-07-01T00:00:00Z').number, 1);
   assert.equal(at('2026-09-30T23:59:59Z').number, 1);
   const s2 = at('2026-10-07T12:00:00Z');
@@ -58,6 +73,20 @@ test('season calendar: 3-month seasons from July 2026', () => {
   assert.equal(s2.end.toISOString(), '2027-01-01T00:00:00.000Z');
   assert.equal(at('2027-01-01T00:00:00Z').number, 3);
   assert.equal(at('2029-06-30T00:00:00Z').number, 12);
+  assert.equal(seasonAt(new Date('2027-02-01T00:00:00Z'), { year: 2026, month: 11 })!.number, 2, 'seasons need not start in January');
+});
+
+test('ranked and the seasons wait for SEASON_ONE', () => {
+  const now = new Date('2026-10-20T12:00:00Z');
+  assert.equal(rankedOpen(now, null), false);
+  assert.equal(seasonAt(now, null), null);
+  assert.equal(rankedOpen(now, { year: 2026, month: 10 }), true);
+  assert.equal(rankedOpen(now, { year: 2026, month: 11 }), false, 'a later month opens ranked on its 1st');
+  assert.equal(rankedOpen(new Date('2026-11-01T00:00:00Z'), { year: 2026, month: 11 }), true);
+  assert.equal(SEASON_ONE, null, 'ranked is closed until the user opens it');
+  assert.deepEqual(parseMonth('2026-07'), { year: 2026, month: 7 });
+  assert.equal(parseMonth('none'), null);
+  assert.equal(parseMonth('2026-13'), null);
 });
 
 test('reward history with the real shop pool keeps every guarantee', () => {

@@ -4,7 +4,7 @@
 import type { Chess, Move } from 'chess.js';
 import { COINS, STAKES, coinReward, wagerNet, type CoinReward, type StakeId } from './economy.ts';
 import { MMR, mmrChange, rankOf, type MmrChange, type Outcome } from './rating.ts';
-import { bracketOf, resetAfterSeason, rewardHistory, seasonAt, type SeasonReward } from './seasons.ts';
+import { SEASON_ONE, bracketOf, rankedOpen, resetAfterSeason, rewardHistory, seasonAt, type Month, type SeasonReward } from './seasons.ts';
 import { itemDef, seasonRewardPool } from './shop.ts';
 
 export type Side = 'w' | 'b';
@@ -34,16 +34,12 @@ export const CONTROLS: Record<ControlId, Control> = {
 export const DEFAULT_CONTROL: ControlId = 'rapid';
 
 /**
- * Ranked matchmaking is closed until the platform has enough players (decided October
- * 2026): the Play hub shows it as "Soon" and the `play` function refuses ranked searches.
- * Set to `true` to open it; the app and the server follow on the next deploy. The server
- * can override it with the `RANKED_OPEN` environment variable (the local e2e tests do).
+ * Whether players can search for games of this kind. Ranked is closed until season 1
+ * starts (SEASON_ONE in seasons.ts, decided October 2026: once there are enough players);
+ * casual and coin games are always open.
  */
-export const RANKED_OPEN: boolean = false;
-
-/** Whether players can search for games of this kind. */
-export function kindOpen(kind: MatchKind, rankedOpen: boolean = RANKED_OPEN): boolean {
-  return kind !== 'ranked' || rankedOpen;
+export function kindOpen(kind: MatchKind, ranked: boolean = rankedOpen()): boolean {
+  return kind !== 'ranked' || ranked;
 }
 
 /** "10 + 5" */
@@ -288,8 +284,13 @@ export interface SeasonGrant {
  * time the player shows up). Rewards go by the highest rank reached in each season;
  * MMR is pulled towards 1,000 and win streaks reset.
  */
-export function rollSeasons(player: PlayerState, inventory: readonly string[], now: Date): { after: PlayerState; grants: SeasonGrant[] } {
-  const current = seasonAt(now).number;
+export function rollSeasons(
+  player: PlayerState,
+  inventory: readonly string[],
+  now: Date,
+  first: Month | null = SEASON_ONE,
+): { after: PlayerState; grants: SeasonGrant[] } {
+  const current = seasonAt(now, first)?.number ?? 0;
   const after = { ...player };
   const grants: SeasonGrant[] = [];
   if (player.season >= current) return { after, grants };
@@ -297,6 +298,14 @@ export function rollSeasons(player: PlayerState, inventory: readonly string[], n
   const history = rewardHistory(current - 1, seasonRewardPool());
   const owned = new Set(inventory);
   for (let s = player.season; s < current; s++) {
+    if (s < 1) {
+      // before season 1 (ranked closed): no rewards; season 1 is a fresh start for everyone
+      after.mmr = MMR.start;
+      after.season_peak_mmr = MMR.start;
+      after.win_streak = 0;
+      after.ranked_streak = 0;
+      continue;
+    }
     const peak = Math.max(after.season_peak_mmr, after.mmr);
     const bracket = bracketOf(rankOf(peak).tier.id);
     const reward = history[s - 1]?.find((r: SeasonReward) => r.bracket === bracket.id);
@@ -322,7 +331,7 @@ export function rollSeasons(player: PlayerState, inventory: readonly string[], n
 }
 
 /** A new player on the server: the fresh start everyone gets. */
-export function newPlayer(id: string, now: Date): PlayerState {
+export function newPlayer(id: string, now: Date, first: Month | null = SEASON_ONE): PlayerState {
   return {
     id,
     mmr: MMR.start,
@@ -333,7 +342,7 @@ export function newPlayer(id: string, now: Date): PlayerState {
     win_streak: 0,
     ranked_streak: 0,
     best_streak: 0,
-    season: seasonAt(now).number,
+    season: seasonAt(now, first)?.number ?? 0,
     season_peak_mmr: MMR.start,
   };
 }

@@ -4,8 +4,19 @@ import { MMR, type TierId } from './rating.ts';
 
 export const SEASON_MONTHS = 3;
 
-/** Season 1 started on this day (UTC); seasons follow back to back. */
-export const FIRST_SEASON_START = { year: 2026, month: 7 } as const;
+export interface Month {
+  year: number;
+  /** 1 = January */
+  month: number;
+}
+
+/**
+ * Ranked games and season 1 start on the 1st of this month (UTC); seasons follow back to
+ * back. `null` while ranked is closed (decided October 2026: ranked opens once the
+ * platform has enough players). Until then no season runs: no rewards, no MMR resets.
+ * To open ranked, set the month (the current one opens it at once) and deploy.
+ */
+export const SEASON_ONE: Month | null = null;
 
 export interface SeasonDates {
   number: number;
@@ -13,16 +24,38 @@ export interface SeasonDates {
   end: Date;
 }
 
-/** Which season `date` falls in, with its first and last moment (end is exclusive). */
-export function seasonAt(date: Date): SeasonDates {
-  const months = (date.getUTCFullYear() - FIRST_SEASON_START.year) * 12 + date.getUTCMonth() + 1 - FIRST_SEASON_START.month;
-  const number = Math.max(1, Math.floor(months / SEASON_MONTHS) + 1);
-  const first = (number - 1) * SEASON_MONTHS + FIRST_SEASON_START.month - 1;
+/** The first moment of season 1, or null while ranked is closed. */
+export function seasonOneStart(first: Month | null = SEASON_ONE): Date | null {
+  return first ? new Date(Date.UTC(first.year, first.month - 1, 1)) : null;
+}
+
+/** Whether ranked games are open at `now`: from the start of season 1 on. */
+export function rankedOpen(now: Date = new Date(), first: Month | null = SEASON_ONE): boolean {
+  const start = seasonOneStart(first);
+  return !!start && now >= start;
+}
+
+/**
+ * Which season `date` falls in, with its first and last moment (end is exclusive), or
+ * null before season 1 (ranked closed). The number of "no season yet" is 0 where a
+ * number is stored (`players.season`).
+ */
+export function seasonAt(date: Date, first: Month | null = SEASON_ONE): SeasonDates | null {
+  if (!first || !rankedOpen(date, first)) return null;
+  const months = (date.getUTCFullYear() - first.year) * 12 + date.getUTCMonth() + 1 - first.month;
+  const number = Math.floor(months / SEASON_MONTHS) + 1;
+  const firstMonth = (number - 1) * SEASON_MONTHS + first.month - 1;
   return {
     number,
-    start: new Date(Date.UTC(FIRST_SEASON_START.year, first, 1)),
-    end: new Date(Date.UTC(FIRST_SEASON_START.year, first + SEASON_MONTHS, 1)),
+    start: new Date(Date.UTC(first.year, firstMonth, 1)),
+    end: new Date(Date.UTC(first.year, firstMonth + SEASON_MONTHS, 1)),
   };
+}
+
+/** "2026-07" → { year: 2026, month: 7 } (the server's SEASON_ONE override); else null. */
+export function parseMonth(value: string | undefined | null): Month | null {
+  const m = /^(\d{4})-(\d{2})$/.exec(value ?? '');
+  return m && +m[2] >= 1 && +m[2] <= 12 ? { year: +m[1], month: +m[2] } : null;
 }
 
 /**
@@ -83,12 +116,6 @@ export interface SeasonReward {
   /** id of the shop item given, or null when the pool ran out */
   item: string | null;
 }
-
-/**
- * Seasons before this one hand out no shop item: they ended before the server kept
- * anyone's items (the fresh start was in season 2), and the real items arrived later.
- */
-export const FIRST_ITEM_SEASON = 2;
 
 /** Item ids handed out in the last few seasons may not be handed out again. */
 export const NO_REPEAT_SEASONS = 3;
@@ -151,7 +178,7 @@ export function pickSeasonRewards(season: number, pool: RewardCandidate[], previ
 export function rewardHistory(season: number, pool: RewardCandidate[]): SeasonReward[][] {
   const all: SeasonReward[][] = [];
   for (let s = 1; s <= season; s++) {
-    all.push(pickSeasonRewards(s, s < FIRST_ITEM_SEASON ? [] : pool, all.map((r) => r.map((x) => x.item).filter((x): x is string => !!x))));
+    all.push(pickSeasonRewards(s, pool, all.map((r) => r.map((x) => x.item).filter((x): x is string => !!x))));
   }
   return all;
 }

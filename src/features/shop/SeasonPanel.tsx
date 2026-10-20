@@ -31,12 +31,19 @@ export function SeasonPanel({ onShowItem }: { onShowItem: (id: string) => void }
         <Badge tone="violet">{t('Season {n}', { n: season.number })}</Badge>
         <h2 className="display">{t('Season rewards')}</h2>
         <p className="muted">
-          <CalendarClock size={15} /> {tn(daysLeft(season.end), 'Ends in {n} day', 'Ends in {n} days')} · {shortDate(new Date(season.end))}
+          <CalendarClock size={15} />{' '}
+          {season.end ? (
+            <>
+              {tn(daysLeft(season.end), 'Ends in {n} day', 'Ends in {n} days')} · {shortDate(new Date(season.end))}
+            </>
+          ) : (
+            t('Starts when ranked games open')
+          )}
         </p>
         <div className="season-peak">
           <RankEmblem tier={season.peak.tier} division={season.peak.division} size={38} />
           <span>
-            <span className="faint">{t('Your highest rank this season')}</span>
+            <span className="faint">{season.end ? t('Your highest rank this season') : t('Your rank')}</span>
             <strong>
               {rankText(season.peak.label)} · {bracketName(season.bracket)}
             </strong>

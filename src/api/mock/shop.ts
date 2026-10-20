@@ -71,7 +71,7 @@ export const shop: ShopService = {
 
 /** Remember the highest MMR of the running season (rewards depend on it). */
 export function notePeak(profile: Profile): void {
-  const season = String(seasonAt(new Date()).number);
+  const season = String(seasonAt(new Date())?.number ?? 0);
   const peaks = (db.seasonPeak[profile.id] ??= {});
   peaks[season] = Math.max(peaks[season] ?? 0, profile.mmr);
 }
@@ -80,17 +80,19 @@ export const seasons: SeasonsService = {
   async current(): Promise<SeasonInfo> {
     await wait(150, 350);
     const { profile } = session();
+    // before season 1 (ranked closed) the panel previews season 1, without dates
     const season = seasonAt(new Date());
-    const peakMmr = Math.max(db.seasonPeak[profile.id]?.[String(season.number)] ?? 0, profile.mmr);
-    const history = rewardHistory(season.number, seasonRewardPool());
+    const number = season?.number ?? 1;
+    const peakMmr = season ? Math.max(db.seasonPeak[profile.id]?.[String(number)] ?? 0, profile.mmr) : profile.mmr;
+    const history = rewardHistory(number, seasonRewardPool());
     return {
-      number: season.number,
-      start: season.start.toISOString(),
-      end: season.end.toISOString(),
+      number,
+      start: season?.start.toISOString() ?? null,
+      end: season?.end.toISOString() ?? null,
       peak: rankInfo(peakMmr),
       bracket: bracketOf(rankOf(peakMmr).tier.id).id,
-      rewards: history[season.number - 1],
-      resetShare: resetShare(season.number),
+      rewards: history[number - 1],
+      resetShare: resetShare(number),
     };
   },
 };

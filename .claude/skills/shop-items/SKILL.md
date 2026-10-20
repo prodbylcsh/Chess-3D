@@ -39,7 +39,7 @@ board. Keep item **ids** stable: they are stored in players' loadouts and in the
   season rewards through `apply_seasons`. A grant by the operator is an insert with
   source `grant` (service role). Never change coins or ownership from the UI.
 - **Season rewards** draw from `seasonRewardPool()` (for-sale pieces, boards, moves,
-  destruction) starting with season 2 (`FIRST_ITEM_SEASON`). Adding or removing pool
+  destruction), every season from season 1 (which starts when ranked opens). Adding or removing pool
   items changes which item later seasons get; past seasons are already in `player_items`.
   Season icons (`season-<n>-<bracket>`) are never for sale.
 - **Who sees what in a game** (§4.5): each side shows its owner's pieces, moves and

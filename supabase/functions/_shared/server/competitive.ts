@@ -6,6 +6,7 @@ import { ANALYSIS, accuracies, isReport, sameReport, type AnalysisReport, type A
 import { newPlayer, performanceAdjustment, rollSeasons, settle, type FinishedGame, type PlayerState, type SeasonGrant, type Side } from '../play.ts';
 import { awardsMet } from '../awards.ts';
 import { rankOf } from '../rating.ts';
+import { SEASON_ONE, parseMonth, type Month } from '../seasons.ts';
 import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
 
@@ -17,6 +18,16 @@ export interface PlayerRow extends PlayerState {
 }
 
 const UNIQUE_VIOLATION = '23505';
+
+/**
+ * Start of season 1 and of ranked on this server: SEASON_ONE, unless the environment sets
+ * `SEASON_ONE` ('2026-07', or 'none' for closed). The local stack sets it so the e2e tests
+ * cover ranked and season ends while ranked is closed live.
+ */
+export const SERVER_SEASON_ONE: Month | null = (() => {
+  const env = Deno.env.get('SEASON_ONE');
+  return env ? parseMonth(env) : SEASON_ONE;
+})();
 
 export function rankInfo(mmr: number) {
   const r = rankOf(mmr);
@@ -54,13 +65,13 @@ export async function publishShowcase(admin: SupabaseClient, player: PlayerRow):
 export async function ensurePlayer(admin: SupabaseClient, id: string, now = new Date()): Promise<{ player: PlayerRow; grants: SeasonGrant[] }> {
   let player = await loadPlayer(admin, id);
   if (!player) {
-    const { error } = await admin.from('players').insert(newPlayer(id, now));
+    const { error } = await admin.from('players').insert(newPlayer(id, now, SERVER_SEASON_ONE));
     if (error && error.code !== UNIQUE_VIOLATION) throw error;
     player = (await loadPlayer(admin, id))!;
     await publishShowcase(admin, player);
   }
-  const { after, grants } = rollSeasons(player, player.inventory, now);
-  if (grants.length === 0) return { player, grants };
+  const { after, grants } = rollSeasons(player, player.inventory, now, SERVER_SEASON_ONE);
+  if (after.season === player.season) return { player, grants };
   const { data: applied, error } = await admin.rpc('apply_seasons', {
     p_player: id,
     p_from: player.season,

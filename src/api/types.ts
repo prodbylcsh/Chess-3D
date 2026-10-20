@@ -193,8 +193,9 @@ export interface ShopItem {
 
 export interface SeasonInfo {
   number: number;
-  start: string;
-  end: string;
+  /** null before season 1: ranked is closed and the season starts when it opens */
+  start: string | null;
+  end: string | null;
   /** highest rank reached this season: the rewards depend on it */
   peak: RankInfo;
   /** reward bracket of the peak rank */

@@ -143,13 +143,17 @@ it. If a player doesn't move in time, the game is **aborted**: no MMR, no coins,
 refunded (decided October 2026). A move sent after the clock ran out ends the game on time
 instead.
 
-**Opening ranked.** Ranked is switched off by one constant, `RANKED_OPEN` in
-`_shared/play.ts`, which the app (Play hub, mock back-end) and the `play` function both
-read; the function answers ranked searches with `ranked_closed`. To open it, set the
-constant to `true` and deploy (the merge to `main` deploys the site and the functions). The
-function also honours a `RANKED_OPEN` environment variable (`true` / `false`), which the
-local stack sets so the e2e tests cover ranked. Ranks, the season panel and season rewards
-keep working while it is closed; everyone simply stays at their rank (new players Silver II).
+**Opening ranked.** Ranked and the seasons wait for one constant, `SEASON_ONE` in
+`_shared/seasons.ts` (`null` for now). The app (Play hub, Shop season panel, mock back-end)
+and the server both read it; the `play` function answers ranked searches with
+`ranked_closed`. To open ranked, set it to the current month (e.g. `{ year: 2027, month: 3 }`)
+and deploy (the merge to `main` deploys the site and the functions): ranked opens at once
+and **season 1** starts on the 1st of that month. A later month opens ranked on its 1st.
+Never set a month in the past beyond the current one: the seasons in between would end at
+once and hand out rewards. Before season 1 the Shop previews season 1's rewards with
+"Starts when ranked games open". The server also honours a `SEASON_ONE` environment variable
+(`2026-07`, or `none`), which the local stack sets so the e2e tests cover ranked and season
+ends.
 
 **Matchmaking (ranked):** start with a ±100 MMR window and widen it by 50 every 5 seconds
 of waiting, up to ±400. Casual uses one queue with no rating window (it still prefers
@@ -645,6 +649,12 @@ real chess experience, and the slow climb reflects that.
 The drift is kept in check by **seasons** (implemented in
 `supabase/functions/_shared/seasons.ts`, tested in `tests/seasons.test.ts`).
 
+**Start:** season 1 starts when ranked opens (`SEASON_ONE`, 4.1), and seasons follow back
+to back. Until then no season runs: nobody gets season rewards and nobody's MMR is reset
+(decided October 2026; the calendar that counted from July 2026 is gone, and nothing was
+handed out for it). When season 1 starts everyone begins it fresh at 1,000 MMR (Silver II),
+with win streaks reset.
+
 **Length:** 3 months. **Reset when a season ends:**
 
 | Season that ends | Pull towards 1,000 MMR | Example (1,800 MMR) |
@@ -987,10 +997,10 @@ Decided:
   placeholder of their kind), with a White version of the black models made by
   recolouring; boards are always separate items. All placeholder items except the
   profile icons left the shop (retired, nobody owned any). Ownership is recorded per
-  item in `player_items`. Season item rewards start with season 2 (season 1 ended before
-  the server kept items), so in season 2 the Challenger bracket gets the Monolith set and
-  Master & Grandmaster the Monolith board, by the existing rule that the most expensive
-  items go to the highest brackets.
+  item in `player_items`. Every season hands out items; with fewer items than brackets
+  the most expensive go to the highest brackets (with today's pool, season 1: Challenger
+  the Monolith set, Master & Grandmaster the Monolith board, Emerald & Diamond the
+  Squircle set). Season 1 starts when ranked opens (5.5).
   The legal pages say so (Privacy §3, Terms §6, effective 11 October 2026); Terms §5
   covers clocks, leaving and the first-move window.
 - **No coins under 20 half-moves**, MMR still counts; **30 s first-move window**, else the
@@ -1020,7 +1030,9 @@ Decided:
 - **Languages**: English (default) and Czech.
 - **Ranked closed at launch** (October 2026): ranked games open only once there are enough
   players for fair matches; until then the Play hub shows ranked as "Soon" and the server
-  refuses ranked searches (`RANKED_OPEN`, 4.1). Casual and coin games stay open.
+  refuses ranked searches (`SEASON_ONE`, 4.1). Casual and coin games stay open.
+- **Seasons wait for ranked** (October 2026): no season rewards while ranked is closed; the
+  first real season (season 1) starts when ranked opens, everyone at 1,000 MMR (5.5).
 
 Open:
 

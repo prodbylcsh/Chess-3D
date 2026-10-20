@@ -20,7 +20,7 @@ import './play.css';
 
 type Sheet = 'friend' | 'ai' | 'stake' | null;
 
-/** ranked waits for enough players (RANKED_OPEN); until then the hero shows "Soon" */
+/** ranked waits for enough players (SEASON_ONE in seasons.ts); until then the hero shows "Soon" */
 const rankedOpen = kindOpen('ranked');
 
 function greeting(): string {

@@ -25,7 +25,8 @@ const quiet = { flags: 'n' };
 const rapid = (white = 600_000, black = 600_000, at = T0): Clocks => ({ control: 'rapid', white, black, turnStartedAt: at });
 const player = (id: string, over: Partial<PlayerState> = {}): PlayerState => ({ ...newPlayer(id, new Date(T0)), ...over });
 
-test('ranked can be closed; casual and coin games stay open', () => {
+test('ranked waits for season 1; casual and coin games stay open', () => {
+  assert.ok(!kindOpen('ranked'), 'closed while SEASON_ONE is null');
   assert.ok(!kindOpen('ranked', false));
   assert.ok(kindOpen('ranked', true));
   for (const open of [false, true]) {
@@ -123,9 +124,24 @@ test('settlement: casual pays coins only; coin games move the pot; aborted games
   assert.equal(aw.after.wins + aw.after.losses + aw.after.draws, 0);
 });
 
+const JULY = { year: 2026, month: 7 };
+
+test('before season 1 nothing rolls over; season 1 starts everyone fresh, without rewards', () => {
+  const p = player('x', { season: 0, mmr: 1240, season_peak_mmr: 1300, coins: 900, win_streak: 3, ranked_streak: 3 });
+  assert.equal(newPlayer('y', new Date(T0)).season, 0);
+  assert.deepEqual(rollSeasons(p, [], new Date(T0)), { after: p, grants: [] }, 'ranked closed: no season ends');
+  const { after, grants } = rollSeasons(p, [], new Date(Date.UTC(2027, 2, 5)), { year: 2027, month: 3 });
+  assert.deepEqual(grants, []);
+  assert.equal(after.season, 1);
+  assert.equal(after.mmr, 1000);
+  assert.equal(after.season_peak_mmr, 1000);
+  assert.equal(after.coins, 900);
+  assert.equal(after.ranked_streak, 0);
+});
+
 test('seasons roll over lazily: reward by peak, MMR pulled to 1,000, streaks reset', () => {
   const p = player('x', { season: 1, mmr: 1500, season_peak_mmr: 1650, win_streak: 4, ranked_streak: 2 });
-  const { after, grants } = rollSeasons(p, [], new Date(Date.UTC(2026, 9, 11)));
+  const { after, grants } = rollSeasons(p, [], new Date(Date.UTC(2026, 9, 11)), JULY);
   assert.equal(after.season, 2);
   assert.equal(grants.length, 1);
   assert.equal(grants[0].bracket, 'gold-platinum', 'peak 1,650 is Platinum');
@@ -134,7 +150,7 @@ test('seasons roll over lazily: reward by peak, MMR pulled to 1,000, streaks res
   assert.equal(after.win_streak, 0);
   assert.equal(after.coins, p.coins + grants[0].coins);
   assert.ok(grants[0].items.includes('season-1-gold-platinum'));
-  assert.deepEqual(rollSeasons(after, [], new Date(Date.UTC(2026, 9, 11))).grants, [], 'only once');
+  assert.deepEqual(rollSeasons(after, [], new Date(Date.UTC(2026, 9, 11)), JULY).grants, [], 'only once');
 });
 
 test('the public showcase comes from the real state', () => {
