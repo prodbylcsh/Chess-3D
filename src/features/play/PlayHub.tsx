@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { Bot, ChevronRight, Coins as CoinsIcon, Puzzle, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
-import { CONTROLS, controlLabel, type ControlId } from '#shared/play.ts';
+import { CONTROLS, controlLabel, kindOpen, type ControlId } from '#shared/play.ts';
 import type { MatchKind, StakeId } from '../../api';
 import { setPrefs, usePrefs } from '../../app/prefs';
 import { Page } from '../../app/AppLayout';
@@ -19,6 +19,9 @@ import { StakePicker } from './StakePicker';
 import './play.css';
 
 type Sheet = 'friend' | 'ai' | 'stake' | null;
+
+/** ranked waits for enough players (RANKED_OPEN); until then the hero shows "Soon" */
+const rankedOpen = kindOpen('ranked');
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -41,10 +44,10 @@ export function PlayHub() {
   // "Find another game" from a result screen lands here with ?queue=…
   useEffect(() => {
     const kind = params.get('queue') as MatchKind | null;
-    if (kind === 'ranked' || kind === 'casual' || kind === 'wager') {
+    if ((kind === 'ranked' && rankedOpen) || kind === 'casual' || kind === 'wager') {
       setQueue({ kind, stake: (params.get('stake') as StakeId) ?? undefined });
       setParams({}, { replace: true });
-    }
+    } else if (kind) setParams({}, { replace: true });
   }, [params, setParams]);
 
   return (
@@ -62,9 +65,12 @@ export function PlayHub() {
           <RankEmblem tier={rank.tier.id} division={rank.division} size={112} />
         </div>
         <div className="ranked-copy">
-          <Badge tone="gold">
-            <Trophy size={12} /> {t('Ranked')}
-          </Badge>
+          <span className="ranked-badges">
+            <Badge tone="gold">
+              <Trophy size={12} /> {t('Ranked')}
+            </Badge>
+            {!rankedOpen && <Badge>{t('Soon')}</Badge>}
+          </span>
           <h2>{rankText(rank.label)}</h2>
           <div className="ranked-progress">
             <ProgressBar value={rank.progress} />
@@ -80,10 +86,12 @@ export function PlayHub() {
           </p>
         </div>
         <div className="ranked-cta">
-          <Button variant="primary" size="lg" icon={<Swords size={18} />} disabled={casualOnly} onClick={() => setQueue({ kind: 'ranked' })}>
+          <Button variant="primary" size="lg" icon={<Swords size={18} />} disabled={!rankedOpen || casualOnly} onClick={() => setQueue({ kind: 'ranked' })}>
             {t('Find ranked match')}
           </Button>
-          <span className="faint">{casualOnly ? t('Fast blitz is for casual games only') : t('Opponents near your rank')}</span>
+          <span className="faint">
+            {!rankedOpen ? t('Ranked opens once enough players are online') : casualOnly ? t('Fast blitz is for casual games only') : t('Opponents near your rank')}
+          </span>
         </div>
       </section>
 

@@ -96,8 +96,11 @@ EOF
 fi
 
 # 4b. Local function secrets: test values for payments (tests/payments.e2e.ts runs a fake
-#     Paddle API on the host's :4875, which the functions reach through the gateway).
+#     Paddle API on the host's :4875, which the functions reach through the gateway), and
+#     ranked open even while it is closed live (RANKED_OPEN in _shared/play.ts), so the
+#     e2e tests keep covering it.
 cat >supabase/functions/.env <<ENV
+RANKED_OPEN=true
 PADDLE_ENV=sandbox
 PADDLE_API_URL=http://$GATEWAY:4875
 PADDLE_API_KEY=local-test-key

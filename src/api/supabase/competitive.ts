@@ -131,6 +131,8 @@ export function createCompetitive(
     switch (code) {
       case 'insufficient_coins':
         return new ApiError(code, t('You do not have enough coins for this stake.'));
+      case 'ranked_closed':
+        return new ApiError(code, t('Ranked games open soon. Try a casual game meanwhile.'));
       case 'not_ready':
         return new ApiError(code, t('Choose a username and an icon first.'));
       case 'unauthorized':

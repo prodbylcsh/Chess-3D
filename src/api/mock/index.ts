@@ -4,6 +4,7 @@ import { t } from '../../i18n';
 // the real shared ones, so results look exactly like they will in production.
 import { mmrChange, rankOf } from '#shared/rating.ts';
 import { STAKES, coinReward, wagerNet } from '#shared/economy.ts';
+import { kindOpen } from '#shared/play.ts';
 import { ApiError, type Api, type MatchFound, type MatchKind, type MatchReport, type MatchResult } from '../types';
 import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../validation';
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
@@ -165,6 +166,10 @@ export function createMockApi(): Api {
         const found = new Promise<MatchFound>((resolve, rej) => {
           reject = rej;
           const { profile } = session();
+          if (!kindOpen(kind)) {
+            rej(new ApiError('ranked_closed', t('Ranked games open soon. Try a casual game meanwhile.')));
+            return;
+          }
           if (kind === 'wager') {
             const amount = STAKES[stake ?? 'low'].amount;
             if (profile.coins < amount) {

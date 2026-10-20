@@ -33,6 +33,19 @@ export const CONTROLS: Record<ControlId, Control> = {
 
 export const DEFAULT_CONTROL: ControlId = 'rapid';
 
+/**
+ * Ranked matchmaking is closed until the platform has enough players (decided October
+ * 2026): the Play hub shows it as "Soon" and the `play` function refuses ranked searches.
+ * Set to `true` to open it; the app and the server follow on the next deploy. The server
+ * can override it with the `RANKED_OPEN` environment variable (the local e2e tests do).
+ */
+export const RANKED_OPEN: boolean = false;
+
+/** Whether players can search for games of this kind. */
+export function kindOpen(kind: MatchKind, rankedOpen: boolean = RANKED_OPEN): boolean {
+  return kind !== 'ranked' || rankedOpen;
+}
+
 /** "10 + 5" */
 export function controlLabel(id: ControlId): string {
   const c = CONTROLS[id];

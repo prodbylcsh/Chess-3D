@@ -43,7 +43,9 @@ Logs: `/tmp/supabase-local/*.log`. After a container restart, run the script aga
 
 The start script writes `supabase/functions/.env` (gitignored) with test values:
 `PADDLE_API_URL` points at the host's `:4875` through the Docker gateway, and the webhook
-secret is `local-test-webhook-secret`. Nothing reaches Paddle. `tests/payments.e2e.ts`
+secret is `local-test-webhook-secret`. It also sets `RANKED_OPEN=true`: ranked is closed
+live until there are enough players, but the local functions keep it open so
+`tests/competitive.e2e.ts` covers it (the app's Play hub still follows the constant). Nothing reaches Paddle. `tests/payments.e2e.ts`
 runs a fake Paddle API on `:4875` and sends webhooks signed with that secret
 (`signWebhook` in `_shared/payments.ts`). Without the fake server running, "Buy coins"
 answers "The payment could not be started". The app shows "Buy coins" only when

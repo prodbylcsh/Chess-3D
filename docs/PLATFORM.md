@@ -109,7 +109,7 @@ username, rank) and the coin balance.
 | Mode | Status | Description |
 | --- | --- | --- |
 | Casual | ✅ (M6) | Matchmaking against any online player. Pays coins, no MMR. |
-| Ranked | ✅ (M6) | Matchmaking against players of similar MMR. Changes MMR and pays coins. |
+| Ranked | ⏸ built (M6), closed | Matchmaking against players of similar MMR. Changes MMR and pays coins. **Closed until the platform has enough players** (October 2026): the Play hub shows it with a "Soon" badge and the server refuses ranked searches. |
 | Tournaments | ⏸ | Coin entry fee, brackets. Later. |
 | Play a friend | 🟡 | Invite from the friends list (🟡 demo list), play on one device (✅), or create a link anyone can open (✅ live online). |
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
@@ -142,6 +142,14 @@ hub (remembered on the device); Rapid is the default.
 it. If a player doesn't move in time, the game is **aborted**: no MMR, no coins, stakes
 refunded (decided October 2026). A move sent after the clock ran out ends the game on time
 instead.
+
+**Opening ranked.** Ranked is switched off by one constant, `RANKED_OPEN` in
+`_shared/play.ts`, which the app (Play hub, mock back-end) and the `play` function both
+read; the function answers ranked searches with `ranked_closed`. To open it, set the
+constant to `true` and deploy (the merge to `main` deploys the site and the functions). The
+function also honours a `RANKED_OPEN` environment variable (`true` / `false`), which the
+local stack sets so the e2e tests cover ranked. Ranks, the season panel and season rewards
+keep working while it is closed; everyone simply stays at their rank (new players Silver II).
 
 **Matchmaking (ranked):** start with a ±100 MMR window and widen it by 50 every 5 seconds
 of waiting, up to ±400. Casual uses one queue with no rating window (it still prefers
@@ -1010,6 +1018,9 @@ Decided:
 - **No third-party requests** from the site apart from the back-end: fonts are served
   with the site (`@fontsource`), no cookies, analytics or ads.
 - **Languages**: English (default) and Czech.
+- **Ranked closed at launch** (October 2026): ranked games open only once there are enough
+  players for fair matches; until then the Play hub shows ranked as "Soon" and the server
+  refuses ranked searches (`RANKED_OPEN`, 4.1). Casual and coin games stay open.
 
 Open:
 

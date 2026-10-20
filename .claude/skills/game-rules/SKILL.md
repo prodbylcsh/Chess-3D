@@ -44,6 +44,9 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   (new players are Silver II). Master, Grandmaster and Challenger have no divisions.
   **MMR numbers are never shown**, only ranks and progress bars (the result card shows
   the MMR *change*).
+- **Ranked is closed** until the platform has enough players (`RANKED_OPEN = false` in
+  `play.ts`; the app shows "Soon", the `play` function refuses ranked searches). Opening it
+  is the user's call.
 - **Who pays what:** coins and MMR only from **ranked** and **casual** games (casual gives
   coins, not MMR). **No coins and no MMR** from friend, AI or same-device games.
 - **Coins:** win 100 / draw 75 / loss 50, adjusted for performance (±20%), rating gap

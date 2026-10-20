@@ -8,6 +8,7 @@ import {
   canMate,
   clocksAfterMove,
   isControl,
+  kindOpen,
   newPlayer,
   remaining,
   rollSeasons,
@@ -23,6 +24,15 @@ const T0 = Date.UTC(2026, 9, 11, 12);
 const quiet = { flags: 'n' };
 const rapid = (white = 600_000, black = 600_000, at = T0): Clocks => ({ control: 'rapid', white, black, turnStartedAt: at });
 const player = (id: string, over: Partial<PlayerState> = {}): PlayerState => ({ ...newPlayer(id, new Date(T0)), ...over });
+
+test('ranked can be closed; casual and coin games stay open', () => {
+  assert.ok(!kindOpen('ranked', false));
+  assert.ok(kindOpen('ranked', true));
+  for (const open of [false, true]) {
+    assert.ok(kindOpen('casual', open));
+    assert.ok(kindOpen('wager', open));
+  }
+});
 
 test('time controls per game kind', () => {
   assert.ok(isControl('casual', 'fast'));

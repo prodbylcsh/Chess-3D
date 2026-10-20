@@ -45,6 +45,11 @@
   min-width: 0;
 }
 
+.ranked-badges {
+  display: flex;
+  gap: 6px;
+}
+
 .ranked-copy h2 {
   font-family: var(--font-display);
   font-size: 30px;

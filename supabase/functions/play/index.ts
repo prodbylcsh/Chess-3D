@@ -9,12 +9,13 @@
 //      finished ranked or casual game (see _shared/analysis.ts); without a report just the status.
 //      `result` (as for 'result') once both reports agreed and the performance part was added.
 //
+// Ranked searches answer `ranked_closed` while ranked is closed (RANKED_OPEN in _shared/play.ts).
 // Errors: { error, code } with an HTTP error status. Registered, onboarded players only.
 // Rules: ../_shared/play.ts; matching itself is the SQL function mm_poll (atomic).
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError } from '../_shared/accounts.ts';
 import { STAKES, type StakeId } from '../_shared/economy.ts';
-import { CONTROLS, isControl, type MatchKind } from '../_shared/play.ts';
+import { CONTROLS, RANKED_OPEN, isControl, kindOpen, type MatchKind } from '../_shared/play.ts';
 import * as rules from '../_shared/rules.ts';
 import type { GameRow } from '../_shared/rules.ts';
 import { ensurePlayer, recordAnalysis, settleGame } from '../_shared/server/competitive.ts';
@@ -34,6 +35,8 @@ const reply = (body: unknown, status = 200) =>
 
 const fail = (code: string, message: string, status = 400) => new AccountError(code, message, status);
 const KINDS: readonly MatchKind[] = ['ranked', 'casual', 'wager'];
+/** RANKED_OPEN unless the environment says otherwise ('true' / 'false') */
+const RANKED = Deno.env.get('RANKED_OPEN') ? Deno.env.get('RANKED_OPEN') === 'true' : RANKED_OPEN;
 
 /** A matchmade game this player is still in, after ending it if its time ran out. */
 async function runningGame(me: string): Promise<GameRow | null> {
@@ -74,6 +77,7 @@ async function runningGame(me: string): Promise<GameRow | null> {
 async function search(user: User, body: Record<string, unknown>): Promise<unknown> {
   const kind = body.kind as MatchKind;
   if (!KINDS.includes(kind)) throw fail('bad_request', 'Unknown game kind.');
+  if (!kindOpen(kind, RANKED)) throw fail('ranked_closed', 'Ranked games are not open yet.', 403);
   if (!isControl(kind, body.control)) throw fail('bad_request', 'That time control is not available here.');
   const stakeId = body.stake as StakeId | undefined;
   if (kind === 'wager' && !(stakeId && stakeId in STAKES)) throw fail('bad_request', 'Choose a stake.');
