@@ -4,6 +4,9 @@ An online chess platform around a cinematic 3D board. The plan, every product de
 and the roadmap are in **`docs/PLATFORM.md`**: read the relevant section before changing
 behaviour, and update it when something changes.
 
+**Starting a new session?** Read **`HANDOFF.md`** first: where the work stands, what the
+user wants, decisions, approaches that failed, and the next steps.
+
 ## Hard rules
 
 - **Git:** work on the session's development branch and push there. **Never push to or
