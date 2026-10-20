@@ -740,7 +740,10 @@ shop purchases are the other one. A player needs at least the stake in their bal
 - Games with fewer than **20 half-moves (10 moves each)** pay no coins; ranked MMR still
   counts, so resigning early still costs rating (decided October 2026). Coin games are
   not affected: the stake is the point. Aborted games change nothing.
-- Possible later: a soft daily cap on coins from Casual.
+- **No daily coin cap** (decided October 2026): instead, detect unusual behaviour (9,
+  after the release), such as 100 games an hour, two accounts from the same IP address, or
+  the same two players handing each other wins. Storing IP addresses for this needs the
+  Privacy Policy updated first.
 
 ## 7. In-game interface (redesign)
 
@@ -954,7 +957,16 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Engine analysis | Stockfish in the players' browsers, both reports must agree, performance part of MMR and coins | ✅ live (October 2026) |
 | Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
 | Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins; daily puzzle and streak, reviews, why-not refutations, the solution when stuck, replays, arrows, vibration | ✅ live (October 2026) |
-| Later | Tournaments, puzzle subscription and more puzzle themes, guests in puzzles, Learn, more sets, boards, backgrounds and effects, live payments (own domain, Paddle review), boosts | ⏸ |
+| Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
+| Guests in puzzles | Try puzzles and the daily puzzle without an account; the progress moves into the account on sign-up (4.2) | 🟡 next |
+| Blocking and reporting | Block a player (no messages, challenges or friend requests from them) and report a player, a message or a username to the operator; a simple review list for the operator | ⏸ next |
+| Learn | A teaching module, separate from Puzzles: how the pieces move and the rules of the game, step by step (4.3) | ⏸ |
+| Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
+| Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
+| Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
+| After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
+| After release: unusual behaviour | Detect abuse instead of capping coins (6.3): e.g. 100 games an hour, two accounts from the same IP address, the same two players feeding each other wins; flags for the operator first | ⏸ |
+| Later | Tournaments, puzzle subscription and more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -1031,6 +1043,13 @@ Decided:
 - **Ranked closed at launch** (October 2026): ranked games open only once there are enough
   players for fair matches; until then the Play hub shows ranked as "Soon" and the server
   refuses ranked searches (`SEASON_ONE`, 4.1). Casual and coin games stay open.
+- **Abuse is detected, not capped** (October 2026): no daily coin cap; unusual behaviour
+  (many games an hour, accounts sharing an IP, wins handed back and forth) is detected after
+  the release (6.3, 9).
+- **Roadmap order** (October 2026): guests in puzzles, then blocking and reporting, then
+  Learn; spectating later; map decorations when the user's assets arrive; measurements and
+  abuse detection after the release; domain, live payments and Sign in with Apple are the
+  user's to do closer to the release.
 - **Seasons wait for ranked** (October 2026): no season rewards while ranked is closed; the
   first real season (season 1) starts when ranked opens, everyone at 1,000 MMR (5.5).
 
