@@ -31,6 +31,23 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## On the branch `claude/peaceful-ramanujan-pi9tzz`, not merged yet (20 October 2026)
+
+Ask the user before merging (it deploys the site, functions and two migrations).
+
+- **Ranked closed** until there are enough players: "Soon" on the Play hub, the `play`
+  function answers `ranked_closed`. One switch, `SEASON_ONE` in `_shared/seasons.ts`
+  (`null` now): set it to the current month to open ranked, which also starts **season 1**.
+- **No season rewards while ranked is closed**; season 1 starts everyone at 1,000 MMR.
+  Migration `20261020120000` moves stored players to season 0. The Shop previews season 1.
+  Locally the functions get `SEASON_ONE=2026-07` (start script) so the e2e tests cover ranked.
+- **Guests in puzzles**: the first 10 Openings puzzles and the daily puzzle without an
+  account; signing up or in on the same device moves them in (`claim`, `src/net/guest.ts`).
+  Migration `20261020130000` (retention counts guest puzzles). Legal pages updated.
+- **Roadmap** in `PLATFORM.md` §9: blocking and reporting next, then Learn; spectating;
+  map decorations wait for the user's assets; measurements and abuse detection (not coin
+  caps) after the release; domain, live payments and Sign in with Apple are the user's.
+
 ## Done (all merged and live, last `main` commit `a90845c`)
 
 **Openings module** (free): 100 hand-made lines from the first move, 50 as White and
@@ -87,9 +104,10 @@ stored data. They are dated 20 October 2026.
 
 ## Remaining (nothing is half-done in the code)
 
-1. **3D map decorations:** the user finds the background objects amateurish; refine
-   them later (`src/features/puzzles/map/World.ts`, `themes.ts`).
-2. **Puzzles later:** guests in puzzles, a puzzle subscription, more themes (fantasy).
+1. **3D map decorations:** the user finds the background objects amateurish. **The user
+   makes the new assets and sends them later**; wait for them
+   (`src/features/puzzles/map/World.ts`, `themes.ts`).
+2. **Puzzles later:** a puzzle subscription, more themes (fantasy).
 3. **Payments:** live payments need the own domain and the Paddle review (sandbox works).
 4. **Roadmap:** Learn module, tournaments, more sets, boards and effects.
 5. **Open question:** which language comes after Czech?
@@ -223,8 +241,8 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Ask the user what comes next. The candidates are above under Remaining; the map
-   decorations were the user's own wish.
+1. Get the user's answer on the Learn module plan (asked 20 October 2026), then build
+   blocking and reporting, then Learn.
 2. On a real iPhone and an Android phone, check the vibration and the "why not?" speed.
    If iOS gives no tick, say so and keep the switch.
 3. When adding opening lines, check them with Stockfish and add lessons:
