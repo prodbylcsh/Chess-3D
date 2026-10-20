@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
 import {
   GraduationCap,
+  LogIn,
   MessageCircle,
   Puzzle,
   Settings,
@@ -13,10 +14,10 @@ import {
 } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
 import { LogoMark, ProfileIcon, RankEmblem } from '../ui/art/art';
-import { Badge, Coins, cx } from '../ui/kit';
+import { Badge, Button, Coins, cx } from '../ui/kit';
 import { rankText, tk, useT } from '../i18n';
 import { useBadges } from './notifications';
-import { useProfile } from './session';
+import { useSession } from './session';
 import './layout.css';
 
 interface NavItem {
@@ -49,8 +50,7 @@ export function Wordmark() {
 }
 
 export function AppLayout() {
-  const profile = useProfile();
-  const rank = rankOf(profile.mmr);
+  const { profile } = useSession();
   const badges = useBadges();
   const t = useT();
   const count = (to: string) => (to === '/messages' ? badges.unreadMessages : to === '/community' ? badges.friendRequests : 0);
@@ -78,22 +78,7 @@ export function AppLayout() {
           )}
         </nav>
 
-        <div className="sidebar-foot">
-          <div className="balance">
-            <span className="faint">{t('Balance')}</span>
-            <Coins amount={profile.coins} />
-          </div>
-          <NavLink to="/profile" className="me-chip">
-            <ProfileIcon icon={profile.iconId} size={40} />
-            <span className="me-text">
-              <strong>{profile.username}</strong>
-              <span className="me-rank">
-                <RankEmblem tier={rank.tier.id} division={rank.division} size={16} />
-                {rankText(rank.label)}
-              </span>
-            </span>
-          </NavLink>
-        </div>
+        {profile ? <Me /> : <GuestFoot />}
       </aside>
 
       <main className="main">
@@ -101,7 +86,7 @@ export function AppLayout() {
       </main>
 
       <nav className="tabbar" aria-label={t('Main')}>
-        {NAV.filter((i) => i.mobile).map((item) => (
+        {(profile ? NAV.filter((i) => i.mobile) : GUEST_TABS).map((item) => (
           <NavLink key={item.to} to={item.to} className={({ isActive }) => cx('tab', isActive && 'is-active')}>
             <span className="tab-icon">
               <item.icon size={21} strokeWidth={1.9} />
@@ -111,6 +96,52 @@ export function AppLayout() {
           </NavLink>
         ))}
       </nav>
+    </div>
+  );
+}
+
+/** A guest (puzzles without an account) gets puzzles and the way in on the phone. */
+const GUEST_TABS: NavItem[] = [
+  { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle },
+  { to: '/auth', label: tk('Sign in'), icon: LogIn },
+];
+
+function Me() {
+  const { profile } = useSession();
+  const t = useT();
+  const rank = rankOf(profile!.mmr);
+  return (
+    <div className="sidebar-foot">
+      <div className="balance">
+        <span className="faint">{t('Balance')}</span>
+        <Coins amount={profile!.coins} />
+      </div>
+      <NavLink to="/profile" className="me-chip">
+        <ProfileIcon icon={profile!.iconId} size={40} />
+        <span className="me-text">
+          <strong>{profile!.username}</strong>
+          <span className="me-rank">
+            <RankEmblem tier={rank.tier.id} division={rank.division} size={16} />
+            {rankText(rank.label)}
+          </span>
+        </span>
+      </NavLink>
+    </div>
+  );
+}
+
+function GuestFoot() {
+  const navigate = useNavigate();
+  const t = useT();
+  return (
+    <div className="sidebar-foot">
+      <p className="faint guest-foot">{t('Playing as a guest. With a free account you keep your puzzles and coins.')}</p>
+      <Button variant="primary" block onClick={() => navigate('/auth?signup', { state: { from: '/puzzles' } })}>
+        {t('Create a free account')}
+      </Button>
+      <Button variant="ghost" block onClick={() => navigate('/auth', { state: { from: '/puzzles' } })}>
+        {t('Sign in')}
+      </Button>
     </div>
   );
 }

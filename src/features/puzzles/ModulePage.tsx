@@ -4,12 +4,12 @@
 // the levels are a plain grid.
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
-import { ArrowLeft, Eye, Gift, Lock, Play, Repeat, RotateCcw, Star } from 'lucide-react';
-import { BONUS_COINS, BONUS_EVERY, PUZZLES_PER_MODULE, moduleOf, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import { ArrowLeft, Eye, Gift, Lock, Play, Repeat, RotateCcw, Star, UserPlus } from 'lucide-react';
+import { BONUS_COINS, BONUS_EVERY, GUEST_PUZZLES, PUZZLES_PER_MODULE, guestMayPlay, moduleOf, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
 import type { PuzzleModuleProgress } from '../../api';
 import { itemName } from '../../api/catalog';
 import { modulePuzzles } from '../../api/puzzleData';
-import { useProfile } from '../../app/session';
+import { useSession } from '../../app/session';
 import { t } from '../../i18n';
 import { Button, Coins, EmptyState, ProgressBar, Spinner, cx } from '../../ui/kit';
 import { timeUntil } from '../../ui/format';
@@ -20,6 +20,7 @@ import { WORLD_THEMES } from './map/themes';
 import { World } from './map/World';
 import { MODULE_ICONS } from './modules';
 import { solvedCount, usePuzzleProgress } from './PuzzlesPage';
+import { signUp } from './guest';
 import './puzzles.css';
 
 const compact = () => typeof matchMedia === 'function' && matchMedia('(max-width: 820px)').matches;
@@ -51,7 +52,9 @@ export function ModulePage() {
 
 function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModuleProgress }) {
   const navigate = useNavigate();
-  const profile = useProfile();
+  const { profile } = useSession();
+  /** a guest may play this level (the first GUEST_PUZZLES of the free module) */
+  const open = (n: number) => !!profile || guestMayPlay(module.id, n);
   const [params, setParams] = useSearchParams();
   const host = useRef<HTMLDivElement>(null);
   const world = useRef<World | null>(null);
@@ -126,7 +129,7 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mine, webgl]);
 
-  const play = (n: number) => navigate(`/game/puzzle/${module.id}?n=${n}`);
+  const play = (n: number) => (open(n) ? navigate(`/game/puzzle/${module.id}?n=${n}`) : signUp(navigate, `/puzzles/${module.id}`));
 
   return (
     <>
@@ -145,7 +148,7 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
             <span>{t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })}</span>
           </div>
         </div>
-        {ready.length > 0 ? (
+        {ready.length > 0 && open(ready[0]) ? (
           <Button className="world-review" icon={<Repeat size={16} />} onClick={() => navigate(`/game/puzzle/${module.id}?n=${ready[0]}&review=1`)}>
             {t('Review ({n})', { n: ready.length })}
           </Button>
@@ -168,6 +171,7 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
           index={selected}
           puzzle={puzzles?.[selected] ?? null}
           next={next}
+          guest={!open(selected)}
           onPlay={() => play(selected)}
           onNext={next >= 0 && selected !== next ? () => (setSelected(next), world.current?.select(next)) : undefined}
         />
@@ -183,6 +187,8 @@ function LevelCard(props: {
   index: number;
   puzzle: Puzzle | null;
   next: number;
+  /** a guest went past the levels they may try: the way in instead of Play */
+  guest: boolean;
   onPlay: () => void;
   onNext?: () => void;
 }) {
@@ -219,7 +225,12 @@ function LevelCard(props: {
             : t('Ready for a review: try for more stars.')}
         </p>
       )}
-      {isNext && next >= 0 && (
+      {props.guest && (
+        <p className="level-card-note">
+          <Lock size={14} /> {t('As a guest you can try the first {n} puzzles. Create a free account to keep going: your progress comes with you.', { n: GUEST_PUZZLES })}
+        </p>
+      )}
+      {isNext && next >= 0 && !props.guest && (
         <p className="level-card-note">
           <Gift size={14} />{' '}
           {solvedNow >= PUZZLES_PER_MODULE - BONUS_EVERY
@@ -234,9 +245,15 @@ function LevelCard(props: {
         </p>
       )}
       <div className="level-card-actions">
-        <Button variant="primary" block icon={stars > 0 || seen ? <RotateCcw size={16} /> : <Play size={16} />} onClick={props.onPlay}>
-          {stars > 0 || seen ? t('Play again') : t('Play')}
-        </Button>
+        {props.guest ? (
+          <Button variant="primary" block icon={<UserPlus size={16} />} onClick={props.onPlay}>
+            {t('Create a free account')}
+          </Button>
+        ) : (
+          <Button variant="primary" block icon={stars > 0 || seen ? <RotateCcw size={16} /> : <Play size={16} />} onClick={props.onPlay}>
+            {stars > 0 || seen ? t('Play again') : t('Play')}
+          </Button>
+        )}
         {props.onNext && <Button onClick={props.onNext}>{t('Next puzzle')}</Button>}
       </div>
     </section>

@@ -13,6 +13,7 @@ import { Badge, Button, Coins, EmptyState, ProgressBar, Spinner, confirmDialog, 
 import { WORLD_THEMES } from './map/themes';
 import { MODULE_ICONS } from './modules';
 import { DailyCard } from './streak';
+import { GuestBanner, onPuzzlesChanged, signUp } from './guest';
 import './puzzles.css';
 
 /** The player's progress in every module; reloads after unlocking. */
@@ -23,6 +24,7 @@ export function usePuzzleProgress(): [PuzzleModuleProgress[] | null | 'error', (
     void api.puzzles.progress().then(setProgress, () => setProgress('error'));
   }, []);
   useEffect(() => reload(), [reload]);
+  useEffect(() => onPuzzlesChanged(() => reload()), [reload]);
   return [progress, reload];
 }
 
@@ -73,6 +75,7 @@ export function PuzzlesPage() {
           <Button onClick={() => reload()}>{t('Try again')}</Button>
         </EmptyState>
       )}
+      {Array.isArray(progress) && !profile && <GuestBanner />}
       {Array.isArray(progress) && <DailyCard />}
       {Array.isArray(progress) && (
         <div className="puzzle-modules">
@@ -108,7 +111,11 @@ export function PuzzlesPage() {
                     {t('{n} of {total} solved', { n: solved, total: PUZZLES_PER_MODULE })} · <Star size={12} /> {stars}
                   </span>
                 </div>
-                {p.unlocked ? (
+                {!profile && !m.free ? (
+                  <Button block onClick={() => signUp(navigate)}>
+                    <Lock size={15} /> {t('Create a free account')}
+                  </Button>
+                ) : p.unlocked ? (
                   <Button variant="primary" block onClick={() => navigate(`/puzzles/${m.id}`)}>
                     {solved === 0 ? t('Start') : solved >= PUZZLES_PER_MODULE ? t('Replay') : t('Continue')}
                   </Button>
@@ -117,7 +124,7 @@ export function PuzzlesPage() {
                     <Lock size={15} /> {t('Unlock')} · <Coins amount={MODULE_PRICE} size={14} />
                   </Button>
                 )}
-                {!p.unlocked && (profile?.coins ?? 0) < MODULE_PRICE && <p className="faint puzzle-module-note">{t('Earn coins in games or buy them in the shop.')}</p>}
+                {profile && !p.unlocked && profile.coins < MODULE_PRICE && <p className="faint puzzle-module-note">{t('Earn coins in games or buy them in the shop.')}</p>}
                 {p.reward?.item && (
                   <p className="faint puzzle-module-note">
                     <Gift size={13} /> {t('Your reward: {item}', { item: itemName(p.reward.item) })}

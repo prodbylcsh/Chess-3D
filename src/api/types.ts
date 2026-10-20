@@ -379,6 +379,22 @@ export interface PuzzlesService {
   daily(): Promise<DailyPuzzle>;
   dailyStart(): Promise<void>;
   dailySolve(moves: string[], mistakes: number, hints: number): Promise<DailySolve>;
+  /**
+   * Signed out: the guest's coins so far (they move into the account on signing up or in).
+   * Null for a signed-in player. Guests play the first GUEST_PUZZLES of the free module and
+   * the daily puzzle; anything else answers `guest_limit`.
+   */
+  guest(): Promise<{ coins: number } | null>;
+  /** Signed in: move this device's guest puzzles into the account, once (null: nothing to move). */
+  claimGuest(): Promise<GuestClaim | null>;
+}
+
+export interface GuestClaim {
+  /** puzzles that were new to the account */
+  puzzles: number;
+  /** daily puzzles added to the account's streak */
+  days: number;
+  coins: number;
 }
 
 export interface StreakView {

@@ -72,8 +72,8 @@ changed later (the username once per 30 days).
 - **Usernames:** 3–20 characters, letters, digits and `_`, unique regardless of case, and a
   few names are reserved (admin, support, guest, wizardbot, …). The demo players' names
   count as taken too.
-- **Guests** (invite links) play under an anonymous session and have no profile. Their
-  result card invites them to create a free account. Registered players use their account
+- **Guests** (invite links, puzzles) play under an anonymous session and have no profile.
+  Their result card invites them to create a free account; their puzzles move into it (4.2). Registered players use their account
   for online games.
 - **Everything a player owns is on the server** (M6): coins, rank, stats, items, loadout,
   game history, friends and messages. The app copies the player's state into its local
@@ -327,7 +327,17 @@ Decided (October 2026):
   (`solve_puzzle`, `unlock_module`, `complete_module`; ledger reasons `puzzle`,
   `puzzle_bonus`, `puzzle_unlock`, `puzzle_reward`; reward items in `player_items` with
   source `puzzle`).
-- **Guests** were to try the first few levels; for now puzzles need an account (open).
+- **Guests** (October 2026): without an account, visitors play the first **10** puzzles of
+  the free module (`GUEST_PUZZLES`, `guestMayPlay` in `_shared/puzzles.ts`) and the daily
+  puzzle, under an anonymous session ("Try puzzles without an account" on the sign-in page;
+  the Puzzles pages work signed out). The server checks their solves like anyone's and
+  answers `guest_limit` beyond that. A guest has no player row: what they earn is recorded in
+  the ledger and shown as "waiting for you". When they sign up or in **on the same device**,
+  the app keeps the guest's refresh token (`src/net/guest.ts`) and the `puzzles` function's
+  `claim` replays the guest's solves into the account with the account's rules (a puzzle it
+  solved already pays nothing; a bonus every 10 by its own count) and adds daily puzzles after
+  the account's last one to its streak; then the guest's rows are deleted. Guests are removed
+  after 6 months without a game move or a puzzle (`cleanup_inactive`).
 
 ### 4.3 Learn ⏸
 
@@ -958,7 +968,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
 | Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins; daily puzzle and streak, reviews, why-not refutations, the solution when stuck, replays, arrows, vibration | ✅ live (October 2026) |
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
-| Guests in puzzles | Try puzzles and the daily puzzle without an account; the progress moves into the account on sign-up (4.2) | 🟡 next |
+| Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ (October 2026, on the branch) |
 | Blocking and reporting | Block a player (no messages, challenges or friend requests from them) and report a player, a message or a username to the operator; a simple review list for the operator | ⏸ next |
 | Learn | A teaching module, separate from Puzzles: how the pieces move and the rules of the game, step by step (4.3) | ⏸ |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
@@ -1046,6 +1056,9 @@ Decided:
 - **Abuse is detected, not capped** (October 2026): no daily coin cap; unusual behaviour
   (many games an hour, accounts sharing an IP, wins handed back and forth) is detected after
   the release (6.3, 9).
+- **Guests in puzzles** (October 2026, 4.2): the first 10 puzzles of the free module and the
+  daily puzzle without an account; what they earn moves into the account on the same device,
+  by the account's rules. The legal pages say so (Privacy §2, §3, §6; Terms §6).
 - **Roadmap order** (October 2026): guests in puzzles, then blocking and reporting, then
   Learn; spectating later; map decorations when the user's assets arrive; measurements and
   abuse detection after the release; domain, live payments and Sign in with Apple are the

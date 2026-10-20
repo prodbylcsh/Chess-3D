@@ -52,6 +52,16 @@ export interface MockDaily {
   streak: { current: number; best: number; lastDay: string | null };
 }
 
+/** A guest's puzzles on the mock back-end are stored under this player id. */
+export const GUEST_ID = 'guest';
+
+export interface MockGuest {
+  /** what the guest earned so far (paid to the account on claiming) */
+  coins: number;
+  /** coins of each first solve, by "module:index" */
+  paid: Record<string, number>;
+}
+
 export interface Db {
   version: 1;
   accounts: StoredAccount[];
@@ -65,6 +75,7 @@ export interface Db {
   /** per player and module: puzzle progress */
   puzzles: Record<string, Record<string, MockPuzzleModule>>;
   daily: Record<string, MockDaily>;
+  guest: MockGuest;
   sessionId: string | null;
 }
 
@@ -90,6 +101,7 @@ function load(): Db {
     seasonPeak: {},
     puzzles: {},
     daily: {},
+    guest: { coins: 0, paid: {} },
     sessionId: null,
     ...data,
   };

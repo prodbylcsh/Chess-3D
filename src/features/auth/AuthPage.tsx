@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { tk, useT, withNodes } from '../../i18n';
-import { Eye, EyeOff, KeyRound, Lock, Mail, MailCheck, Sparkles, Swords, Trophy } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, Lock, Mail, MailCheck, Puzzle, Sparkles, Swords, Trophy } from 'lucide-react';
 import { api, ApiError } from '../../api';
 import { emailProblem, passwordProblem, passwordStrength } from '../../api/validation';
 import { legalUrl } from '../../app/legal';
@@ -271,6 +271,10 @@ export function AuthPage() {
                   {mode === 'signin' ? t('Sign in') : t('Create account')}
                 </Button>
               </form>
+
+              <Link to="/puzzles" className="auth-guest">
+                <Puzzle size={17} /> {t('Try puzzles without an account')}
+              </Link>
 
               <p className="auth-foot faint">
                 {withNodes(t('By continuing you confirm you are at least 15 and agree to the {terms} and the {privacy}.'), {

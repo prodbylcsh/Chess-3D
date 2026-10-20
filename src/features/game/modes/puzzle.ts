@@ -4,6 +4,7 @@ import { Eye, FastForward, Info, Lightbulb, RotateCcw } from 'lucide-react';
 import {
   PUZZLES_PER_MODULE,
   answerAt,
+  guestMayPlay,
   hintPenalty,
   solution,
   mates,
@@ -557,12 +558,24 @@ export class PuzzleMode implements Mode {
       ];
     }
     const next = passed && (this.options.review || this.index + 1 < PUZZLES_PER_MODULE);
+    // a guest at the end of the levels they may try: the way in
+    if (next && !this.ctx.profile && !this.options.review && !guestMayPlay(this.module.id, this.index + 1)) {
+      return [
+        { id: 'register', label: t('Create a free account'), primary: true },
+        ...(passed ? [{ id: 'replay', label: t('Replay the solution') }] : []),
+        { id: 'exit', label: t('Back to the map') },
+      ];
+    }
     return [
       ...(next ? [{ id: 'next', label: this.options.review ? t('Next review') : t('Next puzzle'), primary: true }] : []),
       ...(passed ? [{ id: 'replay', label: t('Replay the solution') }] : []),
       { id: 'retry', label: t('Try again') },
       { id: 'exit', label: t('Back to the map'), primary: !next },
     ];
+  }
+
+  endNote(): string | null {
+    return this.ctx.profile ? null : t('You are playing as a guest. Create a free account on this device to keep your puzzles, streak and coins.');
   }
 
   endTitle(s: GameState): { title: string; text: string } {
@@ -579,6 +592,7 @@ export class PuzzleMode implements Mode {
     else if (id === 'replay') void this.replay();
     else if (id === 'skip') this.skip = true;
     else if (id === 'next') void this.next();
+    else if (id === 'register') this.ctx.navigate('/auth?signup');
     else if (id === 'exit') this.ctx.navigate(this.isDaily ? '/puzzles' : `/puzzles/${this.module.id}`);
   }
 

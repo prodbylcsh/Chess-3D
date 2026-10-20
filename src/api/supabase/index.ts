@@ -10,6 +10,7 @@ import type { ProfileRow } from '#shared/accounts.ts';
 import { getPrefs, subscribePrefs } from '../../app/prefs';
 import { t } from '../../i18n';
 import { appUrl, authReturn, cleanAuthReturn } from '../../net/supabase';
+import { rememberGuest } from '../../net/guest';
 import { shortDate } from '../../ui/format';
 import { createMockApi } from '../mock';
 import { adoptAccount, db, forgetAccount, save, SEED_PLAYERS } from '../mock/db';
@@ -350,6 +351,7 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
   };
   const social = createSocial(client, { profiles: local.profiles, me: () => db.sessionId }, emit);
 
+  rememberGuest(client);
   client.auth.onAuthStateChange((event, session) => {
     const u = session?.user;
     if (u && !u.is_anonymous) social.start(u.id);

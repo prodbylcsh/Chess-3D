@@ -100,6 +100,16 @@ export const MODULES: readonly PuzzleModule[] = [
 export const moduleOf = (id: unknown): PuzzleModule | null => MODULES.find((m) => m.id === id) ?? null;
 
 /**
+ * Guests (no account yet) may play the first puzzles of the free module and the daily
+ * puzzle (October 2026). Their progress and coins move into the account they create or
+ * sign in to on the same device; the account's own rules apply then (a puzzle it solved
+ * already pays nothing).
+ */
+export const GUEST_PUZZLES = 10;
+
+export const guestMayPlay = (module: string, index: number): boolean => !!moduleOf(module)?.free && index >= 0 && index < GUEST_PUZZLES;
+
+/**
  * A puzzle as stored: a position and a line of moves (UCI). Usually the line starts with the
  * opponent's move that sets the puzzle up, then the solution and the replies alternate;
  * with `playerFirst` the player moves first (an opening from the starting position).

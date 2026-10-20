@@ -1,5 +1,6 @@
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
 import type { GameRow, MoveInput, Side } from '../../supabase/functions/_shared/rules';
+import { guestSession } from './guest.ts';
 
 export type { GameRow, Side };
 
@@ -47,15 +48,12 @@ export class Online {
 
   /** Reuse the stored session (a registered player's or a guest's) or sign in anonymously. */
   async signIn(): Promise<string> {
-    const { data } = await this.client.auth.getSession();
-    let user = data.session?.user ?? null;
-    if (!user) {
-      const res = await this.client.auth.signInAnonymously();
-      if (res.error) throw new OnlineError('auth', `Could not sign in: ${res.error.message}`);
-      user = res.data.user!;
+    try {
+      this.uid = await guestSession(this.client);
+    } catch (err) {
+      throw new OnlineError('auth', `Could not sign in: ${(err as Error).message}`);
     }
-    this.uid = user.id;
-    return user.id;
+    return this.uid;
   }
 
   sideOf(row: GameRow): Side | null {

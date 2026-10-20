@@ -169,6 +169,24 @@
   margin-top: -6px;
 }
 
+.auth-guest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px dashed color-mix(in srgb, var(--violet) 50%, var(--border));
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.auth-guest:hover {
+  background: color-mix(in srgb, var(--violet) 12%, transparent);
+}
+
 .auth-foot {
   font-size: 12px;
   text-align: center;

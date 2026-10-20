@@ -4,12 +4,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DAILY_COINS,
+  GUEST_PUZZLES,
   MODULES,
   PUZZLES_PER_MODULE,
   STREAK_TIERS,
   dailyCoins,
   dailyPuzzle,
   dayOf,
+  guestMayPlay,
   liveStreak,
   nextMilestone,
   nextStreak,
@@ -188,4 +190,15 @@ test('the next move\'s aim: told before the move, from the position', async () =
     if (g.intent === 'fork') fork++;
   }
   assert.ok(fork >= 40, `forks named as forks: ${fork}`);
+});
+
+test('guests try the first puzzles of the free module only', () => {
+  const free = MODULES.find((m) => m.free)!;
+  assert.equal(free.id, 'openings');
+  assert.ok(guestMayPlay('openings', 0));
+  assert.ok(guestMayPlay('openings', GUEST_PUZZLES - 1));
+  assert.ok(!guestMayPlay('openings', GUEST_PUZZLES));
+  assert.ok(!guestMayPlay('openings', -1));
+  assert.ok(MODULES.filter((m) => !m.free).every((m) => !guestMayPlay(m.id, 0)));
+  assert.ok(!guestMayPlay('nope', 0));
 });

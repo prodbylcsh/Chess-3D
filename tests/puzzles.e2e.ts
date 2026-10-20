@@ -4,7 +4,7 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
-import { BONUS_COINS, DAILY_COINS, MODULE_PRICE, dailyPuzzle, dayOf, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
+import { BONUS_COINS, DAILY_COINS, GUEST_PUZZLES, MODULE_PRICE, dailyPuzzle, dayOf, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
 import { PUZZLES } from '../supabase/functions/_shared/server/puzzle-data.ts';
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -230,4 +230,49 @@ test('the daily puzzle: once a day, a streak and its milestones', async () => {
   const owned = (await admin.from('player_items').select('item_id, source').eq('player_id', p.id)).data;
   assert.deepEqual(owned, [{ item_id: year.milestone.item, source: 'streak' }]);
   assert.ok((await p.client.from('puzzle_daily').insert({ player_id: p.id, day: '2020-01-01', module, idx: 0, stars: 3, coins: 0 })).error, 'clients cannot write it');
+});
+
+test('guests: the first puzzles of Openings and the daily puzzle, then the account keeps them', async () => {
+  const guest = createClient(URL, KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
+  clients.push(guest);
+  const anon = await guest.auth.signInAnonymously();
+  assert.ifError(anon.error);
+  const g = { client: guest, id: anon.data.user!.id };
+
+  const start = await call(guest, { action: 'progress' });
+  assert.deepEqual(start.guest, { coins: 0 });
+  assert.equal(start.player, undefined, 'a guest has no player state');
+  const first = await solve(g, 'openings', 0);
+  assert.equal(first.first, true, JSON.stringify(first));
+  assert.deepEqual(first.guest, { coins: first.coins });
+  const second = await solve(g, 'openings', 1);
+  assert.equal(second.first, true);
+  assert.equal((await call(guest, { action: 'start', module: 'openings', index: GUEST_PUZZLES })).code, 'guest_limit');
+  assert.equal((await call(guest, { action: 'start', module: 'forks', index: 0 })).code, 'guest_limit');
+  assert.equal((await call(guest, { action: 'unlock', module: 'forks' })).code, 'guest');
+  assert.equal((await call(guest, { action: 'me' }, 'account')).code, 'guest', 'still no account');
+  const { module, index } = dailyPuzzle(dayOf());
+  await call(guest, { action: 'daily_start' });
+  await wait(2100);
+  const daily = await call(guest, { action: 'daily_solve', moves: answer(module, index), mistakes: 0, hints: 0 });
+  assert.equal(daily.already, false, JSON.stringify(daily));
+  const earned = first.coins + second.coins + DAILY_COINS;
+  assert.deepEqual(daily.guest, { coins: earned });
+
+  // the account solved puzzle 0 already: only puzzle 1 and the daily puzzle are new to it
+  const p = await player('pzguest');
+  await solve(p, 'openings', 0);
+  const before = await coins(p.id);
+  const token = (await guest.auth.getSession()).data.session!.access_token;
+  assert.equal((await call(p.client, { action: 'claim', guest: 'not-a-token' })).claimed, null);
+  const claim = await call(p.client, { action: 'claim', guest: token });
+  assert.deepEqual(claim.claimed, { puzzles: 1, days: 1, coins: second.coins + DAILY_COINS }, JSON.stringify(claim));
+  assert.equal(await coins(p.id), before + second.coins + DAILY_COINS);
+  const solved = (await admin.from('puzzle_solves').select('idx').eq('player_id', p.id).order('idx')).data!.map((r) => r.idx);
+  assert.deepEqual(solved, [0, 1]);
+  assert.equal((await call(p.client, { action: 'daily' })).streak.current, 1);
+  assert.deepEqual((await admin.from('puzzle_solves').select('idx').eq('player_id', g.id)).data, [], 'the guest rows are gone');
+  assert.equal((await call(p.client, { action: 'claim', guest: token })).claimed, null, 'once');
+  const other = await player('pzguest2');
+  assert.equal((await call(other.client, { action: 'claim', guest: (await p.client.auth.getSession()).data.session!.access_token })).claimed, null, 'only guests');
 });

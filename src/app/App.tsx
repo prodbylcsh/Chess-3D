@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { api } from '../api';
 import { t } from '../i18n';
@@ -13,12 +13,13 @@ import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { LogoMark } from '../ui/art/art';
-import { ConfirmHost, Spinner, ToastProvider, useToast } from '../ui/kit';
+import { ConfirmHost, Spinner, ToastProvider, formatNumber, useToast } from '../ui/kit';
 import { AppLayout } from './AppLayout';
 import { NotificationsProvider } from './notifications';
 import { usePrefs } from './prefs';
 import { SessionProvider, useSession } from './session';
 import { SearchWatcher } from '../features/play/SearchWatcher';
+import { puzzlesChanged } from '../features/puzzles/guest';
 
 // the 3D game (three.js) is loaded only when a game starts
 const GamePage = lazy(() => import('../features/game/GamePage'));
@@ -45,6 +46,14 @@ function Guard({ children, onboarding }: { children: ReactNode; onboarding?: boo
   return <>{children}</>;
 }
 
+/** Puzzles: signed-out visitors play as guests; unfinished profiles go to /onboarding. */
+function GuestOrPlayer({ children }: { children: ReactNode }) {
+  const { status, profile } = useSession();
+  if (status === 'loading') return <Splash />;
+  if (status === 'ready' && !profile?.onboarded) return <Navigate to="/onboarding" replace />;
+  return <>{children}</>;
+}
+
 function SignedOutOnly({ children }: { children: ReactNode }) {
   const { status } = useSession();
   const location = useLocation();
@@ -67,10 +76,13 @@ function Routed() {
         {/* invite links work for guests too */}
         <Route path="/join/:gameId" element={<JoinPage />} />
         <Route path="/game/:mode/:id?" element={<GamePage />} />
-        <Route element={<Guard><AppLayout /></Guard>}>
-          <Route path="/play" element={<PlayHub />} />
+        {/* puzzles work for guests too (the first ones of the free module, the daily puzzle) */}
+        <Route element={<GuestOrPlayer><AppLayout /></GuestOrPlayer>}>
           <Route path="/puzzles" element={<PuzzlesPage />} />
           <Route path="/puzzles/:module" element={<ModulePage />} />
+        </Route>
+        <Route element={<Guard><AppLayout /></Guard>}>
+          <Route path="/play" element={<PlayHub />} />
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -103,6 +115,28 @@ function AuthReturn() {
   return null;
 }
 
+/** Once signed in and set up: this device's guest puzzles move into the account. */
+function GuestClaim() {
+  const { status, profile, refresh } = useSession();
+  const toast = useToast();
+  const done = useRef<string | null>(null);
+  const ready = status === 'ready' && !!profile?.onboarded;
+  useEffect(() => {
+    if (!ready || done.current === profile!.id) return;
+    done.current = profile!.id;
+    void api.puzzles.claimGuest().then(
+      (claimed) => {
+        if (!claimed || (!claimed.puzzles && !claimed.days)) return;
+        void refresh();
+        puzzlesChanged();
+        toast(t('Your puzzles from before you signed in are now in your account: {coins} coins.', { coins: formatNumber(claimed.coins) }), { tone: 'success', duration: 8 });
+      },
+      () => (done.current = null), // tried again later
+    );
+  }, [ready, profile, refresh, toast]);
+  return null;
+}
+
 /** Re-mounts the screens when the language changes, so every text is redrawn. */
 function LanguageRoot() {
   const { language } = usePrefs();
@@ -118,6 +152,7 @@ export function App() {
       <ToastProvider>
         <HashRouter>
           <AuthReturn />
+          <GuestClaim />
           <SearchWatcher />
           <NotificationsProvider>
             <LanguageRoot />

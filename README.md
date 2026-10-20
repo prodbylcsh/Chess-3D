@@ -19,7 +19,7 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
 - **Accounts** (Supabase): sign up with email and password (confirmation link, password
   reset by email), Apple or Google (once set up on the server), and a 4-step onboarding
   (username with live availability check, one of six profile icons). Guests can still
-  play invite games and are invited to register afterwards.
+  play invite games and try puzzles, and are invited to register afterwards.
 - **Puzzles**: a daily puzzle with a growing streak (and its flame), reviews of weak solves,
   Stockfish showing why a wrong move fails, the solution on demand when stuck, and
   seven themed modules of 100 puzzles, mostly from Lichess, plus Openings: 100
@@ -28,7 +28,8 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   you (Openings free, the others
   unlocked for coins), a map of levels played in order, stars, coins for every new solve,
   500 for every 10, a random shop item for finishing a module; the 3D scene takes the
-  module's colour while you play.
+  module's colour while you play. Without an account, guests try the first 10 Openings
+  puzzles and the daily puzzle; signing up or in on the same device keeps them.
 - **Sidebar** with the eight modules (Learn marked "Soon") and badges for unread
   messages and friend requests.
 - **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile

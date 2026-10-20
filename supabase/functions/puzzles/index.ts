@@ -12,9 +12,15 @@
 // POST { action: 'daily_start' }                               → { ok }
 // POST { action: 'daily_solve', moves, mistakes, hints }        → { coins, hintCost, stars, already, streak, milestone, player }
 //
+// POST { action: 'claim', guest }                              → { claimed, player } move a guest's puzzles
+//      (`guest`: the access token of this device's anonymous session) into this account
+//
 // Stars of a replayed puzzle improve only after REVIEW_AFTER_HOURS without trying it (`counted`).
 //
-// Registered, onboarded players only. Errors: { error, code } with an HTTP error status.
+// Registered, onboarded players; guests (anonymous sessions) may play the first GUEST_PUZZLES
+// of the free module and the daily puzzle. A guest has no player row: what they earn is in the
+// ledger, and their answers carry `guest: { coins }` instead of `player`; 'claim' pays it to
+// the account by the account's rules. Errors: { error, code } with an HTTP error status.
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError } from '../_shared/accounts.ts';
 import {
@@ -39,6 +45,7 @@ import {
   solves,
   stars,
   MODULES,
+  guestMayPlay,
 } from '../_shared/puzzles.ts';
 import { ITEMS } from '../_shared/shop.ts';
 import { PUZZLES } from '../_shared/server/puzzle-data.ts';
@@ -92,10 +99,11 @@ async function progress(me: string) {
 }
 
 /** The module and puzzle a request is about, if the player may play it now. */
-async function playable(me: string, body: Record<string, unknown>) {
+async function playable(me: string, body: Record<string, unknown>, guest = false) {
   const module = moduleOf(body.module);
   const index = Number(body.index);
   if (!module || !Number.isInteger(index) || index < 0 || index >= PUZZLES_PER_MODULE) throw fail('bad_request', 'Unknown puzzle.');
+  if (guest && !guestMayPlay(module.id, index)) throw fail('guest_limit', 'Create a free account to keep going.', 403);
   const mine = (await progress(me)).find((m) => m.id === module.id)!;
   if (!mine.unlocked) throw fail('locked', 'Unlock this module first.', 403);
   // one after another: solved (or seen) puzzles can be replayed, the next one is open
@@ -104,15 +112,15 @@ async function playable(me: string, body: Record<string, unknown>) {
   return { module, index, puzzle: PUZZLES[module.id][index] };
 }
 
-async function start(me: string, body: Record<string, unknown>) {
-  const { module, index } = await playable(me, body);
+async function start(me: string, body: Record<string, unknown>, guest: boolean) {
+  const { module, index } = await playable(me, body, guest);
   const { error } = await admin.from('puzzle_attempts').upsert({ player_id: me, module: module.id, idx: index, started_at: new Date().toISOString() });
   if (error) throw error;
   return { ok: true };
 }
 
-async function solve(me: string, body: Record<string, unknown>) {
-  const { module, index, puzzle } = await playable(me, body);
+async function solve(me: string, body: Record<string, unknown>, guest: boolean) {
+  const { module, index, puzzle } = await playable(me, body, guest);
   const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
   if (error) throw error;
   if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_SOLVE_MS) {
@@ -124,7 +132,7 @@ async function solve(me: string, body: Record<string, unknown>) {
   const hints = count(body.hints);
   const earned = stars(count(body.mistakes), hints);
 
-  await ensurePlayer(admin, me);
+  if (!guest) await ensurePlayer(admin, me);
   const { data: result, error: e2 } = await admin.rpc('solve_puzzle', {
     p_player: me,
     p_module: module.id,
@@ -139,7 +147,7 @@ async function solve(me: string, body: Record<string, unknown>) {
   await admin.from('puzzle_attempts').delete().eq('player_id', me);
 
   let reward: { item: string | null; coins: number | null } | null = null;
-  if (result.first && result.solved >= PUZZLES_PER_MODULE) {
+  if (!guest && result.first && result.solved >= PUZZLES_PER_MODULE) {
     // the finishing reward: an item from the shop the player does not have yet
     const { data: owned, error: e3 } = await admin.from('player_items').select('item_id').eq('player_id', me);
     if (e3) throw e3;
@@ -149,8 +157,6 @@ async function solve(me: string, body: Record<string, unknown>) {
     if (e4) throw e4;
     if (given) reward = { item, coins: item ? null : COMPLETION_COINS };
   }
-  const player = await getPlayer(admin, me);
-  if (reward?.item) await publishShowcase(admin, player);
   const hintCost = result.first ? hintPenalty(hints, solution(puzzle).length) : 0;
   return {
     first: result.first,
@@ -163,15 +169,15 @@ async function solve(me: string, body: Record<string, unknown>) {
     reviewFrom: reviewFrom(result.stars, result.tried_at),
     solved: result.solved,
     reward,
-    player,
+    ...(await whoAfter(me, guest, !!reward?.item)),
   };
 }
 
 /** A puzzle opened this long ago at least before its solution can be shown. */
 const MIN_REVEAL_MS = 20_000;
 
-async function reveal(me: string, body: Record<string, unknown>) {
-  const { module, index } = await playable(me, body);
+async function reveal(me: string, body: Record<string, unknown>, guest: boolean) {
+  const { module, index } = await playable(me, body, guest);
   const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
   if (error) throw error;
   if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_REVEAL_MS) {
@@ -211,7 +217,7 @@ async function dailyStart(me: string) {
 // milestones as the database gets them: the table, then every 100 days after 1000
 const MILESTONES = [...STREAK_MILESTONES, ...Array.from({ length: 90 }, (_, i) => ({ days: 1100 + i * 100, coins: 10_000 }))];
 
-async function dailySolve(me: string, body: Record<string, unknown>) {
+async function dailySolve(me: string, body: Record<string, unknown>, guest: boolean) {
   const day = dayOf();
   const { module, index } = dailyPuzzle(day);
   const puzzle = PUZZLES[module][index];
@@ -227,11 +233,9 @@ async function dailySolve(me: string, body: Record<string, unknown>) {
   const earned = stars(count(body.mistakes), hints);
   const coins = dailyCoins(hints, solution(puzzle).length);
 
-  await ensurePlayer(admin, me);
-  // an item for the milestones that give one: one the player lacks
-  const { data: owned, error: e3 } = await admin.from('player_items').select('item_id').eq('player_id', me);
-  if (e3) throw e3;
-  const item = completionItem(ITEMS.filter((i) => i.forSale && !owned.some((o) => o.item_id === i.id)).map((i) => i.id));
+  if (!guest) await ensurePlayer(admin, me);
+  // an item for the milestones that give one: one the player lacks (guests get it on claiming)
+  const item = guest ? null : await lackingItem(me);
   const { data: result, error: e2 } = await admin.rpc('solve_daily', {
     p_player: me,
     p_day: day,
@@ -244,17 +248,108 @@ async function dailySolve(me: string, body: Record<string, unknown>) {
   });
   if (e2) throw e2;
   await admin.from('puzzle_attempts').delete().eq('player_id', me);
-  const player = await getPlayer(admin, me);
-  if (result.milestone?.item) await publishShowcase(admin, player);
   return {
+    ...(await whoAfter(me, guest, !!result.milestone?.item)),
     already: result.already,
     coins: result.coins,
     hintCost: result.already ? 0 : hintPenalty(hints, solution(puzzle).length),
     stars: earned,
     streak: { current: result.streak.current, best: result.streak.best, lastDay: result.streak.last_day },
     milestone: result.milestone,
-    player,
   };
+}
+
+/** A random shop item the player does not own yet (finishing rewards, streak milestones). */
+async function lackingItem(me: string): Promise<string | null> {
+  const { data: owned, error } = await admin.from('player_items').select('item_id').eq('player_id', me);
+  if (error) throw error;
+  return completionItem(ITEMS.filter((i) => i.forSale && !owned.some((o) => o.item_id === i.id)).map((i) => i.id));
+}
+
+/** What a guest has earned so far: it waits in the ledger until they claim it. */
+async function guestCoins(me: string): Promise<number> {
+  const { data, error } = await admin.from('coin_ledger').select('amount').eq('player_id', me);
+  if (error) throw error;
+  return data.reduce((sum, r) => sum + r.amount, 0);
+}
+
+/** The state a solve answers with: the player's (showcase refreshed for a new item), or a guest's coins. */
+async function whoAfter(me: string, guest: boolean, newItem: boolean): Promise<{ player: unknown } | { guest: { coins: number } }> {
+  if (guest) return { guest: { coins: await guestCoins(me) } };
+  const player = await getPlayer(admin, me);
+  if (newItem) await publishShowcase(admin, player);
+  return { player };
+}
+
+/**
+ * Move a guest's puzzles into this account, once: each solve is replayed with the account's
+ * rules (a puzzle the account solved already pays nothing, a bonus every BONUS_EVERY), and
+ * daily puzzles after the account's last one continue its streak. The guest's rows go.
+ */
+async function claim(me: string, body: Record<string, unknown>) {
+  const token = typeof body.guest === 'string' ? body.guest : '';
+  const { data } = token ? await admin.auth.getUser(token) : { data: { user: null } };
+  const guest = data.user;
+  if (!guest?.is_anonymous || guest.id === me) return { claimed: null, player: (await ensurePlayer(admin, me)).player };
+  const [solves_, daily_, ledger_, streak_] = await Promise.all([
+    admin.from('puzzle_solves').select('module, idx, stars').eq('player_id', guest.id).order('solved_at'),
+    admin.from('puzzle_daily').select('day, module, idx, stars, coins').eq('player_id', guest.id).order('day'),
+    admin.from('coin_ledger').select('amount, ref').eq('player_id', guest.id).eq('reason', 'puzzle'),
+    admin.from('puzzle_streaks').select('last_day').eq('player_id', me).maybeSingle(),
+  ]);
+  for (const r of [solves_, daily_, ledger_, streak_]) if (r.error) throw r.error;
+  if (!solves_.data!.length && !daily_.data!.length) return { claimed: null, player: (await ensurePlayer(admin, me)).player };
+
+  const { player: before } = await ensurePlayer(admin, me);
+  let puzzles = 0;
+  let days = 0;
+  let newItem = false;
+  for (const s of solves_.data!) {
+    if (!guestMayPlay(s.module, s.idx)) continue;
+    if (s.stars === 0) {
+      // seen: opens the next puzzle, unless the account has this one already
+      const { error } = await admin.from('puzzle_solves').upsert({ player_id: me, module: s.module, idx: s.idx, stars: 0 }, { onConflict: 'player_id,module,idx', ignoreDuplicates: true });
+      if (error) throw error;
+      continue;
+    }
+    const coins = ledger_.data!.find((l) => l.ref === `${s.module}:${s.idx}`)?.amount ?? 0;
+    const { data: r, error } = await admin.rpc('solve_puzzle', {
+      p_player: me,
+      p_module: s.module,
+      p_idx: s.idx,
+      p_stars: s.stars,
+      p_coins: coins,
+      p_every: BONUS_EVERY,
+      p_bonus: BONUS_COINS,
+      p_review: REVIEW_AFTER_HOURS * 3600,
+    });
+    if (error) throw error;
+    if (r.first) puzzles++;
+  }
+  const lastDay = streak_.data?.last_day ?? null;
+  for (const d of daily_.data!) {
+    if (lastDay && d.day <= lastDay) continue; // the account's streak is further on
+    const { data: r, error } = await admin.rpc('solve_daily', {
+      p_player: me,
+      p_day: d.day,
+      p_module: d.module,
+      p_idx: d.idx,
+      p_stars: d.stars,
+      p_coins: d.coins,
+      p_milestones: MILESTONES,
+      p_item: await lackingItem(me),
+    });
+    if (error) throw error;
+    if (!r.already) days++;
+    if (r.milestone?.item) newItem = true;
+  }
+  for (const table of ['puzzle_solves', 'puzzle_daily', 'puzzle_streaks', 'puzzle_attempts']) {
+    const { error } = await admin.from(table).delete().eq('player_id', guest.id);
+    if (error) throw error;
+  }
+  const player = await getPlayer(admin, me);
+  if (newItem) await publishShowcase(admin, player);
+  return { claimed: { puzzles, days, coins: player.coins - before.coins }, player };
 }
 
 async function unlock(me: string, body: Record<string, unknown>) {
@@ -270,29 +365,40 @@ async function unlock(me: string, body: Record<string, unknown>) {
   return { modules: await progress(me), player: await getPlayer(admin, me) };
 }
 
+/** Actions a guest may use (the free module's first puzzles and the daily puzzle). */
+const GUEST_ACTIONS = ['progress', 'start', 'solve', 'reveal', 'daily', 'daily_start', 'daily_solve'];
+
 async function handle(user: User, body: Record<string, unknown>): Promise<unknown> {
-  const { data: profile, error } = await admin.from('profiles').select('onboarded_at').eq('id', user.id).maybeSingle();
-  if (error) throw error;
-  if (!profile?.onboarded_at) throw fail('not_ready', 'Finish setting up your profile first.', 403);
+  const guest = !!user.is_anonymous;
+  if (guest) {
+    if (!GUEST_ACTIONS.includes(body.action as string)) throw fail('guest', 'Create an account first.', 403);
+  } else {
+    const { data: profile, error } = await admin.from('profiles').select('onboarded_at').eq('id', user.id).maybeSingle();
+    if (error) throw error;
+    if (!profile?.onboarded_at) throw fail('not_ready', 'Finish setting up your profile first.', 403);
+  }
   switch (body.action) {
     case 'progress': {
+      if (guest) return { modules: await progress(user.id), guest: { coins: await guestCoins(user.id) } };
       const { player } = await ensurePlayer(admin, user.id);
       return { modules: await progress(user.id), player };
     }
     case 'start':
-      return start(user.id, body);
+      return start(user.id, body, guest);
     case 'solve':
-      return solve(user.id, body);
+      return solve(user.id, body, guest);
     case 'unlock':
       return unlock(user.id, body);
     case 'reveal':
-      return reveal(user.id, body);
+      return reveal(user.id, body, guest);
     case 'daily':
       return dailyState(user.id);
     case 'daily_start':
       return dailyStart(user.id);
     case 'daily_solve':
-      return dailySolve(user.id, body);
+      return dailySolve(user.id, body, guest);
+    case 'claim':
+      return claim(user.id, body);
     default:
       throw fail('bad_request', 'Unknown action.');
   }
@@ -304,7 +410,6 @@ Deno.serve(async (req) => {
   const token = req.headers.get('Authorization')?.replace(/^Bearer\s+/i, '');
   const { data: auth } = token ? await admin.auth.getUser(token) : { data: { user: null } };
   if (!auth.user) return reply({ error: 'Please sign in again.', code: 'unauthorized' }, 401);
-  if (auth.user.is_anonymous) return reply({ error: 'Create an account first.', code: 'guest' }, 403);
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   if (!body) return reply({ error: 'Invalid JSON.', code: 'bad_request' }, 400);
   try {

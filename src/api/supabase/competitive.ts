@@ -7,6 +7,8 @@ import { DEFAULT_CONTROL } from '#shared/play.ts';
 import { TIERS, DIVISION_SIZE } from '#shared/rating.ts';
 import { DEFAULT_LOADOUT } from '#shared/shop.ts';
 import { t } from '../../i18n';
+import { forgetGuest, guestSession, guestToken } from '../../net/guest';
+import { SUPABASE_KEY, SUPABASE_URL } from '../../net/supabase';
 import { paddleConfigured } from '../../net/paddle';
 import {
   ApiError,
@@ -23,6 +25,7 @@ import {
   type PuzzleSolve,
   type DailyPuzzle,
   type DailySolve,
+  type GuestClaim,
   type PuzzlesService,
   type ProfileService,
   type PublicProfile,
@@ -284,6 +287,7 @@ export function createCompetitive(
   // ---------------------------------------------------------------- puzzles
 
   async function puzzleCall<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
+    if (!deps.me()) await guestSession(client).catch(() => {}); // signed out: puzzles as this device's guest
     const { data, error } = await client.functions.invoke<T>('puzzles', { body: { action, ...body } });
     if (!error) return data!;
     if (error instanceof FunctionsHttpError) {
@@ -297,6 +301,9 @@ export function createCompetitive(
           throw new ApiError('wrong', t('That is not the solution.'));
         case 'not_started':
           throw new ApiError('not_started', t('Something went wrong. Please try again.'));
+        case 'guest_limit':
+        case 'guest':
+          throw new ApiError('guest_limit', t('Create a free account to keep going.'));
         default:
           throw playError(payload?.code ?? 'server_error');
       }
@@ -304,19 +311,25 @@ export function createCompetitive(
     throw new ApiError('network', t('Could not reach the server. Check your connection.'));
   }
 
+  /** a guest's coins from their last answer (guests have no player state) */
+  let guestState: { coins: number } | null = null;
+  /** A puzzle answer carries the player's state, or a guest's coins. */
+  function took<T extends { player?: PlayerRecord; guest?: { coins: number } }>(res: T): Omit<T, 'player' | 'guest'> {
+    const { player, guest, ...rest } = res;
+    if (player) deps.adopt(player);
+    if (guest) guestState = guest;
+    return rest;
+  }
+
   const puzzles: PuzzlesService = {
     async progress() {
-      const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('progress');
-      deps.adopt(player);
-      return modules;
+      return took(await puzzleCall<{ modules: PuzzleModuleProgress[]; player?: PlayerRecord; guest?: { coins: number } }>('progress')).modules;
     },
     async start(module, index) {
       await puzzleCall('start', { module, index });
     },
     async solve(module, index, moves, mistakes, hints) {
-      const { player, ...result } = await puzzleCall<PuzzleSolve & { player: PlayerRecord }>('solve', { module, index, moves, mistakes, hints });
-      deps.adopt(player);
-      return result;
+      return took(await puzzleCall<PuzzleSolve & { player?: PlayerRecord; guest?: { coins: number } }>('solve', { module, index, moves, mistakes, hints }));
     },
     async unlock(module) {
       const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('unlock', { module });
@@ -334,9 +347,21 @@ export function createCompetitive(
       await puzzleCall('daily_start');
     },
     async dailySolve(moves, mistakes, hints) {
-      const { player, ...result } = await puzzleCall<DailySolve & { player: PlayerRecord }>('daily_solve', { moves, mistakes, hints });
-      deps.adopt(player);
-      return result;
+      return took(await puzzleCall<DailySolve & { player?: PlayerRecord; guest?: { coins: number } }>('daily_solve', { moves, mistakes, hints }));
+    },
+    async guest() {
+      if (deps.me()) return null;
+      if (!guestState) await puzzles.progress();
+      return guestState && { ...guestState };
+    },
+    async claimGuest() {
+      if (!deps.me()) return null;
+      const token = await guestToken(SUPABASE_URL!, SUPABASE_KEY!).catch(() => null);
+      if (!token) return null;
+      const { claimed } = took(await puzzleCall<{ claimed: GuestClaim | null; player: PlayerRecord }>('claim', { guest: token }));
+      forgetGuest();
+      guestState = null;
+      return claimed;
     },
   };
 
