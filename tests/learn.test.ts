@@ -66,9 +66,14 @@ for (const lesson of Object.values(LESSONS)) {
       const where = `${lesson.id} step ${i + 1}`;
       if (step.fen) {
         fen = step.fen;
-        if (hasKings(fen)) assert.ok(validateFen(fen).ok, `${where}: a legal position (${validateFen(fen).error})`);
+        if (hasKings(fen)) {
+          assert.ok(validateFen(fen).ok, `${where}: a legal position (${validateFen(fen).error})`);
+          const [board, side] = fen.split(' ');
+          const other = new Chess(`${board} ${side === 'w' ? 'b' : 'w'} - - 0 1`, { skipValidation: true });
+          assert.ok(!other.inCheck(), `${where}: the side not to move is not in check`);
+        }
       }
-      if (i === 0) assert.ok(step.fen || !step.task, `${where}: the first board`);
+      if (i === 0) assert.ok(step.fen, `${where}: a lesson sets up its own board first`);
       assert.ok(!/\b[a-h][1-8]\b/.test(step.say), `${where}: no square names in "${step.say}"`);
       if (!fen) return;
       const c = load(fen);

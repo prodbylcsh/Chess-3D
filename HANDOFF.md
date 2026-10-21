@@ -246,10 +246,10 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Learn chapters 1–3 are built (`PLATFORM.md` §4.3). Next: write chapters 4–7 (Opening
-   moves, Playing well, First tactics, First endgames) and the Coordinates lesson as data in
-   `src/features/learn/lessons.ts` (ids in `_shared/learn.ts`), with Czech; `tests/learn.test.ts`
-   checks them. The user wants the platform to make money
+1. Learn chapters 1–7 are written (`PLATFORM.md` §4.3; 1–3 live, 4–7 on the branch). Still
+   to write: the Coordinates chapter, as data in `src/features/learn/lessons.ts` (ids in
+   `_shared/learn.ts`), with Czech; `tests/learn.test.ts` checks every lesson (legal boards,
+   every task doable, one right answer, no square names, a board in the first step). The user wants the platform to make money
    (`PLATFORM.md` §1 "Earning money").
 2. On a real iPhone and an Android phone, check the vibration and the "why not?" speed.
    If iOS gives no tick, say so and keep the switch.

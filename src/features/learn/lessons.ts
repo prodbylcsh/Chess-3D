@@ -184,7 +184,7 @@ export const LESSONS: Record<string, Lesson> = {
     id: 'escape',
     title: tk('Getting out of check'),
     steps: [
-      { say: tk('A king in check must get out of it at once. There are three ways: move the king away, put a piece in between, or take the attacking piece.') },
+      { say: tk('A king in check must get out of it at once. There are three ways: move the king away, put a piece in between, or take the attacking piece.'), fen: '4r1k1/8/8/8/8/8/8/4K3 w - - 0 1' },
       { say: tk('The black rook checks your king. Move the king out of its line.'), fen: '4r1k1/8/8/8/8/8/8/4K3 w - - 0 1', task: { kind: 'escape' } },
       {
         say: tk('Your king cannot move. Put a piece between it and the rook.'),
@@ -204,7 +204,7 @@ export const LESSONS: Record<string, Lesson> = {
     steps: [
       { say: tk('If the king is in check and there is no way out, it is checkmate, and the game is over. Whoever gives checkmate wins.'), fen: 'R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1' },
       { say: tk('The black king is walled in by its own pawns. Give checkmate in one move.'), fen: '6k1/5ppp/8/8/8/8/8/R5K1 w - - 0 1', task: { kind: 'mate' } },
-      { say: tk('Your king guards the escape squares. Checkmate with the queen.'), fen: '7k/8/6K1/8/8/8/8/Q7 w - - 0 1', task: { kind: 'mate' } },
+      { say: tk('Your king guards the escape squares. Checkmate with the queen.'), fen: '7k/8/6K1/8/8/8/8/1Q6 w - - 0 1', task: { kind: 'mate' } },
       { say: tk('Two rooks work like a ladder: one cuts off a row, the other gives check. Checkmate.'), fen: 'k7/6R1/8/8/8/8/8/6KR w - - 0 1', task: { kind: 'mate' } },
     ],
   },
@@ -301,8 +301,8 @@ export const LESSONS: Record<string, Lesson> = {
     id: 'avoid-stalemate',
     title: tk('Win, not draw'),
     steps: [
-      { say: tk('With much more material it is easy to stalemate by mistake. Before every move, check that the enemy king still has a move, or give checkmate.') },
-      { say: tk('Give checkmate, and careful: one queen move here is stalemate.'), fen: '7k/8/5QK1/8/8/8/8/8 w - - 0 1', task: { kind: 'mate' } },
+      { say: tk('With much more material it is easy to stalemate by mistake. Before every move, check that the enemy king still has a move, or give checkmate.'), fen: '7k/5Q2/6K1/8/8/8/8/8 b - - 0 1' },
+      { say: tk('Give checkmate, and careful: one queen move here is stalemate.'), fen: '7k/8/6K1/5Q2/8/8/8/8 w - - 0 1', task: { kind: 'mate' } },
       { say: tk('Checkmate with the rook.'), fen: 'k7/8/1K6/8/8/8/8/7R w - - 0 1', task: { kind: 'mate' } },
     ],
   },
@@ -310,7 +310,7 @@ export const LESSONS: Record<string, Lesson> = {
     id: 'repetition',
     title: tk('Draws'),
     steps: [
-      { say: tk('A game is drawn when the same position comes up three times with the same player to move. It often happens when one side gives check after check and the king cannot escape.') },
+      { say: tk('A game is drawn when the same position comes up three times with the same player to move. It often happens when one side gives check after check and the king cannot escape.'), fen: '6k1/5ppp/8/8/8/8/5PPP/6K1 w - - 0 1' },
       {
         say: tk('The same position is on the board for the third time. What happens?'),
         quiz: {
@@ -347,7 +347,7 @@ export const LESSONS: Record<string, Lesson> = {
     id: 'clock',
     title: tk('Resigning and the clock'),
     steps: [
-      { say: tk('A game can also end before the board decides it. A player may resign at any time, and the opponent wins.') },
+      { say: tk('A game can also end before the board decides it. A player may resign at any time, and the opponent wins.'), fen: START },
       { say: tk('In timed games each player has a clock. Running out of time loses, unless the opponent has nothing left that could give checkmate: then it is a draw.') },
       {
         say: tk('Your time runs out, and your opponent has only the king left. What is the result?'),
@@ -357,6 +357,306 @@ export const LESSONS: Record<string, Lesson> = {
         },
       },
       { say: tk('In Wizard Chess your clock waits while a move plays out on the board, so the spells and captures never cost you time.') },
+    ],
+  },
+
+  // ---------------------------------------------------------------- chapter 4: opening moves
+  centre: {
+    id: 'centre',
+    title: tk('The centre'),
+    steps: [
+      { say: tk('The four squares in the middle of the board are the centre. Pieces there reach the most squares, and whoever holds the centre has more room to play.'), fen: START, marks: ['d4', 'e4', 'd5', 'e5'] },
+      { say: tk('A knight in the middle reaches eight squares.'), fen: '8/8/8/8/3N4/8/8/N7 w - - 0 1', moves: 'd4' },
+      { say: tk('In the corner, the same knight reaches only two.'), moves: 'a1' },
+      {
+        say: tk('Start the game by claiming the centre: push one of the two middle pawns two squares.'),
+        fen: START,
+        task: { kind: 'move', moves: ['e2e4', 'd2d4'], wrong: tk('Push one of the two middle pawns two squares forward: they claim the centre.') },
+      },
+      {
+        say: tk('Why do players fight for the centre?'),
+        quiz: {
+          options: [{ text: tk('Pieces there reach more squares'), correct: true }, { text: tk('Pieces there cannot be taken') }, { text: tk('The king is safest there') }],
+          why: tk('From the centre, pieces reach far in every direction and can quickly go wherever they are needed.'),
+        },
+      },
+    ],
+  },
+  develop: {
+    id: 'develop',
+    title: tk('Developing'),
+    steps: [
+      {
+        say: tk('Developing means bringing your knights and bishops out of the back row, so they take part in the game. Do it early, and move each piece once rather than one piece many times.'),
+        fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+      },
+      {
+        say: tk('Bring a knight out towards the centre.'),
+        task: { kind: 'move', moves: ['g1f3', 'b1c3'], wrong: tk('Bring a knight out towards the middle: knights are usually the first pieces to develop.') },
+      },
+      {
+        say: tk('Now develop a bishop to a good diagonal.'),
+        fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
+        task: { kind: 'move', moves: ['f1c4', 'f1b5', 'f1e2'], wrong: tk('Not there: put the bishop where it is safe, does not block a pawn, and looks towards the middle.') },
+      },
+      {
+        say: tk('Which piece should usually stay at home in the first moves?'),
+        quiz: {
+          options: [{ text: tk('The queen'), correct: true }, { text: tk('A knight') }, { text: tk('A bishop') }],
+          why: tk('The queen is so valuable that the opponent chases her with every new piece, and you lose time running away.'),
+        },
+      },
+    ],
+  },
+  'castle-early': {
+    id: 'castle-early',
+    title: tk('A safe king'),
+    steps: [
+      { say: tk('Before the middle of the board opens up, bring your king to safety: castle early. The rook comes towards the centre at the same time.'), fen: 'r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4' },
+      { say: tk('Castle now.'), task: { kind: 'move', moves: ['e1g1'], wrong: tk('Castle: move the king two squares towards the rook on the right.') } },
+      { say: tk('After castling, leave the pawns in front of your king where they are: they are its shield.') },
+      {
+        say: tk('Your king has castled. Which pawns should you keep where they are?'),
+        quiz: {
+          options: [{ text: tk('The ones in front of the king'), correct: true }, { text: tk('The ones on the other side') }, { text: tk('None of them') }],
+          why: tk('The pawns in front of the castled king are its shield. Every one that moves opens a door for the enemy pieces.'),
+        },
+      },
+    ],
+  },
+  'first-moves': {
+    id: 'first-moves',
+    title: tk('Good first moves'),
+    steps: [
+      {
+        say: tk('This is how a game often begins: both sides claim the centre with a pawn, bring a knight out, then a bishop. This opening is called the Italian Game.'),
+        fen: START,
+        play: ['e2e4', 'e7e5', 'g1f3', 'b8c6', 'f1c4'],
+      },
+      {
+        say: tk('Another good start: the queen\'s pawn two squares. Here White even offers a side pawn to win the centre: the Queen\'s Gambit.'),
+        fen: START,
+        play: ['d2d4', 'd7d5', 'c2c4'],
+      },
+      {
+        say: tk('What do good opening moves have in common?'),
+        quiz: {
+          options: [{ text: tk('They claim the centre and bring pieces out'), correct: true }, { text: tk('They bring the queen out early') }, { text: tk('They push the pawns on the edge') }],
+          why: tk('The centre, development and a safe king: every good opening follows these three ideas.'),
+        },
+      },
+      { say: tk('To practise real openings move by move, play the Openings module in Puzzles.') },
+    ],
+  },
+  'opening-traps': {
+    id: 'opening-traps',
+    title: tk('Mistakes to avoid'),
+    steps: [
+      { say: tk('Moving the pawns in front of your own king too early can be fatal. Watch the quickest mate in chess.'), fen: START, play: ['f2f3', 'e7e5', 'g2g4', 'd8h4'] },
+      { say: tk('White pushed the pawns that guard the king, and the black queen walked straight in. Keep those pawns at home in the opening.') },
+      {
+        say: tk('Black\'s queen and bishop both aim at the pawn beside your king. Stop the mate.'),
+        fen: 'rnb1k1nr/pppp1ppp/8/2b1p3/2B1P2q/2N5/PPPP1PPP/R1BQK1NR w KQkq - 4 4',
+        task: {
+          kind: 'move',
+          moves: ['g2g3', 'd1e2', 'd1f3', 'g1h3', 'd2d4', 'd1g4', 'd1h5'],
+          wrong: tk('Not that one: protect the pawn beside your king, block the bishop, or chase the queen away.'),
+        },
+      },
+      { say: tk('Look at your opponent\'s threats before every move: it is the best habit in chess.') },
+    ],
+  },
+
+  // ---------------------------------------------------------------- chapter 5: playing well
+  values: {
+    id: 'values',
+    title: tk('What pieces are worth'),
+    steps: [
+      { say: tk('To compare pieces, count in pawns: a knight or a bishop is worth about three, a rook five, the queen nine. The king is priceless: without him the game is lost.'), fen: START },
+      {
+        say: tk('How many pawns is a rook worth?'),
+        quiz: { options: [{ text: tk('Three') }, { text: tk('Five'), correct: true }, { text: tk('Nine') }], why: tk('About five: more than a knight or a bishop, less than the queen.') },
+      },
+      {
+        say: tk('You can take a knight, but you lose your rook for it. A good deal?'),
+        quiz: { options: [{ text: tk('Yes') }, { text: tk('No'), correct: true }], why: tk('No: you give five and get three.') },
+      },
+      {
+        say: tk('Your bishop for their knight?'),
+        quiz: { options: [{ text: tk('A fair trade'), correct: true }, { text: tk('A bad trade') }], why: tk('A fair trade: both are worth about three.') },
+      },
+    ],
+  },
+  'free-pieces': {
+    id: 'free-pieces',
+    title: tk('Free pieces'),
+    steps: [
+      { say: tk('A piece nobody protects is hanging: it can be taken for free. Look for hanging pieces, the opponent\'s and your own, before every move.'), fen: '6k1/8/4p3/3n4/b7/8/8/3Q2K1 w - - 0 1' },
+      {
+        say: tk('Take the piece that nobody protects.'),
+        task: { kind: 'move', moves: ['d1a4'], wrong: tk('Look again: one black piece is protected by a pawn, the other by nobody. Take the free one.') },
+      },
+      { say: tk('Your own pieces can hang too. When one of yours is attacked, move it, protect it, or make sure the trade is fair.') },
+    ],
+  },
+  trades: {
+    id: 'trades',
+    title: tk('Trading'),
+    steps: [
+      { say: tk('Trading means both sides take a piece of the same value. When you are ahead, trade: the fewer pieces are left, the easier your extra material wins.'), fen: '3qk3/8/8/8/8/8/8/R2QK3 w - - 0 1' },
+      {
+        say: tk('You are a rook ahead. Should you trade queens?'),
+        quiz: { options: [{ text: tk('Yes'), correct: true }, { text: tk('No') }], why: tk('Yes: with the queens gone, your extra rook is even stronger.') },
+      },
+      {
+        say: tk('You are behind. What should you avoid?'),
+        quiz: {
+          options: [{ text: tk('Trading pieces'), correct: true }, { text: tk('Developing your pieces') }, { text: tk('Castling') }],
+          why: tk('Trading helps the side that is ahead. When you are behind, keep pieces on the board and look for chances.'),
+        },
+      },
+    ],
+  },
+  'queen-mate': {
+    id: 'queen-mate',
+    title: tk('Mate with the queen'),
+    steps: [
+      { say: tk('King and queen against a lone king is an easy win: the queen pushes the king to the edge, your king comes close, then the queen gives mate.'), fen: '7k/8/6K1/8/8/8/8/3Q4 w - - 0 1' },
+      { say: tk('Checkmate.'), task: { kind: 'mate' } },
+      { say: tk('Checkmate again, with the king in the other corner.'), fen: 'k7/8/2K5/8/8/8/8/1Q6 w - - 0 1', task: { kind: 'mate' } },
+      { say: tk('Remember the stalemate trap: never leave the lone king without a move unless it is checkmate.') },
+    ],
+  },
+  'rook-mate': {
+    id: 'rook-mate',
+    title: tk('Mate with the rook'),
+    steps: [
+      { say: tk('With king and rook, your king stands right in front of the enemy king, and the rook gives mate along the edge.'), fen: '3k4/8/3K4/8/8/8/8/7R w - - 0 1' },
+      { say: tk('Checkmate.'), task: { kind: 'mate' } },
+      { say: tk('A king walled in by its own pawns on the back row is in danger too: the back-rank mate.'), fen: '6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1', task: { kind: 'mate' } },
+    ],
+  },
+
+  // ---------------------------------------------------------------- chapter 6: first tactics
+  fork: {
+    id: 'fork',
+    title: tk('The fork'),
+    steps: [
+      { say: tk('A fork is one piece attacking two at once. The opponent can save only one of them.'), fen: 'r3k3/2N5/8/8/8/8/8/6K1 b - - 0 1', arrows: [['c7', 'e8'], ['c7', 'a8']] },
+      { say: tk('Find the knight fork: check the king and attack the rook at the same time.'), fen: 'r3k3/8/8/1N6/8/8/8/6K1 w - - 0 1', task: { kind: 'move', moves: ['b5c7'], wrong: tk('Look for a knight jump that attacks the king and the rook together.') } },
+      { say: tk('Pawns fork too. Attack both knights with one pawn move.'), fen: '4k3/8/2n1n3/8/3P4/8/8/4K3 w - - 0 1', task: { kind: 'move', moves: ['d4d5'], wrong: tk('Push the pawn so that it attacks both knights at once.') } },
+      {
+        say: tk('What is a fork?'),
+        quiz: {
+          options: [{ text: tk('One piece attacking two at once'), correct: true }, { text: tk('Two pieces attacking one') }, { text: tk('A trade of queens') }],
+          why: tk('One piece, two targets. Practise them in the Forks puzzle module.'),
+        },
+      },
+    ],
+  },
+  pin: {
+    id: 'pin',
+    title: tk('The pin'),
+    steps: [
+      { say: tk('A pin holds a piece in place: it cannot move without exposing a more valuable piece behind it. When the piece behind is the king, moving is not even allowed.'), fen: '4k3/8/2n5/1B6/8/8/8/6K1 b - - 0 1', arrows: [['b5', 'e8']] },
+      { say: tk('Pin the knight to its king with your bishop.'), fen: '4k3/8/2n5/8/8/8/8/5BK1 w - - 0 1', task: { kind: 'move', moves: ['f1b5'], wrong: tk('Put the bishop on the line that runs through the knight to the king.') } },
+      {
+        say: tk('This knight is pinned to its king by your rook: it cannot move. Attack it with a pawn.'),
+        fen: '4k3/8/8/4n3/8/8/3P1P2/4R1K1 w - - 0 1',
+        task: { kind: 'move', moves: ['d2d4', 'f2f4'], wrong: tk('Attack the pinned knight with a pawn: it cannot run away.') },
+      },
+      { say: tk('Pinned pieces are easy targets. Practise pins in the Pins & Skewers puzzle module.') },
+    ],
+  },
+  discovered: {
+    id: 'discovered',
+    title: tk('Discovered attack'),
+    steps: [
+      { say: tk('When a piece moves out of the way, the piece behind it suddenly attacks. If the moving piece attacks something too, there are two threats at once: a discovered attack.'), fen: 'q3k3/8/8/8/4B3/8/8/4R1K1 w - - 0 1' },
+      {
+        say: tk('Move the bishop: your rook checks the king, and the bishop attacks the queen.'),
+        task: { kind: 'move', moves: ['e4d5', 'e4c6', 'e4b7', 'e4f3', 'e4g2', 'e4h1'], wrong: tk('Move the bishop along the line towards the black queen: the rook behind it gives check by itself.') },
+      },
+      {
+        say: tk('What makes a discovered attack so strong?'),
+        quiz: {
+          options: [{ text: tk('Two threats at once'), correct: true }, { text: tk('It always gives checkmate') }, { text: tk('It cannot be seen') }],
+          why: tk('Two threats at once: the opponent can answer only one. Here the king must escape the check, and the queen is lost.'),
+        },
+      },
+    ],
+  },
+  'tactics-practice': {
+    id: 'tactics-practice',
+    title: tk('Practice'),
+    steps: [
+      { say: tk('Now find the tactics yourself. Win the queen with a knight fork.'), fen: 'q3k3/8/8/3N4/8/8/8/6K1 w - - 0 1', task: { kind: 'move', moves: ['d5c7'], wrong: tk('Find the jump that checks the king and attacks the queen together.') } },
+      { say: tk('Give a discovered check: move the knight, and the rook behind it checks the king.'), fen: '4k3/8/8/8/8/8/4N3/4R1K1 w - - 0 1', task: { kind: 'check' } },
+      { say: tk('Forks, pins and discovered attacks win games. The puzzle modules have hundreds of them to practise.') },
+    ],
+  },
+
+  // ---------------------------------------------------------------- chapter 7: first endgames
+  'king-active': {
+    id: 'king-active',
+    title: tk('The active king'),
+    steps: [
+      { say: tk('In the opening the king hides. In the endgame, with few pieces left, he becomes a fighter: bring him to the middle of the board.'), fen: '8/8/4k3/8/8/4P3/8/4K3 w - - 0 1' },
+      { say: tk('Walk your king to the star in the middle.'), fen: '8/pp6/8/8/8/8/PP6/4K3 w - - 0 1', marks: ['e4'], task: { kind: 'collect' } },
+      {
+        say: tk('In the endgame, where does the king belong?'),
+        quiz: { options: [{ text: tk('In the corner, safe') }, { text: tk('In the middle, active'), correct: true }], why: tk('In the middle: from there he reaches both sides of the board.') },
+      },
+    ],
+  },
+  'passed-pawn': {
+    id: 'passed-pawn',
+    title: tk('The passed pawn'),
+    steps: [
+      { say: tk('A passed pawn has no enemy pawn in front of it or on the files beside it: only pieces can stop it on its way to promotion. The marked pawn is passed.'), fen: '4k3/8/8/1P3pp1/8/6P1/8/4K3 w - - 0 1', marks: ['b5'] },
+      {
+        say: tk('Is the marked pawn passed?'),
+        fen: '4k3/8/4p3/3P4/8/8/8/4K3 w - - 0 1',
+        marks: ['d5'],
+        quiz: { options: [{ text: tk('Yes') }, { text: tk('No'), correct: true }], why: tk('No: the black pawn on the file beside it stands in its way and can take it.') },
+      },
+      { say: tk('Passed pawns must be pushed! Run with this one to the end of the board.'), fen: '8/8/8/1P6/8/8/8/8 w - - 0 1', marks: ['b8'], task: { kind: 'collect' } },
+    ],
+  },
+  opposition: {
+    id: 'opposition',
+    title: tk('The opposition'),
+    steps: [
+      {
+        say: tk('When the kings stand face to face with one square between them, neither may step forward. The side that does not have to move holds the opposition: the other king must give way.'),
+        fen: '8/8/4k3/8/4K3/8/8/8 w - - 0 1',
+        marks: ['e5'],
+      },
+      {
+        say: tk('White is to move. Who holds the opposition?'),
+        quiz: { options: [{ text: tk('White') }, { text: tk('Black'), correct: true }], why: tk('Black: White has to move and give way.') },
+      },
+      {
+        say: tk('Take the opposition: stand right in front of the black king, with one square between.'),
+        fen: '8/8/8/4k3/8/8/3K4/8 w - - 0 1',
+        task: { kind: 'move', moves: ['d2e3'], wrong: tk('Stand straight in front of the black king, with exactly one square between the two kings.') },
+      },
+      { say: tk('In king and pawn endgames the opposition often decides: the king that takes it gets past, and the pawn promotes.') },
+    ],
+  },
+  'edge-pawn': {
+    id: 'edge-pawn',
+    title: tk('The edge pawn'),
+    steps: [
+      { say: tk('A pawn on the edge is the hardest to win with. Here Black is to move.'), fen: 'k7/P7/1K6/8/8/8/8/8 b - - 0 1' },
+      {
+        say: tk('What is the result?'),
+        quiz: {
+          options: [{ text: tk('White wins') }, { text: tk('Stalemate, a draw'), correct: true }, { text: tk('Black wins') }],
+          why: tk('Stalemate: the black king is not in check but has no move. In the corner, the lone king often saves the draw.'),
+        },
+      },
+      { say: tk('With an edge pawn, keep the enemy king out of the corner in front of it, or the game ends in a draw.') },
     ],
   },
 };

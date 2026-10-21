@@ -359,7 +359,7 @@ Decided (October 2026):
   the account's last one to its streak; then the guest's rows are deleted. Guests are removed
   after 6 months without a game move or a puzzle (`cleanup_inactive`).
 
-### 4.3 Learn 🟡 (chapters 1–3 built, October 2026)
+### 4.3 Learn ✅ (chapters 1–7 built, October 2026; Coordinates to write)
 
 Learn **teaches** the game; Puzzles **test** it. Nothing is assumed: a beginner who has never
 played learns every rule here. Each lesson has four steps on the 3D board, reusing what
@@ -380,13 +380,13 @@ coordinates lesson. Tasks with pieces but no kings need a small move generator o
 
 | # | Chapter | Contents | Price |
 | --- | --- | --- | --- |
-| 1 | The pieces | the board; how each piece moves and captures, one lesson per piece | free |
-| 2 | Special rules | check and checkmate, castling and its conditions, promotion, en passant | free |
-| 3 | How a game ends | stalemate, the draws (repetition, the 50-move rule, not enough material, agreement), resigning, time | paid |
-| 4 | Opening moves | the first moves of a game: the centre, developing the pieces, the king's safety, the common first moves and why they are played, mistakes to avoid; leads into the Openings puzzles | paid |
-| 5 | Playing well | what the pieces are worth, protecting and trading, simple mates (queen, rook, two rooks) | paid |
-| 6 | First tactics | fork, pin, discovered attack; each ends by pointing to its Puzzles module | paid |
-| 7 | First endgames | an active king, passed pawns, opposition | paid |
+| 1 | The pieces | the board; how each piece moves and captures, one lesson per piece (8 lessons) | free |
+| 2 | Special rules | check and checkmate, castling and its conditions, promotion, en passant (6) | free |
+| 3 | How a game ends | (5) stalemate, the draws (repetition, the 50-move rule, not enough material, agreement), resigning, time | paid |
+| 4 | Opening moves | (5) the centre, developing the pieces, a safe king (castle early), good first moves (the Italian Game, the Queen's Gambit), mistakes to avoid (the quickest mate, stopping a mate threat); leads into the Openings puzzles | paid |
+| 5 | Playing well | (5) what the pieces are worth, free (hanging) pieces, trading, mate with the queen, mate with the rook and the back-rank mate | paid |
+| 6 | First tactics | (4) fork, pin, discovered attack, practice; each points to its Puzzles module | paid |
+| 7 | First endgames | (4) the active king, the passed pawn, the opposition, the edge pawn | paid |
 | – | Coordinates | a short lesson near the end on "e4"-style coordinates, which the move list uses | paid |
 
 **Price (decided):** chapters 1 and 2 are free (guests too, like the free puzzles). The paid
@@ -1065,7 +1065,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
 | Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
-| Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | 🟡 chapters 1–3 built (October 2026); 4–8 to write |
+| Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | ✅ chapters 1–3 live, 4–7 built (October 2026); the Coordinates lesson to write |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
