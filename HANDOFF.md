@@ -31,12 +31,12 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## On the branch, not merged yet (21 October 2026)
+## Also merged on 21 October 2026 (the user's yes)
 
 - **Blocking and reporting** (`PLATFORM.md` §4.4): block and report on profiles and in
   chats, the blocked list in Settings, matchmaking keeps blocked players apart; reports for
   the operator in the dashboard view `report_queue`. Migration `20261021090000`. Legal pages
-  dated 21 October 2026. Ask the user before merging.
+  dated 21 October 2026.
 
 ## Merged to `main` on 21 October 2026 (the user's yes)
 
