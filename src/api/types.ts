@@ -269,6 +269,28 @@ export interface FriendsService {
   remove(userId: string): Promise<void>;
 }
 
+/** Why a player is reported (the same list as REPORT_REASONS in _shared/social.ts). */
+export type ReportReason = 'cheating' | 'abuse' | 'username' | 'spam' | 'other';
+
+export interface BlockedPlayer {
+  profile: PublicProfile;
+  at: string;
+}
+
+/**
+ * Blocking and reporting. A block ends the friendship or request between the two, and
+ * neither can send the other a request; matchmaking keeps them apart. The blocked player is
+ * not told. Reports go to the operator.
+ */
+export interface SafetyService {
+  blocked(): Promise<BlockedPlayer[]>;
+  isBlocked(userId: string): Promise<boolean>;
+  block(userId: string): Promise<void>;
+  unblock(userId: string): Promise<void>;
+  /** report a player, or one of their messages to you (`messageId`) */
+  report(userId: string, reason: ReportReason, extra?: { messageId?: string; note?: string }): Promise<void>;
+}
+
 export interface MessagesService {
   conversations(): Promise<Conversation[]>;
   /** the conversation with a player, created if needed */
@@ -444,6 +466,7 @@ export interface Api {
   profiles: ProfileService;
   friends: FriendsService;
   messages: MessagesService;
+  safety: SafetyService;
   account: AccountService;
   events: EventsService;
   matchmaking: MatchmakingService;

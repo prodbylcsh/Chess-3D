@@ -209,3 +209,48 @@ test('deleting an account removes its friendships and conversations', async () =
   assert.equal((await pam.client.from('conversation_list').select('id')).data?.length, 0);
   assert.equal((await admin.from('messages').select('id').eq('conversation_id', conversationId)).data?.length, 0);
 });
+
+test('blocking ends the friendship, stops requests both ways, and only the blocker sees it', async () => {
+  const cara = await player('blka');
+  const dan = await player('blkb');
+  await social(cara, { action: 'request', userId: dan.id });
+  await social(dan, { action: 'accept', userId: cara.id });
+  const { conversationId } = await social(dan, { action: 'open', userId: cara.id });
+  const message = (await social(dan, { action: 'send', conversationId, body: 'you are terrible' })).message;
+
+  assert.deepEqual(await social(cara, { action: 'block', userId: dan.id }), { blocked: true });
+  assert.deepEqual(await social(cara, { action: 'block', userId: dan.id }), { blocked: true }, 'repeating is harmless');
+  assert.deepEqual((await cara.client.from('friendships').select('id')).data, [], 'no longer friends');
+  assert.equal((await social(dan, { action: 'send', conversationId, body: 'hello?' })).code, 'not_friends');
+  assert.equal((await social(dan, { action: 'request', userId: cara.id })).code, 'unavailable');
+  assert.equal((await social(cara, { action: 'request', userId: dan.id })).code, 'blocked');
+  assert.deepEqual((await cara.client.from('blocks').select('blocked')).data, [{ blocked: dan.id }]);
+  assert.deepEqual((await dan.client.from('blocks').select('blocked')).data, [], 'the blocked player is not told');
+  assert.ok((await cara.client.from('blocks').insert({ blocker: cara.id, blocked: dan.id })).error, 'clients cannot write blocks');
+
+  // reports: a message from the other player in my conversation, kept as a copy
+  assert.deepEqual(await social(cara, { action: 'report', userId: dan.id, reason: 'abuse', messageId: message.id, note: ' rude ' }), { ok: true });
+  assert.deepEqual(await social(cara, { action: 'report', userId: dan.id, reason: 'abuse', messageId: message.id }), { ok: true }, 'the same report again adds nothing');
+  assert.equal((await social(cara, { action: 'report', userId: dan.id, reason: 'nope' })).code, 'bad_request');
+  assert.equal((await social(dan, { action: 'report', userId: cara.id, reason: 'abuse', messageId: message.id })).code, 'not_found', 'only the other player’s messages');
+  const reports = (await admin.from('reports').select('reporter, reason, message_body, note, status').eq('reported', dan.id)).data;
+  assert.deepEqual(reports, [{ reporter: cara.id, reason: 'abuse', message_body: 'you are terrible', note: 'rude', status: 'open' }]);
+  assert.deepEqual((await cara.client.from('reports').select('id')).data ?? [], [], 'players cannot read reports');
+  const queue = (await admin.from('report_queue').select('reported_name, reporter_name').eq('reported', dan.id)).data;
+  assert.deepEqual(queue, [{ reported_name: dan.name, reporter_name: cara.name }]);
+
+  assert.deepEqual(await social(cara, { action: 'unblock', userId: dan.id }), { blocked: false });
+  assert.deepEqual(await social(dan, { action: 'request', userId: cara.id }), { relation: 'outgoing' }, 'requests work again');
+});
+
+test('matchmaking never pairs players who blocked each other', async () => {
+  const eve = await player('blkc');
+  const fay = await player('blkd');
+  await social(eve, { action: 'block', userId: fay.id });
+  const search = (p: Player) => fn(p.client, 'play', { action: 'search', kind: 'casual', control: 'rapid' });
+  await search(eve);
+  const second = await search(fay);
+  assert.equal(second.gameId, undefined, JSON.stringify(second));
+  await fn(eve.client, 'play', { action: 'leave' });
+  await fn(fay.client, 'play', { action: 'leave' });
+});

@@ -412,6 +412,26 @@ until ranks are on the server. Who is online comes from realtime presence. New r
 and accepted requests arrive as toasts and the Community badge. Message and Challenge
 buttons show only for friends.
 
+**Blocking and reporting** (October 2026). On another player's profile: **Block** and
+**Report**; in a chat: a report flag in the header and on each of the other player's messages.
+- **Block:** the friendship or request between the two goes, neither can send the other a
+  friend request (the blocker gets "unblock them first", the blocked player "you cannot add
+  this player"), chat and chat challenges stop (they need friends), matchmaking never pairs
+  them (`mm_poll`), and the blocker no longer sees the conversation or the player in
+  suggestions. The blocked player is not told. Settings lists blocked players with Unblock.
+  At most 500 (`BLOCKS_MAX`).
+- **Report:** a reason (abusive, cheating, offensive username, spam, something else), an
+  optional note (500 characters), and for a message a copy of it; "Also block" in the same
+  dialog. 10 reports a day per player (`REPORTS_PER_DAY`); the same open report again adds
+  nothing. Rules in `_shared/social.ts`, writes in the `social` function, tables `blocks`
+  and `reports` (migration `20261021090000`). Reports are kept 12 months.
+- **The operator reviews** reports in the Supabase dashboard: the view `report_queue` (SQL
+  editor: `select * from report_queue`) lists open reports first, with both usernames and how
+  often the player was reported. Handling one: `update reports set status = 'resolved'
+  (or 'dismissed'), handled_at = now(), handled_note = '…' where id = '…'`. Actions (a new
+  username, coins or rank reset, deleting the account) are done by hand for now; an in-app
+  moderation page and an email on new reports can come later.
+
 ### 4.5 Shop
 
 Coins earned by playing are spent here. Categories:
@@ -1024,7 +1044,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins; daily puzzle and streak, reviews, why-not refutations, the solution when stuck, replays, arrows, vibration | ✅ live (October 2026) |
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
-| Blocking and reporting | Block a player (no messages, challenges or friend requests from them) and report a player, a message or a username to the operator; a simple review list for the operator | ⏸ next |
+| Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
 | Learn | A teaching module, separate from Puzzles: 7 chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription; first version chapters 1–3 (4.3) | ⏸ |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
@@ -1111,6 +1131,10 @@ Decided:
 - **Abuse is detected, not capped** (October 2026): no daily coin cap; unusual behaviour
   (many games an hour, accounts sharing an IP, wins handed back and forth) is detected after
   the release (6.3, 9).
+- **Blocking and reporting** (October 2026, 4.4): a block ends the friendship, stops requests
+  both ways and keeps the two apart in matchmaking, without telling the blocked player;
+  reports go to the operator (dashboard view `report_queue`), kept 12 months. The legal pages
+  say so (Privacy §2 and §6, Terms §4; effective 21 October 2026).
 - **Learn** (October 2026, 4.3): teaching first, 7 chapters including Opening moves;
   chapters 1–2 free (checkmate is in chapter 2), the rest together 75,000 coins (the coins
   of the €19.99 pack) or free with the subscription; 250 coins once per finished chapter,

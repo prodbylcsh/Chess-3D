@@ -10,7 +10,7 @@ import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } fr
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
 import { puzzles } from './puzzles';
 import { SEED_PLAYERS, type SeedPlayer } from './seed';
-import { account, friends, messages, profileLookups } from './social';
+import { account, friends, messages, profileLookups, safety } from './social';
 import { notePeak, owns, seasons, shop } from './shop';
 
 function pickOpponent(kind: MatchKind, mmr: number): SeedPlayer {
@@ -146,6 +146,7 @@ export function createMockApi(): Api {
 
     friends,
     messages,
+    safety,
     account,
     shop,
     seasons,

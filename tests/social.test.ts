@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MESSAGE_MAX, isGameId, messageBody, pairOf, parseShowcase } from '../supabase/functions/_shared/social.ts';
+import { MESSAGE_MAX, REPORT_NOTE_MAX, isGameId, messageBody, pairOf, parseShowcase, reportOf } from '../supabase/functions/_shared/social.ts';
 
 const showcase = {
   rank: { tier: 'silver', division: 2, progress: 0.4 },
@@ -44,4 +44,11 @@ test('showcase: unknown or wrong-slot items fall back to the defaults', () => {
   const parsed = parseShowcase({ ...showcase, loadout: { ...showcase.loadout, pieces: 'nope', board: 'marble-set' } });
   assert.equal(parsed?.loadout.pieces, 'marble-set');
   assert.equal(parsed?.loadout.board, 'marble-board');
+});
+
+test('reports: a known reason and a short note', () => {
+  assert.deepEqual(reportOf('abuse', '  rude  '), { reason: 'abuse', note: 'rude' });
+  assert.deepEqual(reportOf('cheating', undefined), { reason: 'cheating', note: null });
+  assert.deepEqual(reportOf('nope', ''), { problem: 'reason' });
+  assert.deepEqual(reportOf('spam', 'x'.repeat(REPORT_NOTE_MAX + 1)), { problem: 'note_too_long' });
 });

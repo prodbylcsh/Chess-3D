@@ -2,8 +2,8 @@ import { t, tk } from '../../i18n';
 import { shortDate } from '../../ui/format';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { AtSign, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, Vibrate, X, RefreshCw } from 'lucide-react';
-import { api, ApiError, type UsernameCheck } from '../../api';
+import { AtSign, Ban, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, Vibrate, X, RefreshCw } from 'lucide-react';
+import { api, ApiError, type BlockedPlayer, type UsernameCheck } from '../../api';
 import { USERNAME_COOLDOWN_DAYS, USERNAME_MAX, emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../../api/validation';
 import { Page } from '../../app/AppLayout';
 import { CONTACT_EMAIL, legalUrl } from '../../app/legal';
@@ -82,6 +82,10 @@ export function SettingsPage() {
               </Link>
             }
           />
+        </Section>
+
+        <Section title={t('Blocked players')}>
+          <BlockedPlayers />
         </Section>
 
         <Section title={t('Game')}>
@@ -184,6 +188,53 @@ export function SettingsPage() {
       <ChangeUsername open={dialog === 'username'} onClose={() => setDialog(null)} />
       <DeleteAccount open={dialog === 'delete'} onClose={() => setDialog(null)} />
     </Page>
+  );
+}
+
+/** Players the signed-in player blocked, with Unblock. */
+function BlockedPlayers() {
+  const toast = useToast();
+  const [list, setList] = useState<BlockedPlayer[] | null | 'error'>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  useEffect(() => {
+    void api.safety.blocked().then(setList, () => setList('error'));
+  }, []);
+  if (list === null) return <Row icon={<Ban size={18} />} title={t('Blocked players')} text={<Spinner size={14} />} />;
+  if (list === 'error') return <Row icon={<Ban size={18} />} title={t('Blocked players')} text={t('Could not load the list.')} />;
+  if (!list.length) return <Row icon={<Ban size={18} />} title={t('Nobody is blocked')} text={t('Block a player from their profile. You will not be matched, and neither of you can send the other a friend request.')} />;
+  return (
+    <>
+      {list.map((b) => (
+        <Row
+          key={b.profile.id}
+          icon={<ProfileIcon icon={b.profile.iconId} size={30} />}
+          title={b.profile.username}
+          text={t('Blocked on {date}', { date: shortDate(new Date(b.at)) })}
+          action={
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={busy === b.profile.id}
+              disabled={!!busy}
+              onClick={async () => {
+                setBusy(b.profile.id);
+                try {
+                  await api.safety.unblock(b.profile.id);
+                  setList(list.filter((x) => x.profile.id !== b.profile.id));
+                  toast(t('{name} is unblocked.', { name: b.profile.username }), { tone: 'success' });
+                } catch (err) {
+                  toast(err instanceof ApiError ? err.message : t('Something went wrong.'), { tone: 'danger' });
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            >
+              {t('Unblock')}
+            </Button>
+          }
+        />
+      ))}
+    </>
   );
 }
 

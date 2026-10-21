@@ -25,6 +25,27 @@ export function messageBody(body: unknown, invite: boolean): { text: string } | 
   return { text };
 }
 
+// ------------------------------------------------------------------ blocking and reporting
+
+/** Why a player is reported (the operator reviews every report). */
+export const REPORT_REASONS = ['cheating', 'abuse', 'username', 'spam', 'other'] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+/** Reports a player may send per day, and the longest note. */
+export const REPORTS_PER_DAY = 10;
+export const REPORT_NOTE_MAX = 500;
+/** Most players one can block. */
+export const BLOCKS_MAX = 500;
+
+export type ReportProblem = 'reason' | 'note_too_long';
+
+/** A report as stored, or what is wrong with it. */
+export function reportOf(reason: unknown, note: unknown): { reason: ReportReason; note: string | null } | { problem: ReportProblem } {
+  if (!REPORT_REASONS.includes(reason as ReportReason)) return { problem: 'reason' };
+  const text = typeof note === 'string' ? note.trim() : '';
+  if (text.length > REPORT_NOTE_MAX) return { problem: 'note_too_long' };
+  return { reason: reason as ReportReason, note: text || null };
+}
+
 /** Game ids are the short ids the `game` function creates. */
 export function isGameId(id: unknown): id is string {
   return typeof id === 'string' && /^[a-z0-9]{6,16}$/.test(id);

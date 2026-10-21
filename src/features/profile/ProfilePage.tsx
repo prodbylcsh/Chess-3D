@@ -1,7 +1,7 @@
 import { rankText, t, tk, tn } from '../../i18n';
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
-import { Crown, Flame, Gem, Pencil, Settings, Swords, Target, Trophy, Zap, type LucideIcon } from 'lucide-react';
+import { Crown, Flag, Flame, Gem, Pencil, Settings, Swords, Target, Trophy, Zap, type LucideIcon } from 'lucide-react';
 import { TIERS } from '#shared/rating.ts';
 import { api, type EarnedAward, type GameRecord, type PublicProfile } from '../../api';
 import { awardsFor, type AwardIcon } from '../../api/awards';
@@ -14,6 +14,7 @@ import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, Card, Coins, EmptyState, ProgressBar, Segmented, Spinner, cx } from '../../ui/kit';
 import { memberSince, shortDate, timeAgo, winRate } from '../../ui/format';
 import { ChallengeButton, FriendButton, FriendsOnly, MessageButton } from '../social/social';
+import { BlockButton, ReportDialog, useBlocked } from '../social/safety';
 import './profile.css';
 
 const AWARD_ICON: Record<AwardIcon, LucideIcon> = { trophy: Trophy, flame: Flame, crown: Crown, target: Target, zap: Zap, swords: Swords, gem: Gem };
@@ -70,6 +71,33 @@ export function ProfilePage() {
   return <ProfileView player={player} history={history} earnedAwards={earned} own={own} />;
 }
 
+/** Another player's profile: friends, messages and challenges, or the block; reporting. */
+function OtherActions({ player }: { player: PublicProfile }) {
+  const [blocked, setBlocked] = useBlocked(player.id);
+  const [reporting, setReporting] = useState(false);
+  if (blocked === null) return null;
+  return (
+    <>
+      {blocked ? (
+        <Badge>{t('Blocked')}</Badge>
+      ) : (
+        <>
+          <FriendButton playerId={player.id} compact />
+          <FriendsOnly playerId={player.id}>
+            <MessageButton player={player} compact />
+            <ChallengeButton player={player} compact />
+          </FriendsOnly>
+        </>
+      )}
+      <BlockButton player={player} blocked={blocked} onChange={setBlocked} compact />
+      <Button size="sm" variant="ghost" icon={<Flag size={15} />} onClick={() => setReporting(true)}>
+        {t('Report')}
+      </Button>
+      <ReportDialog player={player} open={reporting} onClose={() => setReporting(false)} onBlocked={() => setBlocked(true)} />
+    </>
+  );
+}
+
 function ProfileView({ player, history, earnedAwards, own }: { player: PublicProfile; history: GameRecord[] | null; earnedAwards: EarnedAward[] | null; own: boolean }) {
   const { profile } = useSession();
   const [tab, setTab] = useState<'overview' | 'games'>('overview');
@@ -110,13 +138,7 @@ function ProfileView({ player, history, earnedAwards, own }: { player: PublicPro
                 </Link>
               </>
             ) : (
-              <>
-                <FriendButton playerId={player.id} compact />
-                <FriendsOnly playerId={player.id}>
-                  <MessageButton player={player} compact />
-                  <ChallengeButton player={player} compact />
-                </FriendsOnly>
-              </>
+              <OtherActions player={player} />
             )}
           </div>
         </div>

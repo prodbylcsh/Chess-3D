@@ -1,7 +1,7 @@
 import { t } from '../../i18n';
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ArrowLeft, MessageCirclePlus, MessagesSquare, Search, SendHorizontal, Swords } from 'lucide-react';
+import { ArrowLeft, Flag, MessageCirclePlus, MessagesSquare, Search, SendHorizontal, Swords } from 'lucide-react';
 import { api, type Conversation, type FriendEntry, type Message } from '../../api';
 import { useBadges } from '../../app/notifications';
 import { useProfile } from '../../app/session';
@@ -9,6 +9,7 @@ import { ProfileIcon } from '../../ui/art/art';
 import { Badge, Button, EmptyState, Field, IconButton, Modal, Spinner, cx } from '../../ui/kit';
 import { clockTime, timeAgo } from '../../ui/format';
 import { ChallengeButton, PlayerLine } from '../social/social';
+import { ReportDialog } from '../social/safety';
 import './messages.css';
 
 export function MessagesPage() {
@@ -102,6 +103,8 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  /** reporting the player (null), one of their messages (its id), or nothing (undefined) */
+  const [reporting, setReporting] = useState<string | null | undefined>(undefined);
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -154,7 +157,18 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
         </IconButton>
         <PlayerLine player={conversation.with} sub={<> · {conversation.with.online ? t('Online') : t('Offline')}</>} />
         <ChallengeButton player={conversation.with} />
+        <IconButton label={t('Report {name}', { name: conversation.with.username })} onClick={() => setReporting(null)}>
+          <Flag size={17} />
+        </IconButton>
       </header>
+      <ReportDialog
+        key={reporting ?? 'player'}
+        player={conversation.with}
+        messageId={reporting ?? undefined}
+        open={reporting !== undefined}
+        onClose={() => setReporting(undefined)}
+        onBlocked={onBack}
+      />
 
       <div className="thread-body" ref={scroller}>
         {!messages ? (
@@ -187,6 +201,11 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
                     <span>{m.body}</span>
                     <time>{clockTime(m.at)}</time>
                   </div>
+                )}
+                {!mine && m.kind === 'text' && (
+                  <button type="button" className="bubble-report" aria-label={t('Report this message')} title={t('Report this message')} onClick={() => setReporting(m.id)}>
+                    <Flag size={13} />
+                  </button>
                 )}
               </div>
             );

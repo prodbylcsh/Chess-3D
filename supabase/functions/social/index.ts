@@ -5,13 +5,16 @@
 // POST { action: 'open', userId }                           → { conversationId }
 // POST { action: 'send', conversationId, body, gameId? }    → { message }
 // POST { action: 'read', conversationId }                   → { ok: true }
+// POST { action: 'block' | 'unblock', userId }               → { blocked } blocking ends the friendship
+//      or request; neither can send the other a request, and matchmaking keeps them apart
+// POST { action: 'report', userId, reason, messageId?, note? } → { ok: true } for the operator
 //
 // Errors: { error, code } with an HTTP error status. Only registered players who have
 // finished the first-time setup take part; guests get 403 'guest'. Messages go only
 // between friends. The limits live in ../_shared/social.ts.
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError } from '../_shared/accounts.ts';
-import { FRIENDS_MAX, MESSAGES_PER_MINUTE, PENDING_MAX, isGameId, messageBody, pairOf } from '../_shared/social.ts';
+import { BLOCKS_MAX, FRIENDS_MAX, MESSAGES_PER_MINUTE, PENDING_MAX, REPORTS_PER_DAY, isGameId, messageBody, pairOf, reportOf } from '../_shared/social.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -69,7 +72,25 @@ async function count(query: PromiseLike<{ count: number | null; error: unknown }
 const friendsOf = (me: string) =>
   admin.from('friendships').select('id', { count: 'exact', head: true }).eq('status', 'accepted').or(`user_a.eq.${me},user_b.eq.${me}`);
 
+/** Who of the two blocked the other, if anyone. */
+async function blockBetween(me: string, other: string): Promise<'me' | 'them' | null> {
+  const { data, error } = await admin
+    .from('blocks')
+    .select('blocker')
+    .or(`and(blocker.eq.${me},blocked.eq.${other}),and(blocker.eq.${other},blocked.eq.${me})`);
+  if (error) throw error;
+  if (data.some((b) => b.blocker === me)) return 'me';
+  return data.length ? 'them' : null;
+}
+
+async function notBlocked(me: string, other: string): Promise<void> {
+  const block = await blockBetween(me, other);
+  if (block === 'me') throw fail('blocked', 'You blocked this player. Unblock them first.', 403);
+  if (block === 'them') throw fail('unavailable', 'You cannot add this player.', 403);
+}
+
 async function request(me: string, other: string): Promise<string> {
+  await notBlocked(me, other);
   const row = await friendship(me, other);
   if (row?.status === 'accepted') return 'friend';
   if (row && row.requested_by === me) return 'outgoing';
@@ -88,6 +109,7 @@ async function request(me: string, other: string): Promise<string> {
 }
 
 async function accept(me: string, other: string): Promise<string> {
+  await notBlocked(me, other);
   const row = await friendship(me, other);
   if (row?.status === 'accepted') return 'friend';
   if (!row || row.requested_by === me) throw fail('no_request', 'That request is no longer there.', 404);
@@ -177,6 +199,58 @@ async function read(me: string, id: unknown): Promise<unknown> {
   return { ok: true };
 }
 
+async function block(me: string, other: string): Promise<boolean> {
+  const { count: n, error: e1 } = await admin.from('blocks').select('blocked', { count: 'exact', head: true }).eq('blocker', me);
+  if (e1) throw e1;
+  if ((n ?? 0) >= BLOCKS_MAX) throw fail('too_many_blocks', 'You have blocked too many players.', 409);
+  const { error } = await admin.from('blocks').upsert({ blocker: me, blocked: other }, { onConflict: 'blocker,blocked', ignoreDuplicates: true });
+  if (error) throw error;
+  await drop(me, other, () => true); // the friendship or a request, either way
+  return true;
+}
+
+async function unblock(me: string, other: string): Promise<boolean> {
+  const { error } = await admin.from('blocks').delete().eq('blocker', me).eq('blocked', other);
+  if (error) throw error;
+  return false;
+}
+
+async function report(me: string, other: string, body: Record<string, unknown>): Promise<unknown> {
+  const parsed = reportOf(body.reason, body.note);
+  if ('problem' in parsed) throw parsed.problem === 'reason' ? fail('bad_request', 'Choose a reason.') : fail('too_long', 'That note is too long.');
+  const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
+  const recent = await count(admin.from('reports').select('id', { count: 'exact', head: true }).eq('reporter', me).gte('created_at', dayAgo));
+  if (recent >= REPORTS_PER_DAY) throw fail('report_limit', 'You have sent many reports today. Try again tomorrow.', 429);
+
+  // a message: one the reported player sent in a conversation with me (a copy is kept)
+  let message: { id: string; body: string } | null = null;
+  if (body.messageId !== undefined && body.messageId !== null) {
+    const id = body.messageId;
+    if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/.test(id)) throw fail('not_found', 'Message not found.', 404);
+    const { data, error } = await admin.from('messages').select('id, body, sender_id, conversation_id').eq('id', id).maybeSingle();
+    if (error) throw error;
+    if (!data || data.sender_id !== other) throw fail('not_found', 'Message not found.', 404);
+    await conversationOf(me, data.conversation_id);
+    message = { id: data.id, body: data.body };
+  }
+  // the same report again while the first one is open: nothing new
+  let same = admin.from('reports').select('id').eq('reporter', me).eq('reported', other).eq('status', 'open').eq('reason', parsed.reason);
+  same = message ? same.eq('message_id', message.id) : same.is('message_id', null);
+  const { data: open, error: e2 } = await same.limit(1);
+  if (e2) throw e2;
+  if (open.length) return { ok: true };
+  const { error } = await admin.from('reports').insert({
+    reporter: me,
+    reported: other,
+    reason: parsed.reason,
+    message_id: message?.id ?? null,
+    message_body: message?.body ?? null,
+    note: parsed.note,
+  });
+  if (error) throw error;
+  return { ok: true };
+}
+
 async function otherPlayer(me: string, body: Record<string, unknown>): Promise<string> {
   const other = body.userId;
   if (typeof other !== 'string' || !/^[0-9a-f-]{36}$/.test(other)) throw fail('not_found', 'Player not found.', 404);
@@ -205,6 +279,12 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return send(me, body);
     case 'read':
       return read(me, body.conversationId);
+    case 'block':
+      return { blocked: await block(me, await otherPlayer(me, body)) };
+    case 'unblock':
+      return { blocked: await unblock(me, await otherPlayer(me, body)) };
+    case 'report':
+      return report(me, await otherPlayer(me, body), body);
     default:
       throw fail('bad_request', 'Unknown action.');
   }

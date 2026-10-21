@@ -13,7 +13,9 @@ import {
   type ProfileService,
   type PublicProfile,
   type Relation,
+  type SafetyService,
 } from '../types';
+import { BLOCKS_MAX, REPORTS_PER_DAY, reportOf } from '#shared/social.ts';
 import { emailProblem, passwordProblem } from '../validation';
 import { allPlayers, db, emit, findPlayer, forgetAccount, newId, now, publicProfile, save, seedById, session, socialOf, strip, wait, type StoredConversation } from './db';
 import { SEED_PLAYERS } from './seed';
@@ -96,7 +98,7 @@ export const profileLookups: Pick<ProfileService, 'get' | 'publicHistory' | 'sea
     await wait();
     const { profile } = session();
     const s = socialOf(profile.id);
-    const known = new Set([profile.id, ...Object.keys(s.friends), ...Object.keys(s.incoming), ...Object.keys(s.outgoing)]);
+    const known = new Set([profile.id, ...Object.keys(s.friends), ...Object.keys(s.incoming), ...Object.keys(s.outgoing), ...Object.keys(s.blocked ?? {})]);
     return SEED_PLAYERS.filter((p) => !known.has(p.id))
       .sort((a, b) => Math.abs(a.mmr - profile.mmr) - Math.abs(b.mmr - profile.mmr))
       .slice(0, 6)
@@ -128,6 +130,11 @@ function befriend(a: string, b: string): void {
   }
 }
 
+function notBlocked(me: string, other: string): void {
+  if (socialOf(me).blocked?.[other]) throw new ApiError('blocked', t('You blocked this player. Unblock them first.'));
+  if (socialOf(other).blocked?.[me]) throw new ApiError('unavailable', t('You cannot add this player.'));
+}
+
 export const friends: FriendsService = {
   async list() {
     await wait();
@@ -156,6 +163,7 @@ export const friends: FriendsService = {
   async request(userId) {
     await wait();
     const me = session().profile.id;
+    notBlocked(me, userId);
     const rel = relationTo(me, userId);
     if (rel === 'friend' || rel === 'outgoing' || rel === 'self') return;
     if (rel === 'incoming') return this.accept(userId);
@@ -178,6 +186,7 @@ export const friends: FriendsService = {
   async accept(userId) {
     await wait();
     const me = session().profile.id;
+    notBlocked(me, userId);
     if (relationTo(me, userId) !== 'incoming') throw new ApiError('no_request', t('That request is no longer there.'));
     befriend(me, userId);
     save();
@@ -209,6 +218,62 @@ export const friends: FriendsService = {
     delete socialOf(userId).friends[me];
     save();
     emit({ type: 'friends' });
+  },
+};
+
+// ------------------------------------------------------------------ blocking and reporting
+
+export const safety: SafetyService = {
+  async blocked() {
+    await wait(150, 300);
+    return Object.entries(socialOf(session().profile.id).blocked ?? {})
+      .map(([id, at]) => ({ profile: findPlayer(id), at }))
+      .filter((b): b is { profile: PublicProfile; at: string } => !!b.profile)
+      .sort((a, b) => a.profile.username.localeCompare(b.profile.username));
+  },
+
+  async isBlocked(userId) {
+    return !!socialOf(session().profile.id).blocked?.[userId];
+  },
+
+  async block(userId) {
+    await wait();
+    const me = session().profile.id;
+    const s = socialOf(me);
+    if (Object.keys(s.blocked ?? {}).length >= BLOCKS_MAX) throw new ApiError('too_many_blocks', t('You have blocked too many players.'));
+    (s.blocked ??= {})[userId] = now();
+    // the friendship or a request, either way
+    for (const [x, y] of [
+      [me, userId],
+      [userId, me],
+    ]) {
+      const o = socialOf(x);
+      delete o.friends[y];
+      delete o.incoming[y];
+      delete o.outgoing[y];
+    }
+    save();
+    emit({ type: 'friends' });
+  },
+
+  async unblock(userId) {
+    await wait();
+    delete socialOf(session().profile.id).blocked?.[userId];
+    save();
+    emit({ type: 'friends' });
+  },
+
+  async report(userId, reason, extra) {
+    await wait();
+    const me = session().profile.id;
+    const parsed = reportOf(reason, extra?.note);
+    if ('problem' in parsed) throw new ApiError('bad_request', t('Something went wrong. Please try again.'));
+    const dayAgo = new Date(Date.now() - 86_400_000).toISOString();
+    if (db.reports.filter((r) => r.reporter === me && r.at >= dayAgo).length >= REPORTS_PER_DAY) {
+      throw new ApiError('report_limit', t('You have sent many reports today. Try again tomorrow.'));
+    }
+    db.reports.push({ reporter: me, reported: userId, reason: parsed.reason, messageId: extra?.messageId ?? null, note: parsed.note, at: now() });
+    save();
   },
 };
 
@@ -249,8 +314,9 @@ export const messages: MessagesService = {
   async conversations() {
     await wait(150, 400);
     const me = session().profile.id;
+    const blocked = socialOf(me).blocked ?? {};
     return Object.values(db.conversations)
-      .filter((c) => c.members.includes(me))
+      .filter((c) => c.members.includes(me) && !blocked[otherMember(c, me)])
       .map((c) => view(c, me))
       .sort((a, b) => (b.last?.at ?? '').localeCompare(a.last?.at ?? ''));
   },

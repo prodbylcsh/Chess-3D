@@ -30,6 +30,8 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   500 for every 10, a random shop item for finishing a module; the 3D scene takes the
   module's colour while you play. Without an account, guests try the first 10 Openings
   puzzles and the daily puzzle; signing up or in on the same device keeps them.
+- **Blocking and reporting**: block a player from their profile (no friendship, requests,
+  chat or matches between you; Settings lists them) and report a player or a message.
 - **Sidebar** with the eight modules (Learn marked "Soon") and badges for unread
   messages and friend requests.
 - **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile

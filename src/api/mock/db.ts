@@ -25,6 +25,18 @@ export interface Social {
   friends: Record<string, string>;
   incoming: Record<string, string>;
   outgoing: Record<string, string>;
+  /** players this one blocked, and when (added October 2026) */
+  blocked?: Record<string, string>;
+}
+
+/** A report kept in the browser (the demo has no operator to read it). */
+export interface MockReport {
+  reporter: string;
+  reported: string;
+  reason: string;
+  messageId: string | null;
+  note: string | null;
+  at: string;
 }
 
 export interface StoredConversation {
@@ -76,6 +88,7 @@ export interface Db {
   puzzles: Record<string, Record<string, MockPuzzleModule>>;
   daily: Record<string, MockDaily>;
   guest: MockGuest;
+  reports: MockReport[];
   sessionId: string | null;
 }
 
@@ -102,6 +115,7 @@ function load(): Db {
     puzzles: {},
     daily: {},
     guest: { coins: 0, paid: {} },
+    reports: [],
     sessionId: null,
     ...data,
   };

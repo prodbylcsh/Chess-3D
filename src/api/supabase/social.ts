@@ -16,6 +16,7 @@ import {
   type FriendsService,
   type Message,
   type MessagesService,
+  type SafetyService,
   type Profile,
   type ProfileService,
   type PublicProfile,
@@ -73,6 +74,14 @@ function socialError(code: string): ApiError {
       return new ApiError(code, t('That message is too long.'));
     case 'not_found':
       return new ApiError(code, t('Player not found.'));
+    case 'blocked':
+      return new ApiError(code, t('You blocked this player. Unblock them first.'));
+    case 'unavailable':
+      return new ApiError(code, t('You cannot add this player.'));
+    case 'too_many_blocks':
+      return new ApiError(code, t('You have blocked too many players.'));
+    case 'report_limit':
+      return new ApiError(code, t('You have sent many reports today. Try again tomorrow.'));
     case 'not_ready':
       return new ApiError(code, t('Choose a username and an icon first.'));
     case 'unauthorized':
@@ -224,7 +233,7 @@ export function createSocial(
 
     async suggestions() {
       const self = me();
-      const known = new Set([self, ...(await friendships()).map((f) => other(f, self))]);
+      const known = new Set([self, ...(await friendships()).map((f) => other(f, self)), ...(await blocks()).keys()]);
       const { data, error } = await client
         .from('profiles')
         .select(PROFILE_COLUMNS)
@@ -297,6 +306,49 @@ export function createSocial(
     },
   };
 
+  // ---------------------------------------------------------------- blocking and reporting
+
+  /** whom the signed-in player blocked (cached; changed only through `safety`) */
+  let blockedIds: Promise<Map<string, string>> | null = null;
+  function blocks(): Promise<Map<string, string>> {
+    blockedIds ??= (async () => {
+      const { data, error } = await client.from('blocks').select('blocked, created_at').eq('blocker', me());
+      if (error) {
+        blockedIds = null;
+        throw socialError('network');
+      }
+      return new Map(data.map((b) => [b.blocked as string, b.created_at as string]));
+    })();
+    return blockedIds;
+  }
+
+  const safety: SafetyService = {
+    async blocked() {
+      const ids = await blocks();
+      const people = await profilesById([...ids.keys()]);
+      return [...ids]
+        .filter(([id]) => people.has(id))
+        .map(([id, at]) => ({ profile: people.get(id)!, at }))
+        .sort((a, b) => a.profile.username.localeCompare(b.profile.username));
+    },
+    async isBlocked(userId) {
+      return (await blocks()).has(userId);
+    },
+    async block(userId) {
+      await call('block', { userId });
+      blockedIds = null;
+      emit({ type: 'friends' });
+    },
+    async unblock(userId) {
+      await call('unblock', { userId });
+      blockedIds = null;
+      emit({ type: 'friends' });
+    },
+    async report(userId, reason, extra) {
+      await call('report', { userId, reason, messageId: extra?.messageId, note: extra?.note });
+    },
+  };
+
   // ---------------------------------------------------------------- messages
 
   interface ListRow {
@@ -316,7 +368,8 @@ export function createSocial(
     if (id) query = query.eq('id', id);
     const { data, error } = await query;
     if (error) throw socialError('network');
-    const rows = data as ListRow[];
+    const blocked = await blocks();
+    const rows = (data as ListRow[]).filter((r) => !blocked.has(r.other_id)); // a block hides the conversation
     const people = await profilesById(rows.map((r) => r.other_id));
     return rows
       .filter((r) => people.has(r.other_id))
@@ -412,11 +465,12 @@ export function createSocial(
 
   function stop(): void {
     watching = null;
+    blockedIds = null;
     online = new Set();
     if (changes) void client.removeChannel(changes);
     if (presence) void client.removeChannel(presence);
     changes = presence = null;
   }
 
-  return { lookups, friends, messages, start, stop, onlineCount: () => online.size };
+  return { lookups, friends, messages, safety, start, stop, onlineCount: () => online.size };
 }
