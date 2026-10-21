@@ -93,8 +93,8 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
   365: 25,000 + a shop item, 500: 40,000, 1000: 100,000 + an item, then 10,000 every
   100 days (`STREAK_MILESTONES`). A missed day ends the streak.
 - **Learn (§4.3, decided October 2026):** chapters 1–2 free, the other chapters together
-  75,000 coins (≈ the €19.99 pack) or free with the subscription; a one-time coin reward per
-  finished chapter (amount open), no stars.
+  75,000 coins (≈ the €19.99 pack) or free with the subscription; **250** coins once per
+  finished chapter, no stars.
 - **Shop prices:** see §4.5 and the shop-items skill.
 - **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
   names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.

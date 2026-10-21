@@ -381,8 +381,8 @@ coordinates lesson. Tasks with pieces but no kings need a small move generator o
 | # | Chapter | Contents | Price |
 | --- | --- | --- | --- |
 | 1 | The pieces | the board; how each piece moves and captures, one lesson per piece | free |
-| 2 | Special rules | check, castling and its conditions, promotion, en passant | free |
-| 3 | How a game ends | checkmate, stalemate, the draws (repetition, the 50-move rule, not enough material, agreement), resigning, time | paid |
+| 2 | Special rules | check and checkmate, castling and its conditions, promotion, en passant | free |
+| 3 | How a game ends | stalemate, the draws (repetition, the 50-move rule, not enough material, agreement), resigning, time | paid |
 | 4 | Opening moves | the first moves of a game: the centre, developing the pieces, the king's safety, the common first moves and why they are played, mistakes to avoid; leads into the Openings puzzles | paid |
 | 5 | Playing well | what the pieces are worth, protecting and trading, simple mates (queen, rook, two rooks) | paid |
 | 6 | First tactics | fork, pin, discovered attack; each ends by pointing to its Puzzles module | paid |
@@ -390,15 +390,13 @@ coordinates lesson. Tasks with pieces but no kings need a small move generator o
 | – | Coordinates | a short lesson near the end on "e4"-style coordinates, which the move list uses | paid |
 
 **Price (decided):** chapters 1 and 2 are free (guests too, like the free puzzles). The paid
-chapters open together for **75,000 coins**, the coins of the €19.99 pack (about €20, see
-4.5), or are free with the **subscription** (planned, 9). Finishing a chapter pays a small
-**one-time** coin reward (amount open; proposed 250); there are no stars.
+chapters open **together** for **75,000 coins**, the coins of the €19.99 pack (about €20,
+see 4.5), or are free with the **subscription** (planned, 9). Finishing a chapter pays
+**250 coins once**; there are no stars. Checkmate is taught in chapter 2, so the free part
+is enough to play a whole game.
 
 **First version:** chapters 1–3, then 4–7.
 
-Open: whether the paid chapters open together (as written) or one by one; the reward per
-chapter; whether chapter 3 should be free, since without it a beginner learns checkmate
-only from chapter 2's check lesson.
 
 ### 4.4 Community
 
@@ -1025,7 +1023,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Buying coins | Coin packs through Paddle (sandbox), purchase terms, refunds | ✅ live in sandbox (October 2026): test payments work |
 | Puzzles | Seven themed modules of 100 puzzles (Lichess, plus hand-made openings), level map, themed scene, coins, bonus every 10, shop item for finishing, unlocking for coins; daily puzzle and streak, reviews, why-not refutations, the solution when stuck, replays, arrows, vibration | ✅ live (October 2026) |
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
-| Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ (October 2026, on the branch) |
+| Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
 | Blocking and reporting | Block a player (no messages, challenges or friend requests from them) and report a player, a message or a username to the operator; a simple review list for the operator | ⏸ next |
 | Learn | A teaching module, separate from Puzzles: 7 chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription; first version chapters 1–3 (4.3) | ⏸ |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
@@ -1114,9 +1112,9 @@ Decided:
   (many games an hour, accounts sharing an IP, wins handed back and forth) is detected after
   the release (6.3, 9).
 - **Learn** (October 2026, 4.3): teaching first, 7 chapters including Opening moves;
-  chapters 1–2 free, the rest 75,000 coins (the coins of the €19.99 pack) or free with the
-  subscription; a one-time coin reward per chapter, no stars; chapters 1–3 first; a
-  coordinates lesson near the end.
+  chapters 1–2 free (checkmate is in chapter 2), the rest together 75,000 coins (the coins
+  of the €19.99 pack) or free with the subscription; 250 coins once per finished chapter,
+  no stars; chapters 1–3 first; a coordinates lesson near the end.
 - **The platform has to make money** (October 2026, 1): free parts bring players in, paid
   parts and coin packs earn.
 - **Season 1 starts everyone at 1,000 MMR** (October 2026, 5.5).

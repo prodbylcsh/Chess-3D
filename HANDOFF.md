@@ -31,9 +31,7 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## On the branch `claude/peaceful-ramanujan-pi9tzz`, not merged yet (20 October 2026)
-
-Ask the user before merging (it deploys the site, functions and two migrations).
+## Merged to `main` on 21 October 2026 (the user's yes)
 
 - **Ranked closed** until there are enough players: "Soon" on the Play hub, the `play`
   function answers `ranked_closed`. One switch, `SEASON_ONE` in `_shared/seasons.ts`
@@ -241,8 +239,7 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Build blocking and reporting, then Learn (plan and prices decided, `PLATFORM.md` §4.3;
-   the open points are listed there). The user wants the platform to make money
+1. Build blocking and reporting, then Learn (plan and prices decided, `PLATFORM.md` §4.3). The user wants the platform to make money
    (`PLATFORM.md` §1 "Earning money").
 2. On a real iPhone and an Android phone, check the vibration and the "why not?" speed.
    If iOS gives no tick, say so and keep the switch.
