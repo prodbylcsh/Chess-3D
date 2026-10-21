@@ -216,6 +216,8 @@ export class BoardView {
   private readonly geometry = new THREE.PlaneGeometry(1, 1);
   private targetMarkers: Marker[] = [];
   private goalMarkers: Marker[] = [];
+  /** letters and numbers on the frame (Learn's Coordinates lessons) */
+  private labels: THREE.Mesh[] = [];
   private readonly selectedMarker: Marker;
   private readonly lastFrom: Marker;
   private readonly lastTo: Marker;
@@ -344,6 +346,43 @@ export class BoardView {
       marker.show(sq, 0.95, 1);
       return marker;
     });
+  }
+
+  /** Files and ranks written on the board's frame (Learn, the Coordinates lessons), or none. */
+  setLabels(on: boolean): void {
+    for (const m of this.labels) {
+      m.removeFromParent();
+      m.geometry.dispose();
+      const material = m.material as THREE.MeshBasicMaterial;
+      material.map?.dispose();
+      material.dispose();
+    }
+    this.labels = [];
+    if (!on) return;
+    const edge = (4 + layout.boardHalf) / 2;
+    const label = (text: string, x: number, z: number) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 64;
+      const g = canvas.getContext('2d')!;
+      g.font = '600 44px Inter, system-ui, sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      g.shadowBlur = 6;
+      g.fillStyle = '#f6e7c1';
+      g.fillText(text, 32, 34);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false, toneMapped: false });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.42), material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, layout.boardTop + 0.03, z);
+      mesh.renderOrder = 6;
+      this.scene.add(mesh);
+      this.labels.push(mesh);
+    };
+    for (let f = 0; f < 8; f++) label('abcdefgh'[f], f - 3.5, edge);
+    for (let r = 0; r < 8; r++) label(String(r + 1), -edge, 3.5 - r);
   }
 
   /** Arrows on the board (puzzles), replacing the ones shown before. */

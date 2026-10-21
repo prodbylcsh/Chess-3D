@@ -246,11 +246,10 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Learn chapters 1–7 are live (`PLATFORM.md` §4.3, merged 21 October 2026). Still
-   to write: the Coordinates chapter, as data in `src/features/learn/lessons.ts` (ids in
-   `_shared/learn.ts`), with Czech; `tests/learn.test.ts` checks every lesson (legal boards,
-   every task doable, one right answer, no square names, a board in the first step). The user wants the platform to make money
-   (`PLATFORM.md` §1 "Earning money").
+1. Learn is complete: 8 chapters, 41 lessons (`PLATFORM.md` §4.3). New lessons go into
+   `src/features/learn/lessons.ts` (ids in `_shared/learn.ts`), with Czech;
+   `tests/learn.test.ts` checks every lesson (legal boards, every task doable, one right
+   answer, no square names outside the Coordinates chapter, a board in the first step).
 2. On a real iPhone and an Android phone, check the vibration and the "why not?" speed.
    If iOS gives no tick, say so and keep the switch.
 3. When adding opening lines, check them with Stockfish and add lessons:

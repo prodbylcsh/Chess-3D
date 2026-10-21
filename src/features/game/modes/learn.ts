@@ -99,6 +99,7 @@ export class LearnMode implements Mode {
     store.onGameOver = () => {};
     store.suppressEnd = true;
     dressGame(this.ctx.engine, { w: this.ctx.profile?.loadout ?? null }, this.seed);
+    this.ctx.engine.game.labels(!!this.lesson.squares);
     wardrobe.setMood(this.chapter.color);
     await this.go(0, token);
   }
@@ -111,6 +112,7 @@ export class LearnMode implements Mode {
     game.goals([]);
     game.showMoves(null);
     game.arrows([]);
+    game.labels(false);
     wardrobe.setMood(null);
   }
 

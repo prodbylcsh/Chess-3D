@@ -46,6 +46,8 @@ export interface Lesson {
   id: string;
   title: string;
   steps: Step[];
+  /** the texts name squares (the Coordinates chapter); everywhere else they speak of pieces */
+  squares?: boolean;
 }
 
 const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
@@ -657,6 +659,88 @@ export const LESSONS: Record<string, Lesson> = {
         },
       },
       { say: tk('With an edge pawn, keep the enemy king out of the corner in front of it, or the game ends in a draw.') },
+    ],
+  },
+
+  // ---------------------------------------------------------------- chapter 8: coordinates
+  'files-ranks': {
+    id: 'files-ranks',
+    title: tk('Files and ranks'),
+    squares: true,
+    steps: [
+      { say: tk('To talk about squares and moves, chess players give every square a name. The columns are called files and have letters, from a to h, starting on White\'s left.'), fen: START, marks: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8'] },
+      { say: tk('These stars mark the e-file, the file of the kings.'), marks: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8'] },
+      { say: tk('The rows are called ranks and have numbers, from 1 on White\'s side to 8 on Black\'s. White\'s pieces start on ranks 1 and 2, Black\'s on 7 and 8.'), marks: ['a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4'] },
+      {
+        say: tk('On which rank do the white pawns start?'),
+        quiz: { options: [{ text: '1' }, { text: '2', correct: true }, { text: '7' }], why: tk('On rank 2, right in front of the other white pieces on rank 1.') },
+      },
+    ],
+  },
+  'square-names': {
+    id: 'square-names',
+    title: tk('Square names'),
+    squares: true,
+    steps: [
+      { say: tk('A square\'s name is its file letter and its rank number. The star stands on e4: file e, rank 4.'), fen: START, marks: ['e4'] },
+      { say: tk('Move the rook to a5.'), fen: '8/8/8/8/8/8/8/R7 w - - 0 1', task: { kind: 'move', moves: ['a1a5'], wrong: tk('That is not a5: stay on the a-file and go up to rank 5.') } },
+      { say: tk('Move the knight to f3.'), fen: '8/8/8/8/8/8/8/6N1 w - - 0 1', task: { kind: 'move', moves: ['g1f3'], wrong: tk('That is not f3: find the f-file, then rank 3.') } },
+      { say: tk('Move the bishop to h6.'), fen: '8/8/8/8/8/8/8/2B5 w - - 0 1', task: { kind: 'move', moves: ['c1h6'], wrong: tk('That is not h6: the h-file is on the right edge, rank 6 is near Black\'s side.') } },
+      {
+        say: tk('Which square is the star on?'),
+        fen: START,
+        marks: ['c6'],
+        quiz: { options: [{ text: 'c3' }, { text: 'c6', correct: true }, { text: 'f6' }], why: tk('c6: file c, rank 6.') },
+      },
+      {
+        say: tk('And this one?'),
+        marks: ['h7'],
+        quiz: { options: [{ text: 'h7', correct: true }, { text: 'g7' }, { text: 'h2' }], why: tk('h7: the h-file on the right edge, rank 7.') },
+      },
+    ],
+  },
+  notation: {
+    id: 'notation',
+    title: tk('Writing moves down'),
+    squares: true,
+    steps: [
+      {
+        say: tk('A move is written as the piece\'s letter and the square it goes to. The move list in Wizard Chess uses the international letters: K king, Q queen, R rook, B bishop, N knight. Pawns get no letter.'),
+        fen: START,
+      },
+      { say: tk('So e4 means a pawn to e4. Play it.'), task: { kind: 'move', moves: ['e2e4'], wrong: tk('e4: the pawn in front of the king, two squares up.') } },
+      { say: tk('And Nf3 means a knight to f3. Play it.'), fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2', task: { kind: 'move', moves: ['g1f3'], wrong: tk('Nf3: the knight goes to the f-file, rank 3.') } },
+      { say: tk('More signs: x means a capture (Bxc6: the bishop takes on c6), + a check, # checkmate. O-O is castling on the short side, O-O-O on the long side.') },
+      {
+        say: tk('What does Bxc6 mean?'),
+        quiz: {
+          options: [{ text: tk('The bishop takes on c6'), correct: true }, { text: tk('The bishop moves to c6 with check') }, { text: tk('The bishop is taken on c6') }],
+          why: tk('B is the bishop, x a capture, c6 the square.'),
+        },
+      },
+      {
+        say: tk('What does # mean after a move?'),
+        quiz: { options: [{ text: tk('Check') }, { text: tk('Checkmate'), correct: true }, { text: tk('A capture') }], why: tk('# is checkmate, + is an ordinary check.') },
+      },
+    ],
+  },
+  'read-moves': {
+    id: 'read-moves',
+    title: tk('Reading a game'),
+    squares: true,
+    steps: [
+      { say: tk('Moves are numbered: each number is a move by White and the answer by Black. Watch 1. e4 e5 2. Nf3 Nc6.'), fen: START, play: ['e2e4', 'e7e5', 'g1f3', 'b8c6'] },
+      { say: tk('Now play 3. Bb5: the bishop goes to b5. This is the Spanish Game.'), task: { kind: 'move', moves: ['f1b5'], wrong: tk('Bb5: the bishop on the king\'s side goes to the b-file, rank 5.') } },
+      { say: tk('Black answers 3... a6: three dots mean a move by Black.'), play: ['a7a6'] },
+      { say: tk('Play 4. Ba4: the bishop steps back to a4.'), task: { kind: 'move', moves: ['b5a4'], wrong: tk('Ba4: the bishop goes back to the a-file, rank 4.') } },
+      {
+        say: tk('Black plays 4... Nf6. Which piece moved, and where?'),
+        play: ['g8f6'],
+        quiz: {
+          options: [{ text: tk('A knight to f6'), correct: true }, { text: tk('A pawn to f6') }, { text: tk('The queen to f6') }],
+          why: tk('N is the knight: it went to f6. Now you can read any game, and the move list beside the board.'),
+        },
+      },
     ],
   },
 };

@@ -227,6 +227,11 @@ export class Game {
     this.view.setGoals(squares);
   }
 
+  /** Files and ranks on the board's frame (Learn's Coordinates lessons). */
+  labels(on: boolean): void {
+    this.view.setLabels(on);
+  }
+
   /** Show where the piece on `from` can go, without picking it up (Learn); null clears. */
   showMoves(from: Square | null): void {
     this.view.clearTargets();

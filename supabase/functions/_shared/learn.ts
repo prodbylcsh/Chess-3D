@@ -86,7 +86,15 @@ export const CHAPTERS: readonly LearnChapter[] = [
     free: false,
     lessons: ['king-active', 'passed-pawn', 'opposition', 'edge-pawn'],
   },
-  { id: 'coordinates', name: 'Coordinates', description: 'How squares and moves are written down.', icon: 'grid', color: '#8fa3ff', free: false, lessons: [] },
+  {
+    id: 'coordinates',
+    name: 'Coordinates',
+    description: 'How squares and moves are written down.',
+    icon: 'grid',
+    color: '#8fa3ff',
+    free: false,
+    lessons: ['files-ranks', 'square-names', 'notation', 'read-moves'],
+  },
 ];
 
 export const chapterOf = (id: unknown): LearnChapter | null => CHAPTERS.find((c) => c.id === id) ?? null;

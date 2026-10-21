@@ -74,7 +74,7 @@ for (const lesson of Object.values(LESSONS)) {
         }
       }
       if (i === 0) assert.ok(step.fen, `${where}: a lesson sets up its own board first`);
-      assert.ok(!/\b[a-h][1-8]\b/.test(step.say), `${where}: no square names in "${step.say}"`);
+      if (!lesson.squares) assert.ok(!/\b[a-h][1-8]\b/.test(step.say), `${where}: no square names in "${step.say}"`);
       if (!fen) return;
       const c = load(fen);
       for (const uci of step.play ?? []) {
@@ -111,9 +111,14 @@ for (const lesson of Object.values(LESSONS)) {
         assert.equal(step.quiz.options.filter((o) => o.correct).length, 1, `${where}: one right answer`);
         assert.ok(!task, `${where}: a quiz or a task, not both`);
       }
-      // a step's moves change the board for the steps after it only through the task; the
-      // check of a later step without its own board starts from this one
-      fen = now;
+      // a later step without its own board goes on from here, after the player's move of a
+      // move task (the first accepted one; a step that relies on it must accept only one)
+      if (task?.kind === 'move') {
+        const next = lesson.steps[i + 1];
+        if (next && !next.fen && (next.play || next.task)) assert.equal(task.moves.length, 1, `${where}: the next step goes on from one known move`);
+        c.move({ from: task.moves[0].slice(0, 2), to: task.moves[0].slice(2, 4), promotion: task.moves[0][4] });
+      }
+      fen = c.fen();
     });
   });
 }
