@@ -1,7 +1,7 @@
 import { rankText, t } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { Bot, ChevronRight, Coins as CoinsIcon, Puzzle, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
+import { Bot, ChevronRight, Coins as CoinsIcon, GraduationCap, Puzzle, Swords, Trophy, Users, Zap, type LucideIcon } from 'lucide-react';
 import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
 import { CONTROLS, controlLabel, kindOpen, type ControlId } from '#shared/play.ts';
@@ -139,6 +139,14 @@ export function PlayHub() {
           text={t('Themed modules of 100 puzzles. Coins for every new solve.')}
           meta={t('First module free')}
           onClick={() => navigate('/puzzles')}
+        />
+        <ModeCard
+          icon={GraduationCap}
+          tone="violet"
+          title={t('Learn')}
+          text={t('The pieces, the rules and the first ideas, step by step on the board.')}
+          meta={t('First two chapters free')}
+          onClick={() => navigate('/learn')}
         />
         <ModeCard icon={Trophy} tone="red" title={t('Tournaments')} text={t('Brackets with entry fees and big prizes.')} meta={t('Coming soon')} disabled />
       </div>

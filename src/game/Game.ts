@@ -60,6 +60,11 @@ export class Game {
   private queue: Promise<void> = Promise.resolve();
   /** the position games start from (puzzles); null: the standard starting position */
   private start: string | null = null;
+  /**
+   * A lesson's board (Learn): any pieces, kings or not, and the game never ends on its own.
+   * The lesson hands the move back (`keepTurn`) and plays its own moves (`playOut`).
+   */
+  private free = false;
   /** the camera's distance from the board at the start of a game on a wide screen */
   private readonly classicDistance: number;
   /** loading of the next game's items (`prepare`); `begin` waits for it */
@@ -83,12 +88,13 @@ export class Game {
    * this player's moves somewhere (server, AI). The first game plays the intro.
    * `start` is a position (FEN) to start from instead of the usual one (puzzles).
    */
-  begin(seat: Seat | null, moves: string[] = [], start: string | null = null): Promise<void> {
+  begin(seat: Seat | null, moves: string[] = [], start: string | null = null, options: { free?: boolean } = {}): Promise<void> {
     this.setBusy(true);
     return this.run(async () => {
       await this.preparing; // the players' piece sets and board
       this.seat = seat;
       this.start = start;
+      this.free = !!options.free;
       const side = seat?.side ?? 'w';
       if (this.introduced) return this.resetBoard(moves, side);
       this.introduced = true;
@@ -214,6 +220,37 @@ export class Game {
   /** Arrows on the board (puzzles); an empty list clears them. */
   arrows(list: { from: Square; to: Square; kind: ArrowKind }[]): void {
     this.view.setArrows(list);
+  }
+
+  /** Marks on squares (Learn): the stars to collect; an empty list clears them. */
+  goals(squares: Square[]): void {
+    this.view.setGoals(squares);
+  }
+
+  /** Show where the piece on `from` can go, without picking it up (Learn); null clears. */
+  showMoves(from: Square | null): void {
+    this.view.clearTargets();
+    if (from) this.view.showTargets(this.chess.moves({ square: from, verbose: true }));
+  }
+
+  /** A free board (Learn): `side` moves again, as if the other side had passed. */
+  keepTurn(side: Side): Promise<void> {
+    return this.run(async () => {
+      if (this.free && this.chess.turn() !== side) this.chess.setTurn(side);
+      this.ui.update(this.chess);
+      this.setBusy(false);
+    });
+  }
+
+  /** Play a move on the board for the lesson, animated (on a free board, by whichever side's piece stands there). */
+  playOut(uci: string): Promise<void> {
+    return this.run(async () => {
+      const from = uci.slice(0, 2) as Square;
+      const piece = this.chess.get(from);
+      if (this.free && piece && piece.color !== this.chess.turn()) this.chess.setTurn(piece.color);
+      this.setBusy(true);
+      await this.play({ from, to: uci.slice(2, 4) as Square, promotion: uci[4] });
+    });
   }
 
   /** Stop taking the player's moves for a while (a puzzle showing a line), or take them again. */
@@ -412,6 +449,7 @@ export class Game {
 
   /** How the current position ends the game, if it does. */
   private ending(): Ending | null {
+    if (this.free) return null;
     const c = this.chess;
     if (c.isCheckmate()) {
       const winner = other(c.turn());
@@ -525,7 +563,7 @@ export class Game {
   }
 
   private replay(moves: string[]): void {
-    if (this.start) this.chess.load(this.start);
+    if (this.start) this.chess.load(this.start, { skipValidation: this.free });
     else this.chess.reset();
     for (const uci of moves) this.chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
   }

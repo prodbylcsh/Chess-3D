@@ -10,6 +10,7 @@ import { Badge, Button, IconButton, Modal, cx } from '../../ui/kit';
 import type { Engine } from './engine';
 import type { Mode } from './modes/types';
 import { SearchPill } from '../play/SearchWatcher';
+import { LessonCoach } from './LessonCoach';
 import { PuzzleBriefing, PuzzleCoach } from './PuzzleCoach';
 import { ResultCard } from './ResultCard';
 import { useGameState, type ClockView, type GameState, type PlayerView } from './store';
@@ -32,12 +33,12 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
         <span className="gs-mode">{mode.label}</span>
       </div>
 
-      <TurnPill s={s} />
+      {!s.lesson && <TurnPill s={s} />}
 
       <aside className="gs-panel">
-        {s.puzzle ? <PuzzleCoach s={s} mode={mode} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
+        {s.lesson ? <LessonCoach s={s} mode={mode} /> : s.puzzle ? <PuzzleCoach s={s} mode={mode} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
         <section className="gs-side">
-          <MoveList moves={s.moves} />
+          {!s.lesson && <MoveList moves={s.moves} />}
           <div className="gs-actions">
             {mode.actions(s).map((a) => (
               <button

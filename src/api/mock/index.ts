@@ -8,6 +8,7 @@ import { kindOpen } from '#shared/play.ts';
 import { ApiError, type Api, type MatchFound, type MatchKind, type MatchReport, type MatchResult } from '../types';
 import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../validation';
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
+import { learn } from './learn';
 import { puzzles } from './puzzles';
 import { SEED_PLAYERS, type SeedPlayer } from './seed';
 import { account, friends, messages, profileLookups, safety } from './social';
@@ -151,6 +152,7 @@ export function createMockApi(): Api {
     shop,
     seasons,
     events: { subscribe },
+    learn,
     puzzles,
     // coins for money need the real back-end (Paddle's checkout and webhooks)
     payments: {

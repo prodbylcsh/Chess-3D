@@ -1,0 +1,202 @@
+/* Learn: chapter cards, the unlock and a chapter's lessons. Each chapter has its colour (--chapter). */
+
+.learn-unlock {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--border));
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 60%),
+    var(--panel-solid);
+  animation: rise-in 0.4s ease both;
+}
+
+.learn-unlock h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.learn-unlock-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.learn-chapters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.learn-chapter {
+  --chapter: var(--gold);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--chapter) 40%, var(--border));
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(140% 90% at 0% 0%, color-mix(in srgb, var(--chapter) 18%, transparent), transparent 60%),
+    var(--panel-solid);
+  animation: rise-in 0.4s both;
+}
+
+.learn-chapter.is-locked {
+  opacity: 0.78;
+}
+
+.learn-chapter header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.learn-chapter-number {
+  flex: 1;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.learn-chapter-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--chapter) 20%, transparent);
+  color: var(--chapter);
+  flex: none;
+}
+
+.learn-chapter h2 {
+  font-size: 22px;
+}
+
+.learn-chapter > p.muted {
+  flex: 1;
+  font-size: 14px;
+}
+
+.learn-chapter-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  flex: 1;
+}
+
+.learn-chapter-progress span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.learn-chapter-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.learn-lessons {
+  --chapter: var(--gold);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.learn-lessons-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.learn-lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.learn-lesson {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel-solid);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.learn-lesson:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--chapter) 60%, var(--border));
+  transform: translateY(-1px);
+}
+
+.learn-lesson:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.learn-lesson.is-next {
+  border-color: color-mix(in srgb, var(--chapter) 70%, var(--border));
+  background:
+    radial-gradient(120% 120% at 0% 50%, color-mix(in srgb, var(--chapter) 16%, transparent), transparent 70%),
+    var(--panel-solid);
+}
+
+.learn-lesson-n {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  font-size: 14px;
+  flex: none;
+}
+
+.learn-lesson.is-done .learn-lesson-n {
+  background: color-mix(in srgb, var(--chapter) 30%, transparent);
+  color: var(--chapter);
+}
+
+.learn-lesson-title {
+  flex: 1;
+  font-weight: 600;
+}
+
+.learn-lesson-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+@media (max-width: 820px) {
+  .learn-unlock {
+    grid-template-columns: 1fr;
+  }
+  .learn-unlock-side {
+    align-items: stretch;
+  }
+}

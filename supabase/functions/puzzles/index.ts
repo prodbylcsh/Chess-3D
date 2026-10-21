@@ -1,4 +1,5 @@
-// Puzzles: progress, solving and module unlocks (rules: ../_shared/puzzles.ts).
+// Puzzles: progress, solving and module unlocks (rules: ../_shared/puzzles.ts), and the
+// lessons of Learn (../_shared/learn.ts).
 //
 // POST { action: 'progress' }                                  → { modules, player }
 // POST { action: 'start', module, index }                      → { ok } the player opened a puzzle
@@ -12,6 +13,10 @@
 // POST { action: 'daily_start' }                               → { ok }
 // POST { action: 'daily_solve', moves, mistakes, hints }        → { coins, hintCost, stars, already, streak, milestone, player }
 //
+// POST { action: 'learn' }                                     → { lessons, unlocked, rewarded, player | guest }
+// POST { action: 'learn_done', lesson }                        → { first, chapterDone, reward, …progress } a lesson
+//      was finished: in order, in an open chapter; the last lesson of a chapter pays CHAPTER_REWARD once
+// POST { action: 'learn_unlock' }                              → { …progress } the paid chapters for LEARN_PRICE
 // POST { action: 'claim', guest }                              → { claimed, player } move a guest's puzzles
 //      (`guest`: the access token of this device's anonymous session) into this account
 //
@@ -47,6 +52,7 @@ import {
   MODULES,
   guestMayPlay,
 } from '../_shared/puzzles.ts';
+import { CHAPTER_REWARD, LEARN_PRICE, MIN_LESSON_MS, lessonOf, lessonOpen } from '../_shared/learn.ts';
 import { ITEMS } from '../_shared/shop.ts';
 import { PUZZLES } from '../_shared/server/puzzle-data.ts';
 import { ensurePlayer, getPlayer, publishShowcase } from '../_shared/server/competitive.ts';
@@ -298,9 +304,13 @@ async function claim(me: string, body: Record<string, unknown>) {
     admin.from('puzzle_streaks').select('last_day').eq('player_id', me).maybeSingle(),
   ]);
   for (const r of [solves_, daily_, ledger_, streak_]) if (r.error) throw r.error;
-  if (!solves_.data!.length && !daily_.data!.length) return { claimed: null, player: (await ensurePlayer(admin, me)).player };
-
   const { player: before } = await ensurePlayer(admin, me);
+  const lessons = await claimLessons(me, guest.id);
+  if (!solves_.data!.length && !daily_.data!.length) {
+    const player = await getPlayer(admin, me);
+    return { claimed: lessons ? { puzzles: 0, days: 0, lessons, coins: player.coins - before.coins } : null, player };
+  }
+
   let puzzles = 0;
   let days = 0;
   let newItem = false;
@@ -349,7 +359,7 @@ async function claim(me: string, body: Record<string, unknown>) {
   }
   const player = await getPlayer(admin, me);
   if (newItem) await publishShowcase(admin, player);
-  return { claimed: { puzzles, days, coins: player.coins - before.coins }, player };
+  return { claimed: { puzzles, days, lessons, coins: player.coins - before.coins }, player };
 }
 
 async function unlock(me: string, body: Record<string, unknown>) {
@@ -365,8 +375,75 @@ async function unlock(me: string, body: Record<string, unknown>) {
   return { modules: await progress(me), player: await getPlayer(admin, me) };
 }
 
-/** Actions a guest may use (the free module's first puzzles and the daily puzzle). */
-const GUEST_ACTIONS = ['progress', 'start', 'solve', 'reveal', 'daily', 'daily_start', 'daily_solve'];
+// ---------------------------------------------------------------- Learn
+
+async function learnState(me: string) {
+  const [lessons, chapters, unlock] = await Promise.all([
+    admin.from('learn_lessons').select('lesson').eq('player_id', me),
+    admin.from('learn_chapters').select('chapter').eq('player_id', me),
+    admin.from('learn_unlocks').select('player_id').eq('player_id', me).maybeSingle(),
+  ]);
+  for (const r of [lessons, chapters, unlock]) if (r.error) throw r.error;
+  return { lessons: lessons.data!.map((l) => l.lesson as string), rewarded: chapters.data!.map((c) => c.chapter as string), unlocked: !!unlock.data };
+}
+
+async function learnDone(me: string, body: Record<string, unknown>, guest: boolean) {
+  const at = lessonOf(body.lesson);
+  if (!at) throw fail('bad_request', 'Unknown lesson.');
+  const state = await learnState(me);
+  if (!at.chapter.free && guest) throw fail('guest_limit', 'Create a free account to keep going.', 403);
+  if (!lessonOpen(at.chapter.lessons[at.index], state.lessons, state.unlocked)) throw fail('locked', 'Finish the lessons before this one first.', 403);
+  if (!guest) await ensurePlayer(admin, me);
+  const { data, error } = await admin.rpc('complete_lesson', {
+    p_player: me,
+    p_lesson: at.chapter.lessons[at.index],
+    p_chapter: at.chapter.id,
+    p_lessons: at.chapter.lessons,
+    p_reward: CHAPTER_REWARD,
+    p_min_ms: MIN_LESSON_MS,
+  });
+  if (error) {
+    if (/too_fast/.test(error.message)) throw fail('too_fast', 'That was quick. Take the lesson again a little slower.', 429);
+    throw error;
+  }
+  return { first: data.first, chapterDone: data.chapter_done, reward: data.reward, ...(await learnState(me)), ...(await whoAfter(me, guest, false)) };
+}
+
+async function learnUnlock(me: string) {
+  await ensurePlayer(admin, me);
+  const { error } = await admin.rpc('unlock_learn', { p_player: me, p_price: LEARN_PRICE });
+  if (error) {
+    if (/cannot_unlock/.test(error.message)) throw fail('insufficient_coins', `You need ${LEARN_PRICE} coins.`, 409);
+    throw error;
+  }
+  return { ...(await learnState(me)), player: await getPlayer(admin, me) };
+}
+
+/** Move a guest's lessons into the account (their count); a chapter the account had not finished pays its reward. */
+async function claimLessons(me: string, guestId: string): Promise<number> {
+  const [lessons_, chapters_] = await Promise.all([
+    admin.from('learn_lessons').select('lesson, done_at').eq('player_id', guestId),
+    admin.from('learn_chapters').select('chapter').eq('player_id', guestId),
+  ]);
+  for (const r of [lessons_, chapters_]) if (r.error) throw r.error;
+  if (!lessons_.data!.length) return 0;
+  const { error } = await admin
+    .from('learn_lessons')
+    .upsert(lessons_.data!.map((l) => ({ player_id: me, lesson: l.lesson, done_at: l.done_at })), { onConflict: 'player_id,lesson', ignoreDuplicates: true });
+  if (error) throw error;
+  for (const c of chapters_.data!) {
+    const { error: e2 } = await admin.rpc('claim_chapter', { p_player: me, p_chapter: c.chapter, p_reward: CHAPTER_REWARD });
+    if (e2) throw e2;
+  }
+  for (const table of ['learn_lessons', 'learn_chapters']) {
+    const { error: e6 } = await admin.from(table).delete().eq('player_id', guestId);
+    if (e6) throw e6;
+  }
+  return lessons_.data!.length;
+}
+
+/** Actions a guest may use (the free module's first puzzles, the daily puzzle, the free lessons). */
+const GUEST_ACTIONS = ['progress', 'start', 'solve', 'reveal', 'daily', 'daily_start', 'daily_solve', 'learn', 'learn_done'];
 
 async function handle(user: User, body: Record<string, unknown>): Promise<unknown> {
   const guest = !!user.is_anonymous;
@@ -399,6 +476,12 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return dailySolve(user.id, body, guest);
     case 'claim':
       return claim(user.id, body);
+    case 'learn':
+      return { ...(await learnState(user.id)), ...(await whoAfter(user.id, guest, false)) };
+    case 'learn_done':
+      return learnDone(user.id, body, guest);
+    case 'learn_unlock':
+      return learnUnlock(user.id);
     default:
       throw fail('bad_request', 'Unknown action.');
   }

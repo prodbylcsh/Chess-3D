@@ -385,6 +385,7 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     matchmaking: competitive.matchmaking,
     payments: competitive.payments,
     puzzles: competitive.puzzles,
+    learn: competitive.learn,
     friends: social.friends,
     messages: social.messages,
     safety: social.safety,

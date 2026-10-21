@@ -1367,3 +1367,61 @@
     font-size: 14px;
   }
 }
+
+/* Learn: the lesson card (docs/PLATFORM.md §4.3), built on the puzzle coach */
+.lesson-say {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.5;
+  animation: fade-in 0.35s both;
+}
+
+.lesson-quiz {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.lesson-option {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.lesson-option:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--module) 60%, var(--border));
+}
+
+.lesson-option:disabled {
+  cursor: default;
+}
+
+.lesson-option.is-right {
+  border-color: var(--success, #4fd1a5);
+  background: color-mix(in srgb, var(--success, #4fd1a5) 14%, transparent);
+}
+
+.lesson-option.is-wrong {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.lesson-actions {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.lesson-reward span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

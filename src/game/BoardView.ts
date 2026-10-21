@@ -13,6 +13,8 @@ export const MarkerKind = {
   Check: 4,
   Hover: 5,
   Guide: 6,
+  /** a star to collect (Learn) */
+  Goal: 7,
 } as const;
 export type MarkerKind = (typeof MarkerKind)[keyof typeof MarkerKind];
 
@@ -46,6 +48,12 @@ void main() {
     a = (1.0 - smoothstep(0.0, 1.2, d)) * (0.65 + 0.35 * sin(uTime * 6.0));
   } else if (uKind == 5) {
     a = smoothstep(0.86, 0.98, box) * 0.55 + 0.05;
+  } else if (uKind == 7) {
+    float ang = atan(p.y, p.x);
+    float edge = 0.42 + 0.16 * cos(5.0 * ang + 1.5708);
+    float pulse = 0.8 + 0.2 * sin(uTime * 3.0);
+    a = (1.0 - smoothstep(edge - 0.06, edge, d)) * pulse;
+    a += (1.0 - smoothstep(0.3, 0.9, d)) * 0.25 * pulse;
   } else {
     float pulse = 0.7 + 0.3 * sin(uTime * 3.5);
     a = smoothstep(0.42, 0.5, d) * (1.0 - smoothstep(0.7, 0.78, d)) * pulse;
@@ -63,6 +71,7 @@ const MARKER_COLORS: Record<MarkerKind, THREE.Color> = {
   [MarkerKind.Check]: new THREE.Color(2.2, 0.15, 0.08),
   [MarkerKind.Hover]: new THREE.Color(1.0, 1.0, 1.0),
   [MarkerKind.Guide]: new THREE.Color(0.15, 1.6, 0.55),
+  [MarkerKind.Goal]: new THREE.Color(1.7, 1.25, 0.3),
 };
 
 /** An arrow drawn on the board (puzzles): a hint, an opponent's threat, or a move of a line. */
@@ -206,6 +215,7 @@ export class BoardView {
   readonly pieces = new Map<Square, Piece>();
   private readonly geometry = new THREE.PlaneGeometry(1, 1);
   private targetMarkers: Marker[] = [];
+  private goalMarkers: Marker[] = [];
   private readonly selectedMarker: Marker;
   private readonly lastFrom: Marker;
   private readonly lastTo: Marker;
@@ -239,6 +249,7 @@ export class BoardView {
     animator.onFrame((_, time) => {
       for (const m of fixed) m.tick(time);
       for (const m of this.targetMarkers) m.tick(time);
+      for (const m of this.goalMarkers) m.tick(time);
       for (const a of this.arrows) a.tick(time);
     });
   }
@@ -323,6 +334,16 @@ export class BoardView {
     else this.guideFrom.hide();
     if (to) this.guideTo.show(to, 0.95, 1);
     else this.guideTo.hide();
+  }
+
+  /** Stars to collect (Learn), replacing the ones shown before. */
+  setGoals(squares: Square[]): void {
+    for (const m of this.goalMarkers) m.dispose();
+    this.goalMarkers = squares.map((sq) => {
+      const marker = this.addMarker(MarkerKind.Goal);
+      marker.show(sq, 0.95, 1);
+      return marker;
+    });
   }
 
   /** Arrows on the board (puzzles), replacing the ones shown before. */

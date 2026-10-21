@@ -9,6 +9,7 @@ import { ShopPage } from '../features/shop/ShopPage';
 import { CommunityPage } from '../features/community/CommunityPage';
 import { ModulePage } from '../features/puzzles/ModulePage';
 import { PuzzlesPage } from '../features/puzzles/PuzzlesPage';
+import { ChapterPage, LearnPage } from '../features/learn/LearnPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { SettingsPage } from '../features/settings/SettingsPage';
@@ -76,10 +77,12 @@ function Routed() {
         {/* invite links work for guests too */}
         <Route path="/join/:gameId" element={<JoinPage />} />
         <Route path="/game/:mode/:id?" element={<GamePage />} />
-        {/* puzzles work for guests too (the first ones of the free module, the daily puzzle) */}
+        {/* puzzles and lessons work for guests too (the free parts) */}
         <Route element={<GuestOrPlayer><AppLayout /></GuestOrPlayer>}>
           <Route path="/puzzles" element={<PuzzlesPage />} />
           <Route path="/puzzles/:module" element={<ModulePage />} />
+          <Route path="/learn" element={<LearnPage />} />
+          <Route path="/learn/:chapter" element={<ChapterPage />} />
         </Route>
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/play" element={<PlayHub />} />
@@ -115,7 +118,7 @@ function AuthReturn() {
   return null;
 }
 
-/** Once signed in and set up: this device's guest puzzles move into the account. */
+/** Once signed in and set up: this device's guest puzzles and lessons move into the account. */
 function GuestClaim() {
   const { status, profile, refresh } = useSession();
   const toast = useToast();
@@ -126,10 +129,10 @@ function GuestClaim() {
     done.current = profile!.id;
     void api.puzzles.claimGuest().then(
       (claimed) => {
-        if (!claimed || (!claimed.puzzles && !claimed.days)) return;
+        if (!claimed || (!claimed.puzzles && !claimed.days && !claimed.lessons)) return;
         void refresh();
         puzzlesChanged();
-        toast(t('Your puzzles from before you signed in are now in your account: {coins} coins.', { coins: formatNumber(claimed.coins) }), { tone: 'success', duration: 8 });
+        toast(t('Your puzzles and lessons from before you signed in are now in your account: {coins} coins.', { coins: formatNumber(claimed.coins) }), { tone: 'success', duration: 8 });
       },
       () => (done.current = null), // tried again later
     );

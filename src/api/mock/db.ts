@@ -29,6 +29,15 @@ export interface Social {
   blocked?: Record<string, string>;
 }
 
+/** Learn progress of one player (or the guest) in the browser. */
+export interface MockLearn {
+  /** finished lessons and when */
+  lessons: Record<string, string>;
+  /** chapters whose reward was paid */
+  rewarded: string[];
+  unlocked: boolean;
+}
+
 /** A report kept in the browser (the demo has no operator to read it). */
 export interface MockReport {
   reporter: string;
@@ -89,6 +98,7 @@ export interface Db {
   daily: Record<string, MockDaily>;
   guest: MockGuest;
   reports: MockReport[];
+  learn: Record<string, MockLearn>;
   sessionId: string | null;
 }
 
@@ -116,6 +126,7 @@ function load(): Db {
     daily: {},
     guest: { coins: 0, paid: {} },
     reports: [],
+    learn: {},
     sessionId: null,
     ...data,
   };

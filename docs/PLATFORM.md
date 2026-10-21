@@ -359,7 +359,7 @@ Decided (October 2026):
   the account's last one to its streak; then the guest's rows are deleted. Guests are removed
   after 6 months without a game move or a puzzle (`cleanup_inactive`).
 
-### 4.3 Learn ⏸ (planned, decided October 2026)
+### 4.3 Learn 🟡 (chapters 1–3 built, October 2026)
 
 Learn **teaches** the game; Puzzles **test** it. Nothing is assumed: a beginner who has never
 played learns every rule here. Each lesson has four steps on the 3D board, reusing what
@@ -396,6 +396,26 @@ see 4.5), or are free with the **subscription** (planned, 9). Finishing a chapte
 is enough to play a whole game.
 
 **First version:** chapters 1–3, then 4–7.
+
+**How it is built (October 2026):**
+- **Structure and rules** (`_shared/learn.ts`): the chapters with their lesson ids, the price
+  (`LEARN_PRICE`), the reward (`CHAPTER_REWARD`), lessons in order (`lessonOpen`). Chapters
+  not written yet have no lessons and show "Coming soon"; unlocking opens them too.
+- **Lessons** (`src/features/learn/lessons.ts`): steps of text with a board (FEN), moves the
+  board plays first, stars, arrows, a piece's moves shown, a task (collect the stars, take
+  every piece, a given move, check, checkmate, get out of check) or a quiz. Boards without
+  both kings are "free": any pieces, no end of game, and the player moves again after each
+  move. `tests/learn.test.ts` proves every task can be done and every quiz has one answer.
+- **Play** (`src/features/game/modes/learn.ts`, `LessonCoach.tsx`): on the 3D board, with
+  gold stars on squares (`BoardView.setGoals`); a wrong move is explained by the rule and
+  taken back. The 3D look is unchanged.
+- **Server** (`puzzles` function, actions `learn`, `learn_done`, `learn_unlock`; tables
+  `learn_lessons`, `learn_chapters`, `learn_unlocks`, migration `20261021120000`): lessons in
+  order, at least 8 s apart (`MIN_LESSON_MS`), the reward once per chapter in the same
+  transaction. Guests take the free chapters; their lessons and rewards move into the
+  account with the puzzles (`claim`).
+- **Pages:** `/learn` (chapters, the unlock), `/learn/:chapter` (lessons), `/game/learn/:id`;
+  a Learn card on the Play hub; Learn in the guest's tab bar.
 
 
 ### 4.4 Community
@@ -1045,7 +1065,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
 | Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
-| Learn | A teaching module, separate from Puzzles: 7 chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription; first version chapters 1–3 (4.3) | ⏸ |
+| Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | 🟡 chapters 1–3 built (October 2026); 4–8 to write |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |

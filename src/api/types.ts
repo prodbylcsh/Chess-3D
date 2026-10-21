@@ -416,7 +416,35 @@ export interface GuestClaim {
   puzzles: number;
   /** daily puzzles added to the account's streak */
   days: number;
+  /** lessons of Learn moved in */
+  lessons?: number;
   coins: number;
+}
+
+/** Learn (docs/PLATFORM.md §4.3): the finished lessons and whether the paid chapters are open. */
+export interface LearnProgress {
+  lessons: string[];
+  /** the paid chapters were unlocked */
+  unlocked: boolean;
+  /** chapters whose reward was paid */
+  rewarded: string[];
+}
+
+export interface LessonDone extends LearnProgress {
+  /** the lesson was new (a replay records nothing) */
+  first: boolean;
+  /** this lesson finished its chapter */
+  chapterDone: boolean;
+  /** coins paid now (CHAPTER_REWARD once per chapter) */
+  reward: number;
+}
+
+/** Guests may take the free chapters (like the first puzzles); their lessons move into an account later. */
+export interface LearnService {
+  progress(): Promise<LearnProgress>;
+  done(lesson: string): Promise<LessonDone>;
+  /** open the paid chapters for LEARN_PRICE coins */
+  unlock(): Promise<LearnProgress>;
 }
 
 export interface StreakView {
@@ -474,6 +502,7 @@ export interface Api {
   seasons: SeasonsService;
   payments: PaymentsService;
   puzzles: PuzzlesService;
+  learn: LearnService;
   /** which parts still run on the in-browser demo back-end */
   demo: { accounts: boolean; social: boolean };
 }

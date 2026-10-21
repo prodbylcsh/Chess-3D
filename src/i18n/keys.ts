@@ -20,6 +20,15 @@ export const EXTERNAL_KEYS = [
   // stored game-end reasons (game records)
   tk('checkmate'), tk('resignation'), tk('agreement'), tk('stalemate'), tk('insufficient material'), tk('threefold repetition'), tk('fifty-move rule'), tk('abandoned'),
   tk('timeout'), tk('timeout vs insufficient material'), tk('aborted'),
+  // Learn chapters (supabase/functions/_shared/learn.ts)
+  tk('The pieces'), tk('The board, and how every piece moves and captures.'),
+  tk('Special rules'), tk('Check and checkmate, castling, promotion and en passant.'),
+  tk('How a game ends'), tk('Stalemate, the draws, resigning and running out of time.'),
+  tk('Opening moves'), tk('The first moves of a game, and why they are played.'),
+  tk('Playing well'), tk('What the pieces are worth, trades and the simple mates.'),
+  tk('First tactics'), tk('Forks, pins and discovered attacks.'),
+  tk('First endgames'), tk('An active king, passed pawns and the opposition.'),
+  tk('Coordinates'), tk('How squares and moves are written down.'),
   // time controls (supabase/functions/_shared/play.ts)
   tk('Fast blitz'), tk('Blitz'), tk('Rapid'), tk('Classical'),
 ];

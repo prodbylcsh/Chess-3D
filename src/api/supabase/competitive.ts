@@ -26,6 +26,9 @@ import {
   type DailyPuzzle,
   type DailySolve,
   type GuestClaim,
+  type LearnProgress,
+  type LearnService,
+  type LessonDone,
   type PuzzlesService,
   type ProfileService,
   type PublicProfile,
@@ -304,6 +307,8 @@ export function createCompetitive(
         case 'guest_limit':
         case 'guest':
           throw new ApiError('guest_limit', t('Create a free account to keep going.'));
+        case 'too_fast':
+          throw new ApiError('too_fast', t('That was quick. Take the lesson again a little slower.'));
         default:
           throw playError(payload?.code ?? 'server_error');
       }
@@ -365,5 +370,21 @@ export function createCompetitive(
     },
   };
 
-  return { matchmaking, shop, history, payments: coinPayments, puzzles };
+  const learn: LearnService = {
+    async progress() {
+      return took(await puzzleCall<LearnProgress & { player?: PlayerRecord; guest?: { coins: number } }>('learn'));
+    },
+    async done(lesson) {
+      return took(await puzzleCall<LessonDone & { player?: PlayerRecord; guest?: { coins: number } }>('learn_done', { lesson }));
+    },
+    async unlock() {
+      try {
+        return took(await puzzleCall<LearnProgress & { player: PlayerRecord }>('learn_unlock'));
+      } catch (err) {
+        throw err instanceof ApiError && err.code === 'insufficient_coins' ? new ApiError(err.code, t('You do not have enough coins for these chapters.')) : err;
+      }
+    },
+  };
+
+  return { matchmaking, shop, history, payments: coinPayments, puzzles, learn };
 }

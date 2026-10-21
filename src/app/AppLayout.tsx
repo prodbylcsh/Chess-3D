@@ -32,7 +32,7 @@ interface NavItem {
 export const NAV: NavItem[] = [
   { to: '/play', label: tk('Play'), icon: Swords, mobile: true },
   { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle },
-  { to: '/learn', label: tk('Learn'), icon: GraduationCap, soon: true },
+  { to: '/learn', label: tk('Learn'), icon: GraduationCap },
   { to: '/community', label: tk('Community'), icon: Users, mobile: true },
   { to: '/shop', label: tk('Shop'), icon: Store, mobile: true },
   { to: '/profile', label: tk('Profile'), icon: UserRound, mobile: true },
@@ -102,6 +102,7 @@ export function AppLayout() {
 
 /** A guest (puzzles without an account) gets puzzles and the way in on the phone. */
 const GUEST_TABS: NavItem[] = [
+  { to: '/learn', label: tk('Learn'), icon: GraduationCap },
   { to: '/puzzles', label: tk('Puzzles'), icon: Puzzle },
   { to: '/auth', label: tk('Sign in'), icon: LogIn },
 ];

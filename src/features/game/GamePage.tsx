@@ -17,6 +17,8 @@ import { PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import type { Mode, ModeContext } from './modes/types';
 import './game.css';
 import { api } from '../../api';
+import { lessonOf } from '#shared/learn.ts';
+import { LearnMode } from './modes/learn';
 
 /** Full-screen game: the 3D board with the game interface around it. */
 export default function GamePage() {
@@ -80,6 +82,8 @@ export default function GamePage() {
       }
       case 'online':
         return id ? new OnlineMode(ctx, id) : null;
+      case 'learn':
+        return id && lessonOf(id) ? new LearnMode(ctx, id) : null;
       case 'puzzle': {
         const n = Number(puzzleIndex);
         if (id === 'daily') return new PuzzleMode(ctx, 'daily', 0);

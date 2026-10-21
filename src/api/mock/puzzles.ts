@@ -27,6 +27,7 @@ import {
 import { ITEMS } from '#shared/shop.ts';
 import { modulePuzzles } from '../puzzleData';
 import { ApiError, type DailySolve, type GuestClaim, type PuzzleModuleProgress, type PuzzlesService } from '../types';
+import { claimGuestLessons } from './learn';
 import { GUEST_ID, db, emit, now, save, session, wait, type MockPuzzleModule } from './db';
 
 /** The signed-in player, or null for a guest (signed out). */
@@ -202,9 +203,10 @@ export const puzzles: PuzzlesService = {
     const profile = player();
     const guestPuzzles = db.puzzles[GUEST_ID];
     const guestDaily = db.daily[GUEST_ID];
-    if (!profile || (!guestPuzzles && !guestDaily)) return null;
+    if (!profile || (!guestPuzzles && !guestDaily && !db.learn[GUEST_ID])) return null;
     await wait(200, 400);
     const before = profile.coins;
+    const lessons = claimGuestLessons(profile);
     let solvedNew = 0;
     // each solve again, with the account's rules: a puzzle it solved already pays nothing
     for (const [module, g] of Object.entries(guestPuzzles ?? {})) {
@@ -238,6 +240,6 @@ export const puzzles: PuzzlesService = {
     db.guest = { coins: 0, paid: {} };
     save();
     emit({ type: 'profile' });
-    return { puzzles: solvedNew, days, coins: profile.coins - before };
+    return { puzzles: solvedNew, days, lessons, coins: profile.coins - before };
   },
 };

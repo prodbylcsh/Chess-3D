@@ -266,7 +266,7 @@ test('guests: the first puzzles of Openings and the daily puzzle, then the accou
   const token = (await guest.auth.getSession()).data.session!.access_token;
   assert.equal((await call(p.client, { action: 'claim', guest: 'not-a-token' })).claimed, null);
   const claim = await call(p.client, { action: 'claim', guest: token });
-  assert.deepEqual(claim.claimed, { puzzles: 1, days: 1, coins: second.coins + DAILY_COINS }, JSON.stringify(claim));
+  assert.deepEqual(claim.claimed, { puzzles: 1, days: 1, lessons: 0, coins: second.coins + DAILY_COINS }, JSON.stringify(claim));
   assert.equal(await coins(p.id), before + second.coins + DAILY_COINS);
   const solved = (await admin.from('puzzle_solves').select('idx').eq('player_id', p.id).order('idx')).data!.map((r) => r.idx);
   assert.deepEqual(solved, [0, 1]);

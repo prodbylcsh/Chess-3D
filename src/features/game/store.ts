@@ -2,7 +2,7 @@ import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
-import type { DailySolve, MatchResult, PuzzleSolve, RankInfo, StreakView } from '../../api';
+import type { DailySolve, LessonDone, MatchResult, PuzzleSolve, RankInfo, StreakView } from '../../api';
 import type { Brief } from '../puzzles/brief';
 import type { Analysis } from '../../ai/analysis';
 
@@ -54,6 +54,34 @@ export interface PuzzleView {
   daily: { day: string; streak: StreakView; result: DailySolve | null } | null;
 }
 
+/** A lesson being taken (Learn, docs/PLATFORM.md §4.3). */
+export interface LessonView {
+  lesson: string;
+  chapter: string;
+  color: string;
+  title: string;
+  /** the lesson's place in its chapter (0-based) and the chapter's size */
+  index: number;
+  total: number;
+  step: number;
+  steps: number;
+  /** what the coach says */
+  say: string;
+  /** the step asks for something on the board, and whether it is done */
+  task: boolean;
+  taskDone: boolean;
+  /** stars or pieces left in a collect / capture task */
+  left: number | null;
+  message: PuzzleMessage | null;
+  quiz: { options: string[]; chosen: number | null; right: boolean } | null;
+  /** a guest (no account): what they finish waits for an account on this device */
+  guest: boolean;
+  /** the lesson is finished (the server's answer), or being saved */
+  done: LessonDone | null;
+  saving: boolean;
+  error: string | null;
+}
+
 export interface ResultState {
   /** fetching MMR/coins from the server */
   loading: boolean;
@@ -103,6 +131,7 @@ export interface GameState {
   drawOffered: boolean;
   clock: ClockView | null;
   puzzle: PuzzleView | null;
+  lesson: LessonView | null;
 }
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -129,6 +158,7 @@ export function initialState(): GameState {
     drawOffered: false,
     clock: null,
     puzzle: null,
+    lesson: null,
   };
 }
 
