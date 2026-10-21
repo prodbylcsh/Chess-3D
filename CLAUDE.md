@@ -7,6 +7,10 @@ behaviour, and update it when something changes.
 **Starting a new session?** Read **`HANDOFF.md`** first: where the work stands, what the
 user wants, decisions, approaches that failed, and the next steps.
 
+**The platform has to make money** (the user's goal): free parts bring players in, paid
+parts (coin packs, puzzle modules, Learn, the planned subscription) earn. Say how a feature
+helps that, and propose prices; the user decides them (`docs/PLATFORM.md` §1 "Earning money").
+
 ## Hard rules
 
 - **Git:** work on the session's development branch and push there. **Never push to or

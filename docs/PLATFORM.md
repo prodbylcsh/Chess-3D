@@ -25,6 +25,26 @@ Principles:
 - **Fair competition.** Everything that affects rank or coins is decided on the server.
   The client only displays.
 - **Cosmetics only.** Coins buy looks, never an advantage.
+- **The platform has to make money** (the user's goal, October 2026). Free parts exist to
+  bring players in and show what the paid parts are worth; features are weighed by how
+  they help players start, stay and pay. See "Earning money" below.
+
+### Earning money
+
+The platform is meant to earn money for its operator. What pays today and what is planned:
+
+| Source | How | Status |
+| --- | --- | --- |
+| Coin packs | €4.99–€49.99 through Paddle (4.5) | sandbox; live needs the own domain and Paddle's review |
+| Puzzle modules | 100,000 coins each; Openings free (4.2) | ✅ |
+| Learn | chapters 1–2 free, the rest 75,000 coins (≈ €20) (4.3) | planned |
+| Shop items | piece sets, boards, effects for coins (4.5) | ✅ |
+| Subscription | all puzzle modules and Learn chapters; price and contents open | planned |
+
+Coins can also be earned by playing, so every paid part is reachable without money; buying
+coins is the shortcut. When a feature is designed, say how it supports this (bringing
+players in, keeping them, or a reason to buy) and propose prices to the user; prices are
+the user's decision.
 
 ## 2. Accounts and onboarding
 
@@ -339,9 +359,46 @@ Decided (October 2026):
   the account's last one to its streak; then the guest's rows are deleted. Guests are removed
   after 6 months without a game move or a puzzle (`cleanup_inactive`).
 
-### 4.3 Learn ⏸
+### 4.3 Learn ⏸ (planned, decided October 2026)
 
-Interactive tutorials: rules and basics, then tactics, openings and advanced ideas.
+Learn **teaches** the game; Puzzles **test** it. Nothing is assumed: a beginner who has never
+played learns every rule here. Each lesson has four steps on the 3D board, reusing what
+Puzzles has (coach card, rings, arrows, vibration):
+
+1. **Explain:** one short idea on the coach card.
+2. **Show:** the piece moves by itself and its moves light up.
+3. **Try:** a small task on an almost empty board ("take all the pawns with the rook",
+   "get out of check", "castle").
+4. **Check:** a quick question with the reason ("Checkmate or stalemate?").
+
+A mistake is explained by the rule it breaks ("the king cannot castle across an attacked
+square"), not by an engine move. Texts speak of pieces, not squares, except in the
+coordinates lesson. Tasks with pieces but no kings need a small move generator of our own
+(chess.js wants both kings).
+
+**Chapters:**
+
+| # | Chapter | Contents | Price |
+| --- | --- | --- | --- |
+| 1 | The pieces | the board; how each piece moves and captures, one lesson per piece | free |
+| 2 | Special rules | check, castling and its conditions, promotion, en passant | free |
+| 3 | How a game ends | checkmate, stalemate, the draws (repetition, the 50-move rule, not enough material, agreement), resigning, time | paid |
+| 4 | Opening moves | the first moves of a game: the centre, developing the pieces, the king's safety, the common first moves and why they are played, mistakes to avoid; leads into the Openings puzzles | paid |
+| 5 | Playing well | what the pieces are worth, protecting and trading, simple mates (queen, rook, two rooks) | paid |
+| 6 | First tactics | fork, pin, discovered attack; each ends by pointing to its Puzzles module | paid |
+| 7 | First endgames | an active king, passed pawns, opposition | paid |
+| – | Coordinates | a short lesson near the end on "e4"-style coordinates, which the move list uses | paid |
+
+**Price (decided):** chapters 1 and 2 are free (guests too, like the free puzzles). The paid
+chapters open together for **75,000 coins**, the coins of the €19.99 pack (about €20, see
+4.5), or are free with the **subscription** (planned, 9). Finishing a chapter pays a small
+**one-time** coin reward (amount open; proposed 250); there are no stars.
+
+**First version:** chapters 1–3, then 4–7.
+
+Open: whether the paid chapters open together (as written) or one by one; the reward per
+chapter; whether chapter 3 should be free, since without it a beginner learns checkmate
+only from chapter 2's check lesson.
 
 ### 4.4 Community
 
@@ -970,13 +1027,13 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Ranked waits for players | Ranked closed and shown as "Soon"; no season runs until ranked opens with season 1 (`SEASON_ONE`, 4.1, 5.5) | ✅ (October 2026) |
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ (October 2026, on the branch) |
 | Blocking and reporting | Block a player (no messages, challenges or friend requests from them) and report a player, a message or a username to the operator; a simple review list for the operator | ⏸ next |
-| Learn | A teaching module, separate from Puzzles: how the pieces move and the rules of the game, step by step (4.3) | ⏸ |
+| Learn | A teaching module, separate from Puzzles: 7 chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription; first version chapters 1–3 (4.3) | ⏸ |
 | Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
 | After release: unusual behaviour | Detect abuse instead of capping coins (6.3): e.g. 100 games an hour, two accounts from the same IP address, the same two players feeding each other wins; flags for the operator first | ⏸ |
-| Later | Tournaments, puzzle subscription and more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
+| Later | Tournaments, the subscription (all puzzle modules and Learn), more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -1056,6 +1113,13 @@ Decided:
 - **Abuse is detected, not capped** (October 2026): no daily coin cap; unusual behaviour
   (many games an hour, accounts sharing an IP, wins handed back and forth) is detected after
   the release (6.3, 9).
+- **Learn** (October 2026, 4.3): teaching first, 7 chapters including Opening moves;
+  chapters 1–2 free, the rest 75,000 coins (the coins of the €19.99 pack) or free with the
+  subscription; a one-time coin reward per chapter, no stars; chapters 1–3 first; a
+  coordinates lesson near the end.
+- **The platform has to make money** (October 2026, 1): free parts bring players in, paid
+  parts and coin packs earn.
+- **Season 1 starts everyone at 1,000 MMR** (October 2026, 5.5).
 - **Guests in puzzles** (October 2026, 4.2): the first 10 puzzles of the free module and the
   daily puzzle without an account; what they earn moves into the account on the same device,
   by the account's rules. The legal pages say so (Privacy §2, §3, §6; Terms §6).

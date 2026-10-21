@@ -241,8 +241,9 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Get the user's answer on the Learn module plan (asked 20 October 2026), then build
-   blocking and reporting, then Learn.
+1. Build blocking and reporting, then Learn (plan and prices decided, `PLATFORM.md` §4.3;
+   the open points are listed there). The user wants the platform to make money
+   (`PLATFORM.md` §1 "Earning money").
 2. On a real iPhone and an Android phone, check the vibration and the "why not?" speed.
    If iOS gives no tick, say so and keep the switch.
 3. When adding opening lines, check them with Stockfish and add lessons:
