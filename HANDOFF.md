@@ -246,7 +246,7 @@ stored data. They are dated 20 October 2026.
 
 ## Next steps
 
-1. Learn chapters 1–7 are written (`PLATFORM.md` §4.3; 1–3 live, 4–7 on the branch). Still
+1. Learn chapters 1–7 are live (`PLATFORM.md` §4.3, merged 21 October 2026). Still
    to write: the Coordinates chapter, as data in `src/features/learn/lessons.ts` (ids in
    `_shared/learn.ts`), with Czech; `tests/learn.test.ts` checks every lesson (legal boards,
    every task doable, one right answer, no square names, a board in the first step). The user wants the platform to make money
