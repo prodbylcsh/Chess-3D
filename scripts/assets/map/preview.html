@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  A puzzle module's map without the app, to look at the models of scripts/assets/build-map.ts:
+  A puzzle module's map without the app, to look at what scripts/assets/build-map.ts built:
     npm run dev:mock, then http://localhost:5173/scripts/assets/map/preview.html?module=forks&at=30
   ?module= a module id, ?at= the level the camera looks at, ?phone for the phone camera,
   ?sheet every model of the module side by side (?sheet=landmark only the landmarks).
@@ -25,6 +25,7 @@
 
       import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
       import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+      import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
       const q = new URLSearchParams(location.search);
       const id = q.get('module') ?? 'openings';
@@ -46,12 +47,8 @@
         const rim = new THREE.DirectionalLight(t.sun, 1.2);
         rim.position.set(-4, 6, -14);
         scene.add(sun, rim, new THREE.AmbientLight('#ffffff', 0.25));
-        const mats = {
-          body: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88 }),
-          gloss: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2 }),
-          glow: new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(1.2, 1.2, 1.2) }),
-          ice: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.12, transparent: true, opacity: 0.72, emissive: new THREE.Color(t.accent).multiplyScalar(0.22) }),
-        };
+        // the light the map gives the models' own materials (World.ts)
+        const environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
         const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(`/assets/map/${id}.glb`);
         const nodes = gltf.scene.children.filter((n) => !n.name.startsWith('horizon') && (!only || n.name.startsWith(only)));
         let x = 0;
@@ -59,7 +56,9 @@
         scene.add(ground);
         const items = [];
         for (const n of nodes) {
-          n.traverse((o) => o.isMesh && (o.material = mats[o.material.name] ?? mats.body));
+          n.traverse((o) => {
+            if (o.isMesh && o.material.isMeshStandardMaterial) Object.assign(o.material, { envMap: environment, envMapIntensity: 0.55 });
+          });
           const box = new THREE.Box3().setFromObject(n);
           const w = box.max.x - box.min.x;
           n.position.x = x - box.min.x;

@@ -109,12 +109,15 @@ stored data. They are dated 20 October 2026.
 
 ## Remaining (nothing is half-done in the code)
 
-1. **3D map scenery (on the development branch, 22 October 2026, not yet merged):** the
-   user asked Claude to make the assets instead of waiting for their own. Every module's
-   map now has real models (`public/assets/map/<module>.glb`, made from code by
-   `scripts/assets/build-map.ts`; `PLATFORM.md` §4.2 lists them). Landmarks stand on level
-   terraces cut into the valley sides; the horizon is not tone-mapped so its foot matches
-   the fog. The user hasn't seen it yet: ask for their verdict, then merge with their yes.
+1. **3D map scenery (on the development branch, 22 October 2026, not yet merged):** every
+   module's map uses the user's PBR pack (67 textured models, originals in the R2 originals
+   bucket under `map/`), lightened for phones by `scripts/assets/build-map.ts` into
+   `public/assets/map/<module>.glb` (`PLATFORM.md` §4.2). The horizon stays made from code.
+   Landmarks stand on level terraces cut into the valley sides; the horizon is not
+   tone-mapped so its foot matches the fog. Rebuild: pull the originals
+   (`node scripts/assets/r2.ts pull-originals map assets-src/map`) and run the build, or run
+   the models workflow with the target `map`. Ask the user for their verdict, then merge
+   with their yes. Speed on real phones is unmeasured (software GL only).
 2. **Puzzles later:** a puzzle subscription, more themes (fantasy).
 3. **Payments:** live payments need the own domain and the Paddle review (sandbox works).
 4. **Roadmap:** Learn module, tournaments, more sets, boards and effects.

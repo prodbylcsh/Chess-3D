@@ -7,7 +7,9 @@ name: Models from R2
 #            reports every model (size, triangles, bounds, textures) into
 #            scripts/assets/reports/, to write the item's build settings from
 #   build    pulls the originals of `target` (an item id in scripts/assets/build-models.ts,
-#            whose `source` names its folder) and builds the game files into public/assets/
+#            whose `source` names its folder) and builds the game files into public/assets/;
+#            the target `map` builds the puzzle map's scenery from the originals' map/ folder
+#            (scripts/assets/build-map.ts → public/assets/map/)
 #
 # Both commit their result to the branch they run on. Run it by hand, or commit
 # scripts/assets/request.json ({ "task": "inspect", "target": "pieces/squircle" }) on any
@@ -78,6 +80,11 @@ jobs:
       - name: Build
         if: env.TASK == 'build'
         run: |
+          if [ "$TARGET" = "map" ]; then
+            node scripts/assets/r2.ts pull-originals map "$RUNNER_TEMP/originals"
+            node scripts/assets/build-map.ts "$RUNNER_TEMP/originals"
+            exit 0
+          fi
           source=$(node -e "import('./scripts/assets/build-models.ts').then(({ MODELS }) => console.log(MODELS[process.env.TARGET]?.source ?? ''))")
           if [ -z "$source" ]; then echo "::error::no item $TARGET with a source in build-models.ts"; exit 1; fi
           node scripts/assets/r2.ts pull-originals "$source" "$RUNNER_TEMP/originals"

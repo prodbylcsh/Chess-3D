@@ -338,12 +338,14 @@ Decided (October 2026):
   the next puzzle's card appears. Drag or scroll to travel, tap a stone to see its card.
   Without WebGL the levels are a plain grid.
   **The scenery is real models** (22 October 2026, the user's request, replacing the first
-  simple shapes): one file per module, `public/assets/map/<module>.glb`, made from code by
-  `scripts/assets/build-map.ts` (recipes in `scripts/assets/map/`, painted from the module's
-  theme colours; rebuild after changing a theme, a test fails otherwise). Each world has
-  things that stand along the path in many copies, small things on the ground near it, two
-  landmarks that stand on level terraces beside the path every 17 levels, and a horizon of
-  distant land round the camera that fades out of the fog:
+  simple shapes): the user's PBR pack (67 textured models: sculpted, normal maps, real
+  materials), kept in the R2 originals bucket under `map/`, one folder per module. One file
+  per module, `public/assets/map/<module>.glb`, built by `scripts/assets/build-map.ts`
+  (what each module uses and how often: `scripts/assets/map/worlds.ts`; the models workflow
+  rebuilds it with the target `map`). Each world has things that stand along the path in
+  many copies, small things on the ground near it, two landmarks that stand on level
+  terraces beside the path every 17 levels, and a horizon of distant land round the camera
+  that fades out of the fog (made from code in the theme's colours; the pack has none):
 
   | Module | Along the path | Landmarks | Horizon |
   | --- | --- | --- | --- |
@@ -355,9 +357,15 @@ Decided (October 2026):
   | Sacrifices | obsidian, basalt columns, lava pools, rune pillars | the altar with a queen laid on it, an obsidian gate with a ring of fire | glowing volcanoes |
   | Endgames | rook towers (whole, broken), standing stones, dead trees, lanterns, graves | a lone king's statue, a ruined wall with an arch | ramparts and towers in the mist |
 
-  The files are small (0.3–0.7 MB each, low-poly with painted colours, no textures) and
-  load with the map; without them the map works, only bare. They are served like the shop
-  models (R2 on the live site). Look at them without the app in
+  The originals are too heavy to draw hundreds of times on a phone, so the build lightens
+  each one: solid parts simplified to about 1,800 triangles along the path, 700 on the
+  ground and 14,000 for a landmark (the normal maps keep the detail), leaf and petal cards
+  thinned out, textures as WebP at 512 px (256 on the ground, 768 for landmarks), and the
+  ice's "transmission" replaced by plain transparency. A file is about 2–3 MB; the map draws
+  about 150–300 thousand triangles at a time (the copies are grouped in six stretches of
+  the path and those in the fog are skipped) and keeps the models' own materials, with a
+  soft studio light for reflections. Without the file the map works, only bare. The files
+  are served like the shop models (R2 on the live site). Look at them without the app in
   `scripts/assets/map/preview.html` on the dev server.
 - **Progress:** the next level opens when the previous one is solved; solved levels can be
   replayed.
@@ -1086,7 +1094,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
 | Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
 | Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | ✅ all 8 chapters live (October 2026) |
-| Puzzle map scenery | Real models for every module's map: things along the path, landmarks, horizon (4.2; `scripts/assets/build-map.ts`) | ✅ built (October 2026) |
+| Puzzle map scenery | The user's PBR models on every module's map: things along the path, landmarks, plus a horizon (4.2; `scripts/assets/build-map.ts`) | ✅ built (October 2026) |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |

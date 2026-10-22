@@ -37,7 +37,7 @@ helps that, and propose prices; the user decides them (`docs/PLATFORM.md` §1 "E
 React 19 + Vite + TypeScript UI (`src/app`, `src/features/*`, `src/ui`), Three.js engine
 (`src/game`, `src/scene`, `src/fx`, cosmetics in `src/cosmetics` + `src/game/Wardrobe.ts`;
 real item models in `public/assets/`, built from the user's originals by
-`scripts/assets/build-models.ts`; the puzzle map's scenery is made from code by
+`scripts/assets/build-models.ts`; the puzzle map's scenery from the user's PBR pack by
 `scripts/assets/build-map.ts`),
 typed service contracts (`src/api/types.ts`). In real-account mode everything a player has
 runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`, `payments`):

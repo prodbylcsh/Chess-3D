@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { BONUS_EVERY, PUZZLES_PER_MODULE } from '#shared/puzzles.ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { assetUrl } from '../../../cosmetics/assets';
 import type { Particles, WorldTheme } from './themes';
 
@@ -53,6 +54,10 @@ interface Pad {
   side: number;
 }
 const PAD_RADIUS = 8;
+/** Stretches of the path the scattered copies are grouped in (for culling). */
+const STRETCHES = 6;
+/** Where the fog hides everything. */
+const FOG_FAR = 95;
 const PAD_BLEND = 6;
 
 /** Height of the ground: flat along the path, hills further out, level on the pads. */
@@ -146,6 +151,8 @@ export class World {
   private readonly pads: Pad[];
   /** the horizon rings, kept round the camera */
   private readonly horizon = new THREE.Group();
+  /** the scattered copies per stretch of the path, shown only while the stretch is out of the fog */
+  private readonly stretches: { meshes: THREE.Object3D[]; near: number; far: number }[] = [];
   private disposed = false;
 
   private stars: number[] = Array(PUZZLES_PER_MODULE).fill(0);
@@ -179,7 +186,7 @@ export class World {
     this.lift = opts.compact ? 0.17 : 0;
     this.lookShift = opts.compact ? 0 : 2.6;
     this.compact = opts.compact;
-    this.scene.fog = new THREE.Fog(new THREE.Color(this.theme.fog).lerp(new THREE.Color(this.theme.sky[1]), 0.35), 26, 95);
+    this.scene.fog = new THREE.Fog(new THREE.Color(this.theme.fog).lerp(new THREE.Color(this.theme.sky[1]), 0.35), 26, FOG_FAR);
 
     this.buildSky();
     this.buildLights();
@@ -581,10 +588,11 @@ export class World {
   }
 
   /**
-   * What stands round the path: the module's models (public/assets/map/<id>.glb, made by
-   * scripts/assets/build-map.ts). Many copies of the `big` and `small` ones are scattered
-   * along the path, the landmarks stand far off at intervals, and the horizon rings follow
-   * the camera. Without the file the map still works, only bare.
+   * What stands round the path: the module's models (public/assets/map/<id>.glb, built by
+   * scripts/assets/build-map.ts from the user's PBR models). Many copies of the `big` and
+   * `small` ones are scattered along the path, the landmarks stand on their terraces, and
+   * the horizon rings follow the camera. The models keep their own textured materials;
+   * the horizon is drawn unlit. Without the file the map still works, only bare.
    */
   private async loadScenery(id: string): Promise<void> {
     let root: THREE.Group;
@@ -594,21 +602,38 @@ export class World {
       console.warn('map scenery', e);
       return;
     }
+    const materials = new Set<THREE.Material>();
+    root.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.isMesh) materials.add(mesh.material as THREE.Material);
+    });
     if (this.disposed) {
       root.traverse((o) => (o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry.dispose());
+      for (const material of materials) disposeMaterial(material);
       return;
     }
     root.updateMatrixWorld(true);
-    const materials = this.sceneryMaterials();
+    // soft light from all round for the textured materials, so metal and polished stone
+    // don't look black (the map has no surroundings to reflect)
+    const environment = this.environment();
+    for (const material of materials) {
+      this.own({ dispose: () => disposeMaterial(material) });
+      const standard = material as THREE.MeshStandardMaterial;
+      if (standard.isMeshStandardMaterial) {
+        standard.envMap = environment;
+        standard.envMapIntensity = 0.55;
+      }
+    }
+    const horizonMaterials = this.horizonMaterials();
     /** the meshes of a model with their placement inside it */
     const meshesOf = (node: THREE.Object3D) => {
       const out: { geometry: THREE.BufferGeometry; material: THREE.Material; matrix: THREE.Matrix4 }[] = [];
       node.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (!mesh.isMesh) return;
-        const name = (mesh.material as THREE.Material).name;
+        const material = mesh.material as THREE.Material;
         const horizon = node.name.startsWith('horizon');
-        out.push({ geometry: this.own(mesh.geometry), material: (horizon ? materials.horizon[name] : materials.lit[name]) ?? materials.lit.body, matrix: mesh.matrixWorld.clone() });
+        out.push({ geometry: this.own(mesh.geometry), material: horizon ? (horizonMaterials[material.name] ?? horizonMaterials.body) : material, matrix: mesh.matrixWorld.clone() });
       });
       return out;
     };
@@ -636,7 +661,7 @@ export class World {
 
     // many copies: `big` from 7.5 units off the path, `small` close to it
     const compact = this.compact ? 0.75 : 1;
-    this.scatter(models('big-'), meshesOf, Math.round(160 * compact), 7.5, 30, 0.3, (far) => (0.6 + this.rand() * 0.45) * (0.8 + far / 26));
+    this.scatter(models('big-'), meshesOf, Math.round(160 * compact), 7.5, 30, 0.3, (far) => (0.7 + this.rand() * 0.45) * (0.8 + far / 26));
     this.scatter(models('small-'), meshesOf, Math.round(380 * compact), 3.2, 16, 0.08, () => 0.75 + this.rand() * 0.6);
 
     for (const node of models('horizon-')) {
@@ -673,8 +698,11 @@ export class World {
       return Math.max(-box.min.x, box.max.x, -box.min.z, box.max.z);
     });
     const total = weights.reduce((a, b) => a + b, 0);
-    const placed: THREE.Matrix4[][] = nodes.map(() => []);
-    const tints: number[][] = nodes.map(() => []);
+    // the copies of a model go into one mesh per stretch of the path, so the stretches out
+    // of sight are skipped (a mesh is drawn whole or not at all)
+    const stretch = (PUZZLES_PER_MODULE + 18) / STRETCHES;
+    const placed: THREE.Matrix4[][][] = nodes.map(() => Array.from({ length: STRETCHES }, () => []));
+    const tints: number[][][] = nodes.map(() => Array.from({ length: STRETCHES }, () => []));
     const pos = new THREE.Vector3();
     const q = new THREE.Quaternion();
     const s = new THREE.Vector3();
@@ -699,45 +727,52 @@ export class World {
       pos.y = this.ground(pos.x, pos.z) - sink - slope * footprint[k] * scale * 0.8;
       q.setFromEuler(new THREE.Euler((this.rand() - 0.5) * 0.06, this.rand() * Math.PI * 2, (this.rand() - 0.5) * 0.06));
       s.setScalar(scale);
-      placed[k].push(new THREE.Matrix4().compose(pos, q, s));
-      tints[k].push(0.82 + this.rand() * 0.3);
+      const at = Math.min(STRETCHES - 1, Math.floor((i + 6) / stretch));
+      placed[k][at].push(new THREE.Matrix4().compose(pos, q, s));
+      tints[k][at].push(0.82 + this.rand() * 0.3);
+    }
+    for (let at = this.stretches.length; at < STRETCHES; at++) {
+      // the stretch's levels as distances along the path (z falls as the levels rise)
+      this.stretches.push({ meshes: [], near: (at * stretch - 6) * SPACING, far: ((at + 1) * stretch - 6) * SPACING });
     }
     const m = new THREE.Matrix4();
     const tint = new THREE.Color();
     nodes.forEach((node, k) => {
-      if (!placed[k].length) return;
-      for (const part of meshesOf(node)) {
-        const mesh = new THREE.InstancedMesh(part.geometry, part.material, placed[k].length);
-        placed[k].forEach((at, j) => {
-          mesh.setMatrixAt(j, m.multiplyMatrices(at, part.matrix));
-          mesh.setColorAt(j, tint.setScalar(tints[k][j]));
-        });
-        mesh.computeBoundingSphere();
-        this.scene.add(mesh);
-      }
+      const parts = meshesOf(node);
+      placed[k].forEach((matrices, at) => {
+        if (!matrices.length) return;
+        for (const part of parts) {
+          const mesh = new THREE.InstancedMesh(part.geometry, part.material, matrices.length);
+          matrices.forEach((placement, j) => {
+            mesh.setMatrixAt(j, m.multiplyMatrices(placement, part.matrix));
+            mesh.setColorAt(j, tint.setScalar(tints[k][at][j]));
+          });
+          mesh.computeBoundingSphere();
+          this.scene.add(mesh);
+          this.stretches[at].meshes.push(mesh);
+        }
+      });
     });
   }
 
-  /** The looks of the models' materials (kit.ts in scripts/assets/map/): lit ones, and unlit ones for the horizon. */
-  private sceneryMaterials(): { lit: Record<string, THREE.Material>; horizon: Record<string, THREE.Material> } {
-    const accent = new THREE.Color(this.theme.accent);
-    const glow = this.own(new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(1.2, 1.2, 1.2) }));
+  /** The horizon's looks: unlit vertex colours (scripts/assets/map/horizon.ts). */
+  private horizonMaterials(): Record<string, THREE.Material> {
     return {
-      lit: {
-        body: this.own(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0 })),
-        gloss: this.own(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2 })),
-        glow,
-        ice: this.own(
-          new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.12, metalness: 0.05, transparent: true, opacity: 0.72, emissive: accent.multiplyScalar(0.22) }),
-        ),
-      },
-      horizon: {
-        // not tone-mapped, like the fog (three.js mixes it in after tone mapping): the foot of
-        // the horizon then has exactly the colour of the fogged ground in front of it
-        body: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, side: THREE.DoubleSide, toneMapped: false })),
-        glow: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, color: new THREE.Color(1.3, 1.3, 1.3) })),
-      },
+      // not tone-mapped, like the fog (three.js mixes it in after tone mapping): the foot of
+      // the horizon then has exactly the colour of the fogged ground in front of it
+      body: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, side: THREE.DoubleSide, toneMapped: false })),
+      glow: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, color: new THREE.Color(1.3, 1.3, 1.3) })),
     };
+  }
+
+  /** A neutral studio light (three's RoomEnvironment), prefiltered for reflections. */
+  private environment(): THREE.Texture {
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    const room = new RoomEnvironment();
+    const texture = this.own(pmrem.fromScene(room, 0.04).texture);
+    room.dispose();
+    pmrem.dispose();
+    return texture;
   }
 
   private buildParticles(): [THREE.Points, Float32Array] {
@@ -856,6 +891,12 @@ export class World {
     this.camera.position.set(focus.x * 0.7 + this.lookShift, this.offset.y, focus.z + this.offset.z);
     this.camera.lookAt(look.x * 0.85 + this.lookShift, 0.6, look.z);
     this.horizon.position.set(this.camera.position.x, 0, this.camera.position.z);
+    // stretches wholly behind the camera or lost in the fog ahead are not drawn
+    const ahead = -this.camera.position.z;
+    for (const s of this.stretches) {
+      const shown = s.far + 40 > ahead && s.near < ahead + FOG_FAR + 20;
+      for (const mesh of s.meshes) mesh.visible = shown;
+    }
 
     // the next stone's ring breathes, the piece bobs while it waits
     const pulse = 0.5 + 0.5 * Math.sin(this.time * 3);
@@ -937,6 +978,12 @@ export class World {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** A loaded material and its textures. */
+function disposeMaterial(material: THREE.Material): void {
+  for (const value of Object.values(material)) if ((value as THREE.Texture | null)?.isTexture) (value as THREE.Texture).dispose();
+  material.dispose();
+}
 
 /** A soft round spot, for glows, particles and shadows. */
 function radialTexture(inner: string, outer: string): THREE.CanvasTexture {
