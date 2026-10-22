@@ -6,11 +6,16 @@
 // the page).
 import * as THREE from 'three';
 import { BONUS_EVERY, PUZZLES_PER_MODULE } from '#shared/puzzles.ts';
-import type { Decor, Particles, WorldTheme } from './themes';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { assetUrl } from '../../../cosmetics/assets';
+import type { Particles, WorldTheme } from './themes';
 
 const SPACING = 3.3;
 const TILE_TOP = 0.24;
 const LAST = PUZZLES_PER_MODULE - 1;
+
+const sceneryLoader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
 
 /** The middle of the path at (fractional) level i. */
 export function pathPoint(i: number, out = new THREE.Vector3()): THREE.Vector3 {
@@ -40,12 +45,41 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
-/** Height of the ground: flat along the path, hills further out. */
-function groundHeight(x: number, z: number): number {
+/** A level terrace cut into the valley's side, where a landmark stands. */
+interface Pad {
+  x: number;
+  z: number;
+  y: number;
+  side: number;
+}
+const PAD_RADIUS = 8;
+const PAD_BLEND = 6;
+
+/** Height of the ground: flat along the path, hills further out, level on the pads. */
+function groundHeight(x: number, z: number, pads: readonly Pad[] = []): number {
   const d = Math.abs(x - pathPoint(-z / SPACING).x);
   const hills = Math.sin(x * 0.11 + z * 0.05) * 1.6 + Math.sin(x * 0.27 - z * 0.13) * 0.7 + Math.sin(z * 0.04 + x * 0.02) * 2.2 + d * 0.06 * Math.max(0, d - 10);
   const away = smooth(2.6, 9, d);
-  return -0.55 - (1 - away) * 0.15 + away * (hills + 1.4);
+  const y = -0.55 - (1 - away) * 0.15 + away * (hills + 1.4);
+  let level = y;
+  for (const p of pads) {
+    const k = smooth(PAD_RADIUS, PAD_RADIUS + PAD_BLEND, Math.hypot(x - p.x, z - p.z));
+    if (k < 1) level = p.y + (level - p.y) * k;
+  }
+  // the terraces never reach the path, its chests and labels
+  return level + (y - level) * (1 - smooth(3.5, 6, d));
+}
+
+/** The landmarks' terraces: every 17 levels, 16 units off the path, on alternating sides. */
+function landmarkPads(id: string): Pad[] {
+  const rand = random(`${id}:landmarks`);
+  return [9, 26, 43, 60, 77, 94].map((level, k) => {
+    const side = k % 2 === 0 ? 1 : -1;
+    const at = pathPoint(level + (rand() - 0.5) * 4);
+    at.x += side * 16;
+    // as high as the ground at the terrace's inner edge, so it opens onto the path
+    return { x: at.x, z: at.z, y: groundHeight(at.x - side * PAD_RADIUS, at.z), side };
+  });
 }
 
 function ease(k: number) {
@@ -72,6 +106,8 @@ interface Chest {
 
 export class World {
   readonly canvas: HTMLCanvasElement;
+  /** settles when the module's scenery has loaded (or failed to) */
+  readonly ready: Promise<void>;
   /** a stone was tapped (only open ones) */
   onPick: (index: number) => void = () => {};
 
@@ -106,6 +142,11 @@ export class World {
   private readonly lookAhead: number;
   /** shifts the picture up by this share of the height (a phone's card covers the bottom) */
   private readonly lift: number;
+  private readonly compact: boolean;
+  private readonly pads: Pad[];
+  /** the horizon rings, kept round the camera */
+  private readonly horizon = new THREE.Group();
+  private disposed = false;
 
   private stars: number[] = Array(PUZZLES_PER_MODULE).fill(0);
   private next = 0;
@@ -122,6 +163,7 @@ export class World {
     this.theme = opts.theme;
     this.color = new THREE.Color(opts.color);
     this.rand = random(opts.id);
+    this.pads = landmarkPads(opts.id);
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.compact ? 1.75 : 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -136,6 +178,7 @@ export class World {
     this.lookAhead = opts.compact ? 3.6 : 4.5;
     this.lift = opts.compact ? 0.17 : 0;
     this.lookShift = opts.compact ? 0 : 2.6;
+    this.compact = opts.compact;
     this.scene.fog = new THREE.Fog(new THREE.Color(this.theme.fog).lerp(new THREE.Color(this.theme.sky[1]), 0.35), 26, 95);
 
     this.buildSky();
@@ -146,7 +189,8 @@ export class World {
     this.buildLabels();
     this.buildChests();
     this.reward = this.buildReward();
-    this.buildDecor(this.theme.decor);
+    this.scene.add(this.horizon);
+    this.ready = this.loadScenery(opts.id);
     this.particleKind = this.theme.particles;
     [this.particles, this.particleVel] = this.buildParticles();
 
@@ -312,6 +356,10 @@ export class World {
 
   // ------------------------------------------------------------------ build
 
+  private ground(x: number, z: number): number {
+    return groundHeight(x, z, this.pads);
+  }
+
   private own<T extends { dispose(): void }>(thing: T): T {
     this.disposables.push(thing);
     return thing;
@@ -379,7 +427,7 @@ export class World {
       const x = pos.getX(v);
       const z = pos.getZ(v);
       const away = smooth(2.6, 9, Math.abs(x - pathPoint(-z / SPACING).x));
-      const y = groundHeight(x, z);
+      const y = this.ground(x, z);
       pos.setY(v, y);
       c.copy(low).lerp(high, Math.min(1, Math.max(0, (y + 0.6) / 4.5)) * 0.85 + (1 - away) * 0.15);
       colors.set([c.r, c.g, c.b], v * 3);
@@ -532,40 +580,164 @@ export class World {
     return group;
   }
 
-  private buildDecor(kind: Decor): void {
-    const color = new THREE.Color(this.theme.decorColor);
-    const accent = new THREE.Color(this.theme.accent);
-    const parts = decorParts(kind, color, accent, (t) => this.own(t));
-    const count = kind === 'trees' ? 260 : kind === 'crystals' ? 220 : 180;
-    const meshes = parts.map((p) => {
-      const mesh = new THREE.InstancedMesh(p.geometry, p.material, count);
-      this.scene.add(mesh);
-      return mesh;
-    });
+  /**
+   * What stands round the path: the module's models (public/assets/map/<id>.glb, made by
+   * scripts/assets/build-map.ts). Many copies of the `big` and `small` ones are scattered
+   * along the path, the landmarks stand far off at intervals, and the horizon rings follow
+   * the camera. Without the file the map still works, only bare.
+   */
+  private async loadScenery(id: string): Promise<void> {
+    let root: THREE.Group;
+    try {
+      root = (await sceneryLoader.loadAsync(assetUrl(`map/${id}.glb`))).scene;
+    } catch (e) {
+      console.warn('map scenery', e);
+      return;
+    }
+    if (this.disposed) {
+      root.traverse((o) => (o as THREE.Mesh).isMesh && (o as THREE.Mesh).geometry.dispose());
+      return;
+    }
+    root.updateMatrixWorld(true);
+    const materials = this.sceneryMaterials();
+    /** the meshes of a model with their placement inside it */
+    const meshesOf = (node: THREE.Object3D) => {
+      const out: { geometry: THREE.BufferGeometry; material: THREE.Material; matrix: THREE.Matrix4 }[] = [];
+      node.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const name = (mesh.material as THREE.Material).name;
+        const horizon = node.name.startsWith('horizon');
+        out.push({ geometry: this.own(mesh.geometry), material: (horizon ? materials.horizon[name] : materials.lit[name]) ?? materials.lit.body, matrix: mesh.matrixWorld.clone() });
+      });
+      return out;
+    };
+    const models = (prefix: string) => root.children.filter((c) => c.name.startsWith(prefix));
+
+    // landmarks on their terraces, turned towards the path and the camera
+    const landmarks = models('landmark-');
     const m = new THREE.Matrix4();
     const q = new THREE.Quaternion();
-    const s = new THREE.Vector3();
+    const one = new THREE.Vector3(1, 1, 1);
+    if (landmarks.length)
+      this.pads.forEach((pad, k) => {
+        const landmark = landmarks[k % landmarks.length];
+        // the front towards the path and the camera; a profile (facing x) shows its side to the camera, looking at the path
+        const yaw = landmark.userData.facing === 'x' ? (pad.side > 0 ? Math.PI : 0) + pad.side * 0.25 : Math.atan2(-pad.side * 0.8, 1);
+        q.setFromEuler(new THREE.Euler(0, yaw + (this.rand() - 0.5) * 0.3, 0));
+        m.compose(new THREE.Vector3(pad.x, pad.y - 0.3, pad.z), q, one);
+        for (const part of meshesOf(landmark)) {
+          const mesh = new THREE.Mesh(part.geometry, part.material);
+          mesh.matrixAutoUpdate = false;
+          mesh.matrix.multiplyMatrices(m, part.matrix);
+          this.scene.add(mesh);
+        }
+      });
+
+    // many copies: `big` from 7.5 units off the path, `small` close to it
+    const compact = this.compact ? 0.75 : 1;
+    this.scatter(models('big-'), meshesOf, Math.round(160 * compact), 7.5, 30, 0.3, (far) => (0.6 + this.rand() * 0.45) * (0.8 + far / 26));
+    this.scatter(models('small-'), meshesOf, Math.round(380 * compact), 3.2, 16, 0.08, () => 0.75 + this.rand() * 0.6);
+
+    for (const node of models('horizon-')) {
+      for (const part of meshesOf(node)) {
+        const mesh = new THREE.Mesh(part.geometry, part.material);
+        mesh.matrixAutoUpdate = false;
+        mesh.matrix.copy(part.matrix);
+        mesh.frustumCulled = false;
+        this.horizon.add(mesh);
+      }
+    }
+  }
+
+  /**
+   * Scatter `count` copies of weighted models beside the path, `near`…`far` units off it.
+   * On a slope a copy sinks by how much the ground falls across its footprint, so no side
+   * floats; slopes too steep for that are skipped, and so are spots another copy stands on.
+   * Models marked `flat` (pools) stay on the flat ground by the path.
+   */
+  private scatter(
+    nodes: THREE.Object3D[],
+    meshesOf: (node: THREE.Object3D) => { geometry: THREE.BufferGeometry; material: THREE.Material; matrix: THREE.Matrix4 }[],
+    count: number,
+    near: number,
+    far: number,
+    sink: number,
+    size: (far: number) => number,
+  ): void {
+    if (!nodes.length) return;
+    const weights = nodes.map((n) => Number(n.userData.weight) || 1);
+    const flat = nodes.map((n) => Boolean(n.userData.flat));
+    const footprint = nodes.map((n) => {
+      const box = new THREE.Box3().setFromObject(n);
+      return Math.max(-box.min.x, box.max.x, -box.min.z, box.max.z);
+    });
+    const total = weights.reduce((a, b) => a + b, 0);
+    const placed: THREE.Matrix4[][] = nodes.map(() => []);
+    const tints: number[][] = nodes.map(() => []);
     const pos = new THREE.Vector3();
-    const tint = new THREE.Color();
+    const q = new THREE.Quaternion();
+    const s = new THREE.Vector3();
+    /** where copies stand already and how far they reach, so two don't stand in each other */
+    const taken: { x: number; z: number; r: number }[] = [];
     for (let n = 0; n < count; n++) {
+      let pick = this.rand() * total;
+      let k = 0;
+      while (k < weights.length - 1 && (pick -= weights[k]) > 0) k++;
       const i = -6 + this.rand() * (PUZZLES_PER_MODULE + 18);
       const side = this.rand() < 0.5 ? -1 : 1;
-      const far = (kind === 'statues' || kind === 'towers' || kind === 'pillars' ? 6 : 4.8) + Math.pow(this.rand(), 2) * 32;
+      const off = flat[k] ? near + this.rand() * Math.min(3, far - near) : near + Math.pow(this.rand(), 2) * (far - near);
       pathPoint(i, pos);
-      pos.x += side * far;
-      pos.y = groundHeight(pos.x, pos.z) - 0.25;
-      const size = (0.55 + this.rand() * 0.75) * (0.8 + far / 22);
-      const yaw = this.rand() * Math.PI * 2;
-      const tilt = (this.rand() - 0.5) * (kind === 'crystals' || kind === 'obsidian' ? 0.6 : kind === 'statues' ? 0.04 : 0.08);
-      q.setFromEuler(new THREE.Euler(tilt, yaw, tilt * 0.6));
-      const bright = 0.8 + this.rand() * 0.35;
-      parts.forEach((p, k) => {
-        s.set(size * p.scale.x, size * p.scale.y * (0.75 + this.rand() * 0.6), size * p.scale.z);
-        m.compose(pos, q, s);
-        meshes[k].setMatrixAt(n, m);
-        meshes[k].setColorAt(n, tint.setRGB(bright, bright, bright));
-      });
+      pos.x += side * off;
+      if (this.pads.some((a) => Math.hypot(a.x - pos.x, a.z - pos.z) < PAD_RADIUS + 5)) continue;
+      const scale = size(off);
+      const reach = footprint[k] * scale * 0.7;
+      if (taken.some((t) => Math.hypot(t.x - pos.x, t.z - pos.z) < t.r + reach)) continue;
+      taken.push({ x: pos.x, z: pos.z, r: reach });
+      const slope = Math.hypot(this.ground(pos.x + 0.5, pos.z) - this.ground(pos.x - 0.5, pos.z), this.ground(pos.x, pos.z + 0.5) - this.ground(pos.x, pos.z - 0.5));
+      if (slope > 1.1) continue;
+      pos.y = this.ground(pos.x, pos.z) - sink - slope * footprint[k] * scale * 0.8;
+      q.setFromEuler(new THREE.Euler((this.rand() - 0.5) * 0.06, this.rand() * Math.PI * 2, (this.rand() - 0.5) * 0.06));
+      s.setScalar(scale);
+      placed[k].push(new THREE.Matrix4().compose(pos, q, s));
+      tints[k].push(0.82 + this.rand() * 0.3);
     }
+    const m = new THREE.Matrix4();
+    const tint = new THREE.Color();
+    nodes.forEach((node, k) => {
+      if (!placed[k].length) return;
+      for (const part of meshesOf(node)) {
+        const mesh = new THREE.InstancedMesh(part.geometry, part.material, placed[k].length);
+        placed[k].forEach((at, j) => {
+          mesh.setMatrixAt(j, m.multiplyMatrices(at, part.matrix));
+          mesh.setColorAt(j, tint.setScalar(tints[k][j]));
+        });
+        mesh.computeBoundingSphere();
+        this.scene.add(mesh);
+      }
+    });
+  }
+
+  /** The looks of the models' materials (kit.ts in scripts/assets/map/): lit ones, and unlit ones for the horizon. */
+  private sceneryMaterials(): { lit: Record<string, THREE.Material>; horizon: Record<string, THREE.Material> } {
+    const accent = new THREE.Color(this.theme.accent);
+    const glow = this.own(new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(1.2, 1.2, 1.2) }));
+    return {
+      lit: {
+        body: this.own(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88, metalness: 0 })),
+        gloss: this.own(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2 })),
+        glow,
+        ice: this.own(
+          new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.12, metalness: 0.05, transparent: true, opacity: 0.72, emissive: accent.multiplyScalar(0.22) }),
+        ),
+      },
+      horizon: {
+        // not tone-mapped, like the fog (three.js mixes it in after tone mapping): the foot of
+        // the horizon then has exactly the colour of the fogged ground in front of it
+        body: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, side: THREE.DoubleSide, toneMapped: false })),
+        glow: this.own(new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, color: new THREE.Color(1.3, 1.3, 1.3) })),
+      },
+    };
   }
 
   private buildParticles(): [THREE.Points, Float32Array] {
@@ -683,6 +855,7 @@ export class World {
     const look = pathPoint(this.camAt + this.lookAhead);
     this.camera.position.set(focus.x * 0.7 + this.lookShift, this.offset.y, focus.z + this.offset.z);
     this.camera.lookAt(look.x * 0.85 + this.lookShift, 0.6, look.z);
+    this.horizon.position.set(this.camera.position.x, 0, this.camera.position.z);
 
     // the next stone's ring breathes, the piece bobs while it waits
     const pulse = 0.5 + 0.5 * Math.sin(this.time * 3);
@@ -744,6 +917,7 @@ export class World {
   }
 
   dispose(): void {
+    this.disposed = true;
     this.renderer.setAnimationLoop(null);
     this.resizer.disconnect();
     const c = this.canvas;
@@ -777,117 +951,4 @@ function radialTexture(inner: string, outer: string): THREE.CanvasTexture {
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
-}
-
-interface DecorPart {
-  geometry: THREE.BufferGeometry;
-  material: THREE.Material;
-  /** scale of this part relative to the decoration's size */
-  scale: THREE.Vector3;
-}
-
-/** The shapes that stand around a module's path. */
-function decorParts(kind: Decor, color: THREE.Color, accent: THREE.Color, own: <T extends { dispose(): void }>(t: T) => T): DecorPart[] {
-  const one = new THREE.Vector3(1, 1, 1);
-  const solid = (c: THREE.Color, extra: THREE.MeshStandardMaterialParameters = {}) =>
-    own(new THREE.MeshStandardMaterial({ color: c, roughness: 0.75, flatShading: true, ...extra }));
-  const lathe = (profile: [number, number][], segments = 14) => {
-    const g = own(new THREE.LatheGeometry(profile.map(([x, y]) => new THREE.Vector2(x, y)), segments));
-    return g;
-  };
-  switch (kind) {
-    case 'statues': {
-      // giant stone pawns, like chessmen left on a field at dawn
-      const pawn = lathe([
-        [0, 0],
-        [0.9, 0],
-        [0.95, 0.25],
-        [0.7, 0.4],
-        [0.5, 0.55],
-        [0.32, 1.3],
-        [0.55, 1.45],
-        [0.55, 1.55],
-        [0.3, 1.62],
-        [0.48, 1.85],
-        [0.5, 2.1],
-        [0.4, 2.35],
-        [0.2, 2.48],
-        [0, 2.52],
-      ]);
-      return [{ geometry: pawn, material: solid(color, { roughness: 0.55 }), scale: one.clone().multiplyScalar(1.5) }];
-    }
-    case 'trees': {
-      const trunk = own(new THREE.CylinderGeometry(0.12, 0.2, 1.3, 6));
-      trunk.translate(0, 0.65, 0);
-      const crown = own(new THREE.IcosahedronGeometry(1, 0));
-      crown.scale(1.1, 1.25, 1.1);
-      crown.translate(0, 2.0, 0);
-      return [
-        { geometry: trunk, material: solid(color), scale: one.clone() },
-        { geometry: crown, material: solid(accent, { roughness: 0.85 }), scale: one.clone() },
-      ];
-    }
-    case 'pillars': {
-      const shaft = own(new THREE.CylinderGeometry(0.42, 0.48, 5, 12));
-      shaft.translate(0, 2.5, 0);
-      const cap = own(new THREE.BoxGeometry(1.25, 0.35, 1.25));
-      cap.translate(0, 5.15, 0);
-      const fire = own(new THREE.IcosahedronGeometry(0.32, 0));
-      fire.translate(0, 5.6, 0);
-      return [
-        { geometry: shaft, material: solid(color, { roughness: 0.5 }), scale: one.clone() },
-        { geometry: cap, material: solid(color, { roughness: 0.5 }), scale: one.clone() },
-        { geometry: fire, material: solid(accent, { emissive: accent, emissiveIntensity: 1.6 }), scale: one.clone() },
-      ];
-    }
-    case 'spires': {
-      const spire = own(new THREE.ConeGeometry(1.3, 7, 6, 3));
-      spire.translate(0, 3.3, 0);
-      const rock = own(new THREE.DodecahedronGeometry(0.9, 0));
-      rock.translate(1.6, 0.3, 0.4);
-      return [
-        { geometry: spire, material: solid(color), scale: one.clone() },
-        { geometry: rock, material: solid(color.clone().multiplyScalar(0.8)), scale: one.clone() },
-      ];
-    }
-    case 'crystals': {
-      const crystal = own(new THREE.OctahedronGeometry(1, 0));
-      crystal.scale(0.55, 2.6, 0.55);
-      crystal.translate(0, 2.2, 0);
-      const mound = own(new THREE.SphereGeometry(1.2, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2));
-      mound.scale(1, 0.45, 1);
-      return [
-        {
-          geometry: crystal,
-          material: solid(color, { roughness: 0.15, metalness: 0.1, emissive: accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.92 }),
-          scale: one.clone(),
-        },
-        { geometry: mound, material: solid(new THREE.Color('#f4f8ff'), { roughness: 0.95 }), scale: one.clone() },
-      ];
-    }
-    case 'obsidian': {
-      const spike = own(new THREE.ConeGeometry(0.9, 5, 4, 1));
-      spike.translate(0, 2.4, 0);
-      const pool = own(new THREE.CircleGeometry(1.4, 10));
-      pool.rotateX(-Math.PI / 2);
-      pool.translate(1.8, 0.5, 0);
-      return [
-        { geometry: spike, material: solid(color, { roughness: 0.2, metalness: 0.3, emissive: accent, emissiveIntensity: 0.12 }), scale: one.clone() },
-        { geometry: pool, material: solid(accent, { emissive: accent, emissiveIntensity: 1.4 }), scale: one.clone() },
-      ];
-    }
-    case 'towers': {
-      const body = own(new THREE.CylinderGeometry(1.1, 1.35, 6, 10));
-      body.translate(0, 3, 0);
-      const crown = own(new THREE.CylinderGeometry(1.45, 1.3, 0.8, 10));
-      crown.translate(0, 6.4, 0);
-      const light = own(new THREE.BoxGeometry(0.3, 0.45, 0.1));
-      light.translate(0, 4.2, 1.18);
-      return [
-        { geometry: body, material: solid(color), scale: one.clone() },
-        { geometry: crown, material: solid(color.clone().multiplyScalar(0.85)), scale: one.clone() },
-        { geometry: light, material: solid(accent, { emissive: accent, emissiveIntensity: 1.5 }), scale: one.clone() },
-      ];
-    }
-  }
 }

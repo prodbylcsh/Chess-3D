@@ -337,8 +337,28 @@ Decided (October 2026):
   "Next puzzle" after a solve goes back to the map, where it hops on to the next stone before
   the next puzzle's card appears. Drag or scroll to travel, tap a stone to see its card.
   Without WebGL the levels are a plain grid.
-  The decorations are simple shapes for now; the user wants them refined later (they look
-  amateurish), possibly with real models.
+  **The scenery is real models** (22 October 2026, the user's request, replacing the first
+  simple shapes): one file per module, `public/assets/map/<module>.glb`, made from code by
+  `scripts/assets/build-map.ts` (recipes in `scripts/assets/map/`, painted from the module's
+  theme colours; rebuild after changing a theme, a test fails otherwise). Each world has
+  things that stand along the path in many copies, small things on the ground near it, two
+  landmarks that stand on level terraces beside the path every 17 levels, and a horizon of
+  distant land round the camera that fades out of the fog:
+
+  | Module | Along the path | Landmarks | Horizon |
+  | --- | --- | --- | --- |
+  | Openings | giant stone pawns (whole, chipped, sunk, fallen), dawn grass, flowers | the gate where games begin (a chessboard band, pawns on top), a toppled king | hills with giant pawns |
+  | First Steps | round trees, blossom, poplars, bushes, mushrooms, a signpost | a windmill built like a pawn, a cottage with a rook tower | green hills, a line of trees |
+  | Mate in Two | marble columns (whole, broken), braziers, red banners, candles, a fallen crown | the empty throne, a broken colonnade | the palace with lit windows |
+  | Forks | striped rock spires, Y-shaped forked rocks, buttes, dead trees, cacti | a cliff shaped like the knight's head, a rock arch | mesas |
+  | Pins & Skewers | crystal clusters, ice spears in the snow, ice blocks, snowy firs | a king frozen in ice, a spear skewering a queen and a rook in ice | snowy peaks |
+  | Sacrifices | obsidian, basalt columns, lava pools, rune pillars | the altar with a queen laid on it, an obsidian gate with a ring of fire | glowing volcanoes |
+  | Endgames | rook towers (whole, broken), standing stones, dead trees, lanterns, graves | a lone king's statue, a ruined wall with an arch | ramparts and towers in the mist |
+
+  The files are small (0.3–0.7 MB each, low-poly with painted colours, no textures) and
+  load with the map; without them the map works, only bare. They are served like the shop
+  models (R2 on the live site). Look at them without the app in
+  `scripts/assets/map/preview.html` on the dev server.
 - **Progress:** the next level opens when the previous one is solved; solved levels can be
   replayed.
 - **Server checks** (`puzzles` function): a puzzle must be opened before it is solved
@@ -1066,7 +1086,7 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Guests in puzzles | Try the first 10 Openings puzzles and the daily puzzle without an account; the progress and coins move into the account on signing up or in on the same device (4.2) | ✅ live (October 2026) |
 | Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
 | Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | ✅ all 8 chapters live (October 2026) |
-| Puzzle map decorations | New background objects for the 3D module map, **from assets the user makes** (`map/World.ts`, `themes.ts`); wait for them | ⏸ waiting for assets |
+| Puzzle map scenery | Real models for every module's map: things along the path, landmarks, horizon (4.2; `scripts/assets/build-map.ts`) | ✅ built (October 2026) |
 | Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
@@ -1166,7 +1186,7 @@ Decided:
   daily puzzle without an account; what they earn moves into the account on the same device,
   by the account's rules. The legal pages say so (Privacy §2, §3, §6; Terms §6).
 - **Roadmap order** (October 2026): guests in puzzles, then blocking and reporting, then
-  Learn; spectating later; map decorations when the user's assets arrive; measurements and
+  Learn; spectating later; map decorations (built 22 October 2026, 4.2); measurements and
   abuse detection after the release; domain, live payments and Sign in with Apple are the
   user's to do closer to the release.
 - **Seasons wait for ranked** (October 2026): no season rewards while ranked is closed; the

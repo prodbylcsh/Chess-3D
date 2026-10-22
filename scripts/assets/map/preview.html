@@ -1,0 +1,109 @@
+<!doctype html>
+<!--
+  A puzzle module's map without the app, to look at the models of scripts/assets/build-map.ts:
+    npm run dev:mock, then http://localhost:5173/scripts/assets/map/preview.html?module=forks&at=30
+  ?module= a module id, ?at= the level the camera looks at, ?phone for the phone camera,
+  ?sheet every model of the module side by side (?sheet=landmark only the landmarks).
+  window.step(n) renders n frames by hand once `window.mapReady` is true (screenshots).
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Map preview</title>
+    <style>
+      html, body, #host { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+    </style>
+  </head>
+  <body>
+    <div id="host"></div>
+    <script type="module">
+      import * as THREE from 'three';
+      import { World } from '/src/features/puzzles/map/World.ts';
+      import { WORLD_THEMES } from '/src/features/puzzles/map/themes.ts';
+      import { MODULES as PUZZLE_MODULES } from '/supabase/functions/_shared/puzzles.ts';
+
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+      import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+      const q = new URLSearchParams(location.search);
+      const id = q.get('module') ?? 'openings';
+      if (q.has('sheet')) await sheet(q.get('sheet'));
+      else map();
+
+      async function sheet(only) {
+        const t = WORLD_THEMES[id];
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        document.getElementById('host').appendChild(renderer.domElement);
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(t.fog).lerp(new THREE.Color(t.sky[1]), 0.35);
+        scene.add(new THREE.HemisphereLight(t.sky[1], t.ground[0], 1.15));
+        const sun = new THREE.DirectionalLight(t.light, 2.2);
+        sun.position.set(6, 14, 10);
+        const rim = new THREE.DirectionalLight(t.sun, 1.2);
+        rim.position.set(-4, 6, -14);
+        scene.add(sun, rim, new THREE.AmbientLight('#ffffff', 0.25));
+        const mats = {
+          body: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.88 }),
+          gloss: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.3, metalness: 0.2 }),
+          glow: new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color(1.2, 1.2, 1.2) }),
+          ice: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.12, transparent: true, opacity: 0.72, emissive: new THREE.Color(t.accent).multiplyScalar(0.22) }),
+        };
+        const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(`/assets/map/${id}.glb`);
+        const nodes = gltf.scene.children.filter((n) => !n.name.startsWith('horizon') && (!only || n.name.startsWith(only)));
+        let x = 0;
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(400, 32).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: t.ground[1], roughness: 1 }));
+        scene.add(ground);
+        const items = [];
+        for (const n of nodes) {
+          n.traverse((o) => o.isMesh && (o.material = mats[o.material.name] ?? mats.body));
+          const box = new THREE.Box3().setFromObject(n);
+          const w = box.max.x - box.min.x;
+          n.position.x = x - box.min.x;
+          x += w + 1;
+          items.push(n);
+        }
+        for (const n of items) {
+          n.position.x -= x / 2;
+          scene.add(n);
+        }
+        const all = new THREE.Box3();
+        for (const n of items) all.expandByObject(n);
+        const size = all.getSize(new THREE.Vector3());
+        const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 2000);
+        const d = Math.max(size.x / 2 / Math.tan((15 * Math.PI) / 180) / camera.aspect, size.y * 2.2) * 1.05;
+        camera.position.set(0, size.y * 0.75 + d * 0.25, d);
+        camera.lookAt(0, size.y * 0.4, 0);
+        renderer.render(scene, camera);
+        window.mapReady = true;
+        window.step = () => renderer.render(scene, camera);
+      }
+
+      function map() {
+      const at = Number(q.get('at') ?? 0);
+      const module = PUZZLE_MODULES.find((m) => m.id === id);
+      const world = new World(document.getElementById('host'), { id, color: module?.color ?? '#ffffff', theme: WORLD_THEMES[id], compact: q.has('phone') });
+      const stars = Array.from({ length: 100 }, (_, i) => (i < at ? 1 + (i % 3) : 0));
+      world.setProgress(stars, Math.min(at, 99));
+      const pawn = new THREE.Mesh(
+        new THREE.LatheGeometry([[0, 0], [0.42, 0], [0.4, 0.1], [0.24, 0.22], [0.15, 0.5], [0.25, 0.6], [0.15, 0.66], [0.22, 0.82], [0.08, 0.99], [0, 1]].map(([x, y]) => new THREE.Vector2(x, y)), 16),
+        new THREE.MeshStandardMaterial({ color: '#f2efe8', roughness: 0.4 }),
+      );
+      world.setToken(pawn);
+      world.placeToken(Math.min(at, 99));
+      world.focus(Math.min(at, 99), true);
+      window.world = world;
+      world.ready.then(() => {
+        if (q.has('still')) world.renderer.setAnimationLoop(null);
+        window.step = (n = 1) => {
+          for (let k = 0; k < n; k++) world.frame();
+        };
+        window.mapReady = true;
+      });
+      }
+    </script>
+  </body>
+</html>

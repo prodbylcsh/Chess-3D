@@ -109,9 +109,12 @@ stored data. They are dated 20 October 2026.
 
 ## Remaining (nothing is half-done in the code)
 
-1. **3D map decorations:** the user finds the background objects amateurish. **The user
-   makes the new assets and sends them later**; wait for them
-   (`src/features/puzzles/map/World.ts`, `themes.ts`).
+1. **3D map scenery (on the development branch, 22 October 2026, not yet merged):** the
+   user asked Claude to make the assets instead of waiting for their own. Every module's
+   map now has real models (`public/assets/map/<module>.glb`, made from code by
+   `scripts/assets/build-map.ts`; `PLATFORM.md` §4.2 lists them). Landmarks stand on level
+   terraces cut into the valley sides; the horizon is not tone-mapped so its foot matches
+   the fog. The user hasn't seen it yet: ask for their verdict, then merge with their yes.
 2. **Puzzles later:** a puzzle subscription, more themes (fantasy).
 3. **Payments:** live payments need the own domain and the Paddle review (sandbox works).
 4. **Roadmap:** Learn module, tournaments, more sets, boards and effects.
