@@ -31,6 +31,16 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## Subscription: a plan only (25 October 2026, waiting for the user)
+
+The user asked to plan the subscription thoroughly before building it. The proposal is in
+**`docs/SUBSCRIPTION.md`**: three plans (Apprentice €4.99, Wizard €9.99, Archmage €19.99 a
+month; yearly 8× monthly), all with every puzzle module and Learn chapter; Wizard and
+Archmage give their price back in coins every month (35,000 / 75,000, the packs of the same
+price); new Game Review, streak shields, monthly icons, the Wardrobe; the Premium page and
+where offers appear; legal and build steps. **Nothing is decided or built yet.** Wait for
+the user's answers to §8 before changing any rule, then follow §7.5.
+
 ## Spectating (merged to `main` and live on 25 October 2026, the user's yes)
 
 Decided with the user and recorded in `PLATFORM.md` §4.1 "Spectating", §9 and §10:

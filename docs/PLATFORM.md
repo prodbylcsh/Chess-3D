@@ -39,7 +39,7 @@ The platform is meant to earn money for its operator. What pays today and what i
 | Puzzle modules | 100,000 coins each; Openings free (4.2) | ✅ |
 | Learn | chapters 1–2 free, the rest 75,000 coins (≈ €20) (4.3) | planned |
 | Shop items | piece sets, boards, effects for coins (4.5) | ✅ |
-| Subscription | all puzzle modules and Learn chapters; price and contents open | planned |
+| Subscription | three plans proposed (Apprentice €4.99, Wizard €9.99, Archmage €19.99 a month): all puzzles and Learn, coins every month, Game Review, the Wardrobe; see `docs/SUBSCRIPTION.md` | proposal, waiting for the user's decisions |
 
 Coins can also be earned by playing, so every paid part is reachable without money; buying
 coins is the shortcut. When a feature is designed, say how it supports this (bringing
@@ -1166,7 +1166,8 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
 | After release: unusual behaviour | Detect abuse instead of capping coins (6.3): e.g. 100 games an hour, two accounts from the same IP address, the same two players feeding each other wins; flags for the operator first | ⏸ |
-| Later | Tournaments, the subscription (all puzzle modules and Learn), more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
+| Subscription (Premium) | Three plans with puzzles, Learn, monthly coins, Game Review, streak shields, the Wardrobe; the Premium page and offers (`docs/SUBSCRIPTION.md`) | 🔜 proposal (25 October 2026), waiting for the user's decisions |
+| Later | Tournaments, more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -1277,3 +1278,5 @@ Decided:
 Open:
 
 1. Which languages come after Czech?
+2. The subscription: plans, prices, monthly coins and the economy changes proposed in
+   `docs/SUBSCRIPTION.md` §8.
