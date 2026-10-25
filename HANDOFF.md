@@ -109,15 +109,15 @@ stored data. They are dated 20 October 2026.
 
 ## Remaining (nothing is half-done in the code)
 
-1. **3D map scenery (on the development branch, 22 October 2026, not yet merged):** every
+1. **3D map scenery (merged to `main` on 25 October 2026, the user's yes):** every
    module's map uses the user's PBR pack (67 textured models, originals in the R2 originals
    bucket under `map/`), lightened for phones by `scripts/assets/build-map.ts` into
    `public/assets/map/<module>.glb` (`PLATFORM.md` §4.2). The horizon stays made from code.
    Landmarks stand on level terraces cut into the valley sides; the horizon is not
    tone-mapped so its foot matches the fog. Rebuild: pull the originals
    (`node scripts/assets/r2.ts pull-originals map assets-src/map`) and run the build, or run
-   the models workflow with the target `map`. Ask the user for their verdict, then merge
-   with their yes. Speed on real phones is unmeasured (software GL only).
+   the models workflow with the target `map`. Speed on real phones is unmeasured (software
+   GL only): ask the user how it runs.
 2. **Puzzles later:** a puzzle subscription, more themes (fantasy).
 3. **Payments:** live payments need the own domain and the Paddle review (sandbox works).
 4. **Roadmap:** Learn module, tournaments, more sets, boards and effects.
@@ -158,7 +158,9 @@ stored data. They are dated 20 October 2026.
   it doesn't run again after a merge.
 - **R2 "folder" marker objects** caused EEXIST in pull-originals. Keys ending in `/` are
   skipped.
-- **Network:** this container can't reach github.io, lichess.org or Cloudflare. Use the
+- **Network:** this container can't reach github.io or lichess.org. R2 works when the
+  session has the R2_* variables (an R2 token scoped to named buckets: a new bucket needs
+  the token edited first). Use the
   GitHub Actions (`puzzles.yml`, `models.yml`, deploys) and the GitHub MCP tools for run
   status.
 - **`pkill -f <script>` in a background shell** kills that shell too.
