@@ -5,6 +5,7 @@ import { t } from '../../i18n';
 import { mmrChange, rankOf } from '#shared/rating.ts';
 import { STAKES, coinReward, wagerNet } from '#shared/economy.ts';
 import { kindOpen } from '#shared/play.ts';
+import { isWatchPolicy } from '#shared/spectate.ts';
 import { ApiError, type Api, type MatchFound, type MatchKind, type MatchReport, type MatchResult } from '../types';
 import { emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../validation';
 import { createAccount, db, emit, isTaken, newId as id, publicSeed, rankInfo, save, session, strip, subscribe, wait } from './db';
@@ -131,6 +132,7 @@ export function createMockApi(): Api {
           profile.usernameChangedAt = new Date().toISOString();
         }
         if (patch.iconId != null && !owns(profile, patch.iconId)) throw new ApiError('not_owned', t('You do not own this item.'));
+        if (patch.watch != null && !isWatchPolicy(patch.watch)) throw new ApiError('invalid', t('Something went wrong. Please try again.'));
         Object.assign(profile, patch);
         save();
         emit({ type: 'profile' });
@@ -148,6 +150,11 @@ export function createMockApi(): Api {
     friends,
     messages,
     safety,
+    // the demo players' games are played by the AI on this device: nothing to watch
+    spectate: {
+      playing: async () => ({}),
+      live: async () => [],
+    },
     account,
     shop,
     seasons,

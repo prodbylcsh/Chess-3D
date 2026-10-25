@@ -2,7 +2,7 @@ import { t, tk } from '../../i18n';
 import { shortDate } from '../../ui/format';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { AtSign, Ban, Check, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, Vibrate, X, RefreshCw } from 'lucide-react';
+import { AtSign, Ban, Check, Eye, FileText, Globe, KeyRound, LogOut, Mail, MessageCircleQuestion, ShieldCheck, Trash2, UserRound, Volume2, Vibrate, X, RefreshCw } from 'lucide-react';
 import { api, ApiError, type BlockedPlayer, type UsernameCheck } from '../../api';
 import { USERNAME_COOLDOWN_DAYS, USERNAME_MAX, emailProblem, nextUsernameChange, passwordProblem, usernameProblem } from '../../api/validation';
 import { Page } from '../../app/AppLayout';
@@ -11,7 +11,46 @@ import { LANGUAGES, setPrefs, usePrefs } from '../../app/prefs';
 import { useSession } from '../../app/session';
 import { ProfileIcon } from '../../ui/art/art';
 import { Badge, Button, Card, Field, Modal, Spinner, Switch, useToast } from '../../ui/kit';
+import { DEFAULT_WATCH, WATCH_POLICIES, type WatchPolicy } from '#shared/spectate.ts';
 import './settings.css';
+
+const WATCH_LABEL: Record<WatchPolicy, string> = { everyone: tk('Everyone with the link'), friends: tk('Friends only'), nobody: tk('Nobody') };
+
+/** Who may watch the player's games (docs/PLATFORM.md §4.1 "Spectating"). */
+function WatchSetting() {
+  const { profile, refresh } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const value = profile?.watch ?? DEFAULT_WATCH;
+  async function change(watch: WatchPolicy) {
+    setBusy(true);
+    try {
+      await api.profiles.update({ watch });
+      await refresh();
+    } catch (err) {
+      toast((err as Error).message, { tone: 'danger' });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Row
+      icon={<Eye size={18} />}
+      stack
+      title={t('Who can watch my games')}
+      text={t('Through a watch link and “Playing now”. Ranked and coin games are shown two moves behind.')}
+      action={
+        <select className="select" value={value} disabled={busy} onChange={(e) => void change(e.target.value as WatchPolicy)} aria-label={t('Who can watch my games')}>
+          {WATCH_POLICIES.map((p) => (
+            <option key={p} value={p}>
+              {t(WATCH_LABEL[p])}
+            </option>
+          ))}
+        </select>
+      }
+    />
+  );
+}
 
 const PROVIDER: Record<string, string> = { email: tk('Email and password'), apple: tk('Sign in with Apple'), google: tk('Sign in with Google') };
 
@@ -82,6 +121,7 @@ export function SettingsPage() {
               </Link>
             }
           />
+          <WatchSetting />
         </Section>
 
         <Section title={t('Blocked players')}>
@@ -247,9 +287,10 @@ function Section({ title, children, danger }: { title: string; children: ReactNo
   );
 }
 
-function Row({ icon, title, text, action }: { icon: ReactNode; title: string; text: ReactNode; action?: ReactNode }) {
+/** `stack`: on narrow screens the action goes under the text (wide controls). */
+function Row({ icon, title, text, action, stack }: { icon: ReactNode; title: string; text: ReactNode; action?: ReactNode; stack?: boolean }) {
   return (
-    <div className="settings-row">
+    <div className={stack ? 'settings-row is-stacked' : 'settings-row'}>
       <span className="settings-icon">{icon}</span>
       <span className="settings-text">
         <strong>{title}</strong>

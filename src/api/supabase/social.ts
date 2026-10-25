@@ -7,6 +7,7 @@ import { FunctionsHttpError, type RealtimeChannel, type SupabaseClient } from '@
 import { DEFAULT_LOADOUT } from '#shared/shop.ts';
 import { parseShowcase, type Showcase } from '#shared/social.ts';
 import { TIERS } from '#shared/rating.ts';
+import { LIVE_NOW_LIMIT, PLAYING_NOW_FRESH_MS } from '#shared/spectate.ts';
 import { t } from '../../i18n';
 import { rankInfo } from '../mock/db';
 import {
@@ -14,6 +15,7 @@ import {
   type ApiEvent,
   type Conversation,
   type FriendsService,
+  type LiveGame,
   type Message,
   type MessagesService,
   type SafetyService,
@@ -22,6 +24,7 @@ import {
   type PublicProfile,
   type RankInfo,
   type Relation,
+  type SpectateService,
 } from '../types';
 
 interface ProfileRecord {
@@ -50,6 +53,20 @@ interface FriendshipRecord {
   created_at: string;
   accepted_at: string | null;
 }
+
+interface WatchRecord {
+  id: string;
+  white_id: string | null;
+  black_id: string | null;
+  white_name: string | null;
+  black_name: string | null;
+  kind: string;
+  control: string | null;
+  moves: string[];
+}
+
+/** How high a player's rank is (for ordering "Live now"); guests count lowest. */
+const tierIndex = (p: PublicProfile | null) => (p ? TIERS.findIndex((x) => x.id === p.rank.tier) : -1);
 
 const PROFILE_COLUMNS = 'id, username, icon_id, created_at, showcase';
 const NO_STATS = { wins: 0, losses: 0, draws: 0, winStreak: 0, rankedStreak: 0, bestStreak: 0 };
@@ -424,6 +441,55 @@ export function createSocial(
     },
   };
 
+  // ---------------------------------------------------------------- spectating
+
+  /** Running games in the spectators' copy; row security leaves out what the viewer may not watch. */
+  const runningGames = () =>
+    client
+      .from('game_watch')
+      .select('id, white_id, black_id, white_name, black_name, kind, control, moves')
+      .eq('status', 'active')
+      .gt('updated_at', new Date(Date.now() - PLAYING_NOW_FRESH_MS).toISOString())
+      .order('updated_at', { ascending: false });
+
+  const spectate: SpectateService = {
+    async playing(userIds) {
+      const ids = [...new Set(userIds)].filter((id) => /^[0-9a-f-]{36}$/.test(id));
+      if (ids.length === 0) return {};
+      const list = `(${ids.join(',')})`;
+      const { data, error } = await runningGames().or(`white_id.in.${list},black_id.in.${list}`);
+      if (error) throw socialError('network');
+      const out: Record<string, string> = {};
+      for (const r of data as WatchRecord[]) for (const id of [r.white_id, r.black_id]) if (id && ids.includes(id) && !out[id]) out[id] = r.id;
+      return out;
+    },
+
+    async live() {
+      const { data, error } = await runningGames().in('kind', ['ranked', 'casual', 'wager']).limit(LIVE_NOW_LIMIT);
+      if (error) throw socialError('network');
+      const rows = data as WatchRecord[];
+      const self = local.me();
+      const people = await profilesById(rows.flatMap((r) => [r.white_id, r.black_id]).filter((id): id is string => !!id));
+      const friendIds = self ? new Set((await friendships()).filter((f) => f.status === 'accepted').map((f) => other(f, self))) : new Set<string>();
+      const games: LiveGame[] = rows
+        .filter((r) => r.white_id !== self && r.black_id !== self)
+        .map((r) => ({
+          id: r.id,
+          kind: r.kind as LiveGame['kind'],
+          control: (r.control as LiveGame['control']) ?? null,
+          white: (r.white_id && people.get(r.white_id)) || null,
+          black: (r.black_id && people.get(r.black_id)) || null,
+          whiteName: r.white_name ?? t('A player'),
+          blackName: r.black_name ?? t('A player'),
+          moves: r.moves.length,
+          friend: [r.white_id, r.black_id].some((id) => !!id && friendIds.has(id)),
+        }));
+      // friends' games first, then the best-ranked pairing
+      const strength = (g: LiveGame) => Math.max(tierIndex(g.white), tierIndex(g.black));
+      return games.sort((a, b) => Number(b.friend) - Number(a.friend) || strength(b) - strength(a));
+    },
+  };
+
   // ---------------------------------------------------------------- live updates
 
   /** Listen for messages and friend requests, and show this player as online. */
@@ -472,5 +538,5 @@ export function createSocial(
     changes = presence = null;
   }
 
-  return { lookups, friends, messages, safety, start, stop, onlineCount: () => online.size };
+  return { lookups, friends, messages, safety, spectate, start, stop, onlineCount: () => online.size };
 }

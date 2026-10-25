@@ -30,6 +30,8 @@ export default function JoinPage() {
         await online.signIn();
         const r = await online.fetch(gameId);
         if (!live) return;
+        // the game has started: its players play, everyone else may watch
+        if (!r && (await online.fetchWatch(gameId).catch(() => null))) return live && navigate(`/watch/${gameId}`, { replace: true });
         if (!r) return setProblem(t('This invite is no longer valid.'));
         // already playing in it, or it is full: go straight to the board
         if (online.sideOf(r) || r.status !== 'waiting') return navigate(`/game/online/${r.id}`, { replace: true });

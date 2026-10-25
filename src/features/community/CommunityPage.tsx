@@ -6,7 +6,7 @@ import { Page } from '../../app/AppLayout';
 import { useBadges } from '../../app/notifications';
 import { Badge, Card, EmptyState, Field, Segmented, Spinner } from '../../ui/kit';
 import { timeAgo } from '../../ui/format';
-import { ChallengeButton, FriendButton, MessageButton, PlayerLine } from '../social/social';
+import { ChallengeButton, FriendButton, MessageButton, PlayerLine, PlayingBadge, WatchButton, usePlayingNow } from '../social/social';
 import './community.css';
 
 type Tab = 'friends' | 'requests';
@@ -107,6 +107,7 @@ function Friends() {
   useEffect(() => {
     void api.friends.list().then(setFriends);
   }, [version]);
+  const playing = usePlayingNow(friends?.map((f) => f.profile.id) ?? []);
 
   if (!friends) return <Loading />;
   if (!friends.length) {
@@ -124,8 +125,9 @@ function Friends() {
       </p>
       {friends.map((f) => (
         <div key={f.profile.id} className="person">
-          <PlayerLine player={f.profile} sub={<> · {f.profile.online ? t('Online') : t('Offline')}</>} />
+          <PlayerLine player={f.profile} sub={playing[f.profile.id] ? <PlayingBadge /> : <> · {f.profile.online ? t('Online') : t('Offline')}</>} />
           <div className="person-actions">
+            {playing[f.profile.id] && <WatchButton gameId={playing[f.profile.id]} compact />}
             <MessageButton player={f.profile} compact />
             <ChallengeButton player={f.profile} compact />
           </div>

@@ -39,6 +39,10 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   (guests too), the rest for coins; 250 coins per finished chapter.
 - **Blocking and reporting**: block a player from their profile (no friendship, requests,
   chat or matches between you; Settings lists them) and report a player or a message.
+- **Spectating**: watch a running online game through its watch link (Share in the game) or a
+  friend's "Playing now" (Community, profiles, chats), on the same 3D board with the players'
+  items; how many are watching; ranked and coin games two moves behind; "Who can watch my
+  games" in Settings. "Live now" on the Play hub is built and shows "Soon".
 - **Sidebar** with the eight modules (Learn marked "Soon") and badges for unread
   messages and friend requests.
 - **Shop**: piece sets, boards, backgrounds, move animations, destruction effects and profile
@@ -53,7 +57,7 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   sign out, delete account.
 - **Play hub**: Ranked (with your rank emblem and division progress), Casual, Play a friend
   (friends list, invite link, same device), Play vs AI (5 levels), Play for coins (3 stakes),
-  Tournaments ("Soon").
+  Tournaments ("Soon"), Live now ("Soon").
 - **Redesigned game screen** around the unchanged 3D board: player cards with rank and
   captures, move list, actions, promotion picker, invite card, and a result screen with the
   MMR change and its breakdown, rank progress, coins and accuracy.

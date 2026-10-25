@@ -1,7 +1,9 @@
 import { rankText, t, tk } from '../../i18n';
-import { useEffect, useState } from 'react';
-import { Award, Eye, Gift, Sparkles, Star, Target, TrendingDown, TrendingUp } from 'lucide-react';
-import { itemName } from '../../api/catalog';
+import { Fragment, useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { itemDef } from '#shared/shop.ts';
+import { Award, Eye, Gift, ShoppingBag, Sparkles, Star, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { CATEGORY_NAMES, itemName } from '../../api/catalog';
 import { awardName } from '../../api/awards';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Button, Coins, ProgressBar, Spinner, cx, formatNumber } from '../../ui/kit';
@@ -132,7 +134,7 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
         <div className="result-glow" />
         <header className="result-head">
           <span className="result-kicker">{mode.label}</span>
-          <h1 className="display">{title}</h1>
+          <h1 className={cx('display', s.spectator && title.length > 16 && 'is-long')}>{title}</h1>
           <p className="muted">{custom ? custom.text : aborted ? end.text : outcome ? `${end.text} · ${sub}` : sub}</p>
         </header>
 
@@ -150,6 +152,33 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
               <span>{opp.name}</span>
             </div>
           </div>
+        )}
+
+        {!me && s.spectator && (
+          <div className="result-vs">
+            {(['w', 'b'] as const).map((side, i) => (
+              <Fragment key={side}>
+                {i === 1 && <span className="result-vs-label">{t('vs')}</span>}
+                <div className={cx('result-player', end.winner === side && 'is-winner')}>
+                  <ProfileIcon icon={s.players[side].iconId} size={52} />
+                  <span>{s.players[side].name}</span>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        )}
+
+        {s.spectator && s.spectator.items.length > 0 && (
+          <section className="result-block result-seen">
+            <span className="result-label">{t('Seen in this game')}</span>
+            <div className="result-chips">
+              {s.spectator.items.map((id) => (
+                <Link key={id} to={`/shop?c=${itemDef(id)!.category}`} className="result-seen-item">
+                  <ShoppingBag size={14} /> {itemName(id)} <span className="result-seen-kind">{t(CATEGORY_NAMES[itemDef(id)!.category])}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {result?.loading && (

@@ -181,6 +181,64 @@ close ratings when several players are waiting). Leaving a running game counts a
 When nobody fits, the search keeps going: it shows how many players are online and
 offers a game against the AI while waiting (which pays nothing, as decided).
 
+#### Spectating ✅ (October 2026)
+
+Anyone may watch a running online game on the same 3D board, with both players' own items
+(piece sets, boards, effects), read-only. Decided with the user on 25 October 2026.
+
+**Ways in**
+- **Watch link** `#/watch/<game id>`: players share it from the game (the **Share** action:
+  the share sheet on phones, else copied). It works without an account (the app signs the
+  visitor in as a guest); a player opening it plays instead, and anyone else opening the
+  game's own link or invite link of a running game lands on the watch link.
+- **Friends:** a friend in a game shows **Playing now** in Community, on their profile and
+  in the chat header, with **Watch** (also on the profile of a non-friend whose game may be
+  watched). "Playing now" needs a move or other change in the last 30 minutes
+  (`PLAYING_NOW_FRESH_MS`), so an abandoned game does not show; checked every 20 s.
+- **Live now** on the Play hub (friends' games first, then the best-ranked running
+  matchmade games, `LIVE_NOW_LIMIT` 12): **built but closed** (`LIVE_NOW_OPEN = false` in
+  `_shared/spectate.ts`); the hub shows it with "Soon" until there are enough games to fill
+  it. To open it, set the constant to `true` and deploy.
+
+**The spectator screen** (`src/features/game/modes/watch.ts`): both player cards (name,
+icon, rank in matchmade games, clocks, captured pieces), the move list, Flip, Sound and
+Share; a chip with how many are watching, and in delayed games "2 moves behind". Joining
+mid-game shows the position at once; later moves animate one by one. At the end a result
+card for spectators: both players with the winner highlighted, **Seen in this game** (the
+players' shop items, each linking to its Shop category), and **Watch the rematch**, Create a
+free account (guests) and Play a game. When the players start a rematch, the spectator is
+taken there after 4 s unless they choose Stay. Spectators can't move, offer anything,
+chat with the players, or analyse the game.
+
+**N watching:** players and spectators both see how many people watch: everyone in the
+game's realtime presence except its two players.
+
+**Delay:** in ranked and coin games, spectators see the moves **two moves (4 half-moves)
+behind** while the game runs, so nobody watching can help a player; once the game is over
+they see every move. Friend and casual games are live. The delay is even, so the side to
+move and the live clocks match the position spectators see.
+
+**Who may watch** (Settings → Profile, "Who can watch my games"): **Everyone with the link**
+(default), **Friends only**, or **Nobody**. Both players' settings must allow it (a guest
+from an invite link has no setting), and neither player may have blocked the spectator or
+been blocked by them. Players always see their own games.
+
+**On the server** (migration `20261025090000_spectating.sql`): a trigger keeps
+`game_watch`, the spectators' copy of every game (the delayed moves, names, clocks, result,
+rematch; no draw offers), and `can_watch(white, black)` decides who may read it (row
+security; realtime follows it). The game row itself (`games`) is readable only by its
+players, and by anyone while it waits for its second player (the invite link). The rules
+and numbers are in `_shared/spectate.ts`, which `tests/spectate.test.ts` compares with the
+SQL; `tests/spectate.e2e.ts` covers the delay, the settings, blocks and realtime.
+
+**Earning:** watch links bring new players in (guests watch without signing up and get
+"Create a free account"), watching friends brings players back, and spectators see the
+paid items in action with a way to the Shop. Spectating stays free (a paywall would stop
+the links from spreading).
+
+**Later** (§9): spectator chat or emoji reactions (v2, needs moderation), replays of
+finished games from a profile's history, opening Live now.
+
 ### 4.2 Puzzles ✅
 
 Puzzles are meant to be fun first. They come in **themed modules of 100 puzzles**, easiest
@@ -668,7 +726,8 @@ are deleted with either account. New messages arrive through realtime (toast and
 
 ### 4.8 Settings
 
-Language, change email, change password, sound and music, board preferences
+Language, change email, change password, who can watch my games (4.1 "Spectating"),
+sound and music, board preferences
 (auto-rotate camera), sign out, delete account.
 
 ## 5. Ranked: MMR and ranks
@@ -954,7 +1013,7 @@ The 3D board fills the screen. Around it:
 | Auth | email + password, Apple, Google; email verification and password reset (✅ M4); anonymous sessions for guests |
 | Postgres + RLS | all data; clients read what they may, writes go through functions |
 | Edge Functions | game moves, clocks and results (✅ `game`), profiles, shop and seasons (✅ `account`), friends and chat (✅ M5: `social`), matchmaking and history (✅ M6: `play`), coins for money (✅ `payments`), puzzles (✅ `puzzles`) |
-| Realtime | live moves (✅), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
+| Realtime | live moves (✅; spectators follow `game_watch`, 4.1), who is online (✅ presence), chat and friend requests (✅), matchmaking notifications. On the free plan Supabase stops realtime for an idle project and restarts it on the next connection, dropping the first updates; the app re-reads a watched game every 4 s and the badges every 20 s, so nothing gets stuck |
 | Payments | ✅ in code: the `payments` function creates a Paddle transaction for a pack (price given inline, nothing set up in Paddle's catalogue; `custom_data` = player and pack) that the app opens in Paddle's overlay checkout (Paddle.js, loaded only then); Paddle's signed webhook (`transaction.completed`, refunds and chargebacks as `adjustment.*`) credits or takes back the coins once (`purchases`, `complete_purchase`, `reverse_purchase`, ledger `coins_bought` / `coins_refunded`). Sandbox (test payments) until the live account is approved; in sandbox the Shop shows "Buy coins" only with `#/shop?buy=coins` |
 | Engine analysis | ✅ in the players' browsers (5.2): the `play` function takes each player's report (`analysis`), the `game_analysis` table (server only) keeps the settlement's input and both reports for two days, and `apply_analysis` adds the performance part once both agree (ledger reason `performance`). Edge Functions are too CPU-limited for Stockfish; a server of our own (`engine/`, Oracle Cloud) is ready but unused |
 | Email | Supabase Auth emails (sign-up, password reset, email change) in the player's language, through a custom SMTP provider (Resend) in production |
@@ -999,6 +1058,11 @@ price_paid, season, acquired_at; private to the player) has one row per owned it
 ```
 player_awards   player_id, award_id, earned_at, game_id  (✅; definitions in code)
 ```
+
+Spectating (✅, 4.1): `game_watch` (the spectators' copy of each game, kept by a trigger on
+`games`, moves delayed in running ranked and coin games; readable where `can_watch` allows)
+and `profiles.watch` (everyone | friends | nobody). `games` itself is readable by its
+players, and by anyone while it waits for a second player.
 
 Puzzles (✅): `puzzle_solves` (player_id, module, idx, best stars, first solved_at),
 `puzzle_modules` (player_id, module, unlocked_at, completed_at, reward_item,
@@ -1095,7 +1159,10 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Blocking and reporting | Block a player (no friendship, requests, chat or matches between them) and report a player or a message; the operator reviews them in the dashboard (4.4) | ✅ (October 2026) |
 | Learn | A teaching module, separate from Puzzles: chapters from the pieces to first endgames, incl. Opening moves; chapters 1–2 free, the rest 75,000 coins or the subscription (4.3) | ✅ all 8 chapters live (October 2026) |
 | Puzzle map scenery | The user's PBR models on every module's map: things along the path, landmarks, plus a horizon (4.2; `scripts/assets/build-map.ts`) | ✅ built (October 2026) |
-| Spectating | Watch a running online game through a spectate link, read-only, with the same 3D board and effects | ⏸ |
+| Spectating | Watch a running online game (watch link, friends' "Playing now"), read-only, with the same 3D board and the players' items; "N watching"; ranked and coin games two moves behind; who may watch in Settings (4.1) | ✅ (October 2026) |
+| Live now | Running games to watch on the Play hub, friends' first (4.1) | ⏸ built, closed until there are enough games (`LIVE_NOW_OPEN`) |
+| Spectating v2 | Spectator chat or emoji reactions (only spectators see them; needs moderation) | ⏸ |
+| Replays | Watch any finished game from a profile's history on the 3D board | ⏸ later |
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
 | After release: unusual behaviour | Detect abuse instead of capping coins (6.3): e.g. 100 games an hour, two accounts from the same IP address, the same two players feeding each other wins; flags for the operator first | ⏸ |
@@ -1199,6 +1266,13 @@ Decided:
   user's to do closer to the release.
 - **Seasons wait for ranked** (October 2026): no season rewards while ranked is closed; the
   first real season (season 1) starts when ranked opens, everyone at 1,000 MMR (5.5).
+
+- **Spectating** (25 October 2026, 4.1): watch links and friends' "Playing now" with
+  Watch; the players' items on the spectator's board; "N watching" for players and
+  spectators; ranked and coin games two moves behind while they run; "Who can watch my
+  games" (everyone with the link by default, friends, nobody), blocked players never; free.
+  "Live now" built but closed ("Soon"); spectator chat or reactions in v2; replays later.
+  The legal pages say so (Privacy §2 and §6, Terms §4; effective 25 October 2026).
 
 Open:
 

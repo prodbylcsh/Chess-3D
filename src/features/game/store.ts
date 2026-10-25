@@ -104,6 +104,16 @@ export interface ClockView {
   firstMove: boolean;
 }
 
+/** Watching someone else's game (modes/watch.ts, docs/PLATFORM.md §4.1 "Spectating"). */
+export interface SpectatorView {
+  /** half-moves the board is behind the real game (ranked and coin games while they run) */
+  delay: number;
+  /** the players' shop items in this game, for "Seen in this game" */
+  items: string[];
+  /** the players started a rematch: its game id */
+  rematch: string | null;
+}
+
 export interface GameState {
   turn: Side;
   /** "Check!", "Checkmate!", "Draw" … */
@@ -132,6 +142,9 @@ export interface GameState {
   clock: ClockView | null;
   puzzle: PuzzleView | null;
   lesson: LessonView | null;
+  /** people watching this online game (players and spectators see it); null when not online */
+  watchers: number | null;
+  spectator: SpectatorView | null;
 }
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -159,6 +172,8 @@ export function initialState(): GameState {
     clock: null,
     puzzle: null,
     lesson: null,
+    watchers: null,
+    spectator: null,
   };
 }
 

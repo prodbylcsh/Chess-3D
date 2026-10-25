@@ -13,7 +13,7 @@ import { useSession } from '../../app/session';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
 import { Badge, Button, Card, Coins, EmptyState, ProgressBar, Segmented, Spinner, cx } from '../../ui/kit';
 import { memberSince, shortDate, timeAgo, winRate } from '../../ui/format';
-import { ChallengeButton, FriendButton, FriendsOnly, MessageButton } from '../social/social';
+import { ChallengeButton, FriendButton, FriendsOnly, MessageButton, WatchButton, usePlayingNow } from '../social/social';
 import { BlockButton, ReportDialog, useBlocked } from '../social/safety';
 import './profile.css';
 
@@ -75,6 +75,7 @@ export function ProfilePage() {
 function OtherActions({ player }: { player: PublicProfile }) {
   const [blocked, setBlocked] = useBlocked(player.id);
   const [reporting, setReporting] = useState(false);
+  const playing = usePlayingNow([player.id])[player.id];
   if (blocked === null) return null;
   return (
     <>
@@ -82,6 +83,7 @@ function OtherActions({ player }: { player: PublicProfile }) {
         <Badge>{t('Blocked')}</Badge>
       ) : (
         <>
+          {playing && <WatchButton gameId={playing} small />}
           <FriendButton playerId={player.id} compact />
           <FriendsOnly playerId={player.id}>
             <MessageButton player={player} compact />

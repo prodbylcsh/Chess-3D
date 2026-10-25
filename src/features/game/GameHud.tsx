@@ -1,7 +1,7 @@
-import { rankText, t } from '../../i18n';
+import { rankText, t, tn } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { Color as Side, PieceSymbol } from 'chess.js';
-import { ArrowLeft, Copy, Link2, RefreshCcw, Share2, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Copy, Eye, Hourglass, Link2, RefreshCcw, Share2, Volume2, VolumeX } from 'lucide-react';
 import { sfx } from '../../audio/sfx';
 import { getPrefs, setPrefs } from '../../app/prefs';
 import { PieceGlyph, ProfileIcon, RankEmblem } from '../../ui/art/art';
@@ -107,6 +107,23 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
   );
 }
 
+/** How many people watch (players and spectators see it), and for spectators how late they see the moves. */
+function WatchLine({ s }: { s: GameState }) {
+  const delay = s.spectator && !s.end ? s.spectator.delay : 0;
+  return (
+    <div className="gs-note gs-watchline">
+      <span>
+        <Eye size={14} /> {tn(s.watchers ?? 0, '{n} spectator', '{n} spectators')}
+      </span>
+      {delay > 0 && (
+        <span title={t('In ranked and coin games, spectators see the moves a little later, so nobody can help the players.')}>
+          <Hourglass size={13} /> {tn(delay / 2, 'You see the moves {n} move late', 'You see the moves {n} moves late')}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function TurnPill({ s }: { s: GameState }) {
   const p = s.players[s.turn];
   const text = s.end ? t('Game over') : s.invite ? t('Waiting for an opponent…') : s.mySide && s.turn === s.mySide ? t('Your move') : t('{name} to move', { name: p.name });
@@ -122,6 +139,7 @@ function TurnPill({ s }: { s: GameState }) {
         )}
       </div>
       {s.note && <div className="gs-note">{s.note}</div>}
+      {(s.spectator || !!s.watchers) && <WatchLine s={s} />}
       <SearchPill />
     </div>
   );

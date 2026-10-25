@@ -8,7 +8,7 @@ import { useProfile } from '../../app/session';
 import { ProfileIcon } from '../../ui/art/art';
 import { Badge, Button, EmptyState, Field, IconButton, Modal, Spinner, cx } from '../../ui/kit';
 import { clockTime, timeAgo } from '../../ui/format';
-import { ChallengeButton, PlayerLine } from '../social/social';
+import { ChallengeButton, PlayerLine, PlayingBadge, WatchButton, usePlayingNow } from '../social/social';
 import { ReportDialog } from '../social/safety';
 import './messages.css';
 
@@ -97,6 +97,7 @@ export function MessagesPage() {
 }
 
 function Thread({ conversation, onBack }: { conversation: Conversation; onBack: () => void }) {
+  const playing = usePlayingNow([conversation.with.id])[conversation.with.id];
   const me = useProfile();
   const navigate = useNavigate();
   const { version } = useBadges();
@@ -155,8 +156,8 @@ function Thread({ conversation, onBack }: { conversation: Conversation; onBack: 
         <IconButton label={t('Back to conversations')} className="thread-back" onClick={onBack}>
           <ArrowLeft size={18} />
         </IconButton>
-        <PlayerLine player={conversation.with} sub={<> · {conversation.with.online ? t('Online') : t('Offline')}</>} />
-        <ChallengeButton player={conversation.with} />
+        <PlayerLine player={conversation.with} sub={playing ? <PlayingBadge /> : <> · {conversation.with.online ? t('Online') : t('Offline')}</>} />
+        {playing ? <WatchButton gameId={playing} /> : <ChallengeButton player={conversation.with} />}
         <IconButton label={t('Report {name}', { name: conversation.with.username })} onClick={() => setReporting(null)}>
           <Flag size={17} />
         </IconButton>

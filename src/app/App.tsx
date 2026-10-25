@@ -77,6 +77,7 @@ function Routed() {
         {/* invite links work for guests too */}
         <Route path="/join/:gameId" element={<JoinPage />} />
         <Route path="/game/:mode/:id?" element={<GamePage />} />
+        <Route path="/watch/:id" element={<GamePage watch />} />
         {/* puzzles and lessons work for guests too (the free parts) */}
         <Route element={<GuestOrPlayer><AppLayout /></GuestOrPlayer>}>
           <Route path="/puzzles" element={<PuzzlesPage />} />

@@ -12,6 +12,7 @@ import { AiMode } from './modes/ai';
 import { LocalMode } from './modes/local';
 import { MatchMode } from './modes/match';
 import { OnlineMode } from './modes/online';
+import { WatchMode } from './modes/watch';
 import { PuzzleMode } from './modes/puzzle';
 import { PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import type { Mode, ModeContext } from './modes/types';
@@ -21,8 +22,10 @@ import { lessonOf } from '#shared/learn.ts';
 import { LearnMode } from './modes/learn';
 
 /** Full-screen game: the 3D board with the game interface around it. */
-export default function GamePage() {
-  const { mode: modeId = 'local', id } = useParams();
+export default function GamePage({ watch = false }: { watch?: boolean }) {
+  const params0 = useParams();
+  const modeId = watch ? 'watch' : (params0.mode ?? 'local');
+  const id = params0.id;
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const session = useSession();
@@ -82,6 +85,8 @@ export default function GamePage() {
       }
       case 'online':
         return id ? new OnlineMode(ctx, id) : null;
+      case 'watch':
+        return id ? new WatchMode(ctx, id) : null;
       case 'learn':
         return id && lessonOf(id) ? new LearnMode(ctx, id) : null;
       case 'puzzle': {

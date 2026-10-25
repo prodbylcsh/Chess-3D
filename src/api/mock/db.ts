@@ -287,7 +287,7 @@ function seedPlayer(id: string, createdAt: string): void {
 }
 
 /** The profile fields the server owns once accounts are real (M4). */
-export type Identity = Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'usernameChangedAt' | 'createdAt'> &
+export type Identity = Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'usernameChangedAt' | 'createdAt' | 'watch'> &
   Partial<Pick<Profile, 'coins' | 'mmr' | 'stats' | 'loadout' | 'inventory'>> & { seasonPeak?: { season: number; mmr: number } };
 
 /**

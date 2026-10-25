@@ -4,6 +4,12 @@ import { guestSession } from './guest.ts';
 
 export type { GameRow, Side };
 
+/**
+ * A game as spectators see it (the `game_watch` table): the moves `delay` half-moves behind
+ * while a ranked or coin game runs, all of them once it is over (docs/PLATFORM.md §4.1).
+ */
+export type WatchRow = Omit<GameRow, 'fen' | 'draw_offer' | 'settled_at'> & { delay: number; created_at: string; updated_at: string };
+
 export class OnlineError extends Error {
   readonly code: string;
 
@@ -16,9 +22,9 @@ export class OnlineError extends Error {
 /** How often a watched game is re-read in case realtime missed an update. */
 const WATCH_POLL_MS = 4000;
 
-export interface Watcher {
+export interface Watcher<R = GameRow> {
   /** Every newer version of the game row, in order (also sent once on (re)connect). */
-  onRow(row: GameRow): void;
+  onRow(row: R): void;
   /** Ids of the users currently connected to this game. */
   onPresence?(userIds: Set<string>): void;
 }
@@ -68,6 +74,13 @@ export class Online {
     return data as GameRow | null;
   }
 
+  /** A game as spectators see it, or null when it does not exist or may not be watched. */
+  async fetchWatch(id: string): Promise<WatchRow | null> {
+    const { data, error } = await this.client.from('game_watch').select('*').eq('id', id).maybeSingle();
+    if (error) throw new OnlineError('network', error.message);
+    return data as WatchRow | null;
+  }
+
   create(name: string, color: Side | 'random') {
     return this.call({ action: 'create', name, color });
   }
@@ -112,17 +125,24 @@ export class Online {
 
   /** Follow a game: row updates and who is connected. Returns an unsubscribe function. */
   watch(id: string, watcher: Watcher): () => void {
+    return this.follow('games', id, () => this.fetch(id), watcher);
+  }
+
+  /** Follow a game as a spectator (the delayed copy); spectators count in its presence too. */
+  spectate(id: string, watcher: Watcher<WatchRow>): () => void {
+    return this.follow('game_watch', id, () => this.fetchWatch(id), watcher);
+  }
+
+  private follow<R extends { version: number }>(table: string, id: string, read: () => Promise<R | null>, watcher: Watcher<R>): () => void {
     let version = -1;
-    const push = (row: GameRow) => {
+    const push = (row: R) => {
       if (row.version <= version) return;
       version = row.version;
       watcher.onRow(row);
     };
     const channel = this.client
       .channel(`game:${id}`, { config: { presence: { key: this.userId } } })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${id}` }, (p) =>
-        push(p.new as GameRow),
-      )
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table, filter: `id=eq.${id}` }, (p) => push(p.new as R))
       .on('presence', { event: 'sync' }, () => {
         watcher.onPresence?.(new Set(Object.keys(channel.presenceState())));
       })
@@ -130,12 +150,12 @@ export class Online {
         if (status !== 'SUBSCRIBED') return;
         void channel.track({ at: Date.now() });
         // catch up on anything that happened before (or while) we were disconnected
-        void this.fetch(id).then((row) => row && push(row)).catch(() => {});
+        void read().then((row) => row && push(row)).catch(() => {});
       });
     // Safety net: realtime can miss updates, e.g. while Supabase restarts it for a project
     // that was idle (the first game after a quiet spell). Re-read the row now and then;
     // `push` ignores versions we already have.
-    const poll = setInterval(() => void this.fetch(id).then((row) => row && push(row)).catch(() => {}), WATCH_POLL_MS);
+    const poll = setInterval(() => void read().then((row) => row && push(row)).catch(() => {}), WATCH_POLL_MS);
     return () => {
       clearInterval(poll);
       void this.client.removeChannel(channel);

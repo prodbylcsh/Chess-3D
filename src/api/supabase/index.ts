@@ -7,6 +7,7 @@
 // that store's session (`adoptAccount`).
 import { FunctionsHttpError, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { ProfileRow } from '#shared/accounts.ts';
+import { DEFAULT_WATCH } from '#shared/spectate.ts';
 import { getPrefs, subscribePrefs } from '../../app/prefs';
 import { t } from '../../i18n';
 import { appUrl, authReturn, cleanAuthReturn } from '../../net/supabase';
@@ -108,6 +109,7 @@ function identity(row: ProfileRow) {
     onboarded: !!row.onboarded_at,
     usernameChangedAt: row.username_changed_at,
     createdAt: row.created_at,
+    watch: row.watch ?? DEFAULT_WATCH,
   };
 }
 
@@ -389,6 +391,7 @@ export function createSupabaseApi(client: SupabaseClient, url: string, key: stri
     friends: social.friends,
     messages: social.messages,
     safety: social.safety,
+    spectate: social.spectate,
     events,
     account,
   };

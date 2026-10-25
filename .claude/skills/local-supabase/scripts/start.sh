@@ -80,7 +80,9 @@ if [ -z "$EDGE" ]; then
   pkill -f "supabase functions serve" || true
 fi
 GATEWAY=$(docker network inspect supabase_network_chess-3d -f '{{(index .IPAM.Config 0).Gateway}}')
-if ! docker image inspect "$EDGE" -f '{{.Config.Env}}' | grep -q NPM_CONFIG_REGISTRY; then
+# every tag: `supabase start` and `functions serve` may use different edge-runtime versions
+for EDGE in $(docker images supabase/edge-runtime --format '{{.Repository}}:{{.Tag}}' | grep -v -- '-orig$'); do
+  docker image inspect "$EDGE" -f '{{.Config.Env}}' | grep -q NPM_CONFIG_REGISTRY && continue
   step "patching $EDGE (CA bundle + npm mirror at $GATEWAY:4873)"
   D=$(mktemp -d)
   cp /root/.ccr/ca-bundle.crt "$D/ca.crt"
@@ -93,7 +95,9 @@ ENV NPM_CONFIG_REGISTRY=http://$GATEWAY:4873/
 EOF
   docker build -q -t "$EDGE" "$D" >/dev/null
   docker rm -f supabase_edge_runtime_chess-3d >/dev/null 2>&1 || true
-fi
+  RESTART_FUNCTIONS=1
+done
+[ -n "${RESTART_FUNCTIONS:-}" ] && { pkill -f "supabase functions serve" || true; }
 
 # 4b. Local function secrets: test values for payments (tests/payments.e2e.ts runs a fake
 #     Paddle API on the host's :4875, which the functions reach through the gateway), and

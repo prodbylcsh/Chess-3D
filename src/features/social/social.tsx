@@ -1,7 +1,7 @@
 import { rankText, t } from '../../i18n';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Check, MessageCircle, Swords, UserCheck, UserMinus, UserPlus, X } from 'lucide-react';
+import { Check, Eye, MessageCircle, Swords, UserCheck, UserMinus, UserPlus, X } from 'lucide-react';
 import { api, ApiError, type PublicProfile, type Relation } from '../../api';
 import { useBadges } from '../../app/notifications';
 import { useProfile } from '../../app/session';
@@ -174,4 +174,51 @@ export function FriendsOnly({ playerId, children }: { playerId: string; children
 
 export function OnlineBadge({ online: on }: { online: boolean }) {
   return on ? <Badge tone="success">{t('Online')}</Badge> : <Badge>{t('Offline')}</Badge>;
+}
+
+/** How often "Playing now" is checked again. */
+const PLAYING_POLL_MS = 20_000;
+
+/**
+ * Of these players, those in a game the signed-in player may watch: player id → game id
+ * (docs/PLATFORM.md §4.1 "Spectating"). Checked again every 20 s.
+ */
+export function usePlayingNow(playerIds: string[]): Record<string, string> {
+  const key = [...playerIds].sort().join(',');
+  const [playing, setPlaying] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!key) return setPlaying({});
+    let live = true;
+    const check = () =>
+      void api.spectate.playing(key.split(',')).then(
+        (p) => live && setPlaying(p),
+        () => {},
+      );
+    check();
+    const timer = setInterval(check, PLAYING_POLL_MS);
+    return () => {
+      live = false;
+      clearInterval(timer);
+    };
+  }, [key]);
+  return playing;
+}
+
+/** Watch a running game. */
+export function WatchButton({ gameId, compact, small }: { gameId: string; compact?: boolean; small?: boolean }) {
+  const navigate = useNavigate();
+  return (
+    <Button size={compact || small ? 'sm' : 'md'} variant="secondary" icon={<Eye size={16} />} title={t('Watch their game')} onClick={() => navigate(`/watch/${gameId}`)}>
+      {compact ? null : t('Watch')}
+    </Button>
+  );
+}
+
+/** "Playing now" next to a player's name. */
+export function PlayingBadge() {
+  return (
+    <span className="playing-badge">
+      <span className="playing-dot" /> {t('Playing now')}
+    </span>
+  );
 }

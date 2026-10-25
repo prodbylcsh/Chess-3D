@@ -70,6 +70,20 @@
   flex: none;
 }
 
+@media (max-width: 560px) {
+  .settings-row.is-stacked {
+    flex-wrap: wrap;
+  }
+
+  .settings-row.is-stacked .settings-text {
+    flex-basis: calc(100% - 52px);
+  }
+
+  .settings-row.is-stacked .settings-action {
+    margin-left: 52px;
+  }
+}
+
 .settings-note {
   font-size: 12.5px;
 }

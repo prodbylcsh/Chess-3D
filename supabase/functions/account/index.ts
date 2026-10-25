@@ -2,7 +2,7 @@
 //
 // POST { action: 'me' }                          → { profile, player, seasonGrants }   (created on first call)
 // POST { action: 'check_username', username }    → { status: 'available' | 'taken' | 'invalid' }
-// POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded? }
+// POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded?, watch? }
 // POST { action: 'buy', itemId }                 → { player }    take the price, add the item (player_items)
 // POST { action: 'equip', itemId }               → { profile, player }   use an owned item
 // POST { action: 'delete', username }            → { deleted: true }

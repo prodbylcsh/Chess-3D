@@ -1,4 +1,4 @@
-# Handoff: where the work stands (20 October 2026)
+# Handoff: where the work stands (25 October 2026)
 
 Read this, then `CLAUDE.md` (rules, loaded automatically), `docs/PLATFORM.md` (every
 product decision; §4.2 is Puzzles) and the skills in `.claude/skills/` before changing
@@ -30,6 +30,27 @@ How the user works:
 - **Secrets.** No secrets in chat or in commits; keys live in GitHub secrets.
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
+
+## Spectating (built 25 October 2026 on `claude/spectating`, not merged yet)
+
+Decided with the user and recorded in `PLATFORM.md` §4.1 "Spectating", §9 and §10:
+watch links (Share in a game), friends' "Playing now" with Watch (Community, profiles,
+chat header), the players' own items on the spectator's board, "N spectators" for players
+and spectators, ranked and coin games two moves behind while they run, "Who can watch my
+games" in Settings (everyone with the link / friends / nobody; blocked players never),
+spectator result card with "Seen in this game" links to the Shop and following rematches.
+"Live now" on the Play hub is built but closed (`LIVE_NOW_OPEN` in `_shared/spectate.ts`,
+shows "Soon"). Later (roadmap): spectator chat or reactions (v2), replays of finished games.
+
+- Server: migration `20261025090000_spectating.sql` (`game_watch` kept by a trigger,
+  `can_watch`, `profiles.watch`; `games` now readable only by its players and while it
+  waits). Rules: `_shared/spectate.ts`. Client: `modes/watch.ts`, route `#/watch/<id>`,
+  `Online.fetchWatch` / `spectate`, `api.spectate` (`playing`, `live`).
+- Tests: `tests/spectate.test.ts`, `tests/spectate.e2e.ts` (delay, settings, blocks,
+  realtime). Legal pages dated 25 October 2026.
+- The local-supabase start script now patches every edge-runtime image tag (the CLI's
+  `functions serve` used a different version from `supabase start`, and its npm imports
+  failed on the proxy certificate).
 
 ## Also merged on 21 October 2026 (the user's yes)
 

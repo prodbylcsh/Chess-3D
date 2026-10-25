@@ -2,6 +2,7 @@
 // Edge Function (the only place profiles are written). Pure functions; problems
 // are returned as codes, and the app turns them into translated messages.
 import { itemDef } from './shop.ts';
+import { isWatchPolicy, type WatchPolicy } from './spectate.ts';
 
 export const USERNAME_MIN = 3;
 export const USERNAME_MAX = 20;
@@ -59,6 +60,8 @@ export interface ProfileRow {
   onboarded_at: string | null;
   username_changed_at: string | null;
   created_at: string;
+  /** who may watch the player's games (spectate.ts) */
+  watch?: WatchPolicy;
 }
 
 /** What a player may ask to change. */
@@ -67,6 +70,7 @@ export interface ProfilePatch {
   iconId?: string;
   onboardingStep?: number;
   onboarded?: boolean;
+  watch?: WatchPolicy;
 }
 
 export type PatchProblem =
@@ -128,6 +132,11 @@ export function profileUpdate(row: ProfileRow, patch: ProfilePatch, now = Date.n
   if (patch.onboardingStep !== undefined) {
     if (!Number.isInteger(patch.onboardingStep)) throw new AccountError('bad_request', 'Invalid onboarding step.');
     out.onboarding_step = Math.max(0, Math.min(ONBOARDING_STEPS, patch.onboardingStep));
+  }
+
+  if (patch.watch !== undefined) {
+    if (!isWatchPolicy(patch.watch)) throw new AccountError('bad_request', 'Invalid setting.');
+    if (patch.watch !== row.watch) out.watch = patch.watch;
   }
 
   if (patch.onboarded === true && !row.onboarded_at) {

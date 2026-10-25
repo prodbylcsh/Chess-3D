@@ -55,8 +55,9 @@ test('two players play a game to checkmate over the network', async () => {
   await rejects(bob.move(id, { from: 'e7', to: 'e5' }), 'not_your_turn');
   await rejects(alice.move(id, { from: 'e2', to: 'e5' }), 'illegal_move');
 
-  // spectators can read
-  assert.equal((await eve.fetch(id))?.id, id);
+  // a running game is for its players; spectators read the watch copy
+  assert.equal(await eve.fetch(id), null);
+  assert.equal((await eve.fetchWatch(id))?.id, id);
 
   const seq: [Online, string, string][] = [
     [alice, 'f2', 'f3'],

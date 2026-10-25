@@ -8,8 +8,9 @@ import type { ItemCategory, Rarity } from '#shared/shop.ts';
 import type { SeasonReward } from '#shared/seasons.ts';
 import type { ControlId } from '#shared/play.ts';
 import type { AnalysisReport, AnalysisStatus } from '#shared/analysis.ts';
+import type { WatchPolicy } from '#shared/spectate.ts';
 
-export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId, AnalysisReport, AnalysisStatus };
+export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId, AnalysisReport, AnalysisStatus, WatchPolicy };
 
 // ------------------------------------------------------------------ accounts and profiles
 
@@ -58,6 +59,8 @@ export interface Profile {
   createdAt: string;
   /** last time the username was changed after onboarding (changes are limited) */
   usernameChangedAt: string | null;
+  /** who may watch this player's games (docs/PLATFORM.md §4.1 "Spectating"); missing means everyone */
+  watch?: WatchPolicy;
 }
 
 export interface RankInfo {
@@ -245,7 +248,7 @@ export type UsernameCheck = 'available' | 'taken' | 'invalid';
 export interface ProfileService {
   me(): Promise<Profile>;
   checkUsername(username: string): Promise<UsernameCheck>;
-  update(patch: Partial<Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded'>>): Promise<Profile>;
+  update(patch: Partial<Pick<Profile, 'username' | 'iconId' | 'onboardingStep' | 'onboarded' | 'watch'>>): Promise<Profile>;
   history(): Promise<GameRecord[]>;
   /** a player's public profile by username (case-insensitive) or id */
   get(usernameOrId: string): Promise<PublicProfile | null>;
@@ -289,6 +292,30 @@ export interface SafetyService {
   unblock(userId: string): Promise<void>;
   /** report a player, or one of their messages to you (`messageId`) */
   report(userId: string, reason: ReportReason, extra?: { messageId?: string; note?: string }): Promise<void>;
+}
+
+/** A running game anyone may watch, for "Live now" on the Play hub. */
+export interface LiveGame {
+  id: string;
+  kind: 'ranked' | 'casual' | 'wager';
+  control: ControlId | null;
+  /** the players' profiles (null for a guest) and names */
+  white: PublicProfile | null;
+  black: PublicProfile | null;
+  whiteName: string;
+  blackName: string;
+  /** half-moves spectators can see */
+  moves: number;
+  /** one of the players is the viewer's friend */
+  friend: boolean;
+}
+
+/** Watching other players' games (docs/PLATFORM.md §4.1 "Spectating"). */
+export interface SpectateService {
+  /** of these players, those in a game the viewer may watch: player id → game id */
+  playing(userIds: string[]): Promise<Record<string, string>>;
+  /** running matchmade games to watch, friends' games first ("Live now", closed for now) */
+  live(): Promise<LiveGame[]>;
 }
 
 export interface MessagesService {
@@ -495,6 +522,7 @@ export interface Api {
   friends: FriendsService;
   messages: MessagesService;
   safety: SafetyService;
+  spectate: SpectateService;
   account: AccountService;
   events: EventsService;
   matchmaking: MatchmakingService;

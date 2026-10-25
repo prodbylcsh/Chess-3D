@@ -13,6 +13,7 @@ import { RankEmblem } from '../../ui/art/art';
 import { Badge, Button, ProgressBar, Segmented, cx } from '../../ui/kit';
 import { prefetchModel } from '../game/model';
 import { AiSetup } from './AiSetup';
+import { LiveNow } from './LiveNow';
 import { Matchmaking } from './Matchmaking';
 import { PlayFriend } from './PlayFriend';
 import { StakePicker } from './StakePicker';
@@ -150,6 +151,8 @@ export function PlayHub() {
         />
         <ModeCard icon={Trophy} tone="red" title={t('Tournaments')} text={t('Brackets with entry fees and big prizes.')} meta={t('Coming soon')} disabled />
       </div>
+
+      <LiveNow />
 
       <PlayFriend open={sheet === 'friend'} onClose={() => setSheet(null)} />
       <AiSetup open={sheet === 'ai'} onClose={() => setSheet(null)} onStart={(level, color) => navigate(`/game/ai?level=${level}&color=${color}`)} />

@@ -1,6 +1,6 @@
 import { t } from '../../../i18n';
 import type { Color as Side, Move } from 'chess.js';
-import { Flag, Handshake } from 'lucide-react';
+import { Flag, Handshake, Share2 } from 'lucide-react';
 import { STAKES, type StakeId } from '#shared/economy.ts';
 import { CONTROLS, FIRST_MOVE_MS, controlLabel } from '#shared/play.ts';
 import { api, type PublicProfile } from '../../../api';
@@ -11,6 +11,8 @@ import { confirmDialog, formatNumber, toast } from '../../../ui/kit';
 import type { ClockView, GameState, PlayerView } from '../store';
 import type { EndAction, Mode, ModeAction, ModeContext } from './types';
 import { dressGame, playerFromProfile } from './types';
+import { shareWatchLink } from './share';
+import { watcherCount } from '#shared/spectate.ts';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
 
@@ -64,12 +66,15 @@ export class OnlineMode implements Mode {
     await online.signIn();
     const row = await online.fetch(this.gameId);
     if (this.disposed) return;
+    // only its players (and anyone, while it waits for a second player) read the game itself
+    if (!row && (await online.fetchWatch(this.gameId).catch(() => null))) return this.ctx.navigate(`/watch/${this.gameId}`);
+    if (this.disposed) return;
     if (!row) {
       toast(t('That game link is not valid any more.'), { tone: 'danger' });
       return this.ctx.navigate('/play');
     }
     if (!online.sideOf(row) && row.status === 'waiting') return this.ctx.navigate(`/join/${row.id}`);
-    if (!online.sideOf(row)) toast(t('This game already has two players. You are watching.'));
+    if (!online.sideOf(row)) return this.ctx.navigate(`/watch/${row.id}`);
     const side = online.sideOf(row);
     if (row.kind && row.kind !== 'friend' && side) {
       const opponentId = side === 'w' ? row.black_id : row.white_id;
@@ -115,6 +120,7 @@ export class OnlineMode implements Mode {
     return [
       { id: 'draw', label: s.drawOffered ? t('Offered') : t('Draw'), icon: Handshake, disabled: !live || s.drawOffered },
       { id: 'resign', label: t('Resign'), icon: Flag, tone: 'danger', disabled: !live },
+      { id: 'share', label: t('Share'), icon: Share2, disabled: this.row?.status === 'waiting' },
     ];
   }
 
@@ -173,6 +179,8 @@ export class OnlineMode implements Mode {
       toast(t('Draw offered.'));
     } else if (id === 'rematch') {
       void this.rematch().catch((e) => this.fail(e));
+    } else if (id === 'share') {
+      void shareWatchLink(row.id);
     }
   }
 
@@ -288,6 +296,7 @@ export class OnlineMode implements Mode {
     }
     this.present = ids;
     this.refresh();
+    this.ctx.engine.store.set({ watchers: watcherCount(ids, row.white_id, row.black_id) });
   }
 
   // ---------------------------------------------------------------- helpers
