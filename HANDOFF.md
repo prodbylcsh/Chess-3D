@@ -31,7 +31,7 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## Spectating (built 25 October 2026 on `claude/spectating`, not merged yet)
+## Spectating (merged to `main` and live on 25 October 2026, the user's yes)
 
 Decided with the user and recorded in `PLATFORM.md` §4.1 "Spectating", §9 and §10:
 watch links (Share in a game), friends' "Playing now" with Watch (Community, profiles,
