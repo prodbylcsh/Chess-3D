@@ -37,6 +37,15 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   coordinates (square names and how moves are written);
   stars to collect, pieces to take, mates to find and quick questions. Chapters 1–2 free
   (guests too), the rest for coins; 250 coins per finished chapter.
+- **Premium** (the subscription, Paddle; sandbox until live payments): Apprentice, Wizard and
+  Archmage, monthly or yearly. Every puzzle module and Learn chapter, free hints, Game Review,
+  streak shields; Wizard and Archmage add coins every month (the coins of the pack with the same
+  price), a subscriber icon every month and bonus coins on packs; Archmage the Wardrobe (every
+  shop item to use) and early access. The Premium page, a 7-day Wizard trial, Settings →
+  Subscription (change, cancel in two clicks), badges next to names, offers where they help.
+- **Game Review**: after a game, Stockfish in the browser judges every move (best, great,
+  inaccuracy, mistake, blunder), picks the key moments and steps through the game on the 3D board
+  with the better move as an arrow; one a day free, more with Premium.
 - **Blocking and reporting**: block a player from their profile (no friendship, requests,
   chat or matches between you; Settings lists them) and report a player or a message.
 - **Spectating**: watch a running online game through its watch link (Share in the game) or a

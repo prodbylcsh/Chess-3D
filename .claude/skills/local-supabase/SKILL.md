@@ -36,7 +36,11 @@ The first run pulls images and takes several minutes, so start it with
 7. runs `supabase functions serve` and waits until the functions answer;
 8. prints the anon and service-role keys (local demo keys).
 
-Logs: `/tmp/supabase-local/*.log`. After a container restart, run the script again
+Logs: `/tmp/supabase-local/*.log`. If `supabase start` or `db reset` fails pulling
+`storage-api` (Docker Hub 429: the CLI pulls it to set up the schema even though it is skipped),
+set `enabled = false` under `[storage]` in `supabase/config.toml` for that command only and
+`git checkout supabase/config.toml` right after; the app uses no storage. After a `db reset`
+run `node supabase/catalog.ts --local` (the shop catalogue). After a container restart, run the script again
 (Docker images survive, processes don't).
 
 ## Payments (Paddle) locally

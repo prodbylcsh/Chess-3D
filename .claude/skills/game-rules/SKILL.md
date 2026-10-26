@@ -22,6 +22,7 @@ server and the app. The app only previews and displays; the server applies.
 | Shop prices and purchase rules | `shop.ts` | `tests/shop.test.ts` | §4.5 |
 | Coin packs for real money (sizes, euro prices), refund window | `payments.ts` | `tests/payments.test.ts`, `tests/payments.e2e.ts` | §4.5 |
 | Puzzle modules, prices, puzzle coins, bonus, stars, module reward, solution check | `puzzles.ts` | `tests/puzzles.test.ts`, `tests/puzzles.e2e.ts` | §4.2 |
+| Premium: plans, prices, monthly coins, Game Review limits, streak shields, the Wardrobe, early access, Founders | `subscription.ts` | `tests/subscription.test.ts`, `tests/subscription.e2e.ts` | §4.9 |
 | Usernames, reserved names, the 30-day limit, onboarding | `accounts.ts` | `tests/accounts.test.ts`, `tests/accounts.e2e.ts` | §2 |
 | Time controls, clocks, first move, timeouts, settling a game, season rollover | `play.ts` | `tests/play.test.ts`, `tests/competitive.e2e.ts` | §4.1, §6.3 |
 
@@ -95,6 +96,15 @@ Never copy these numbers into UI code. Import them (`#shared/rating.ts` etc.) an
 - **Learn (§4.3, decided October 2026):** chapters 1–2 free, the other chapters together
   75,000 coins (≈ the €19.99 pack) or free with the subscription; **250** coins once per
   finished chapter, no stars.
+- **Premium (§4.9, decided 26 Oct 2026):** Apprentice €4.99 / €39.99, Wizard €9.99 / €79.99,
+  Archmage €19.99 / €159.99 (a year = 8 months). Every plan: every puzzle module and Learn
+  chapter, free hints. Game Review a day: free 1, Apprentice 3, Wizard and Archmage unlimited.
+  Coins every month: Wizard 35,000, Archmage 75,000 (the packs of the same price; monthly on
+  yearly plans too). Streak shields a month 1 / 2 / 4; 2,500 coins each for everyone, at most 2
+  held (4 with Archmage). Pack bonus +10% / +20%. A subscriber icon every month (Wizard,
+  Archmage), kept. The Wardrobe (Archmage): every for-sale item, lost when the plan ends unless
+  bought. Early access 7 days (Archmage). 7-day Wizard trial once per account, coins from the
+  first payment. Never an advantage in games.
 - **Shop prices:** see §4.5 and the shop-items skill.
 - **Username:** 3–20 characters (letters, digits, `_`), unique regardless of case, some
   names reserved (`RESERVED_USERNAMES`); changeable once per 30 days after onboarding.

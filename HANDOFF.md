@@ -31,15 +31,33 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## Subscription: a plan only (25 October 2026, waiting for the user)
+## Premium, the subscription (built 26 October 2026, on the branch, not merged)
 
-The user asked to plan the subscription thoroughly before building it. The proposal is in
-**`docs/SUBSCRIPTION.md`**: three plans (Apprentice €4.99, Wizard €9.99, Archmage €19.99 a
-month; yearly 8× monthly), all with every puzzle module and Learn chapter; Wizard and
-Archmage give their price back in coins every month (35,000 / 75,000, the packs of the same
-price); new Game Review, streak shields, monthly icons, the Wardrobe; the Premium page and
-where offers appear; legal and build steps. **Nothing is decided or built yet.** Wait for
-the user's answers to §8 before changing any rule, then follow §7.5.
+The user decided every point of `docs/SUBSCRIPTION.md` §8 (all "yes"; monthly coins 35,000 /
+75,000; the Wardrobe's items are lost when the plan ends unless bought). Built in full, rules in
+`PLATFORM.md` §4.9:
+
+- Rules `_shared/subscription.ts` (+ `tests/subscription.test.ts`); migration
+  `20261026090000_subscriptions.sql`; `payments` (subscribe, subscription, change, cancel,
+  resume, manage, subscription webhooks, pack bonus), `puzzles` (modules and Learn open with a
+  plan, free hints, streak shields `shield_buy`, Game Review limits `reviews`/`review_start`),
+  `account` (the Wardrobe in equip, cancel on delete); `server/premium.ts` gives the monthly
+  coins lazily in `ensurePlayer`. `tests/subscription.e2e.ts` (7 tests, a fake Paddle on :4875).
+- App: `src/features/premium/` (page, checkout, celebration, Settings → Subscription, badge,
+  Play hub card), offers in Puzzles, Learn, Buy coins, item dialog, streak card, puzzle
+  briefing; Game Review (`src/features/review/review.ts` + `tests/review.test.ts`,
+  `modes/review.ts`, `ReviewCoach.tsx`, the result card's offer). Demo back-end too
+  (`src/api/mock/premium.ts`: subscribes at once and renews by itself).
+- Shown on the real site only with `#/premium?test=1` while Paddle is in sandbox (`premiumShown`).
+- Legal pages (EN, CS) dated 26 October 2026: Terms §6 "Premium", Privacy §2/§4/§6.
+
+**Before merging / going live (the user's):** add the `subscription.*` events to Paddle's
+notification destination (PLATFORM §8.4); test a sandbox subscription end to end (the recurring
+non-catalog price and the PATCH for plan changes are per Paddle's docs but untested against
+Paddle itself); ask Paddle about subscriptions with in-game currency together with the coin-pack
+question; set `PREMIUM_LAUNCH` when real payments open (Founders). New shop items about once a
+month keep the monthly coins meaningful: the engine's unused animations and effects (levitate,
+blink, comet, embers, frostbite, implode) can become items (names and prices are the user's).
 
 ## Spectating (merged to `main` and live on 25 October 2026, the user's yes)
 

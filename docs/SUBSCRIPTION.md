@@ -1,9 +1,10 @@
 # Wizard Chess Premium: the subscription plan (proposal)
 
-Status: **proposal, 25 October 2026. Nothing here is decided yet.** The numbers, plan names
-and economy changes wait for the user's yes (CLAUDE.md: prices and product rules are the
-user's). When they are decided, the rules move into `docs/PLATFORM.md` (§1, §4, §6, §10)
-and this file becomes the design record of the subscription.
+Status: **decided on 26 October 2026 and built** (every decision in §8 answered yes; on the
+monthly coins: 35,000 / 75,000, because new shop items about once a month are possible, from
+the engine's unused animations and effects and new icons). The rules as built are in
+`docs/PLATFORM.md` §4.9, which wins where the two differ; this file is the design record:
+why the plans look as they do.
 
 What this document does: it looks at what the platform has now, what it is about to get
 and what it may get later; puts a coin and euro value on all of it; and builds three plans
@@ -237,7 +238,8 @@ accounts. A card is needed to start. One trial per account. The app reminds the 
 
 - **Upgrade** (to a higher plan or to yearly): at once; Paddle charges the prorated
   difference; the coins of the new plan for this period are topped up to its amount.
-- **Downgrade**: at the end of the current period.
+- **Downgrade**: at once; what was paid for the higher plan is credited to the next payment
+  (Paddle cannot change a subscription's items at the end of a period by itself; built so).
 - **Failed payment**: Paddle retries for a few days; the plan keeps working meanwhile,
   without new coins until a payment succeeds; then it ends.
 - **Cancel**: in Settings, two clicks (5.6); the plan runs until the end of the period

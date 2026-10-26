@@ -39,7 +39,7 @@ The platform is meant to earn money for its operator. What pays today and what i
 | Puzzle modules | 100,000 coins each; Openings free (4.2) | ✅ |
 | Learn | chapters 1–2 free, the rest 75,000 coins (≈ €20) (4.3) | planned |
 | Shop items | piece sets, boards, effects for coins (4.5) | ✅ |
-| Subscription | three plans proposed (Apprentice €4.99, Wizard €9.99, Archmage €19.99 a month): all puzzles and Learn, coins every month, Game Review, the Wardrobe; see `docs/SUBSCRIPTION.md` | proposal, waiting for the user's decisions |
+| Premium (subscription) | Apprentice €4.99, Wizard €9.99, Archmage €19.99 a month (a year = 8 months): every puzzle module and Learn chapter, coins every month, Game Review, streak shields, the Wardrobe (4.9) | ✅ built (October 2026); sandbox until live payments |
 
 Coins can also be earned by playing, so every paid part is reachable without money; buying
 coins is the shortcut. When a feature is designed, say how it supports this (bringing
@@ -115,7 +115,8 @@ modules and a "More" sheet.
 | Shop | 🔜 | Spend coins on cosmetics. |
 | Profile | 🟡 | Rank, history, awards, equipped cosmetics. |
 | Messages | 🟡 | Chat with friends. |
-| Settings | 🟡 | Language, email, password, sound. |
+| Settings | 🟡 | Language, email, password, sound, the subscription. |
+| Premium | ✅ | The plans and subscribing (4.9); reached from the sidebar, the Shop and the offers, not a nav item. |
 
 Modules marked 🔜 currently show a placeholder page listing their planned features.
 
@@ -289,7 +290,7 @@ Decided (October 2026):
 - **Unlocking:** only Openings, shown first, is free (since 15 October 2026, the user's
   choice; First Steps was the free one on the first day, and players who had solved a
   First Steps puzzle by then keep it unlocked, migration `20261015170000`). The others cost **100,000 coins** each and
-  stay unlocked. A subscription that opens all modules comes later.
+  stay unlocked. Any Premium plan opens every module while it runs (4.9).
 - **Coins:** 25–50 coins the first time a puzzle is solved, by its rating
   (25 at 400, 50 at 2400 and above). Solving it again pays nothing, so puzzles cannot be
   farmed. **Every 10 solved puzzles in a module pay a bonus of 500 coins.**
@@ -477,7 +478,7 @@ Coordinates chapter (lessons marked `squares`). Boards with pieces but no kings 
 
 **Price (decided):** chapters 1 and 2 are free (guests too, like the free puzzles). The paid
 chapters open **together** for **75,000 coins**, the coins of the €19.99 pack (about €20,
-see 4.5), or are free with the **subscription** (planned, 9). Finishing a chapter pays
+see 4.5), or are open with any **Premium** plan (4.9). Finishing a chapter pays
 **250 coins once**; there are no stars. Checkmate is taught in chapter 2, so the free part
 is enough to play a whole game.
 
@@ -730,6 +731,93 @@ Language, change email, change password, who can watch my games (4.1 "Spectating
 sound and music, board preferences
 (auto-rotate camera), sign out, delete account.
 
+### 4.9 Premium (subscription) ✅ (October 2026)
+
+Decided with the user on 26 October 2026; the reasoning, the psychology and the design are in
+`docs/SUBSCRIPTION.md`. Rules: `supabase/functions/_shared/subscription.ts` (tested in
+`tests/subscription.test.ts`, `tests/subscription.e2e.ts`).
+
+**Plans** (prices VAT included; a year costs 8 months, "4 months free"):
+
+| | Apprentice | **Wizard** (recommended) | Archmage |
+| --- | --- | --- | --- |
+| Monthly / yearly | €4.99 / €39.99 | **€9.99 / €79.99** | €19.99 / €159.99 |
+| Puzzles and Learn | every module and chapter, new ones too | ✓ | ✓ |
+| Hints | free | free | free |
+| Game Review a day | 3 | unlimited | unlimited |
+| Coins every month | – | **35,000** (the €9.99 pack) | **75,000** (the €19.99 pack) |
+| Streak shields a month | 1 | 2 | 4 |
+| Bonus on coin packs | – | +10% | +20% |
+| Subscriber icon every month (kept) | – | ✓ | ✓ (animated frame on the badge) |
+| The Wardrobe (every for-sale item to use) | – | – | ✓ |
+| Early access to new items and modules | – | – | 7 days |
+| Badge | silver | gold, gold name | violet, animated |
+| Free trial | – | 7 days, once per account | – |
+
+Free players: Openings, the daily puzzle, Learn chapters 1–2, one Game Review a day, streak
+shields for 2,500 coins (at most 2 held). The coin prices of modules (100,000) and Learn
+(75,000) stay: bought ones stay open for good. **Nothing in a plan changes MMR, matchmaking,
+clocks, stakes or season rewards.** Spectating and replays stay free.
+
+**How the benefits work**
+- **Monthly coins** are given lazily from the paid periods (`grantsDue`): one grant per
+  month that has begun (a yearly payment gives twelve, month by month), with the month's icon
+  (`premium-YYYY-MM`, Wizard and Archmage, never for sale) and the shields refilled to the
+  plan's number. The trial's zero transaction gives nothing. An upgrade (a payment that starts
+  inside the paid period) ends the old payment's months there and tops the current month up to
+  the new plan's coins. A refund takes that payment's coins (down to zero) and icons back.
+- **Streak shields:** a missed UTC day is kept when the player holds a shield for every missed
+  day (used when they next show up, `use_shields`); the day counts as kept, not solved (no
+  coins, the streak doesn't grow). At most `shieldCap` held (2, or 4 with Archmage).
+- **The Wardrobe** (Archmage): every for-sale item can be equipped; when the plan ends, items not
+  owned go back to the standard ones (loadout and icon, `tidyLoadout`). Season rewards and
+  monthly icons stay earned.
+- **Early access:** items and modules can carry `releaseAt`; Archmage sees them 7 days early.
+- **Founders:** subscribed in the month after `PREMIUM_LAUNCH` (null while in Paddle's sandbox):
+  a Founder badge, and the price is kept while the subscription runs.
+- **Game Review** (`src/features/review/review.ts`, `modes/review.ts`, route
+  `/game/review/<id>`): from the result card of any finished game of the player's (vs AI,
+  matchmade, online), Stockfish in the browser (30,000 nodes a position) judges every move by
+  the drop in the mover's winning chance (best, great: the best move after the opponent's
+  mistake, good, inaccuracy ≥ 6, mistake ≥ 12, blunder ≥ 22 points), picks the key moments, and
+  the 3D board steps through the game with a green arrow for the better move, described by its
+  piece. The server counts the reviews per UTC day (`review_uses`, `start_review`); a game
+  reviewed again the same day is free.
+
+**Paying** (`payments` function, Paddle as merchant of record like coin packs): `subscribe`
+opens a transaction with the plan's recurring non-catalog price (Wizard's trial once per
+account); Paddle's webhooks `subscription.*` keep `subscriptions` in step (older events are
+ignored) and `transaction.completed` with a subscription records the paid period
+(`subscription_payments`); `change` (upgrade charged at once, a downgrade credited to the next
+payment), `cancel` (at the end of the paid period; a trial at once), `resume`, `manage`
+(Paddle's customer portal). Deleting the account cancels a running subscription. Before
+subscribing the player ticks the withdrawal waiver (EU digital content). The checkout waits
+for the plan, then a celebration shows the coins arriving.
+
+**Where it shows** (until live payments: only with `#/premium?test=1` on the real site, always
+in the demo, `premiumShown`):
+- the Premium page `/premium`: value first, Monthly | Yearly (yearly selected), three cards
+  with Wizard in the middle (first on phones), what every plan includes in coins, the
+  comparison, questions, the button again;
+- "Go Premium" in the sidebar (subscribers see their badge), a Premium button in the Shop;
+- contextual offers: locked puzzle modules and Learn ("Included in Premium · from €3.33 a
+  month"), the Buy coins dialog (Wizard = the €9.99 pack's coins + everything), the item dialog
+  (the Archmage's Wardrobe), the puzzle briefing (free hints), the streak card late in a long
+  unsolved day, the result card (Game Review left today);
+- one unrequested offer: a card on the Play hub after an account's third day, gone for two
+  weeks once closed;
+- Settings → Subscription: plan, next payment, what the plan gave so far, change, Paddle's
+  portal, cancel in two clicks (what stays, what closes, one offer, the button);
+- badges next to names (profile, Community, the sidebar, the cards in games).
+
+**Server** (migration `20261026090000_subscriptions.sql`): `subscriptions`, `subscription_payments`,
+`subscription_grants`, `review_uses`, `puzzle_streaks.shields`; functions `sync_subscription`,
+`record_subscription_payment`, `grant_subscription`, `reverse_subscription_payment`,
+`use_shields`, `buy_shield`, `start_review`; ledger reasons `subscription_coins`,
+`subscription_refunded`, `shield_bought`; `player_items` source `subscription`. The player's
+state (`ensurePlayer`) carries `premium` and `trial_used` and gives what is owed on every visit;
+the showcase carries the badge.
+
 ## 5. Ranked: MMR and ranks
 
 The implementation is `supabase/functions/_shared/rating.ts` (tested in
@@ -923,7 +1011,7 @@ Both players stake the same amount and are matched with someone who chose the sa
 
 The winner receives the pot minus a **10% fee** (stake 500: win +400 net, loss −500,
 draw refunds both). The fee is the main coin sink that keeps the economy from inflating;
-shop purchases are the other one. A player needs at least the stake in their balance.
+shop purchases are the other one, and streak shields (2,500 coins, 4.9) a small third. A player needs at least the stake in their balance.
 
 ### 6.3 Anti-abuse
 
@@ -1128,7 +1216,10 @@ These hold secrets, so the dashboard keeps them (project `yhzgrorvjfvbqshneipc`)
    transactions) → GitHub secret `PADDLE_API_KEY`; a **client-side token** → GitHub variable
    `PADDLE_CLIENT_TOKEN` (public). Developer tools → Notifications: a destination
    `https://yhzgrorvjfvbqshneipc.supabase.co/functions/v1/payments` with the events
-   `transaction.completed`, `adjustment.created` and `adjustment.updated`; its secret key →
+   `transaction.completed`, `adjustment.created`, `adjustment.updated` and, for Premium,
+   `subscription.created`, `subscription.updated`, `subscription.activated`,
+   `subscription.trialing`, `subscription.past_due`, `subscription.paused`,
+   `subscription.resumed` and `subscription.canceled`; its secret key →
    GitHub secret `PADDLE_WEBHOOK_SECRET`. Checkout → Checkout settings: default payment
    link `https://prodbylcsh.github.io/Chess-3D/`. GitHub variable `PADDLE_ENV` = `sandbox`.
    Then run both deploy workflows by hand. Going live: the same in the live account, plus
@@ -1166,8 +1257,8 @@ Front-end first (with the mock data layer), then back-end module by module.
 | Before release | Own domain (site, auth emails from our own sender, Google branding), Paddle's live review (and an IČO if needed), Sign in with Apple (Apple Developer Program). **The user handles these closer to the release** (8.4) | ⏸ |
 | After release: measurements | Our own numbers, no third-party analytics: players and games per day, how long a search waits, puzzle use; shows when ranked can open | ⏸ |
 | After release: unusual behaviour | Detect abuse instead of capping coins (6.3): e.g. 100 games an hour, two accounts from the same IP address, the same two players feeding each other wins; flags for the operator first | ⏸ |
-| Subscription (Premium) | Three plans with puzzles, Learn, monthly coins, Game Review, streak shields, the Wardrobe; the Premium page and offers (`docs/SUBSCRIPTION.md`) | 🔜 proposal (25 October 2026), waiting for the user's decisions |
-| Later | Tournaments, more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
+| Premium (subscription) | Three plans: every puzzle module and Learn chapter, monthly coins, Game Review, streak shields, monthly icons, the Wardrobe, early access; the Premium page, offers, Settings, badges (4.9) | ✅ built (October 2026), sandbox; live with the coin packs |
+| Later | Game Review from a profile's history, season pass and tournament benefits for subscribers, gifting a month, prices by country; tournaments, more puzzle themes, more sets, boards, backgrounds and effects, boosts | ⏸ |
 
 ## 10. Decisions and open questions
 
@@ -1275,8 +1366,17 @@ Decided:
   "Live now" built but closed ("Soon"); spectator chat or reactions in v2; replays later.
   The legal pages say so (Privacy §2 and §6, Terms §4; effective 25 October 2026).
 
+- **Premium** (26 October 2026, 4.9, `docs/SUBSCRIPTION.md`): three plans, Apprentice €4.99,
+  Wizard €9.99, Archmage €19.99 a month, a year = 8 months; every plan opens every module and
+  Learn chapter; Wizard and Archmage give their price back in coins every month (35,000 /
+  75,000, paid monthly on yearly plans too; this needs about one new shop item a month, which
+  the unused animations and effects in the engine and new icons can supply); Game Review
+  (1 / 3 / unlimited a day); streak shields (1 / 2 / 4 a month, 2,500 coins for everyone); the
+  Wardrobe for Archmage (items not bought are lost when the plan ends); +10% / +20% on coin
+  packs; monthly icons; early access; badges; a 7-day Wizard trial (coins from the first
+  payment); Founders; plan names the same in every language; the placements in 4.9. The legal
+  pages say so (Terms §6 "Premium", Privacy §2, §4, §6; effective 26 October 2026).
+
 Open:
 
 1. Which languages come after Czech?
-2. The subscription: plans, prices, monthly coins and the economy changes proposed in
-   `docs/SUBSCRIPTION.md` §8.

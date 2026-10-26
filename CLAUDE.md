@@ -42,7 +42,8 @@ real item models in `public/assets/`, built from the user's originals by
 typed service contracts (`src/api/types.ts`). In real-account mode everything a player has
 runs on Supabase (`src/api/supabase`; Edge Functions `account`, `social`, `play`, `game`, `payments`):
 accounts, profile, friends, chat, coins, rank, items, history, matchmaking and timed games;
-coins for money through Paddle (`payments`, `src/net/paddle.ts`).
+coins for money and the Premium subscription through Paddle (`payments`, `src/net/paddle.ts`;
+rules in `_shared/subscription.ts`, the screens in `src/features/premium/`).
 The in-browser mock (`src/api/mock`, localStorage) is the store the screens read (the
 server state is copied in) and the whole back-end in `npm run dev:mock`. Online invite games are on
 Supabase too (`src/net`, `game` Edge Function). Wizard Chess has its own Supabase project
