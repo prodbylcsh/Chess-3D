@@ -835,3 +835,8 @@
     width: 100%;
   }
 }
+
+.puzzle-module .premium-offer {
+  font-size: 13px;
+  line-height: 1.3;
+}

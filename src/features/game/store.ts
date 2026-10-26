@@ -6,6 +6,7 @@ import type { GameEnd, GameUi } from '../../game/ui';
 import type { DailySolve, LessonDone, MatchResult, PuzzleSolve, RankInfo, StreakView } from '../../api';
 import type { Brief } from '../puzzles/brief';
 import type { Analysis } from '../../ai/analysis';
+import type { GameReview } from '../review/review';
 
 export interface PlayerView {
   name: string;
@@ -117,6 +118,20 @@ export interface SpectatorView {
   rematch: string | null;
 }
 
+/** A finished game being reviewed (modes/review.ts, docs/PLATFORM.md §4.9). */
+export interface ReviewView {
+  /** checking the day's reviews, over the limit, the engine at work, or ready */
+  status: 'checking' | 'locked' | 'analysing' | 'ready' | 'failed';
+  progress: number;
+  /** the player's side */
+  color: Side;
+  /** half-moves shown on the board */
+  at: number;
+  review: GameReview | null;
+  /** today's reviews and the plan's limit (null: unlimited) */
+  limit: { used: number; limit: number | null } | null;
+}
+
 export interface GameState {
   turn: Side;
   /** "Check!", "Checkmate!", "Draw" … */
@@ -148,6 +163,7 @@ export interface GameState {
   /** people watching this online game (players and spectators see it); null when not online */
   watchers: number | null;
   spectator: SpectatorView | null;
+  review: ReviewView | null;
 }
 
 const VALUE: Record<PieceSymbol, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -177,6 +193,7 @@ export function initialState(): GameState {
     lesson: null,
     watchers: null,
     spectator: null,
+    review: null,
   };
 }
 

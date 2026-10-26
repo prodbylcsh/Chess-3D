@@ -13,6 +13,7 @@ import { LocalMode } from './modes/local';
 import { MatchMode } from './modes/match';
 import { OnlineMode } from './modes/online';
 import { WatchMode } from './modes/watch';
+import { ReviewMode } from './modes/review';
 import { PuzzleMode } from './modes/puzzle';
 import { PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import type { Mode, ModeContext } from './modes/types';
@@ -87,6 +88,8 @@ export default function GamePage({ watch = false }: { watch?: boolean }) {
         return id ? new OnlineMode(ctx, id) : null;
       case 'watch':
         return id ? new WatchMode(ctx, id) : null;
+      case 'review':
+        return id ? new ReviewMode(ctx, id) : null;
       case 'learn':
         return id && lessonOf(id) ? new LearnMode(ctx, id) : null;
       case 'puzzle': {

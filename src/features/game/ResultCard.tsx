@@ -1,8 +1,14 @@
-import { rankText, t, tk } from '../../i18n';
+import { rankText, t, tk, tn } from '../../i18n';
 import { Fragment, useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { itemDef } from '#shared/shop.ts';
-import { Award, Eye, Gift, ShoppingBag, Sparkles, Star, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { Award, Crown, Eye, Gift, LineChart, ShoppingBag, Sparkles, Star, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { PLANS, RECOMMENDED } from '#shared/subscription.ts';
+import { api } from '../../api';
+import { useSession } from '../../app/session';
+import type { Engine } from './engine';
+import { reviewPath } from './modes/review';
+import { usePremiumShown } from '../premium/plans';
 import { CATEGORY_NAMES, itemName } from '../../api/catalog';
 import { awardName } from '../../api/awards';
 import { ProfileIcon, RankEmblem } from '../../ui/art/art';
@@ -115,7 +121,60 @@ function signed(n: number): string {
   return n > 0 ? `+${n}` : `${n}`;
 }
 
-export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHide: () => void }) {
+/**
+ * Game Review from the result card (docs/PLATFORM.md §4.9): how many reviews are left today,
+ * and the plan without a limit once they are used.
+ */
+function ReviewOffer({ s, mode, engine }: { s: GameState; mode: Mode; engine: Engine }) {
+  const { profile } = useSession();
+  const navigate = useNavigate();
+  const params = useParams();
+  const premiumShown = usePremiumShown();
+  const [limit, setLimit] = useState<{ used: number; limit: number | null } | null>(null);
+  // games without an id of their own (vs AI) get one for today's count
+  const [id] = useState(() => params.id ?? `${params.mode ?? 'game'}-${Date.now().toString(36)}`);
+  useEffect(() => void api.reviews.today().then(setLimit, () => {}), []);
+  if (!profile || !limit) return null;
+  const left = limit.limit === null ? null : Math.max(0, limit.limit - limit.used);
+  const me = s.mySide!;
+
+  function open() {
+    navigate(
+      reviewPath({
+        id,
+        moves: engine.game.history,
+        color: me,
+        players: s.players,
+        loadouts: { [me]: profile!.loadout },
+        label: mode.label,
+      }),
+    );
+  }
+
+  return (
+    <section className="result-block result-review">
+      <div className="result-row">
+        <span className="result-label">
+          <LineChart size={16} /> {t('See your best and worst moves')}
+        </span>
+      </div>
+      <p className="faint result-note">
+        {left === null ? t('Game Review is unlimited with your plan.') : left > 0 ? tn(left, '{n} free review left today', '{n} free reviews left today') : t('Today’s free review is used.')}
+      </p>
+      {left === 0 && premiumShown ? (
+        <Button variant="secondary" icon={<Crown size={15} />} onClick={() => navigate('/premium')}>
+          {t('Every game with {plan}', { plan: PLANS[RECOMMENDED].name })}
+        </Button>
+      ) : (
+        <Button variant="secondary" icon={<LineChart size={15} />} disabled={left === 0} onClick={open}>
+          {t('Game Review')}
+        </Button>
+      )}
+    </section>
+  );
+}
+
+export function ResultCard({ s, mode, engine, onHide }: { s: GameState; mode: Mode; engine: Engine; onHide: () => void }) {
   const end = s.end!;
   const me = s.mySide;
   const outcome = !me ? null : end.winner === null ? 'draw' : end.winner === me ? 'win' : 'loss';
@@ -234,6 +293,8 @@ export function ResultCard({ s, mode, onHide }: { s: GameState; mode: Mode; onHi
           </section>
         )}
         {result?.analysis && ANALYSIS_NOTE[result.analysis.status] && <p className="faint result-note">{t(ANALYSIS_NOTE[result.analysis.status]!)}</p>}
+
+        {me && !s.puzzle && !s.lesson && !s.spectator && !s.review && engine.game.history.length >= 4 && <ReviewOffer s={s} mode={mode} engine={engine} />}
 
         {mode.endNote?.(s) && <p className="faint result-note">{mode.endNote(s)}</p>}
 

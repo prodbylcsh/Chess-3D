@@ -1484,3 +1484,115 @@
   align-items: center;
   gap: 6px;
 }
+
+/* ---------------------------------------------------------------- Game Review (docs/PLATFORM.md §4.9) */
+
+.kind-best,
+.kind-great { --kind: #55d391; }
+.kind-good { --kind: #9fd8b8; }
+.kind-inaccuracy { --kind: #f2c27a; }
+.kind-mistake { --kind: #ff9a4d; }
+.kind-blunder { --kind: #ff6b5e; }
+.kind-great { --kind: #6fb3ff; }
+
+.review-coach .coach-task {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-progress,
+.review-locked {
+  display: grid;
+  gap: 8px;
+}
+
+.review-locked .btn {
+  justify-self: start;
+}
+
+.review-sides {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.review-side {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-side span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-2);
+  text-align: right;
+}
+
+.review-move {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--kind) 40%, transparent);
+  background: color-mix(in srgb, var(--kind) 10%, transparent);
+  animation: fade-in 0.25s ease-out;
+}
+
+.review-move-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 13px;
+}
+
+.review-move-head strong {
+  color: var(--kind);
+}
+
+.review-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--kind);
+}
+
+.review-move-text {
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.review-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.review-key {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--kind) 50%, transparent);
+  background: transparent;
+  color: var(--kind);
+  font: 600 12px var(--font-ui);
+  cursor: pointer;
+}
+
+.review-key.is-now {
+  background: color-mix(in srgb, var(--kind) 18%, transparent);
+}
+
+/* the review offer on the result card */
+.result-review {
+  display: grid;
+  gap: 8px;
+}
+
+.result-review .result-row {
+  align-items: flex-start;
+}

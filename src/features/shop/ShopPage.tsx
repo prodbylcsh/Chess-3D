@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Check, Plus } from 'lucide-react';
+import { Link } from 'react-router';
+import { Check, Crown, Plus } from 'lucide-react';
 import { api, type ShopItem } from '../../api';
 import { SHOP_CATEGORIES, CATEGORY_NAMES, CATEGORY_PLURALS, RARITY_NAMES, itemName, type ItemCategory } from '../../api/catalog';
 import { Page } from '../../app/AppLayout';
@@ -12,6 +13,7 @@ import { BuyCoins } from './BuyCoins';
 import { ItemDialog } from './ItemDialog';
 import { ItemPreview } from './previews';
 import { SeasonPanel } from './SeasonPanel';
+import { usePremiumShown } from '../premium/plans';
 import './shop.css';
 
 type Filter = 'all' | 'owned' | 'available';
@@ -34,6 +36,7 @@ export function ShopPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const open = items?.find((i) => i.id === openId) ?? null;
   const [buying, setBuying] = useState(params.get('buy') === 'coins');
+  const premiumShown = usePremiumShown();
   // test payments (Paddle's sandbox) are only for those who open the shop with ?buy=coins
   const [canBuy] = useState(() => api.payments.available && (!paddleSandbox || params.get('buy') === 'coins'));
 
@@ -62,6 +65,11 @@ export function ShopPage() {
               <span className="faint">{t('Balance')}</span>
               <Coins amount={profile.coins} size={20} />
             </div>
+            {premiumShown && (
+              <Link to="/premium" className="btn btn-secondary btn-md">
+                <Crown size={16} /> {t('Premium')}
+              </Link>
+            )}
             {canBuy && (
               <Button variant="primary" icon={<Plus size={16} />} onClick={() => setBuying(true)}>
                 {t('Buy coins')}

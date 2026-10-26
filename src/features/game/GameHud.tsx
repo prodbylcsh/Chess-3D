@@ -12,6 +12,7 @@ import type { Engine } from './engine';
 import type { Mode } from './modes/types';
 import { SearchPill } from '../play/SearchWatcher';
 import { LessonCoach } from './LessonCoach';
+import { ReviewCoach } from './ReviewCoach';
 import { PuzzleBriefing, PuzzleCoach } from './PuzzleCoach';
 import { ResultCard } from './ResultCard';
 import { useGameState, type ClockView, type GameState, type PlayerView } from './store';
@@ -34,10 +35,18 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
         <span className="gs-mode">{mode.label}</span>
       </div>
 
-      {!s.lesson && <TurnPill s={s} />}
+      {!s.lesson && !s.review && <TurnPill s={s} />}
 
       <aside className="gs-panel">
-        {s.lesson ? <LessonCoach s={s} mode={mode} /> : s.puzzle ? <PuzzleCoach s={s} mode={mode} /> : <PlayerCard side={top} player={s.players[top]} s={s} />}
+        {s.lesson ? (
+          <LessonCoach s={s} mode={mode} />
+        ) : s.puzzle ? (
+          <PuzzleCoach s={s} mode={mode} />
+        ) : s.review ? (
+          <ReviewCoach s={s} mode={mode} />
+        ) : (
+          <PlayerCard side={top} player={s.players[top]} s={s} />
+        )}
         <section className="gs-side">
           {!s.lesson && <MoveList moves={s.moves} />}
           <div className="gs-actions">
@@ -98,7 +107,7 @@ export function GameHud({ engine, mode }: { engine: Engine; mode: Mode }) {
         </div>
       </Modal>
 
-      {s.end && s.showEnd && <ResultCard s={s} mode={mode} onHide={() => engine.store.set({ showEnd: false })} />}
+      {s.end && s.showEnd && <ResultCard s={s} mode={mode} engine={engine} onHide={() => engine.store.set({ showEnd: false })} />}
       {s.end && !s.showEnd && (
         <button type="button" className="gs-show-result" onClick={() => engine.store.set({ showEnd: true })}>
           {t('Show result')}
