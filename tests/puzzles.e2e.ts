@@ -188,7 +188,7 @@ test('the daily puzzle: once a day, a streak and its milestones', async () => {
   const { module, index } = dailyPuzzle(today);
   const state = await call(p.client, { action: 'daily' });
   assert.deepEqual({ day: state.day, module: state.module, index: state.index, solved: state.solved }, { day: today, module, index, solved: null });
-  assert.deepEqual(state.streak, { current: 0, best: 0, lastDay: null });
+  assert.deepEqual(state.streak, { current: 0, best: 0, lastDay: null, shields: 0, shielded: 0 });
   const moves = answer(module, index);
   assert.equal((await call(p.client, { action: 'daily_solve', moves })).code, 'not_started');
   const dailySolve = async (extra = {}) => {

@@ -13,6 +13,7 @@ import { ChapterPage, LearnPage } from '../features/learn/LearnPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { SettingsPage } from '../features/settings/SettingsPage';
+import { PremiumPage } from '../features/premium/PremiumPage';
 import { LogoMark } from '../ui/art/art';
 import { ConfirmHost, Spinner, ToastProvider, formatNumber, useToast } from '../ui/kit';
 import { AppLayout } from './AppLayout';
@@ -84,6 +85,7 @@ function Routed() {
           <Route path="/puzzles/:module" element={<ModulePage />} />
           <Route path="/learn" element={<LearnPage />} />
           <Route path="/learn/:chapter" element={<ChapterPage />} />
+          <Route path="/premium" element={<PremiumPage />} />
         </Route>
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/play" element={<PlayHub />} />

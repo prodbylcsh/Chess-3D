@@ -265,6 +265,30 @@
   gap: 4px;
   flex-wrap: wrap;
 }
+.daily-shields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+.daily-shields > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.daily-shields .link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.daily-shielded {
+  flex-basis: 100%;
+  color: var(--success);
+  font-weight: 600;
+}
 .daily-done {
   display: inline-flex;
   align-items: center;

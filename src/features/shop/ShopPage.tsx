@@ -146,6 +146,8 @@ export function ItemCard({ item, index = 0, onOpen, compact }: { item: ShopItem;
           </Badge>
         ) : item.owned ? (
           <Badge tone="success">{t('Owned')}</Badge>
+        ) : item.wardrobe ? (
+          <Badge tone="violet">{t('Wardrobe')}</Badge>
         ) : item.forSale ? (
           <Coins amount={item.price} size={15} />
         ) : (

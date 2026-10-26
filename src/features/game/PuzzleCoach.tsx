@@ -4,6 +4,8 @@ import { type CSSProperties } from 'react';
 import { Check, Crosshair, Eye, Flame, Lightbulb, MessageCircle, Play, Repeat, Star, X } from 'lucide-react';
 import { HINT_PENALTY, PUZZLES_PER_MODULE, moduleOf } from '#shared/puzzles.ts';
 import { t } from '../../i18n';
+import { useSession } from '../../app/session';
+import { usePremiumShown } from '../premium/plans';
 import { Button, cx } from '../../ui/kit';
 import { timeUntil } from '../../ui/format';
 import { MODULE_ICONS } from '../puzzles/modules';
@@ -88,6 +90,8 @@ export function PuzzleCoach({ s, mode }: { s: GameState; mode: Mode }) {
 
 /** Before the first move (and on "Task"): what the puzzle is about and how to earn three stars. */
 export function PuzzleBriefing({ s, mode }: { s: GameState; mode: Mode }) {
+  const premium = !!useSession().profile?.premium;
+  const premiumShown = usePremiumShown();
   const p = s.puzzle!;
   const module = moduleOf(p.module)!;
   const Icon = MODULE_ICONS[module.icon];
@@ -127,7 +131,8 @@ export function PuzzleBriefing({ s, mode }: { s: GameState; mode: Mode }) {
               <Star key={i} size={14} />
             ))}
           </span>
-          {t('No mistakes and no hints: three stars. After a wrong move the board shows where the right one ends, for free; after three in a row also the piece, as a hint. Hints cost coins, up to {n}.', { n: HINT_PENALTY })}
+          {t('No mistakes and no hints: three stars. After a wrong move the board shows where the right one ends, for free; after three in a row also the piece, as a hint.')}{' '}
+          {premium ? t('Hints are free with your Premium plan.') : premiumShown ? t('Hints cost coins, up to {n}; with Premium they are free.', { n: HINT_PENALTY }) : t('Hints cost coins, up to {n}.', { n: HINT_PENALTY })}
         </p>
         <Button variant="primary" block icon={<Play size={16} />} onClick={() => mode.act('go')}>
           {started ? t('Back to the board') : t("Let's go")}

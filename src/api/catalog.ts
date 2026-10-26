@@ -2,7 +2,7 @@
 // supabase/functions/_shared/shop.ts; how items look lives in src/cosmetics/looks.ts.
 import { BRACKETS } from '#shared/seasons.ts';
 import { ITEMS, itemDef, type ItemCategory, type ShopItemDef } from '#shared/shop.ts';
-import { t, tk } from '../i18n';
+import { locale, t, tk } from '../i18n';
 import type { Loadout } from './types';
 
 export type { ItemCategory };
@@ -71,6 +71,8 @@ export interface ItemInfo extends ShopItemDef {
   description: string;
   /** season reward icons: the season and bracket */
   season?: { number: number; bracket: string };
+  /** monthly Premium icons: their month */
+  month?: Date;
 }
 
 /** Name of a season icon, e.g. "Season 2 · Gold & Platinum". */
@@ -82,11 +84,25 @@ export function parseSeasonId(id: string): { number: number; bracket: string } |
   return m && BRACKETS.some((b) => b.id === m[2]) ? { number: Number(m[1]), bracket: m[2] } : null;
 }
 
+/** Name of a monthly Premium icon, e.g. "Premium · November 2026" (docs/PLATFORM.md §4.9). */
+export const PREMIUM_ICON_NAME = tk('Premium · {month}');
+export const PREMIUM_ICON_TEXT = tk('The subscriber icon of {month}. Yours to keep.');
+
+/** The month of a Premium icon id ("premium-2026-11"), as a date. */
+export function premiumIconMonth(id: string): Date | null {
+  const m = /^premium-(\d{4})-(0[1-9]|1[0-2])$/.exec(id);
+  return m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 15)) : null;
+}
+
+const monthName = (d: Date) => new Intl.DateTimeFormat(locale(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+
 export function itemInfo(id: string): ItemInfo | null {
   const def = itemDef(id);
   if (!def) return null;
   const season = parseSeasonId(id);
   if (season) return { ...def, name: SEASON_ICON_NAME, description: SEASON_ICON_TEXT, season };
+  const month = premiumIconMonth(id);
+  if (month) return { ...def, name: PREMIUM_ICON_NAME, description: PREMIUM_ICON_TEXT, month };
   const [name, description] = TEXT[id] ?? [id, ''];
   return { ...def, name, description };
 }
@@ -97,6 +113,7 @@ const bracketName = (id: string) => t(BRACKETS.find((b) => b.id === id)?.name ??
 export function itemName(id: string): string {
   const info = itemInfo(id);
   if (!info) return id;
+  if (info.month) return t(PREMIUM_ICON_NAME, { month: monthName(info.month) });
   return info.season ? t(SEASON_ICON_NAME, { n: info.season.number, bracket: bracketName(info.season.bracket) }) : t(info.name);
 }
 
@@ -104,6 +121,7 @@ export function itemName(id: string): string {
 export function itemDescription(id: string): string {
   const info = itemInfo(id);
   if (!info) return '';
+  if (info.month) return t(PREMIUM_ICON_TEXT, { month: monthName(info.month) });
   return info.season ? t(SEASON_ICON_TEXT, { bracket: bracketName(info.season.bracket) }) : t(info.description);
 }
 

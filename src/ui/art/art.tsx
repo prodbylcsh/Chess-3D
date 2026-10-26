@@ -20,6 +20,8 @@ export interface IconDef {
   frame?: string;
   /** season reward icons show the season number */
   season?: number;
+  /** monthly Premium icons show the month ("11·26") */
+  month?: string;
 }
 
 export const PROFILE_ICONS: IconDef[] = [
@@ -62,8 +64,34 @@ function seasonIcon(id: string): IconDef | null {
   return { id, name: tk('Season reward'), ...style, glyph: ['#ffffff', '#f3e7cf'], season: Number(m[1]) };
 }
 
+/**
+ * The monthly Premium icons ("premium-2026-11"): a different piece and colours every month
+ * of the year, a gold frame and the month on a pill (docs/PLATFORM.md §4.9).
+ */
+const PREMIUM_STYLE: { piece: PieceId; colors: [string, string] }[] = [
+  { piece: 'king', colors: ['#9fd8ff', '#123a6b'] }, // January
+  { piece: 'queen', colors: ['#ffb3d1', '#6b1240'] },
+  { piece: 'knight', colors: ['#a6f0a0', '#1b5a1e'] },
+  { piece: 'bishop', colors: ['#ffd9a0', '#7a3b0e'] },
+  { piece: 'rook', colors: ['#c9b3ff', '#3a1c7a'] },
+  { piece: 'pawn', colors: ['#ffe58a', '#7a5a0a'] },
+  { piece: 'queen', colors: ['#8af0e6', '#0e4f5a'] },
+  { piece: 'king', colors: ['#ff9f8a', '#6b1a12'] },
+  { piece: 'knight', colors: ['#e2c08a', '#4f3410'] },
+  { piece: 'bishop', colors: ['#ff8fb0', '#3d0a2a'] },
+  { piece: 'rook', colors: ['#b8c4d6', '#232b3d'] },
+  { piece: 'pawn', colors: ['#bfe8ff', '#16304f'] }, // December
+];
+
+function premiumIcon(id: string): IconDef | null {
+  const m = /^premium-(\d{4})-(0[1-9]|1[0-2])$/.exec(id);
+  if (!m) return null;
+  const style = PREMIUM_STYLE[Number(m[2]) - 1];
+  return { id, name: tk('Premium icon'), ...style, glyph: ['#fffbe8', '#ffd98a'], frame: '#f2c27a', month: `${Number(m[2])}·${m[1].slice(2)}` };
+}
+
 export function iconById(id: string | null | undefined): IconDef {
-  return PROFILE_ICONS.find((i) => i.id === id) ?? (id ? seasonIcon(id) : null) ?? PROFILE_ICONS.find((i) => i.id === 'guest')!;
+  return PROFILE_ICONS.find((i) => i.id === id) ?? (id ? (seasonIcon(id) ?? premiumIcon(id)) : null) ?? PROFILE_ICONS.find((i) => i.id === 'guest')!;
 }
 
 export function PieceGlyph({ piece, fill = 'currentColor' }: { piece: PieceId; fill?: string }) {
@@ -117,6 +145,14 @@ export function ProfileIcon({
       <g transform="translate(11 10) scale(0.78)" style={{ filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.35))' }}>
         <PieceGlyph piece={def.piece} fill={`url(#pc${uid})`} />
       </g>
+      {def.month != null && (
+        <g>
+          <rect x="29" y="74" width="42" height="17" rx="8.5" fill="rgba(16,12,4,.85)" stroke={def.frame} strokeWidth="1.2" />
+          <text x="50" y="86.5" textAnchor="middle" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="10" fill={def.frame}>
+            {def.month}
+          </text>
+        </g>
+      )}
       {def.season != null && (
         <g>
           <rect x="31" y="74" width="38" height="17" rx="8.5" fill="rgba(10,8,16,.82)" stroke={def.frame} strokeWidth="1.2" />

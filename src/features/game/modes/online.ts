@@ -380,7 +380,7 @@ export class OnlineMode implements Mode {
       if (!id) return { name: t('Waiting…'), iconId: 'guest' };
       if (id === online!.userId) return { ...playerFromProfile(this.ctx.profile, this.nameOf(row, side)), name: this.nameOf(row, side) };
       const present = this.present ? this.present.has(id) : undefined;
-      if (this.opponent?.id === id) return { name: this.opponent.username, iconId: this.opponent.iconId, rank: this.opponent.rank, present };
+      if (this.opponent?.id === id) return { name: this.opponent.username, iconId: this.opponent.iconId, rank: this.opponent.rank, present, premium: this.opponent.premium?.plan ?? null };
       return { name: this.nameOf(row, side), iconId: 'guest', present };
     };
     this.ctx.engine.store.set({

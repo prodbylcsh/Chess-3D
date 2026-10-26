@@ -19,7 +19,11 @@ import {
   type MatchmakingService,
   type MatchResult,
   type PaymentsService,
+  type PremiumService,
+  type PremiumState,
+  type PremiumView,
   type Profile,
+  type ReviewService,
   type PurchaseStatus,
   type PuzzleModuleProgress,
   type PuzzleSolve,
@@ -49,6 +53,9 @@ export interface PlayerRecord {
   season_peak_mmr: number;
   inventory: string[];
   loadout: Record<string, string>;
+  /** the Premium plan now (docs/PLATFORM.md §4.9) */
+  premium?: PremiumView | null;
+  trial_used?: boolean;
 }
 
 interface ResultRecord {
@@ -83,6 +90,8 @@ export function economyOf(p: PlayerRecord) {
     },
     loadout: { ...DEFAULT_LOADOUT, ...p.loadout } as Profile['loadout'],
     inventory: p.inventory,
+    premium: p.premium ?? null,
+    trialUsed: !!p.trial_used,
     seasonPeak: { season: p.season, mmr: p.season_peak_mmr },
   };
 }
@@ -309,6 +318,8 @@ export function createCompetitive(
           throw new ApiError('guest_limit', t('Create a free account to keep going.'));
         case 'too_fast':
           throw new ApiError('too_fast', t('That was quick. Take the lesson again a little slower.'));
+        case 'shields_full':
+          throw new ApiError('shields_full', t('You hold as many streak shields as you can.'));
         default:
           throw playError(payload?.code ?? 'server_error');
       }
@@ -359,6 +370,9 @@ export function createCompetitive(
       if (!guestState) await puzzles.progress();
       return guestState && { ...guestState };
     },
+    async buyShield() {
+      return took(await puzzleCall<{ shields: number; player: PlayerRecord }>('shield_buy')).shields;
+    },
     async claimGuest() {
       if (!deps.me()) return null;
       const token = await guestToken(SUPABASE_URL!, SUPABASE_KEY!).catch(() => null);
@@ -386,5 +400,58 @@ export function createCompetitive(
     },
   };
 
-  return { matchmaking, shop, history, payments: coinPayments, puzzles, learn };
+  // ---------------------------------------------------------------- Premium and Game Review
+
+  async function premiumCall<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
+    const { data, error } = await client.functions.invoke<T>('payments', { body: { action, ...body } });
+    if (!error) return data!;
+    if (error instanceof FunctionsHttpError) {
+      const payload = await (error.context as Response).json().catch(() => null);
+      switch (payload?.code) {
+        case 'unavailable':
+          throw new ApiError('unavailable', t('Premium is not available yet.'));
+        case 'subscribed':
+          throw new ApiError('subscribed', t('You already have Premium. Change your plan in Settings.'));
+        case 'not_subscribed':
+          throw new ApiError('not_subscribed', t('You have no Premium plan.'));
+        case 'unauthorized':
+        case 'guest':
+          throw new ApiError('unauthorized', t('Please sign in again.'));
+        case 'not_ready':
+          throw new ApiError('not_ready', t('Choose a username and an icon first.'));
+        default:
+          throw new ApiError('payment_failed', t('The payment could not be started. Please try again.'));
+      }
+    }
+    throw new ApiError('network', t('Could not reach the server. Check your connection.'));
+  }
+
+  /** The subscription's answers carry the player's state too. */
+  async function premiumState(action: string, body: Record<string, unknown> = {}): Promise<PremiumState> {
+    const { player, premium, trialUsed, given } = await premiumCall<PremiumState & { player: PlayerRecord }>(action, body);
+    deps.adopt(player);
+    return { premium, trialUsed, given };
+  }
+
+  const premium: PremiumService = {
+    available: paddleConfigured(),
+    checkout: 'paddle',
+    state: () => premiumState('subscription'),
+    async subscribe(plan, period) {
+      return (await premiumCall<{ transactionId: string }>('subscribe', { plan, period, waiver: true })).transactionId;
+    },
+    change: (plan, period) => premiumState('change', { plan, period }),
+    cancel: () => premiumState('cancel'),
+    resume: () => premiumState('resume'),
+    async manage() {
+      return (await premiumCall<{ url: string }>('manage')).url;
+    },
+  };
+
+  const reviews: ReviewService = {
+    today: () => puzzleCall<{ used: number; limit: number | null }>('reviews'),
+    start: (gameId) => puzzleCall<{ allowed: boolean; used: number; limit: number | null }>('review_start', { game: gameId }),
+  };
+
+  return { matchmaking, shop, history, payments: coinPayments, puzzles, learn, premium, reviews };
 }

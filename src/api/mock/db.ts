@@ -226,6 +226,7 @@ export function publicProfile(p: Profile): PublicProfile {
     createdAt: p.createdAt,
     // in the demo, real accounts are "online" while they are the signed-in one
     online: p.id === db.sessionId,
+    premium: p.premium ? { plan: p.premium.plan, founder: p.premium.founder } : null,
   };
 }
 

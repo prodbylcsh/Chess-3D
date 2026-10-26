@@ -28,6 +28,7 @@ import { useSession } from '../../app/session';
 import { t } from '../../i18n';
 import { Badge, Button, Coins, EmptyState, ProgressBar, Spinner, confirmDialog, cx, formatNumber, useToast } from '../../ui/kit';
 import { onPuzzlesChanged, signUp } from '../puzzles/guest';
+import { FROM_PRICE, euros, usePremiumShown } from '../premium/plans';
 import { LESSONS } from './lessons';
 import './learn.css';
 
@@ -53,6 +54,7 @@ export function LearnPage() {
   const toast = useToast();
   const [progress, reload] = useLearnProgress();
   const [busy, setBusy] = useState(false);
+  const premiumShown = usePremiumShown();
 
   async function unlock() {
     const ok = await confirmDialog({
@@ -96,13 +98,28 @@ export function LearnPage() {
           {!progress.unlocked && (
             <section className="learn-unlock">
               <div>
-                <h2 className="display">{t('The whole course')}</h2>
-                <p className="muted">{t('The first two chapters are free. The others open together, once and for good.')}</p>
+                {/* after chapter 2 the next chapter is the reason to go on */}
+                {progress.rewarded.includes('rules') ? (
+                  <>
+                    <h2 className="display">{t('You know the rules.')}</h2>
+                    <p className="muted">{t('Chapter 3, How a game ends, is next: stalemate, the draws and the clock. The paid chapters open together, once and for good.')}</p>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="display">{t('The whole course')}</h2>
+                    <p className="muted">{t('The first two chapters are free. The others open together, once and for good.')}</p>
+                  </>
+                )}
               </div>
               {profile ? (
                 <div className="learn-unlock-side">
-                  <Button variant="primary" loading={busy} disabled={busy || profile.coins < LEARN_PRICE} onClick={() => void unlock()}>
-                    <Lock size={15} /> {t('Unlock')} · <Coins amount={LEARN_PRICE} size={14} />
+                  {premiumShown && (
+                    <Link to="/premium" className="premium-offer">
+                      <Crown size={15} /> {t('Included in Premium · from {price} a month', { price: euros(FROM_PRICE) })}
+                    </Link>
+                  )}
+                  <Button variant={premiumShown ? 'secondary' : 'primary'} loading={busy} disabled={busy || profile.coins < LEARN_PRICE} onClick={() => void unlock()}>
+                    <Lock size={15} /> {t('Unlock for')} <Coins amount={LEARN_PRICE} size={14} />
                   </Button>
                   {profile.coins < LEARN_PRICE && <span className="faint">{t('Earn coins in games or buy them in the shop.')}</span>}
                 </div>

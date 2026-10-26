@@ -1,11 +1,14 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { Box, Check, Eye, Lock, Sparkles } from 'lucide-react';
+import { Link } from 'react-router';
+import { Box, Check, Eye, Lock, Shirt, Sparkles } from 'lucide-react';
 import { api, type ShopItem } from '../../api';
 import { CATEGORY_AUDIENCE, CATEGORY_NAMES, RARITY_NAMES, itemDescription, itemName } from '../../api/catalog';
 import { useSession } from '../../app/session';
 import { t } from '../../i18n';
 import { Button, Coins, Modal, Spinner, confirmDialog, cx, formatNumber, useToast } from '../../ui/kit';
 import { ItemPreview } from './previews';
+import { usePremiumShown } from '../premium/plans';
+import '../premium/premium.css';
 
 // three.js loads only when someone opens the 3D view
 const ModelViewer = lazy(() => import('./ModelViewer').then((m) => ({ default: m.ModelViewer })));
@@ -25,14 +28,15 @@ export function ItemDialog({ item, onClose, onChanged }: { item: ShopItem | null
             <ModelViewer itemId={item.id} name={itemName(item.id)} onBack={() => setView3d(false)} />
           </Suspense>
         ) : (
-          <ItemDetail item={item} onChanged={onChanged} onView3d={hasModel(item) ? () => setView3d(true) : undefined} />
+          <ItemDetail item={item} onChanged={onChanged} onClose={onClose} onView3d={hasModel(item) ? () => setView3d(true) : undefined} />
         ))}
     </Modal>
   );
 }
 
-function ItemDetail({ item, onChanged, onView3d }: { item: ShopItem; onChanged: () => void; onView3d?: () => void }) {
+function ItemDetail({ item, onChanged, onClose, onView3d }: { item: ShopItem; onChanged: () => void; onClose: () => void; onView3d?: () => void }) {
   const { profile, setProfile } = useSession();
+  const premiumShown = usePremiumShown() && profile?.premium?.plan !== 'archmage';
   const toast = useToast();
   const [busy, setBusy] = useState<'buy' | 'equip' | null>(null);
   const coins = profile?.coins ?? 0;
@@ -90,10 +94,33 @@ function ItemDetail({ item, onChanged, onView3d }: { item: ShopItem; onChanged: 
       <p className="item-detail-note">
         <Eye size={15} /> {t(CATEGORY_AUDIENCE[item.category])}
       </p>
-      {!item.forSale && !item.owned && (
+      {!item.forSale && !item.owned && !item.id.startsWith('premium-') && (
         <p className="item-detail-note">
           <Sparkles size={15} /> {t('Season reward: it cannot be bought.')}
         </p>
+      )}
+
+      {item.wardrobe ? (
+        <p className="item-detail-note item-wardrobe">
+          <Shirt size={15} /> {t('In your Wardrobe: yours to use while you have Archmage. Buy it to keep it for good.')}
+          {!item.equipped && (
+            <Button size="sm" variant="secondary" loading={busy === 'equip'} onClick={() => void equip()}>
+              {t('Use')}
+            </Button>
+          )}
+        </p>
+      ) : (
+        !item.owned &&
+        item.forSale &&
+        premiumShown &&
+        item.category !== 'icon' && (
+          <p className="item-detail-note">
+            <Shirt size={15} />
+            <Link to="/premium" className="premium-quiet" onClick={onClose}>
+              {t('Use it now with the Archmage’s Wardrobe')}
+            </Link>
+          </p>
+        )
       )}
 
       <footer className="item-detail-foot">

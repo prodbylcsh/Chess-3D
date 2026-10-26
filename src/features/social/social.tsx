@@ -1,3 +1,4 @@
+import { PlanBadge } from '../premium/PlanBadge';
 import { rankText, t } from '../../i18n';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -19,7 +20,9 @@ export function PlayerLine({ player, sub, size = 44 }: { player: PublicProfile; 
         <span className={cx('presence-dot', player.online && 'is-on')} title={player.online ? t('Online') : t('Offline')} />
       </span>
       <span className="player-line-text">
-        <strong>{player.username}</strong>
+        <strong>
+          {player.username} <PlanBadge plan={player.premium?.plan} founder={player.premium?.founder} link={false} />
+        </strong>
         <span className="player-line-sub">
           <RankEmblem tier={player.rank.tier} division={player.rank.division} size={15} />
           {rankText(player.rank.label)}

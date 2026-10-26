@@ -1,3 +1,4 @@
+import type { PlanId } from '#shared/subscription.ts';
 import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
 import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
@@ -15,6 +16,8 @@ export interface PlayerView {
   you?: boolean;
   /** connected (online games); undefined when not applicable */
   present?: boolean;
+  /** the player's Premium plan, for the badge on the card */
+  premium?: PlanId | null;
 }
 
 /** What the puzzle coach says right now. */

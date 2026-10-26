@@ -221,7 +221,7 @@ export class WatchMode implements Mode {
       if (!id) return { name: t('Waiting…'), iconId: 'guest' };
       const present = this.present.size ? this.present.has(id) : undefined;
       const p = this.players[side];
-      if (p) return { name: p.username, iconId: p.iconId, rank: row.kind === 'friend' ? null : p.rank, present };
+      if (p) return { name: p.username, iconId: p.iconId, rank: row.kind === 'friend' ? null : p.rank, present, premium: p.premium?.plan ?? null };
       return { name: this.nameOf(row, side), iconId: 'guest', tag: t('Guest'), present };
     };
     const items = [this.players.w?.loadout, this.players.b?.loadout]

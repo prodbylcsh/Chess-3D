@@ -4,13 +4,16 @@
 // blaze throws embers, azure fire is ringed, a phoenix spreads wings, starfire has stars
 // circling it.
 import { useEffect, useId, useState, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router';
-import { Check, Gift, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { Check, Gift, Shield, Sparkles } from 'lucide-react';
 import { STREAK_MILESTONES, STREAK_TIERS, moduleOf, nextMilestone, streakTier } from '#shared/puzzles.ts';
-import { api, type DailyPuzzle, type DailySolve } from '../../api';
+import { PLANS, RECOMMENDED, SHIELD_PRICE, shieldCap } from '#shared/subscription.ts';
+import { api, ApiError, type DailyPuzzle, type DailySolve } from '../../api';
 import { itemName } from '../../api/catalog';
+import { useSession } from '../../app/session';
 import { t, tk, tn } from '../../i18n';
-import { Button, Coins, ProgressBar, cx, formatNumber } from '../../ui/kit';
+import { Button, Coins, ProgressBar, cx, formatNumber, useToast } from '../../ui/kit';
+import { usePremiumShown } from '../premium/plans';
 import './streak.css';
 
 // the tier names, for the translator
@@ -104,6 +107,7 @@ export function DailyCard() {
               ? t('Solve today\'s puzzle to keep your streak. It comes from {module}.', { module: t(moduleOf(daily.module)?.name ?? '') })
               : t('A new puzzle every day, from every module. Solve it day after day for growing rewards.')}
         </p>
+        {daily.streak.shields !== undefined && <Shields daily={daily} onChange={setDaily} />}
         <div className="daily-next">
           <ProgressBar value={Math.min(1, (days - from) / (next.days - from))} />
           <span className="faint">
@@ -129,6 +133,55 @@ export function DailyCard() {
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * Streak shields (docs/PLATFORM.md §4.9): how many keep the streak over missed days, one
+ * more for coins, and late in the UTC day of a long unsolved streak, the plan that gives
+ * them every month.
+ */
+function Shields({ daily, onChange }: { daily: DailyPuzzle; onChange: (d: DailyPuzzle) => void }) {
+  const { profile, refresh } = useSession();
+  const toast = useToast();
+  const premiumShown = usePremiumShown();
+  const [busy, setBusy] = useState(false);
+  if (!profile) return null;
+  const held = daily.streak.shields ?? 0;
+  const plan = profile.premium?.plan ?? null;
+  const late = new Date().getUTCHours() >= 18 && !daily.solved && daily.streak.current >= 7;
+
+  async function buy() {
+    setBusy(true);
+    try {
+      const shields = await api.puzzles.buyShield();
+      onChange({ ...daily, streak: { ...daily.streak, shields } });
+      await refresh();
+      toast(t('A streak shield is ready. It keeps your streak on a day you miss.'), { tone: 'success' });
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : t('Something went wrong. Please try again.'), { tone: 'danger' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="daily-shields">
+      {!!daily.streak.shielded && <span className="daily-shielded">{tn(daily.streak.shielded, 'A shield kept your streak over {n} missed day.', 'Shields kept your streak over {n} missed days.')}</span>}
+      <span>
+        <Shield size={14} /> {held ? tn(held, '{n} streak shield', '{n} streak shields') : t('No streak shield')}
+      </span>
+      {held < shieldCap(plan) && (
+        <button type="button" className="link-btn" disabled={busy || profile.coins < SHIELD_PRICE} onClick={() => void buy()}>
+          {t('Buy one for')} <Coins amount={SHIELD_PRICE} size={12} />
+        </button>
+      )}
+      {late && premiumShown && !plan && (
+        <Link to="/premium" className="premium-quiet">
+          {t('{plan} gives you {n} every month', { plan: PLANS[RECOMMENDED].name, n: PLANS[RECOMMENDED].shields })}
+        </Link>
+      )}
+    </div>
   );
 }
 

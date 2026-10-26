@@ -17,6 +17,7 @@ import { LiveNow } from './LiveNow';
 import { Matchmaking } from './Matchmaking';
 import { PlayFriend } from './PlayFriend';
 import { StakePicker } from './StakePicker';
+import { TrialCard } from '../premium/TrialCard';
 import './play.css';
 
 type Sheet = 'friend' | 'ai' | 'stake' | null;
@@ -60,6 +61,7 @@ export function PlayHub() {
         </>
       }
     >
+      <TrialCard />
       <section className="ranked-hero">
         <div className="ranked-hero-bg" />
         <div className="ranked-emblem">

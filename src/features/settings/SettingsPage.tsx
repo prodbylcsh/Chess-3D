@@ -12,6 +12,7 @@ import { useSession } from '../../app/session';
 import { ProfileIcon } from '../../ui/art/art';
 import { Badge, Button, Card, Field, Modal, Spinner, Switch, useToast } from '../../ui/kit';
 import { DEFAULT_WATCH, WATCH_POLICIES, type WatchPolicy } from '#shared/spectate.ts';
+import { SubscriptionSettings } from '../premium/SubscriptionSettings';
 import './settings.css';
 
 const WATCH_LABEL: Record<WatchPolicy, string> = { everyone: tk('Everyone with the link'), friends: tk('Friends only'), nobody: tk('Nobody') };
@@ -94,6 +95,8 @@ export function SettingsPage() {
             />
           )}
         </Section>
+
+        <SubscriptionSettings Section={Section} Row={Row} />
 
         <Section title={t('Profile')}>
           <Row

@@ -16,6 +16,9 @@ import { rankOf } from '#shared/rating.ts';
 import { LogoMark, ProfileIcon, RankEmblem } from '../ui/art/art';
 import { Badge, Button, Coins, cx } from '../ui/kit';
 import { rankText, tk, useT } from '../i18n';
+import { Crown } from 'lucide-react';
+import { PlanBadge } from '../features/premium/PlanBadge';
+import { usePremiumShown } from '../features/premium/plans';
 import { useBadges } from './notifications';
 import { useSession } from './session';
 import './layout.css';
@@ -110,17 +113,27 @@ const GUEST_TABS: NavItem[] = [
 function Me() {
   const { profile } = useSession();
   const t = useT();
+  const shown = usePremiumShown();
   const rank = rankOf(profile!.mmr);
+  const plan = profile!.premium?.plan ?? null;
   return (
     <div className="sidebar-foot">
       <div className="balance">
         <span className="faint">{t('Balance')}</span>
         <Coins amount={profile!.coins} />
       </div>
+      {shown && !plan && (
+        <NavLink to="/premium" className="premium-nav">
+          <Crown size={16} strokeWidth={1.9} />
+          {t('Go Premium')}
+        </NavLink>
+      )}
       <NavLink to="/profile" className="me-chip">
         <ProfileIcon icon={profile!.iconId} size={40} />
         <span className="me-text">
-          <strong>{profile!.username}</strong>
+          <strong className={plan && plan !== 'apprentice' ? `premium-name-${plan}` : undefined}>
+            {profile!.username} <PlanBadge plan={plan} founder={profile!.premium?.founder} link={false} />
+          </strong>
           <span className="me-rank">
             <RankEmblem tier={rank.tier.id} division={rank.division} size={16} />
             {rankText(rank.label)}

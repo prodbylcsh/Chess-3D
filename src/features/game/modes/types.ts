@@ -51,6 +51,7 @@ export function playerFromProfile(profile: Profile | null, fallbackName = 'You')
     iconId: profile.iconId ?? 'guest',
     rank: { tier: r.tier.id, division: r.division, label: r.label, progress: r.progress },
     you: true,
+    premium: profile.premium?.plan ?? null,
   };
 }
 

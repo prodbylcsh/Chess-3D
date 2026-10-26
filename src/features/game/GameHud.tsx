@@ -1,3 +1,4 @@
+import { PlanBadge } from '../premium/PlanBadge';
 import { rankText, t, tn } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { Color as Side, PieceSymbol } from 'chess.js';
@@ -157,6 +158,7 @@ function PlayerCard({ side, player, s }: { side: Side; player: PlayerView; s: Ga
       <div className="player-info">
         <div className="player-name">
           <strong>{player.name}</strong>
+          <PlanBadge plan={player.premium} link={false} />
           {player.you && s.mySide && <Badge tone="gold">{t('You')}</Badge>}
           {player.tag && <Badge tone="violet">{player.tag}</Badge>}
         </div>

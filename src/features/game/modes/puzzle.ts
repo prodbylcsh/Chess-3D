@@ -400,6 +400,8 @@ export class PuzzleMode implements Mode {
   }
 
   private hintCost(puzzle: Puzzle): string {
+    // with Premium hints cost nothing (docs/PLATFORM.md §4.9)
+    if (this.ctx.profile?.premium) return t('Hints are free with your Premium plan.');
     return t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, solution(puzzle).length) });
   }
 

@@ -1,3 +1,4 @@
+import { PlanBadge } from '../premium/PlanBadge';
 import { rankText, t, tk, tn } from '../../i18n';
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
@@ -125,7 +126,8 @@ function ProfileView({ player, history, earnedAwards, own }: { player: PublicPro
         </div>
         <div className="profile-id">
           <div className="profile-name">
-            <h1>{player.username}</h1>
+            <h1 className={player.premium && player.premium.plan !== 'apprentice' ? `premium-name-${player.premium.plan}` : undefined}>{player.username}</h1>
+            <PlanBadge plan={player.premium?.plan} founder={player.premium?.founder} size="md" />
             {own ? <Badge tone="gold">{t('You')}</Badge> : player.online ? <Badge tone="success">{t('Online')}</Badge> : <Badge>{t('Offline')}</Badge>}
           </div>
           <p className="faint">{t('Member since {date}', { date: memberSince(player.createdAt) })}</p>

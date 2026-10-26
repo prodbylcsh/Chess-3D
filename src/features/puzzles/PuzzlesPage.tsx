@@ -1,8 +1,8 @@
 // Puzzles: the themed modules (docs/PLATFORM.md §4.2). Openings, the first, is free; the others are
 // unlocked with coins. Each has 100 puzzles, a bonus every 10 and a reward at the end.
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
-import { useNavigate } from 'react-router';
-import { Check, Gift, Lock, Star } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { Check, Crown, Gift, Lock, Star } from 'lucide-react';
 import { BONUS_COINS, BONUS_EVERY, MODULES, MODULE_PRICE, PUZZLES_PER_MODULE } from '#shared/puzzles.ts';
 import { api, type PuzzleModuleProgress } from '../../api';
 import { itemName } from '../../api/catalog';
@@ -14,6 +14,7 @@ import { WORLD_THEMES } from './map/themes';
 import { MODULE_ICONS } from './modules';
 import { DailyCard } from './streak';
 import { GuestBanner, onPuzzlesChanged, signUp } from './guest';
+import { FROM_PRICE, euros, usePremiumShown } from '../premium/plans';
 import './puzzles.css';
 
 /** The player's progress in every module; reloads after unlocking. */
@@ -36,6 +37,7 @@ export function PuzzlesPage() {
   const toast = useToast();
   const [progress, reload] = usePuzzleProgress();
   const [busy, setBusy] = useState<string | null>(null);
+  const premiumShown = usePremiumShown();
 
   async function unlock(id: string, name: string) {
     const ok = await confirmDialog({
@@ -79,7 +81,7 @@ export function PuzzlesPage() {
       {Array.isArray(progress) && <DailyCard />}
       {Array.isArray(progress) && (
         <div className="puzzle-modules">
-          {MODULES.map((m) => {
+          {MODULES.filter((m) => progress.some((x) => x.id === m.id)).map((m) => {
             const p = progress.find((x) => x.id === m.id)!;
             const Icon = MODULE_ICONS[m.icon];
             const solved = solvedCount(p);
@@ -96,7 +98,17 @@ export function PuzzlesPage() {
                   <span className="puzzle-module-icon">
                     <Icon size={26} />
                   </span>
-                  {m.free ? <Badge tone="success">{t('Free')}</Badge> : !p.unlocked && <Lock size={18} className="faint" />}
+                  {m.free ? (
+                    <Badge tone="success">{t('Free')}</Badge>
+                  ) : !p.unlocked ? (
+                    <Lock size={18} className="faint" />
+                  ) : (
+                    p.bought === false && (
+                      <Badge tone="gold">
+                        <Crown size={12} /> {t('Premium')}
+                      </Badge>
+                    )
+                  )}
                   {p.completedAt && (
                     <Badge tone="gold">
                       <Check size={12} /> {t('Complete')}
@@ -120,9 +132,16 @@ export function PuzzlesPage() {
                     {solved === 0 ? t('Start') : solved >= PUZZLES_PER_MODULE ? t('Replay') : t('Continue')}
                   </Button>
                 ) : (
-                  <Button block loading={busy === m.id} disabled={!!busy || (profile?.coins ?? 0) < MODULE_PRICE} onClick={() => void unlock(m.id, name)}>
-                    <Lock size={15} /> {t('Unlock')} · <Coins amount={MODULE_PRICE} size={14} />
-                  </Button>
+                  <>
+                    {premiumShown && (
+                      <Link to="/premium" className="premium-offer">
+                        <Crown size={15} /> {t('Included in Premium · from {price} a month', { price: euros(FROM_PRICE) })}
+                      </Link>
+                    )}
+                    <Button block loading={busy === m.id} disabled={!!busy || (profile?.coins ?? 0) < MODULE_PRICE} onClick={() => void unlock(m.id, name)}>
+                      <Lock size={15} /> {t('Unlock for')} <Coins amount={MODULE_PRICE} size={14} />
+                    </Button>
+                  </>
                 )}
                 {profile && !p.unlocked && profile.coins < MODULE_PRICE && <p className="faint puzzle-module-note">{t('Earn coins in games or buy them in the shop.')}</p>}
                 {p.reward?.item && (

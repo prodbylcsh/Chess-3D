@@ -170,6 +170,7 @@ export function createSocial(
       loadout: showcase?.loadout ?? { ...DEFAULT_LOADOUT },
       createdAt: row.created_at,
       online: online.has(row.id),
+      premium: showcase?.premium ?? null,
     };
   }
 
