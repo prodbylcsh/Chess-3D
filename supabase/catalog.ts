@@ -42,7 +42,7 @@ with catalogue as (
   returning 1
 )
 update public.items set retired = true, for_sale = false, updated_at = now()
-where not retired and id not like 'season-%' and id not in (${known});
+where not retired and id not like 'season-%' and id not like 'premium-%' and id not in (${known});
 `;
 }
 

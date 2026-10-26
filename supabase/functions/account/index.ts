@@ -4,7 +4,8 @@
 // POST { action: 'check_username', username }    → { status: 'available' | 'taken' | 'invalid' }
 // POST { action: 'update', patch }               → { profile }   patch: { username?, iconId?, onboardingStep?, onboarded?, watch? }
 // POST { action: 'buy', itemId }                 → { player }    take the price, add the item (player_items)
-// POST { action: 'equip', itemId }               → { profile, player }   use an owned item
+// POST { action: 'equip', itemId }               → { profile, player }   use an owned item (or one of
+//      the Archmage's Wardrobe)
 // POST { action: 'delete', username }            → { deleted: true }
 //
 // Errors: { error, code, detail? } with an HTTP error status. Only registered
@@ -12,8 +13,9 @@
 // live in ../_shared/accounts.ts (shared with the app's form checks).
 import { createClient, type User } from '@supabase/supabase-js';
 import { AccountError, isIcon, profileUpdate, usernameProblem, type ProfilePatch, type ProfileRow } from '../_shared/accounts.ts';
-import { FREE_ITEMS, itemDef, purchaseProblem } from '../_shared/shop.ts';
-import { ensurePlayer, getPlayer, publishShowcase, type PlayerRow } from '../_shared/server/competitive.ts';
+import { itemDef, purchaseProblem } from '../_shared/shop.ts';
+import { ensurePlayer, getPlayer, mayUse, publishShowcase } from '../_shared/server/competitive.ts';
+import { paddle, paddleReady, subscriptionsOf } from '../_shared/server/premium.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -53,15 +55,13 @@ async function usernameTaken(username: string, exceptId: string): Promise<boolea
   return data.length > 0;
 }
 
-/** Free items belong to everyone; the rest must be in the inventory. */
-const owns = (player: PlayerRow, id: string) => FREE_ITEMS.includes(id) || player.inventory.includes(id);
-
 async function handle(user: User, body: Record<string, unknown>): Promise<unknown> {
   switch (body.action) {
     case 'me': {
-      const profile = await me(user);
+      await me(user);
       const { player, grants } = await ensurePlayer(admin, user.id);
-      return { profile, player, seasonGrants: grants };
+      // read after: a Wardrobe icon may have gone back to a standard one
+      return { profile: await loadProfile(user.id), player, seasonGrants: grants };
     }
 
     case 'check_username': {
@@ -75,7 +75,7 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       const patch = body.patch as ProfilePatch;
       if (patch?.iconId != null && isIcon(patch.iconId)) {
         const { player } = await ensurePlayer(admin, user.id);
-        if (!owns(player, patch.iconId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
+        if (!mayUse(player, patch.iconId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
       }
       const changes = profileUpdate(row, patch);
       if (Object.keys(changes).length === 0) return { profile: row };
@@ -101,7 +101,8 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       const { player } = await ensurePlayer(admin, user.id);
       const itemId = String(body.itemId ?? '');
       const def = itemDef(itemId);
-      if (!def || !owns(player, itemId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
+      // owned, free, or in the Archmage's Wardrobe (docs/PLATFORM.md §4.9)
+      if (!def || !mayUse(player, itemId)) throw new AccountError('not_owned', 'You do not own this item.', 403);
       if (def.category === 'icon') {
         const { error } = await admin.from('profiles').update({ icon_id: itemId }).eq('id', user.id);
         if (error) throw error;
@@ -120,6 +121,9 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       if (!row?.username || body.username !== row.username) {
         throw new AccountError('confirm', 'Type your username exactly to confirm.');
       }
+      // a running subscription ends with the account (nothing more is charged)
+      const { live } = await subscriptionsOf(admin, user.id);
+      if (live && paddleReady()) await paddle('POST', `/subscriptions/${live.id}/cancel`, { effective_from: 'immediately' }).catch(() => {});
       const { error } = await admin.auth.admin.deleteUser(user.id);
       if (error) throw error;
       return { deleted: true };

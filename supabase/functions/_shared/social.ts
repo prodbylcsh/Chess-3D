@@ -2,6 +2,7 @@
 // and `account` Edge Functions and the app.
 import { TIERS, rankOf } from './rating.ts';
 import { DEFAULT_LOADOUT, itemDef } from './shop.ts';
+import { planOf, type PlanId } from './subscription.ts';
 
 export const MESSAGE_MAX = 1000;
 /** Most friends a player can have, and most requests waiting for an answer. */
@@ -62,6 +63,13 @@ export interface Showcase {
   rank: { tier: string; division: 1 | 2 | 3 | 4 | null; progress: number };
   stats: { wins: number; losses: number; draws: number; winStreak: number; rankedStreak: number; bestStreak: number };
   loadout: { pieces: string; board: string; background: string; moveAnimation: string; destruction: string };
+  /** the Premium plan, for the badge everyone sees (docs/PLATFORM.md §4.9); none without one */
+  premium?: ShowcasePremium | null;
+}
+
+export interface ShowcasePremium {
+  plan: PlanId;
+  founder: boolean;
 }
 
 const STAT_KEYS = ['wins', 'losses', 'draws', 'winStreak', 'rankedStreak', 'bestStreak'] as const;
@@ -97,10 +105,14 @@ export function parseShowcase(input: unknown): Showcase | null {
     cleanLoadout[slot] = def && def.category === slot ? def.id : DEFAULT_LOADOUT[slot];
   }
 
+  const premium = x.premium as Record<string, unknown> | null | undefined;
+  const plan = planOf(premium?.plan);
+
   return {
     rank: { tier: tier.id, division: division as Showcase['rank']['division'], progress: Math.round(progress * 1000) / 1000 },
     stats: cleanStats,
     loadout: cleanLoadout,
+    ...(plan ? { premium: { plan: plan.id, founder: premium?.founder === true } } : {}),
   };
 }
 
@@ -108,6 +120,7 @@ export function parseShowcase(input: unknown): Showcase | null {
 export function showcaseOf(
   player: { mmr: number; wins: number; losses: number; draws: number; win_streak: number; ranked_streak: number; best_streak: number },
   loadout: Partial<Showcase['loadout']> | null,
+  premium: ShowcasePremium | null = null,
 ): Showcase {
   const r = rankOf(player.mmr);
   return parseShowcase({
@@ -121,5 +134,6 @@ export function showcaseOf(
       bestStreak: player.best_streak,
     },
     loadout: { ...DEFAULT_LOADOUT, ...loadout },
+    premium,
   })!;
 }

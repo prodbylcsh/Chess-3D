@@ -2,6 +2,7 @@
 import { t } from '../../i18n';
 import { rankOf } from '#shared/rating.ts';
 import { FREE_ITEMS, ITEMS, itemDef, purchaseProblem, seasonRewardPool } from '#shared/shop.ts';
+import { canUse, released } from '#shared/subscription.ts';
 import { bracketOf, resetShare, rewardHistory, seasonAt } from '#shared/seasons.ts';
 import { itemInfo, type LoadoutCategory } from '../catalog';
 import { ApiError, type Profile, type SeasonInfo, type SeasonsService, type ShopItem, type ShopService } from '../types';
@@ -9,6 +10,12 @@ import { db, emit, rankInfo, save, session, wait } from './db';
 
 export function owns(profile: Profile, id: string): boolean {
   return FREE_ITEMS.includes(id) || profile.inventory.includes(id);
+}
+
+/** Owned, or in the Archmage's Wardrobe while the plan runs (docs/PLATFORM.md §4.9). */
+export function mayUse(profile: Profile, id: string): boolean {
+  const def = itemDef(id);
+  return !!def && canUse(def, owns(profile, id), profile.premium?.plan ?? null);
 }
 
 function equipped(profile: Profile, id: string): boolean {
@@ -30,6 +37,7 @@ function view(profile: Profile, id: string): ShopItem | null {
     description: info.description,
     owned: owns(profile, id),
     equipped: equipped(profile, id),
+    wardrobe: !owns(profile, id) && mayUse(profile, id),
   };
 }
 
@@ -38,7 +46,9 @@ export const shop: ShopService = {
     await wait(200, 450);
     const { profile } = session();
     // regular items, plus rewards the player won that are not for sale
-    const ids = [...ITEMS.map((i) => i.id), ...profile.inventory.filter((id) => !ITEMS.some((i) => i.id === id))];
+    // items waiting for their release date show early with Archmage (and are for sale once released)
+    const plan = profile.premium?.plan ?? null;
+    const ids = [...ITEMS.filter((i) => released(i.releaseAt, plan)).map((i) => i.id), ...profile.inventory.filter((id) => !ITEMS.some((i) => i.id === id))];
     return ids.map((id) => view(profile, id)).filter((x): x is ShopItem => !!x);
   },
 
@@ -60,7 +70,7 @@ export const shop: ShopService = {
     await wait(150, 300);
     const { profile } = session();
     const def = itemDef(itemId);
-    if (!def || !owns(profile, itemId)) throw new ApiError('not_owned', t('You do not own this item.'));
+    if (!def || !mayUse(profile, itemId)) throw new ApiError('not_owned', t('You do not own this item.'));
     if (def.category === 'icon') profile.iconId = itemId;
     else profile.loadout[def.category as LoadoutCategory] = itemId;
     save();

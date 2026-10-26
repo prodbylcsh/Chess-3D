@@ -5,6 +5,7 @@ import { rankOf } from '#shared/rating.ts';
 import { COINS } from '#shared/economy.ts';
 import { ApiError, type Account, type ApiEvent, type AuthProviderId, type GameRecord, type Loadout, type MatchKind, type Message, type Profile, type PublicProfile, type RankInfo, type StakeId } from '../types';
 import { DEFAULT_LOADOUT, NEW_PLAYER_STATS, SEED_FRIENDS, SEED_PLAYERS, START_MMR, type SeedPlayer } from './seed';
+import type { MockPremium } from './premium';
 
 export interface StoredAccount extends Account {
   /** demo only: a real back-end never stores plain passwords */
@@ -99,6 +100,12 @@ export interface Db {
   guest: MockGuest;
   reports: MockReport[];
   learn: Record<string, MockLearn>;
+  /** per player: Premium subscriptions, paid periods and the months given (October 2026) */
+  premium: Record<string, MockPremium>;
+  /** per player: today's Game Reviews */
+  reviews: Record<string, { day: string; games: string[] }>;
+  /** per player: streak shields held */
+  shields: Record<string, number>;
   sessionId: string | null;
 }
 
@@ -127,6 +134,9 @@ function load(): Db {
     guest: { coins: 0, paid: {} },
     reports: [],
     learn: {},
+    premium: {},
+    reviews: {},
+    shields: {},
     sessionId: null,
     ...data,
   };

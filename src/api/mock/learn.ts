@@ -1,6 +1,7 @@
 // Mock Learn: lessons, the chapter reward and the unlock in the browser, with the server's rules.
 import { t } from '../../i18n';
 import { CHAPTER_REWARD, LEARN_PRICE, MIN_LESSON_MS, lessonOf, lessonOpen } from '#shared/learn.ts';
+import { learnUnlocked } from '#shared/subscription.ts';
 import { ApiError, type LearnProgress, type LearnService } from '../types';
 import { GUEST_ID, db, emit, now, save, session, wait, type MockLearn } from './db';
 
@@ -11,7 +12,9 @@ export function learnOf(id: string): MockLearn {
   return (db.learn[id] ??= { lessons: {}, rewarded: [], unlocked: false });
 }
 
-const view = (l: MockLearn): LearnProgress => ({ lessons: Object.keys(l.lessons), unlocked: l.unlocked, rewarded: [...l.rewarded] });
+/** Open with coins or with any Premium plan (guests have none). */
+const open = (l: MockLearn) => learnUnlocked(l.unlocked, player()?.premium?.plan ?? null);
+const view = (l: MockLearn): LearnProgress => ({ lessons: Object.keys(l.lessons), unlocked: open(l), bought: l.unlocked, rewarded: [...l.rewarded] });
 
 export const learn: LearnService = {
   async progress() {
@@ -26,7 +29,7 @@ export const learn: LearnService = {
     const profile = player();
     const l = learnOf(who());
     if (!profile && !at.chapter.free) throw new ApiError('guest_limit', t('Create a free account to keep going.'));
-    if (!lessonOpen(lesson, Object.keys(l.lessons), l.unlocked)) throw new ApiError('locked', t('Finish the lessons before this one first.'));
+    if (!lessonOpen(lesson, Object.keys(l.lessons), open(l))) throw new ApiError('locked', t('Finish the lessons before this one first.'));
     if (l.lessons[lesson]) return { first: false, chapterDone: false, reward: 0, ...view(l) };
     const last = Math.max(0, ...Object.values(l.lessons).map((at) => Date.parse(at)));
     if (Date.now() - last < MIN_LESSON_MS) throw new ApiError('too_fast', t('That was quick. Take the lesson again a little slower.'));

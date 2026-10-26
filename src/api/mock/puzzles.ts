@@ -25,6 +25,7 @@ import {
   guestMayPlay,
 } from '#shared/puzzles.ts';
 import { ITEMS } from '#shared/shop.ts';
+import { SHIELD_PRICE, hintsFree, moduleOpen, released, shieldCap } from '#shared/subscription.ts';
 import { modulePuzzles } from '../puzzleData';
 import { ApiError, type DailySolve, type GuestClaim, type PuzzleModuleProgress, type PuzzlesService } from '../types';
 import { claimGuestLessons } from './learn';
@@ -34,6 +35,11 @@ import { GUEST_ID, db, emit, now, save, session, wait, type MockPuzzleModule } f
 const player = () => (db.sessionId ? session().profile : null);
 /** Whose puzzles a call is about: the player's, or this browser's guest's. */
 const who = () => player()?.id ?? GUEST_ID;
+/** The player's Premium plan (guests have none). */
+const plan = () => player()?.premium?.plan ?? null;
+const DAY = 86_400_000;
+const dayNumber = (day: string) => Math.round(Date.parse(`${day}T00:00:00Z`) / DAY);
+const dayBefore = (day: string) => new Date(Date.parse(`${day}T00:00:00Z`) - DAY).toISOString().slice(0, 10);
 
 function guestLimit(module: string, index: number): void {
   if (!player() && !guestMayPlay(module, index)) throw new ApiError('guest_limit', t('Create a free account to keep going.'));
@@ -52,11 +58,13 @@ function mine(playerId: string, module: string): MockPuzzleModule {
 }
 
 function progress(playerId: string): PuzzleModuleProgress[] {
-  return MODULES.map((m) => {
+  const premium = playerId === GUEST_ID ? null : plan();
+  return MODULES.filter((m) => released(m.releaseAt, premium)).map((m) => {
     const p = mine(playerId, m.id);
     return {
       id: m.id,
-      unlocked: m.free || p.unlocked,
+      unlocked: moduleOpen(m.free, p.unlocked, premium),
+      bought: m.free || p.unlocked,
       stars: [...p.stars],
       seen: [...p.seen],
       reviewFrom: p.stars.map((s, i) => reviewFrom(s, p.tried[i])),
@@ -64,6 +72,23 @@ function progress(playerId: string): PuzzleModuleProgress[] {
       reward: p.reward && { ...p.reward },
     };
   });
+}
+
+/**
+ * Streak shields (as the server's `use_shields`): days missed since the last one solved are
+ * kept when the player holds a shield for each. Returns the shields used now.
+ */
+function useShields(day: string): number {
+  const profile = player();
+  const d = profile && db.daily[profile.id];
+  if (!profile || !d?.streak.lastDay || !d.streak.current) return 0;
+  const missed = dayNumber(day) - dayNumber(d.streak.lastDay) - 1;
+  const held = db.shields[profile.id] ?? 0;
+  if (missed < 1 || missed > held) return 0;
+  db.shields[profile.id] = held - missed;
+  d.streak.lastDay = dayBefore(day);
+  save();
+  return missed;
 }
 
 export const puzzles: PuzzlesService = {
@@ -88,14 +113,16 @@ export const puzzles: PuzzlesService = {
     if (!puzzle || !solves(puzzle, moves)) throw new ApiError('wrong', t('That is not the solution.'));
     const p = mine(who(), module);
     const earned = stars(mistakes, hints);
+    // with Premium hints cost no coins (the stars still count them)
+    const paidHints = hintsFree(plan()) ? 0 : hints;
     const counted = p.stars[index] < 3 && reviewCounts(p.tried[index]);
     const first = p.stars[index] === 0 && counted;
     if (counted) p.stars[index] = Math.max(p.stars[index], earned);
     p.seen[index] = p.seen[index] && p.stars[index] === 0;
     p.tried[index] = now();
     const solved = p.stars.filter((s) => s > 0).length;
-    const coins = first ? solveCoins(puzzle.rating, hints, solution(puzzle).length) : 0;
-    const hintCost = first ? hintPenalty(hints, solution(puzzle).length) : 0;
+    const coins = first ? solveCoins(puzzle.rating, paidHints, solution(puzzle).length) : 0;
+    const hintCost = first ? hintPenalty(paidHints, solution(puzzle).length) : 0;
     const bonus = first ? bonusFor(solved) : 0;
     if (profile) profile.coins += coins + bonus;
     else {
@@ -140,8 +167,27 @@ export const puzzles: PuzzlesService = {
   async daily() {
     await wait(100, 250);
     const day = dayOf();
+    const shielded = useShields(day);
     const d = db.daily[who()];
-    return { day, ...dailyPuzzle(day), solved: d?.days[day] ?? null, streak: { ...(d?.streak ?? { best: 0, lastDay: null }), current: liveStreak(d?.streak ?? null, day) } };
+    return {
+      day,
+      ...dailyPuzzle(day),
+      solved: d?.days[day] ?? null,
+      streak: { ...(d?.streak ?? { best: 0, lastDay: null }), current: liveStreak(d?.streak ?? null, day), shields: player() ? (db.shields[who()] ?? 0) : 0, shielded },
+    };
+  },
+
+  async buyShield() {
+    await wait(250, 450);
+    const { profile } = session();
+    const held = db.shields[profile.id] ?? 0;
+    if (held >= shieldCap(plan())) throw new ApiError('shields_full', t('You hold as many streak shields as you can.'));
+    if (profile.coins < SHIELD_PRICE) throw new ApiError('insufficient_coins', t('You do not have enough coins for a streak shield.'));
+    profile.coins -= SHIELD_PRICE;
+    db.shields[profile.id] = held + 1;
+    save();
+    emit({ type: 'profile' });
+    return held + 1;
   },
 
   async dailyStart() {},
@@ -153,10 +199,12 @@ export const puzzles: PuzzlesService = {
     const { module, index } = dailyPuzzle(day);
     const puzzle = (await modulePuzzles(module))[index];
     if (!puzzle || !solves(puzzle, moves)) throw new ApiError('wrong', t('That is not the solution.'));
+    useShields(day);
     const d = (db.daily[who()] ??= { days: {}, streak: { current: 0, best: 0, lastDay: null } });
     const earned = stars(mistakes, hints);
     if (d.days[day]) return { already: true, coins: 0, hintCost: 0, stars: earned, streak: { ...d.streak }, milestone: null };
-    const coins = dailyCoins(hints, solution(puzzle).length);
+    const paidHints = hintsFree(plan()) ? 0 : hints;
+    const coins = dailyCoins(paidHints, solution(puzzle).length);
     d.days[day] = { stars: earned, coins };
     d.streak = nextStreak(d.streak, day);
     const m = streakMilestone(d.streak.current);
@@ -172,7 +220,7 @@ export const puzzles: PuzzlesService = {
     return {
       already: false,
       coins,
-      hintCost: hintPenalty(hints, solution(puzzle).length),
+      hintCost: hintPenalty(paidHints, solution(puzzle).length),
       stars: earned,
       streak: { ...d.streak },
       milestone: m ? { days: m.days, coins: m.coins, item } : null,

@@ -9,8 +9,10 @@ import type { SeasonReward } from '#shared/seasons.ts';
 import type { ControlId } from '#shared/play.ts';
 import type { AnalysisReport, AnalysisStatus } from '#shared/analysis.ts';
 import type { WatchPolicy } from '#shared/spectate.ts';
+import type { Period, PlanId, PremiumState, PremiumView } from '#shared/subscription.ts';
 
 export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId, AnalysisReport, AnalysisStatus, WatchPolicy };
+export type { Period, PlanId, PremiumState, PremiumView };
 
 // ------------------------------------------------------------------ accounts and profiles
 
@@ -61,6 +63,10 @@ export interface Profile {
   usernameChangedAt: string | null;
   /** who may watch this player's games (docs/PLATFORM.md §4.1 "Spectating"); missing means everyone */
   watch?: WatchPolicy;
+  /** the Premium plan the player has now (docs/PLATFORM.md §4.9); missing or null without one */
+  premium?: PremiumView | null;
+  /** had a subscription before: no second free trial */
+  trialUsed?: boolean;
 }
 
 export interface RankInfo {
@@ -81,6 +87,8 @@ export interface PublicProfile {
   loadout: Loadout;
   createdAt: string;
   online: boolean;
+  /** the Premium badge (plan and Founder), when the player has a plan */
+  premium?: { plan: PlanId; founder: boolean } | null;
 }
 
 export interface FriendEntry {
@@ -192,6 +200,8 @@ export interface ShopItem {
   description: string;
   owned: boolean;
   equipped: boolean;
+  /** not owned, but usable with the Archmage's Wardrobe (until the plan ends) */
+  wardrobe?: boolean;
 }
 
 export interface SeasonInfo {
@@ -380,8 +390,10 @@ export interface MatchmakingService {
 
 export interface PuzzleModuleProgress {
   id: string;
-  /** free, or unlocked with coins */
+  /** open now: free, unlocked with coins, or with Premium */
   unlocked: boolean;
+  /** free or unlocked with coins (stays open without Premium) */
+  bought?: boolean;
   /** best stars per puzzle (1–3), 0 while unsolved */
   stars: number[];
   /** the solution was shown and the puzzle isn't solved yet (it counts as passed, without stars) */
@@ -436,6 +448,8 @@ export interface PuzzlesService {
   guest(): Promise<{ coins: number } | null>;
   /** Signed in: move this device's guest puzzles into the account, once (null: nothing to move). */
   claimGuest(): Promise<GuestClaim | null>;
+  /** buy a streak shield for SHIELD_PRICE coins (the shields held now) */
+  buyShield(): Promise<number>;
 }
 
 export interface GuestClaim {
@@ -451,8 +465,10 @@ export interface GuestClaim {
 /** Learn (docs/PLATFORM.md §4.3): the finished lessons and whether the paid chapters are open. */
 export interface LearnProgress {
   lessons: string[];
-  /** the paid chapters were unlocked */
+  /** the paid chapters are open: unlocked with coins, or with Premium */
   unlocked: boolean;
+  /** unlocked with coins (stays open without Premium) */
+  bought?: boolean;
   /** chapters whose reward was paid */
   rewarded: string[];
 }
@@ -474,12 +490,42 @@ export interface LearnService {
   unlock(): Promise<LearnProgress>;
 }
 
+/** Game Review limits (the review itself runs in the browser, src/features/review). */
+export interface ReviewService {
+  /** today's reviews (UTC day); `limit` null: unlimited */
+  today(): Promise<{ used: number; limit: number | null }>;
+  /** start reviewing a game; a game already reviewed today opens again for free */
+  start(gameId: string): Promise<{ allowed: boolean; used: number; limit: number | null }>;
+}
+
+/** Premium, the subscription (docs/PLATFORM.md §4.9). */
+export interface PremiumService {
+  /** subscribing works in this build (real back-end with Paddle settings, or the demo) */
+  available: boolean;
+  /** 'demo': the in-browser back-end subscribes at once, without Paddle's checkout */
+  checkout: 'paddle' | 'demo';
+  state(): Promise<PremiumState>;
+  /** start a plan: the Paddle transaction to open in the checkout (null in the demo: subscribed already) */
+  subscribe(plan: PlanId, period: Period): Promise<string | null>;
+  change(plan: PlanId, period: Period): Promise<PremiumState>;
+  /** ends at the end of the paid period (a trial at once) */
+  cancel(): Promise<PremiumState>;
+  /** take a cancellation back */
+  resume(): Promise<PremiumState>;
+  /** Paddle's page for the payment method and invoices */
+  manage(): Promise<string>;
+}
+
 export interface StreakView {
   /** days in a row, 0 when broken */
   current: number;
   best: number;
   /** the last day solved (UTC date) */
   lastDay: string | null;
+  /** streak shields held (a missed day doesn't end the streak) */
+  shields?: number;
+  /** shields used just now for missed days */
+  shielded?: number;
 }
 
 export interface DailyPuzzle {
@@ -531,6 +577,8 @@ export interface Api {
   payments: PaymentsService;
   puzzles: PuzzlesService;
   learn: LearnService;
+  premium: PremiumService;
+  reviews: ReviewService;
   /** which parts still run on the in-browser demo back-end */
   demo: { accounts: boolean; social: boolean };
 }

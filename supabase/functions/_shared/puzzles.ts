@@ -29,6 +29,8 @@ export interface PuzzleModule {
    * (Openings is all hand-made: real games from the first move, so it takes nothing from Lichess)
    */
   select: { min: number; max: number; maxPlies: number; themes?: string[]; without?: string[]; curated?: boolean };
+  /** a new module can wait for a release date (ISO); Archmage sees it 7 days early (_shared/subscription.ts) */
+  releaseAt?: string | null;
 }
 
 export const MODULES: readonly PuzzleModule[] = [

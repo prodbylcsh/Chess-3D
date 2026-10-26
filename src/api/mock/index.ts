@@ -13,7 +13,8 @@ import { learn } from './learn';
 import { puzzles } from './puzzles';
 import { SEED_PLAYERS, type SeedPlayer } from './seed';
 import { account, friends, messages, profileLookups, safety } from './social';
-import { notePeak, owns, seasons, shop } from './shop';
+import { notePeak, mayUse, seasons, shop } from './shop';
+import { premium, refreshPremium, reviews } from './premium';
 
 function pickOpponent(kind: MatchKind, mmr: number): SeedPlayer {
   const pool = SEED_PLAYERS.filter((p) => p.online);
@@ -109,7 +110,9 @@ export function createMockApi(): Api {
 
     profiles: {
       async me() {
-        return structuredClone(session().profile);
+        const { profile } = session();
+        if (refreshPremium(profile)) save();
+        return structuredClone(profile);
       },
 
       async checkUsername(username) {
@@ -131,7 +134,7 @@ export function createMockApi(): Api {
           if (next) throw new ApiError('cooldown', t('You can change your username again on {date}.', { date: next.toLocaleDateString() }));
           profile.usernameChangedAt = new Date().toISOString();
         }
-        if (patch.iconId != null && !owns(profile, patch.iconId)) throw new ApiError('not_owned', t('You do not own this item.'));
+        if (patch.iconId != null && !mayUse(profile, patch.iconId)) throw new ApiError('not_owned', t('You do not own this item.'));
         if (patch.watch != null && !isWatchPolicy(patch.watch)) throw new ApiError('invalid', t('Something went wrong. Please try again.'));
         Object.assign(profile, patch);
         save();
@@ -161,6 +164,8 @@ export function createMockApi(): Api {
     events: { subscribe },
     learn,
     puzzles,
+    premium,
+    reviews,
     // coins for money need the real back-end (Paddle's checkout and webhooks)
     payments: {
       available: false,

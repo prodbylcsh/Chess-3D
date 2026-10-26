@@ -19,6 +19,13 @@
 // POST { action: 'learn_unlock' }                              → { …progress } the paid chapters for LEARN_PRICE
 // POST { action: 'claim', guest }                              → { claimed, player } move a guest's puzzles
 //      (`guest`: the access token of this device's anonymous session) into this account
+// POST { action: 'shield_buy' }                                 → { shields, player } a streak shield for SHIELD_PRICE
+// POST { action: 'reviews' }                                    → { used, limit } today's Game Reviews (limit null: unlimited)
+// POST { action: 'review_start', game }                         → { allowed, used, limit } start the Game Review of a game
+//
+// Premium (../_shared/subscription.ts): any plan opens every module and the paid Learn chapters
+// and makes hints free; streak shields keep a streak over missed days (used when the player
+// next shows up).
 //
 // Stars of a replayed puzzle improve only after REVIEW_AFTER_HOURS without trying it (`counted`).
 //
@@ -54,6 +61,8 @@ import {
 } from '../_shared/puzzles.ts';
 import { CHAPTER_REWARD, LEARN_PRICE, MIN_LESSON_MS, lessonOf, lessonOpen } from '../_shared/learn.ts';
 import { ITEMS } from '../_shared/shop.ts';
+import { SHIELD_PRICE, activePlan, hintsFree, learnUnlocked, moduleOpen, released, reviewsPerDay, shieldCap, type PlanId } from '../_shared/subscription.ts';
+import { subscriptionsOf } from '../_shared/server/premium.ts';
 import { PUZZLES } from '../_shared/server/puzzle-data.ts';
 import { ensurePlayer, getPlayer, publishShowcase } from '../_shared/server/competitive.ts';
 
@@ -74,14 +83,21 @@ const fail = (code: string, message: string, status = 400) => new AccountError(c
 /** A puzzle takes at least this long from opening it to the solve (no scripted farming). */
 const MIN_SOLVE_MS = 2_000;
 
-async function progress(me: string) {
-  const [solves_, modules_] = await Promise.all([
+/** The Premium plan the player has now (guests have none). */
+async function planNow(me: string): Promise<PlanId | null> {
+  return activePlan((await subscriptionsOf(admin, me)).live);
+}
+
+async function progress(me: string, plan?: PlanId | null) {
+  const [solves_, modules_, plan_] = await Promise.all([
     admin.from('puzzle_solves').select('module, idx, stars, tried_at').eq('player_id', me),
     admin.from('puzzle_modules').select('*').eq('player_id', me),
+    plan === undefined ? planNow(me) : plan,
   ]);
   if (solves_.error) throw solves_.error;
   if (modules_.error) throw modules_.error;
-  return MODULES.map((m) => {
+  // a module waiting for its release date shows early with Archmage
+  return MODULES.filter((m) => released(m.releaseAt, plan_)).map((m) => {
     const row = modules_.data.find((r) => r.module === m.id);
     const starsByIdx = Array.from({ length: PUZZLES_PER_MODULE }, () => 0);
     const seen = Array.from({ length: PUZZLES_PER_MODULE }, () => false);
@@ -94,7 +110,8 @@ async function progress(me: string) {
     }
     return {
       id: m.id,
-      unlocked: m.free || !!row?.unlocked_at,
+      unlocked: moduleOpen(m.free, !!row?.unlocked_at, plan_),
+      bought: m.free || !!row?.unlocked_at,
       stars: starsByIdx,
       seen,
       reviewFrom: review,
@@ -110,12 +127,13 @@ async function playable(me: string, body: Record<string, unknown>, guest = false
   const index = Number(body.index);
   if (!module || !Number.isInteger(index) || index < 0 || index >= PUZZLES_PER_MODULE) throw fail('bad_request', 'Unknown puzzle.');
   if (guest && !guestMayPlay(module.id, index)) throw fail('guest_limit', 'Create a free account to keep going.', 403);
-  const mine = (await progress(me)).find((m) => m.id === module.id)!;
-  if (!mine.unlocked) throw fail('locked', 'Unlock this module first.', 403);
+  const plan = guest ? null : await planNow(me);
+  const mine = (await progress(me, plan)).find((m) => m.id === module.id);
+  if (!mine?.unlocked) throw fail('locked', 'Unlock this module first.', 403);
   // one after another: solved (or seen) puzzles can be replayed, the next one is open
   const next = mine.stars.findIndex((s, i) => s === 0 && !mine.seen[i]);
   if (next !== -1 && index > next) throw fail('locked', 'Solve the puzzles before this one first.', 403);
-  return { module, index, puzzle: PUZZLES[module.id][index] };
+  return { module, index, puzzle: PUZZLES[module.id][index], plan };
 }
 
 async function start(me: string, body: Record<string, unknown>, guest: boolean) {
@@ -126,7 +144,7 @@ async function start(me: string, body: Record<string, unknown>, guest: boolean) 
 }
 
 async function solve(me: string, body: Record<string, unknown>, guest: boolean) {
-  const { module, index, puzzle } = await playable(me, body, guest);
+  const { module, index, puzzle, plan } = await playable(me, body, guest);
   const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
   if (error) throw error;
   if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_SOLVE_MS) {
@@ -137,6 +155,8 @@ async function solve(me: string, body: Record<string, unknown>, guest: boolean) 
   const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
   const hints = count(body.hints);
   const earned = stars(count(body.mistakes), hints);
+  // with Premium hints cost no coins (the stars still count them)
+  const paidHints = hintsFree(plan) ? 0 : hints;
 
   if (!guest) await ensurePlayer(admin, me);
   const { data: result, error: e2 } = await admin.rpc('solve_puzzle', {
@@ -144,7 +164,7 @@ async function solve(me: string, body: Record<string, unknown>, guest: boolean) 
     p_module: module.id,
     p_idx: index,
     p_stars: earned,
-    p_coins: solveCoins(puzzle.rating, hints, solution(puzzle).length),
+    p_coins: solveCoins(puzzle.rating, paidHints, solution(puzzle).length),
     p_every: BONUS_EVERY,
     p_bonus: BONUS_COINS,
     p_review: REVIEW_AFTER_HOURS * 3600,
@@ -163,7 +183,7 @@ async function solve(me: string, body: Record<string, unknown>, guest: boolean) 
     if (e4) throw e4;
     if (given) reward = { item, coins: item ? null : COMPLETION_COINS };
   }
-  const hintCost = result.first ? hintPenalty(hints, solution(puzzle).length) : 0;
+  const hintCost = result.first ? hintPenalty(paidHints, solution(puzzle).length) : 0;
   return {
     first: result.first,
     coins: result.coins,
@@ -200,17 +220,60 @@ async function reveal(me: string, body: Record<string, unknown>, guest: boolean)
 /** The attempt row of the daily puzzle (one attempt at a time, like the modules). */
 const DAILY = 'daily';
 
-async function dailyState(me: string) {
+/** Streak shields keep the streak over the days missed since the last one (when there are enough). */
+async function useShields(me: string, day: string): Promise<number> {
+  const { data, error } = await admin.rpc('use_shields', { p_player: me, p_today: day });
+  if (error) throw error;
+  return data as number;
+}
+
+async function dailyState(me: string, guest: boolean) {
   const day = dayOf();
   const { module, index } = dailyPuzzle(day);
+  const shielded = guest ? 0 : await useShields(me, day);
   const [solved_, streak_] = await Promise.all([
     admin.from('puzzle_daily').select('stars, coins').eq('player_id', me).eq('day', day).maybeSingle(),
-    admin.from('puzzle_streaks').select('current, best, last_day').eq('player_id', me).maybeSingle(),
+    admin.from('puzzle_streaks').select('current, best, last_day, shields').eq('player_id', me).maybeSingle(),
   ]);
   if (solved_.error) throw solved_.error;
   if (streak_.error) throw streak_.error;
   const s: Streak | null = streak_.data ? { current: streak_.data.current, best: streak_.data.best, lastDay: streak_.data.last_day } : null;
-  return { day, module, index, solved: solved_.data, streak: { current: liveStreak(s, day), best: s?.best ?? 0, lastDay: s?.lastDay ?? null } };
+  return {
+    day,
+    module,
+    index,
+    solved: solved_.data,
+    streak: { current: liveStreak(s, day), best: s?.best ?? 0, lastDay: s?.lastDay ?? null, shields: streak_.data?.shields ?? 0, shielded },
+  };
+}
+
+async function shieldBuy(me: string) {
+  const { player } = await ensurePlayer(admin, me);
+  const { data, error } = await admin.rpc('buy_shield', { p_player: me, p_price: SHIELD_PRICE, p_cap: shieldCap(player.premium?.plan ?? null) });
+  if (error) {
+    if (/shields_full/.test(error.message)) throw fail('shields_full', 'You hold as many streak shields as you can.', 409);
+    if (/cannot_buy/.test(error.message)) throw fail('insufficient_coins', `You need ${SHIELD_PRICE} coins.`, 409);
+    throw error;
+  }
+  return { shields: data, player: await getPlayer(admin, me) };
+}
+
+// ---------------------------------------------------------------- Game Review limits
+
+async function reviews(me: string) {
+  const limit = reviewsPerDay(await planNow(me));
+  const { count, error } = await admin.from('review_uses').select('game_id', { count: 'exact', head: true }).eq('player_id', me).eq('day', dayOf());
+  if (error) throw error;
+  return { used: count ?? 0, limit };
+}
+
+async function reviewStart(me: string, body: Record<string, unknown>) {
+  const game = typeof body.game === 'string' && body.game.length <= 80 ? body.game : null;
+  if (!game) throw fail('bad_request', 'Unknown game.');
+  const limit = reviewsPerDay(await planNow(me));
+  const { data, error } = await admin.rpc('start_review', { p_player: me, p_day: dayOf(), p_game: game, p_limit: limit });
+  if (error) throw error;
+  return { allowed: data.allowed, used: data.used, limit };
 }
 
 async function dailyStart(me: string) {
@@ -237,9 +300,14 @@ async function dailySolve(me: string, body: Record<string, unknown>, guest: bool
   const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
   const hints = count(body.hints);
   const earned = stars(count(body.mistakes), hints);
-  const coins = dailyCoins(hints, solution(puzzle).length);
+  const plan = guest ? null : await planNow(me);
+  const paidHints = hintsFree(plan) ? 0 : hints;
+  const coins = dailyCoins(paidHints, solution(puzzle).length);
 
-  if (!guest) await ensurePlayer(admin, me);
+  if (!guest) {
+    await ensurePlayer(admin, me);
+    await useShields(me, day);
+  }
   // an item for the milestones that give one: one the player lacks (guests get it on claiming)
   const item = guest ? null : await lackingItem(me);
   const { data: result, error: e2 } = await admin.rpc('solve_daily', {
@@ -258,7 +326,7 @@ async function dailySolve(me: string, body: Record<string, unknown>, guest: bool
     ...(await whoAfter(me, guest, !!result.milestone?.item)),
     already: result.already,
     coins: result.coins,
-    hintCost: result.already ? 0 : hintPenalty(hints, solution(puzzle).length),
+    hintCost: result.already ? 0 : hintPenalty(paidHints, solution(puzzle).length),
     stars: earned,
     streak: { current: result.streak.current, best: result.streak.best, lastDay: result.streak.last_day },
     milestone: result.milestone,
@@ -378,13 +446,20 @@ async function unlock(me: string, body: Record<string, unknown>) {
 // ---------------------------------------------------------------- Learn
 
 async function learnState(me: string) {
-  const [lessons, chapters, unlock] = await Promise.all([
+  const [lessons, chapters, unlock, plan] = await Promise.all([
     admin.from('learn_lessons').select('lesson').eq('player_id', me),
     admin.from('learn_chapters').select('chapter').eq('player_id', me),
     admin.from('learn_unlocks').select('player_id').eq('player_id', me).maybeSingle(),
+    planNow(me),
   ]);
   for (const r of [lessons, chapters, unlock]) if (r.error) throw r.error;
-  return { lessons: lessons.data!.map((l) => l.lesson as string), rewarded: chapters.data!.map((c) => c.chapter as string), unlocked: !!unlock.data };
+  return {
+    lessons: lessons.data!.map((l) => l.lesson as string),
+    rewarded: chapters.data!.map((c) => c.chapter as string),
+    // every Premium plan opens the paid chapters; bought with coins they stay open
+    unlocked: learnUnlocked(!!unlock.data, plan),
+    bought: !!unlock.data,
+  };
 }
 
 async function learnDone(me: string, body: Record<string, unknown>, guest: boolean) {
@@ -469,7 +544,7 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
     case 'reveal':
       return reveal(user.id, body, guest);
     case 'daily':
-      return dailyState(user.id);
+      return dailyState(user.id, guest);
     case 'daily_start':
       return dailyStart(user.id);
     case 'daily_solve':
@@ -482,6 +557,12 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
       return learnDone(user.id, body, guest);
     case 'learn_unlock':
       return learnUnlock(user.id);
+    case 'shield_buy':
+      return shieldBuy(user.id);
+    case 'reviews':
+      return reviews(user.id);
+    case 'review_start':
+      return reviewStart(user.id, body);
     default:
       throw fail('bad_request', 'Unknown action.');
   }

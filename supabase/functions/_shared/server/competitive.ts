@@ -9,12 +9,19 @@ import { rankOf } from '../rating.ts';
 import { SEASON_ONE, parseMonth, type Month } from '../seasons.ts';
 import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
+import { DEFAULT_LOADOUT, FREE_ITEMS, itemDef } from '../shop.ts';
+import { canUse } from '../subscription.ts';
+import { applyPremium, subscriptionsOf, viewOf, type PremiumView } from './premium.ts';
 
 export interface PlayerRow extends PlayerState {
   /** items bought or won (the `player_items` table; free items are not listed) */
   inventory: string[];
   loadout: Record<string, string>;
   badges: string[];
+  /** the Premium plan the player has now (docs/PLATFORM.md §4.9), or null */
+  premium: PremiumView | null;
+  /** had a subscription before: no second free trial */
+  trial_used: boolean;
 }
 
 const UNIQUE_VIOLATION = '23505';
@@ -35,14 +42,18 @@ export function rankInfo(mmr: number) {
 }
 
 async function loadPlayer(admin: SupabaseClient, id: string): Promise<PlayerRow | null> {
-  const [player, items] = await Promise.all([
+  const [player, items, subs] = await Promise.all([
     admin.from('players').select('*').eq('id', id).maybeSingle(),
     admin.from('player_items').select('item_id').eq('player_id', id).order('acquired_at'),
+    subscriptionsOf(admin, id),
   ]);
   if (player.error) throw player.error;
   if (items.error) throw items.error;
-  return player.data ? ({ ...player.data, inventory: items.data.map((i) => i.item_id as string) } as PlayerRow) : null;
+  if (!player.data) return null;
+  return { ...player.data, inventory: items.data.map((i) => i.item_id as string), premium: viewOf(subs.live), trial_used: subs.all.length > 0 } as PlayerRow;
 }
+
+const premiumBadge = (p: PlayerRow) => (p.premium ? { plan: p.premium.plan, founder: p.premium.founder } : null);
 
 /** A player's current state (after `ensurePlayer` created it). */
 export async function getPlayer(admin: SupabaseClient, id: string): Promise<PlayerRow> {
@@ -53,7 +64,7 @@ export async function getPlayer(admin: SupabaseClient, id: string): Promise<Play
 
 /** Publish what other players see of this player (rank, stats, items in use). */
 export async function publishShowcase(admin: SupabaseClient, player: PlayerRow): Promise<void> {
-  const { error } = await admin.from('profiles').update({ showcase: showcaseOf(player, player.loadout) }).eq('id', player.id);
+  const { error } = await admin.from('profiles').update({ showcase: showcaseOf(player, player.loadout, premiumBadge(player)) }).eq('id', player.id);
   if (error) throw error;
 }
 
@@ -70,6 +81,12 @@ export async function ensurePlayer(admin: SupabaseClient, id: string, now = new 
     player = (await loadPlayer(admin, id))!;
     await publishShowcase(admin, player);
   }
+  // the monthly coins a subscription owes, and items of the Wardrobe that are no longer in it
+  const premium = await applyPremium(admin, id, now.getTime());
+  if (premium.granted || (await tidyLoadout(admin, player, now))) {
+    player = (await loadPlayer(admin, id))!;
+    await publishShowcase(admin, player);
+  }
   const { after, grants } = rollSeasons(player, player.inventory, now, SERVER_SEASON_ONE);
   if (after.season === player.season) return { player, grants };
   const { data: applied, error } = await admin.rpc('apply_seasons', {
@@ -82,6 +99,42 @@ export async function ensurePlayer(admin: SupabaseClient, id: string, now = new 
   player = (await loadPlayer(admin, id))!;
   await publishShowcase(admin, player);
   return { player, grants: applied ? grants : [] };
+}
+
+/** Whether the player may use an item now: owned, free, or in the Archmage's Wardrobe. */
+export function mayUse(player: PlayerRow, itemId: string, now = Date.now()): boolean {
+  const def = itemDef(itemId);
+  if (!def) return false;
+  const owned = FREE_ITEMS.includes(itemId) || player.inventory.includes(itemId);
+  return canUse(def, owned, player.premium?.plan ?? null, now);
+}
+
+/**
+ * Items in use that the player may no longer use (the Wardrobe ended with the plan) go back
+ * to the standard ones. Returns whether anything changed.
+ */
+async function tidyLoadout(admin: SupabaseClient, player: PlayerRow, now: Date): Promise<boolean> {
+  const loadout = { ...DEFAULT_LOADOUT, ...player.loadout } as Record<string, string>;
+  let changed = false;
+  for (const [slot, id] of Object.entries(loadout)) {
+    if (!mayUse(player, id, now.getTime())) {
+      loadout[slot] = DEFAULT_LOADOUT[slot as keyof typeof DEFAULT_LOADOUT];
+      changed = true;
+    }
+  }
+  // a Wardrobe icon too (only someone who had a plan can have one)
+  if (player.trial_used && !player.premium?.plan) {
+    const { data, error } = await admin.from('profiles').select('icon_id').eq('id', player.id).maybeSingle();
+    if (error) throw error;
+    if (data?.icon_id && !mayUse(player, data.icon_id, now.getTime())) {
+      const { error: e2 } = await admin.from('profiles').update({ icon_id: 'king' }).eq('id', player.id);
+      if (e2) throw e2;
+    }
+  }
+  if (!changed) return false;
+  const { error } = await admin.from('players').update({ loadout }).eq('id', player.id);
+  if (error) throw error;
+  return true;
 }
 
 /** Settle a finished matchmade game once: MMR, coins, stats, results, ledger, showcases. */
@@ -125,7 +178,7 @@ export async function settleGame(admin: SupabaseClient, row: GameRow): Promise<v
       player_id: s.playerId,
       credit: s.credit,
       state: s.after,
-      showcase: showcaseOf(s.after, me.loadout),
+      showcase: showcaseOf(s.after, me.loadout, premiumBadge(me)),
       result,
     };
   });

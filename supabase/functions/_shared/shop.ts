@@ -12,8 +12,13 @@ export interface ShopItemDef {
   /** 0 for items everyone owns */
   price: number;
   rarity: Rarity;
-  /** false for items that cannot be bought (season rewards) */
+  /** false for items that cannot be bought (season rewards, subscriber icons) */
   forSale: boolean;
+  /**
+   * New items can wait for a release date (ISO): Archmage subscribers may use them
+   * `PLANS.archmage.earlyDays` before everyone can buy them (_shared/subscription.ts).
+   */
+  releaseAt?: string | null;
 }
 
 /** Price range per category (docs/PLATFORM.md §4.5). */
@@ -79,8 +84,11 @@ export const DEFAULT_LOADOUT = {
 } as const;
 
 export function itemDef(id: string): ShopItemDef | undefined {
-  return ITEMS.find((i) => i.id === id) ?? seasonIconDef(id);
+  return ITEMS.find((i) => i.id === id) ?? seasonIconDef(id) ?? premiumIconDef(id);
 }
+
+/** On sale for everyone now (no release date, or it has passed). */
+export const onSale = (def: ShopItemDef, now = Date.now()): boolean => def.forSale && (!def.releaseAt || now >= Date.parse(def.releaseAt));
 
 /** Free items everyone owns. */
 export const FREE_ITEMS: readonly string[] = ITEMS.filter((i) => i.price === 0).map((i) => i.id);
@@ -88,6 +96,14 @@ export const FREE_ITEMS: readonly string[] = ITEMS.filter((i) => i.price === 0).
 /** Season reward icons ("season-3-gold-platinum") are not in the list but are real items. */
 function seasonIconDef(id: string): ShopItemDef | undefined {
   return /^season-\d+-[a-z-]+$/.test(id) ? { id, category: 'icon', price: 0, rarity: 'legendary', forSale: false } : undefined;
+}
+
+/**
+ * The monthly subscriber icons ("premium-2026-11", Wizard and Archmage, kept forever) are
+ * real items too, never for sale (docs/PLATFORM.md §4.9).
+ */
+function premiumIconDef(id: string): ShopItemDef | undefined {
+  return /^premium-\d{4}-(0[1-9]|1[0-2])$/.test(id) ? { id, category: 'icon', price: 0, rarity: 'epic', forSale: false } : undefined;
 }
 
 /** Items that can be handed out as season rewards: piece sets, boards and effects. */
@@ -98,11 +114,11 @@ export function seasonRewardPool(): ShopItemDef[] {
 export type PurchaseProblem = 'unknown' | 'not-for-sale' | 'owned' | 'coins';
 
 /** Why a purchase cannot happen, or null when it can. */
-export function purchaseProblem(id: string, owned: readonly string[], coins: number): PurchaseProblem | null {
+export function purchaseProblem(id: string, owned: readonly string[], coins: number, now = Date.now()): PurchaseProblem | null {
   const def = itemDef(id);
   if (!def) return 'unknown';
   if (owned.includes(id) || FREE_ITEMS.includes(id)) return 'owned';
-  if (!def.forSale) return 'not-for-sale';
+  if (!onSale(def, now)) return 'not-for-sale';
   if (coins < def.price) return 'coins';
   return null;
 }
