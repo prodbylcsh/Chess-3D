@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Chess } from 'chess.js';
-import { FAIRPLAY, gameSignals, matchZ, median, review, type GameSignals, type ReviewedGame } from '../supabase/functions/_shared/fairplay.ts';
+import { BY_MMR, FAIRPLAY, NEUTRAL_MMR, barFor, gameSignals, matchZ, median, review, reviewMmr, type GameSignals, type ReviewedGame } from '../supabase/functions/_shared/fairplay.ts';
 import { ANALYSIS, isReport, sameReport } from '../supabase/functions/_shared/analysis.ts';
 import { move, type GameRow } from '../supabase/functions/_shared/rules.ts';
 
@@ -85,6 +85,7 @@ const signals = (o: Partial<GameSignals>): GameSignals => ({
   accuracy: 75,
   times: [4000, 9000, 2000, 15000, 6000, 3000, 20000, 5000, 7000, 1000],
   obvious: [800, 1200],
+  found: [6000],
   away: 0,
   awayMatched: 0,
   ...o,
@@ -93,7 +94,7 @@ const games = (n: number, o: Partial<GameSignals> = {}, source: ReviewedGame['so
   Array.from({ length: n }, () => ({ signals: signals(o), source }));
 
 test('an ordinary player is not flagged', () => {
-  const r = review(games(20));
+  const r = review(games(20), null);
   assert.equal(r.level, 0);
   assert.deepEqual(r.reasons, []);
   assert.equal(r.stats.games, 20);
@@ -101,46 +102,86 @@ test('an ordinary player is not flagged', () => {
 });
 
 test('finding the engine\'s choice far above a strong human, over many moves', () => {
-  const r = review(games(8, { matched: 22, quietMatched: 10, accuracy: 96 }));
+  const r = review(games(8, { matched: 22, quietMatched: 10, accuracy: 96 }), null);
   const ids = r.reasons.map((x) => x.id);
   assert.ok(ids.includes('engine_match') && ids.includes('engine_game') && ids.includes('quiet_match') && ids.includes('high_accuracy'));
   assert.ok(r.level >= FAIRPLAY.reviewLevel);
   assert.equal(r.reasons.find((x) => x.id === 'engine_match')!.points, 3);
   // the same rate over too few moves says nothing yet
-  assert.ok(!review(games(2, { matched: 21 })).reasons.some((x) => x.id === 'engine_match'));
+  assert.ok(!review(games(2, { matched: 21 }), null).reasons.some((x) => x.id === 'engine_match'));
 });
 
 test('the bar falls as the evidence grows', () => {
-  assert.ok(matchZ(40, 60)! < matchZ(400, 600)!);
-  assert.ok(matchZ(30, 60)! === 0);
-  assert.equal(matchZ(0, 0), null);
+  assert.ok(matchZ(40, 60, 0.5)! < matchZ(400, 600, 0.5)!);
+  assert.ok(matchZ(30, 60, 0.5)! === 0);
+  assert.equal(matchZ(0, 0, 0.5), null);
   assert.equal(median([3, 1, 2]), 2);
   assert.equal(median([4, 1, 2, 3]), 2.5);
 });
 
 test('relaying moves to another device: obvious moves as slow as the rest', () => {
-  const relay = review(games(5, { times: [12000, 14000, 11000, 13000, 12500], obvious: [11000, 12000] }));
+  const relay = review(games(5, { times: [12000, 14000, 11000, 13000, 12500], obvious: [11000, 12000] }), null);
   assert.ok(relay.reasons.some((x) => x.id === 'steady_timing'));
   assert.equal(relay.stats.obviousMs, 11500);
-  assert.ok(!review(games(5)).reasons.some((x) => x.id === 'steady_timing'), 'quick obvious moves are human');
+  assert.ok(!review(games(5), null).reasons.some((x) => x.id === 'steady_timing'), 'quick obvious moves are human');
 });
 
 test('leaving the game and coming back with the engine\'s move', () => {
-  const left = review(games(5, { away: 6, awayMatched: 6 }));
+  const left = review(games(5, { away: 6, awayMatched: 6 }), null);
   assert.deepEqual(left.reasons.find((x) => x.id === 'left_game'), { id: 'left_game', points: 2 });
-  const wandering = review(games(5, { away: 6, awayMatched: 2 }));
+  const wandering = review(games(5, { away: 6, awayMatched: 2 }), null);
   assert.deepEqual(wandering.reasons.find((x) => x.id === 'left_game'), { id: 'left_game', points: 1 });
 });
 
 test('a sudden jump in accuracy', () => {
-  const r = review([...games(5, { accuracy: 93 }), ...games(10, { accuracy: 70 })]);
+  const r = review([...games(5, { accuracy: 93 }), ...games(10, { accuracy: 70 })], null);
   assert.ok(r.reasons.some((x) => x.id === 'accuracy_jump'));
   assert.equal(r.stats.recentAccuracy, 93);
   assert.equal(r.stats.earlierAccuracy, 70);
 });
 
+test('the bar follows MMR: fewer engine moves expected low, more at the top', () => {
+  assert.deepEqual(barFor(null), barFor(NEUTRAL_MMR));
+  assert.equal(barFor(1000).humanMatch, 0.36);
+  assert.equal(barFor(800).humanMatch, 0.34, 'interpolated between the anchors');
+  assert.equal(barFor(0).humanMatch, BY_MMR.humanMatch[0]);
+  assert.equal(barFor(9000).humanMatch, BY_MMR.humanMatch.at(-1));
+  for (const key of ['humanMatch', 'gameMatch', 'gameAccuracy', 'quietMatch', 'highAccuracy'] as const) {
+    assert.ok(barFor(600)[key] < barFor(3200)[key], `${key} rises with MMR`);
+  }
+  // obvious moves and hard moves: the stronger the player, the quicker they are expected to be
+  assert.ok(barFor(600).obviousMs > barFor(3200).obviousMs);
+  assert.ok(barFor(600).foundRatio > barFor(3200).foundRatio);
+
+  // the same games: suspicious for a Bronze player, normal for a Grandmaster
+  const same = games(20, { matched: 12 });
+  assert.equal(review(same, 3200).level, 0);
+  const low = review(same, 700);
+  assert.ok(low.reasons.some((x) => x.id === 'engine_match'));
+  assert.equal(low.stats.mmr, 700);
+  assert.equal(low.stats.humanMatch, 0.33);
+});
+
+test('MMR counts once ranked runs and the player has played enough of it', () => {
+  assert.equal(reviewMmr(1800, false, 50), null, 'ranked closed: everyone is near 1,000, MMR says nothing');
+  assert.equal(reviewMmr(1800, true, FAIRPLAY.rankedGames - 1), null);
+  assert.equal(reviewMmr(1800, true, FAIRPLAY.rankedGames), 1800);
+});
+
+test('timing by MMR: a relay, and hard moves found too fast for the rank', () => {
+  const slowObvious = games(5, { obvious: [2800, 2800], times: [4300, 4300, 4300] });
+  assert.ok(review(slowObvious, 3200).reasons.some((x) => x.id === 'steady_timing'), 'a top player takes back at once');
+  assert.ok(!review(slowObvious, 600).reasons.some((x) => x.id === 'steady_timing'), 'a beginner may well think it over');
+
+  const quick = games(5, { quietMatched: 8, found: [3000, 3500] });
+  const low = review(quick, 1000);
+  assert.ok(low.reasons.some((x) => x.id === 'fast_precision'));
+  assert.equal(low.stats.foundMs, 3250);
+  assert.ok(!review(quick, 3200).reasons.some((x) => x.id === 'fast_precision'), 'top players find hard moves quickly');
+});
+
 test('games judged only by the opponent\'s report are counted for the operator', () => {
-  const r = review([...games(3), ...games(2, {}, 'opponent')]);
+  const r = review([...games(3), ...games(2, {}, 'opponent')], null);
   assert.equal(r.stats.fromOpponent, 2);
 });
 

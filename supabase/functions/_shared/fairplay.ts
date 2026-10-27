@@ -7,7 +7,9 @@
 // An engine on a second device leaves no trace in the browser, so the signals are in the moves
 // themselves: how often the player finds the engine's first choice after the opening, quiet
 // moves included, and how they spend their time (someone relaying moves to another device
-// takes as long over an obvious recapture as over a hard move). Pure functions shared by the
+// takes as long over an obvious recapture as over a hard move). How strict the review is
+// follows the player's MMR: a low-ranked player is expected to find fewer engine moves and to
+// think longer before the hard ones than a top player (`barFor`). Pure functions shared by the
 // server and the tests.
 import { Chess } from 'chess.js';
 import { accuracies } from './analysis.ts';
@@ -22,8 +24,6 @@ export const FAIRPLAY = {
   awayMs: 2_000,
   /** a player's last analysed games, looked at together */
   window: 20,
-  /** the engine's first choice found this often is a strong human's level (a fixed bar: MMR is a ladder, not strength) */
-  humanMatch: 0.5,
   /** real players vary more than coin flips: the spread of the match rate is widened by this */
   spread: 1.5,
   /** counted moves before the match rate over several games counts */
@@ -31,23 +31,19 @@ export const FAIRPLAY = {
   /** standard deviations above the human bar for 'engine_match' (2 points), and for 3 points */
   matchZ: 3,
   matchZStrong: 5,
-  /** one game played like an engine: this many counted moves, this match rate and accuracy */
+  /** one game played like an engine (with this many counted moves; match and accuracy by MMR) */
   gameMoves: 20,
-  gameMatch: 0.85,
-  gameAccuracy: 95,
   /** quiet moves (no capture, check or promotion) are the hard ones to find */
   quietMoves: 25,
-  quietMatch: 0.7,
   /** average accuracy over at least `accuracyGames` games */
   accuracyGames: 5,
-  highAccuracy: 92,
   /** the last `jumpGames` games against the ones before (at least as many) */
   jumpGames: 5,
   accuracyJump: 15,
-  /** obvious moves (the only legal one, taking back) made as slowly as the rest */
+  /** obvious moves (the only legal one, taking back) made as slowly as the rest: at least this many */
   obviousMoves: 8,
-  obviousMs: 3_000,
-  obviousRatio: 0.6,
+  /** hard engine moves (quiet first choices) found without thinking longer: at least this many */
+  foundMoves: 10,
   /** left the game during this share of counted moves, at least `awayMoves` times */
   awayMoves: 5,
   awayShare: 0.1,
@@ -55,7 +51,55 @@ export const FAIRPLAY = {
   awayMatch: 0.7,
   /** the review queue shows players from this level */
   reviewLevel: 2,
+  /** MMR sets the bar only once ranked is open and the player has this many ranked games */
+  rankedGames: 10,
 } as const;
+
+/**
+ * What an honest player at a given MMR does, at these MMRs (Bronze, Silver II, Platinum IV,
+ * Diamond IV, Grandmaster); in between it is interpolated, beyond it stays at the ends.
+ */
+export const BY_MMR = {
+  mmr: [600, 1000, 1600, 2400, 3200],
+  /** the engine's first choice found this often */
+  humanMatch: [0.32, 0.36, 0.42, 0.5, 0.56],
+  /** one game played like an engine: match rate and accuracy */
+  gameMatch: [0.75, 0.78, 0.82, 0.85, 0.9],
+  gameAccuracy: [90, 91, 93, 95, 97],
+  /** quiet first choices found this often */
+  quietMatch: [0.5, 0.55, 0.62, 0.7, 0.76],
+  /** average accuracy over several games */
+  highAccuracy: [85, 87, 89, 92, 94],
+  /** obvious moves: a median this slow, and this close to the player's median move, look like a relay */
+  obviousMs: [3_500, 3_000, 2_500, 2_000, 1_500],
+  obviousRatio: [0.75, 0.7, 0.65, 0.6, 0.5],
+  /** hard engine moves found in at most this share of the player's median think time */
+  foundRatio: [0.8, 0.75, 0.7, 0.6, 0.5],
+} as const;
+
+/** The MMR whose bar applies while a player's MMR says nothing yet: a strong player's (lenient). */
+export const NEUTRAL_MMR = 2400;
+
+export type Bar = { [K in Exclude<keyof typeof BY_MMR, 'mmr'>]: number };
+
+/** How strict the review is for a player at this MMR (null: unknown strength, the neutral bar). */
+export function barFor(mmr: number | null): Bar {
+  const at = mmr ?? NEUTRAL_MMR;
+  const xs = BY_MMR.mmr;
+  const i = Math.max(0, Math.min(xs.length - 2, xs.findIndex((x, k) => k === xs.length - 1 || at < xs[k + 1])));
+  const t = Math.max(0, Math.min(1, (at - xs[i]) / (xs[i + 1] - xs[i])));
+  const bar = {} as Bar;
+  for (const key of Object.keys(BY_MMR) as Array<keyof typeof BY_MMR>) {
+    if (key === 'mmr') continue;
+    const ys = BY_MMR[key];
+    bar[key] = Math.round((ys[i] + (ys[i + 1] - ys[i]) * t) * 10_000) / 10_000;
+  }
+  return bar;
+}
+
+/** The MMR the review goes by: only while ranked runs and once the player has played enough of it. */
+export const reviewMmr = (mmr: number, rankedOpen: boolean, rankedGames: number): number | null =>
+  rankedOpen && rankedGames >= FAIRPLAY.rankedGames ? mmr : null;
 
 /** What one game says about one player. Kept per game (`fairplay_games`). */
 export interface GameSignals {
@@ -72,6 +116,8 @@ export interface GameSignals {
   times: number[];
   /** think time of the obvious ones among them: the only legal move, or taking back at once */
   obvious: number[];
+  /** think time of the counted moves where the player found a quiet first choice (hard moves) */
+  found: number[];
   /** counted moves made after leaving the game, and how many of those were the engine's choice */
   away: number;
   awayMatched: number;
@@ -95,7 +141,7 @@ const isQuiet = (m: { flags: string; san: string }) => !/[cep]/.test(m.flags) &&
 
 /** The signals of one player in one analysed game. */
 export function gameSignals({ moves, scores, best, color, moveMs, away }: GameInput): GameSignals {
-  const s: GameSignals = { counted: 0, matched: 0, quiet: 0, quietMatched: 0, accuracy: accuracies(scores)[color], times: [], obvious: [], away: 0, awayMatched: 0 };
+  const s: GameSignals = { counted: 0, matched: 0, quiet: 0, quietMatched: 0, accuracy: accuracies(scores)[color], times: [], obvious: [], found: [], away: 0, awayMatched: 0 };
   const timed = moveMs?.length === moves.length;
   const chess = new Chess();
   let lastCapture: string | null = null;
@@ -126,6 +172,7 @@ export function gameSignals({ moves, scores, best, color, moveMs, away }: GameIn
     if (isQuiet(engine)) {
       s.quiet++;
       if (match) s.quietMatched++;
+      if (match && timed) s.found.push(moveMs![i]);
     }
     if ((away?.[i] ?? 0) >= FAIRPLAY.awayMs) {
       s.away++;
@@ -142,13 +189,24 @@ export interface ReviewedGame {
   source: 'agreed' | 'opponent';
 }
 
-export type Reason = 'engine_match' | 'engine_game' | 'quiet_match' | 'high_accuracy' | 'accuracy_jump' | 'steady_timing' | 'left_game';
+export type Reason =
+  | 'engine_match'
+  | 'engine_game'
+  | 'quiet_match'
+  | 'high_accuracy'
+  | 'accuracy_jump'
+  | 'steady_timing'
+  | 'fast_precision'
+  | 'left_game';
 
 export interface Review {
   /** the sum of the reasons' points; the queue shows players from FAIRPLAY.reviewLevel */
   level: number;
   reasons: Array<{ id: Reason; points: number }>;
   stats: {
+    /** the MMR the bar was set by (null: not known yet, the neutral bar) and the expected match rate */
+    mmr: number | null;
+    humanMatch: number;
     games: number;
     fromOpponent: number;
     counted: number;
@@ -161,6 +219,7 @@ export interface Review {
     recentAccuracy: number | null;
     earlierAccuracy: number | null;
     obviousMs: number | null;
+    foundMs: number | null;
     medianMs: number | null;
     away: number;
     awayMatchRate: number | null;
@@ -179,15 +238,18 @@ export function median(xs: number[]): number | null {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-/** How far a match rate over n moves is above the human bar, in (widened) standard deviations. */
-export function matchZ(matched: number, n: number): number | null {
+/** How far a match rate over n moves is above an honest player's rate p, in (widened) standard deviations. */
+export function matchZ(matched: number, n: number, p: number): number | null {
   if (!n) return null;
-  const p = FAIRPLAY.humanMatch;
   return (matched / n - p) / (Math.sqrt((p * (1 - p)) / n) * FAIRPLAY.spread);
 }
 
-/** A player's recent analysed games (newest first) together: a level and its reasons. */
-export function review(recent: ReviewedGame[]): Review {
+/**
+ * A player's recent analysed games (newest first) together: a level and its reasons, against
+ * the bar for the player's MMR (`reviewMmr`; null: the neutral bar).
+ */
+export function review(recent: ReviewedGame[], mmr: number | null): Review {
+  const bar = barFor(mmr);
   const games = recent.slice(0, FAIRPLAY.window);
   const all = games.map((g) => g.signals);
   const counted = sum(all.map((s) => s.counted));
@@ -199,27 +261,35 @@ export function review(recent: ReviewedGame[]): Review {
   const earlierAccs = accs.slice(FAIRPLAY.jumpGames);
   const obvious = all.flatMap((s) => s.obvious);
   const times = all.flatMap((s) => s.times);
+  const found = all.flatMap((s) => s.found ?? []);
   const away = sum(all.map((s) => s.away));
   const awayMatched = sum(all.map((s) => s.awayMatched));
-  const engineGames = all.filter((s) => s.counted >= FAIRPLAY.gameMoves && s.matched / s.counted >= FAIRPLAY.gameMatch && (s.accuracy ?? 0) >= FAIRPLAY.gameAccuracy).length;
+  const engineGames = all.filter((s) => s.counted >= FAIRPLAY.gameMoves && s.matched / s.counted >= bar.gameMatch && (s.accuracy ?? 0) >= bar.gameAccuracy).length;
 
-  const z = matchZ(matched, counted);
+  const z = matchZ(matched, counted, bar.humanMatch);
   const accuracy = mean(accs);
   const recentAccuracy = mean(recentAccs);
   const earlierAccuracy = earlierAccs.length >= FAIRPLAY.jumpGames ? mean(earlierAccs) : null;
   const obviousMs = median(obvious);
   const medianMs = median(times);
+  const foundMs = median(found);
+  const quietRate = rate(quietMatched, quiet);
 
   const reasons: Review['reasons'] = [];
   if (counted >= FAIRPLAY.minMoves && z !== null && z >= FAIRPLAY.matchZ) reasons.push({ id: 'engine_match', points: z >= FAIRPLAY.matchZStrong ? 3 : 2 });
   if (engineGames) reasons.push({ id: 'engine_game', points: 2 });
-  if (quiet >= FAIRPLAY.quietMoves && quietMatched / quiet >= FAIRPLAY.quietMatch) reasons.push({ id: 'quiet_match', points: 1 });
-  if (accs.length >= FAIRPLAY.accuracyGames && accuracy! >= FAIRPLAY.highAccuracy) reasons.push({ id: 'high_accuracy', points: 1 });
+  if (quiet >= FAIRPLAY.quietMoves && quietRate! >= bar.quietMatch) reasons.push({ id: 'quiet_match', points: 1 });
+  if (accs.length >= FAIRPLAY.accuracyGames && accuracy! >= bar.highAccuracy) reasons.push({ id: 'high_accuracy', points: 1 });
   if (earlierAccuracy !== null && recentAccs.length === FAIRPLAY.jumpGames && recentAccuracy! - earlierAccuracy >= FAIRPLAY.accuracyJump) {
     reasons.push({ id: 'accuracy_jump', points: 1 });
   }
-  if (obvious.length >= FAIRPLAY.obviousMoves && obviousMs! >= FAIRPLAY.obviousMs && medianMs && obviousMs! / medianMs >= FAIRPLAY.obviousRatio) {
+  // a relay to a second device: obvious moves take about as long as any other
+  if (obvious.length >= FAIRPLAY.obviousMoves && obviousMs! >= bar.obviousMs && medianMs && obviousMs! / medianMs >= bar.obviousRatio) {
     reasons.push({ id: 'steady_timing', points: 1 });
+  }
+  // hard engine moves found, often, without the longer think a player of this rank needs
+  if (found.length >= FAIRPLAY.foundMoves && quietRate! >= bar.quietMatch && medianMs && foundMs! / medianMs <= bar.foundRatio) {
+    reasons.push({ id: 'fast_precision', points: 1 });
   }
   if (away >= FAIRPLAY.awayMoves && away / counted >= FAIRPLAY.awayShare) {
     reasons.push({ id: 'left_game', points: awayMatched / away >= FAIRPLAY.awayMatch ? 2 : 1 });
@@ -229,17 +299,20 @@ export function review(recent: ReviewedGame[]): Review {
     level: sum(reasons.map((r) => r.points)),
     reasons,
     stats: {
+      mmr,
+      humanMatch: round(bar.humanMatch)!,
       games: games.length,
       fromOpponent: games.filter((g) => g.source === 'opponent').length,
       counted,
       matchRate: round(rate(matched, counted)),
       matchZ: round(z, 1),
-      quietRate: round(rate(quietMatched, quiet)),
+      quietRate: round(quietRate),
       engineGames,
       accuracy: round(accuracy, 1),
       recentAccuracy: round(recentAccuracy, 1),
       earlierAccuracy: round(earlierAccuracy, 1),
       obviousMs: obviousMs === null ? null : Math.round(obviousMs),
+      foundMs: foundMs === null ? null : Math.round(foundMs),
       medianMs: medianMs === null ? null : Math.round(medianMs),
       away,
       awayMatchRate: round(rate(awayMatched, away)),

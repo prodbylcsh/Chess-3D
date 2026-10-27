@@ -40,6 +40,9 @@ the operator only, nothing automatic (`PLATFORM.md` §6.4):
 - Rules `_shared/fairplay.ts` (+ `tests/fairplay.test.ts`): per-game signals (engine first
   choice match after the opening, quiet moves, accuracy, think times incl. obvious moves,
   moves after leaving the game) and a review over the last 20 games (level + reasons).
+  The bar follows MMR (the user's decision): stricter for low ranks, looser for top players,
+  in engine moves and in think times (`BY_MMR`); while ranked is closed, or before 10 ranked
+  games, the neutral bar of a 2,400 player applies.
 - The analysis report carries Stockfish's first choice per position (`best`) and the player's
   away times (`away`, `src/features/game/modes/away.ts`); the server times every move
   (`games.move_ms`). Coin games are analysed too (accuracy only, the stake pays as before).

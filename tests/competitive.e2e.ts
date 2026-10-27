@@ -255,6 +255,7 @@ test('fair play: coin games are analysed too; a player is judged by the agreed a
   const flag = (await admin.from('fairplay_flags').select('*').eq('player_id', black.id).single()).data!;
   assert.equal(flag.status, 'open');
   assert.equal(flag.stats.games, 1);
+  assert.equal(flag.stats.mmr, null, 'no ranked games yet: the neutral bar, not the MMR');
   for (const table of ['fairplay_games', 'fairplay_flags', 'fairplay_queue']) {
     const read = await black.client.from(table).select('*');
     assert.ok(read.error || read.data!.length === 0, `players cannot read ${table}`);

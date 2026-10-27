@@ -1049,15 +1049,32 @@ migration `20261027090000_fair_play.sql`.
 - **Who is judged by which report.** By the agreed analysis when both reports match; until
   then, or when they differ, by the opponent's report (marked `opponent`, since it could be
   made up). A player who withholds or alters their own report is still analysed.
+- **The bar follows MMR** (the user's decision, October 2026): a low-ranked player is expected
+  to find fewer engine moves and to think longer over obvious and hard moves; a top player
+  more and quicker (`BY_MMR`, interpolated between these MMRs):
+
+  | MMR | 600 | 1,000 | 1,600 | 2,400 | 3,200 |
+  | --- | --- | --- | --- | --- | --- |
+  | engine's first choice found by an honest player | 32% | 36% | 42% | 50% | 56% |
+  | one game like an engine: match / accuracy | 75% / 90 | 78% / 91 | 82% / 93 | 85% / 95 | 90% / 97 |
+  | quiet first choices found | 50% | 55% | 62% | 70% | 76% |
+  | average accuracy over 5+ games | 85 | 87 | 89 | 92 | 94 |
+  | obvious moves at least (median, and share of the player's median move) | 3.5 s, 75% | 3 s, 70% | 2.5 s, 65% | 2 s, 60% | 1.5 s, 50% |
+  | hard engine moves found in at most (share of the player's median move) | 80% | 75% | 70% | 60% | 50% |
+
+  MMR counts only while ranked runs and once the player has 10 ranked games
+  (`reviewMmr`): while ranked is closed everyone sits near 1,000, and a new player's MMR
+  doesn't show their strength yet. Until then the bar of a strong player (2,400) applies,
+  so strong newcomers are not flagged just for playing well. The queue shows which MMR
+  the bar used (`stats.mmr`, null for the neutral bar).
 - **Per player** (`fairplay_flags`), over the last 20 analysed games, points for:
-  engine match well above a strong human (a fixed bar of 50%, z ≥ 3 with the spread widened
-  1.5×, at least 60 counted moves: 2 points, z ≥ 5: 3), a game played like an engine (≥ 20
-  moves, ≥ 85% match, ≥ 95% accuracy: 2), quiet moves found ≥ 70% (1), average accuracy ≥ 92
-  over 5+ games (1), accuracy up by 15+ in the last 5 games (1), obvious moves as slow as the
-  rest (median ≥ 3 s and ≥ 60% of the overall median: the relay to a second device; 1), and
-  leaving the game during ≥ 10% of counted moves (1, or 2 when ≥ 70% of those were the
-  engine's move). MMR is not used for the bar: it is a ladder, not strength, and while ranked
-  is closed everyone is near 1,000.
+  engine match well above the bar (z ≥ 3 with the spread widened 1.5×, at least 60 counted
+  moves: 2 points, z ≥ 5: 3), a game played like an engine (≥ 20 counted moves, match and
+  accuracy over the bar: 2), quiet moves found over the bar (1), average accuracy over the
+  bar (1), accuracy up by 15+ in the last 5 games (1), obvious moves as slow as the rest (the
+  relay to a second device; 1), hard engine moves found often and without the longer think
+  the rank needs (1), and leaving the game during ≥ 10% of counted moves (1, or 2 when ≥ 70%
+  of those were the engine's move).
 - **Review.** `fairplay_queue` (dashboard, service role only) lists open flags from level 2 and
   anyone with an open cheating report, highest first; `report_queue` shows the reported
   player's level. The operator sets `status` to `cleared` or `confirmed` (and a `note`); a

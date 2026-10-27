@@ -3,11 +3,11 @@
 // matchmade games. The numbers come from the pure rules in ../play.ts.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ANALYSIS, accuracies, isReport, sameReport, type AnalysisReport, type AnalysisStatus } from '../analysis.ts';
-import { gameSignals, review, FAIRPLAY } from '../fairplay.ts';
+import { gameSignals, review, reviewMmr, FAIRPLAY } from '../fairplay.ts';
 import { newPlayer, performanceAdjustment, rollSeasons, settle, type FinishedGame, type PlayerState, type SeasonGrant, type Side } from '../play.ts';
 import { awardsMet } from '../awards.ts';
 import { rankOf } from '../rating.ts';
-import { SEASON_ONE, parseMonth, type Month } from '../seasons.ts';
+import { SEASON_ONE, parseMonth, rankedOpen, type Month } from '../seasons.ts';
 import type { GameRow } from '../rules.ts';
 import { showcaseOf } from '../social.ts';
 import { DEFAULT_LOADOUT, FREE_ITEMS, itemDef } from '../shop.ts';
@@ -328,14 +328,17 @@ async function recordFairPlay(admin: SupabaseClient, row: GameRow, analysis: Ana
     });
     if (error) throw error;
 
-    const { data: recent, error: e2 } = await admin
-      .from('fairplay_games')
-      .select('signals, source')
-      .eq('player_id', playerId)
-      .order('played_at', { ascending: false })
-      .limit(FAIRPLAY.window);
-    if (e2) throw e2;
-    const r = review(recent as Parameters<typeof review>[0]);
+    // the bar follows the player's MMR once ranked runs and they have played enough of it
+    const [recent, player, ranked] = await Promise.all([
+      admin.from('fairplay_games').select('signals, source').eq('player_id', playerId).order('played_at', { ascending: false }).limit(FAIRPLAY.window),
+      admin.from('players').select('mmr').eq('id', playerId).single(),
+      admin.from('game_results').select('game_id', { count: 'exact', head: true }).eq('player_id', playerId).eq('kind', 'ranked'),
+    ]);
+    if (recent.error) throw recent.error;
+    if (player.error) throw player.error;
+    if (ranked.error) throw ranked.error;
+    const mmr = reviewMmr(player.data.mmr, rankedOpen(new Date(), SERVER_SEASON_ONE), ranked.count ?? 0);
+    const r = review(recent.data as Parameters<typeof review>[0], mmr);
     const { error: e3 } = await admin.rpc('fairplay_flag', { p_player: playerId, p_level: r.level, p_reasons: r.reasons, p_stats: r.stats });
     if (e3) throw e3;
   }
