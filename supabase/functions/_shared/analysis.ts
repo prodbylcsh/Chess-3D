@@ -23,6 +23,10 @@ export interface AnalysisReport {
   engine: string;
   /** one score per position, from the start to the end of the game, from White's point of view */
   scores: number[];
+  /** the engine's first choice per position (UCI, '' where there is none), for fair play (_shared/fairplay.ts) */
+  best?: string[];
+  /** how long the reporting player was away from the game during each ply (ms, 0 for the opponent's), for fair play */
+  away?: number[];
 }
 
 /** How the analysis of a game ended up (the app shows it on the result card). */
@@ -56,6 +60,16 @@ export function positions(moves: string[]): { fens: string[]; final: number | nu
   return { fens, final };
 }
 
+/** A player's away times as they report them: whole ms per ply, 0 for the opponent's. */
+export function isAway(value: unknown, plies: number): value is number[] {
+  return Array.isArray(value) && value.length === plies && value.every((v) => Number.isInteger(v) && v >= 0 && v <= 24 * 60 * 60 * 1000);
+}
+
+/** The engine's first choice per position as a report gives it: UCI, or '' where there is none. */
+export function isBest(value: unknown, plies: number): value is string[] {
+  return Array.isArray(value) && value.length === plies + 1 && value.every((v) => typeof v === 'string' && (v === '' || /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(v)));
+}
+
 /** A report the server can use: the right engine and one whole-number score per position. */
 export function isReport(value: unknown, plies: number): value is AnalysisReport {
   const r = value as AnalysisReport;
@@ -64,12 +78,18 @@ export function isReport(value: unknown, plies: number): value is AnalysisReport
     r.engine === ANALYSIS.engine &&
     Array.isArray(r.scores) &&
     r.scores.length === plies + 1 &&
-    r.scores.every((s) => Number.isInteger(s) && Math.abs(s) <= ANALYSIS.mate)
+    r.scores.every((s) => Number.isInteger(s) && Math.abs(s) <= ANALYSIS.mate) &&
+    (r.best === undefined || isBest(r.best, plies)) &&
+    (r.away === undefined || isAway(r.away, plies))
   );
 }
 
+/** The same analysis (the away times are each player's own; a report from an older app has no first choices). */
 export const sameReport = (a: AnalysisReport, b: AnalysisReport) =>
-  a.engine === b.engine && a.scores.length === b.scores.length && a.scores.every((s, i) => s === b.scores[i]);
+  a.engine === b.engine &&
+  a.scores.length === b.scores.length &&
+  a.scores.every((s, i) => s === b.scores[i]) &&
+  (!a.best || !b.best || a.best.every((m, i) => m === b.best![i]));
 
 /** Each side's accuracy (0-100) from a report: how much each move lowered the mover's chances. */
 export function accuracies(scores: number[]): { w: number | null; b: number | null } {

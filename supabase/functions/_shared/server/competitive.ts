@@ -3,6 +3,7 @@
 // matchmade games. The numbers come from the pure rules in ../play.ts.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ANALYSIS, accuracies, isReport, sameReport, type AnalysisReport, type AnalysisStatus } from '../analysis.ts';
+import { gameSignals, review, FAIRPLAY } from '../fairplay.ts';
 import { newPlayer, performanceAdjustment, rollSeasons, settle, type FinishedGame, type PlayerState, type SeasonGrant, type Side } from '../play.ts';
 import { awardsMet } from '../awards.ts';
 import { rankOf } from '../rating.ts';
@@ -192,7 +193,8 @@ export async function settleGame(admin: SupabaseClient, row: GameRow): Promise<v
     }
   }
   // the players' browsers analyse the game next; their reports add the performance part
-  if (settled && row.result && (row.kind === 'ranked' || row.kind === 'casual')) {
+  // (coin games: just the accuracy) and give the fair-play signals (_shared/fairplay.ts)
+  if (settled && row.result) {
     const { error } = await admin.from('game_analysis').insert({ game_id: row.id, game });
     if (error && error.code !== UNIQUE_VIOLATION) throw error;
   }
@@ -249,6 +251,8 @@ export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color:
   const analysis = await read();
   if (!analysis) return 'none';
   if (analysis.status !== 'waiting') return analysis.status;
+  // fair play never stands in the way of the player's own result
+  if (report !== undefined) await recordFairPlay(admin, row, analysis).catch((err) => console.error('fair play', err));
   const { w, b } = analysis.reports;
   if (!w || !b) return Date.now() - Date.parse(analysis.created_at) > ANALYSIS.windowMs ? 'expired' : 'waiting';
 
@@ -261,6 +265,8 @@ export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color:
   const game = analysis.game;
   const rows = performanceAdjustment(game, accuracy).map((a) => {
     const me = a.color === 'w' ? game.white : game.black;
+    // a coin game pays its stake whatever the accuracy: the analysis only shows the accuracy
+    if (game.kind === 'wager') return { player_id: a.playerId, season: me.season, accuracy: rounded[a.color], mmr_delta: 0, coins_delta: 0, result: {} };
     return {
       player_id: a.playerId,
       season: me.season,
@@ -276,7 +282,7 @@ export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color:
   });
   const { data: applied, error: applyError } = await admin.rpc('apply_analysis', { p_game: row.id, p_status: 'applied', p_rows: rows });
   if (applyError) throw applyError;
-  if (applied) {
+  if (applied && game.kind !== 'wager') {
     await Promise.all(
       rows.map(async (r) => {
         const player = await getPlayer(admin, r.player_id);
@@ -287,4 +293,50 @@ export async function recordAnalysis(admin: SupabaseClient, row: GameRow, color:
     );
   }
   return 'applied';
+}
+
+/**
+ * The fair-play signals of a game whenever a report comes in, and each player's review over
+ * their recent games (docs/PLATFORM.md §6.4). A player is judged by the agreed analysis, or
+ * until then (or when the two differ) by the opponent's report: a player who hides or alters
+ * their own report is still analysed. The away times are always the player's own.
+ */
+async function recordFairPlay(admin: SupabaseClient, row: GameRow, analysis: AnalysisRow): Promise<void> {
+  const { w, b } = analysis.reports;
+  const agreed = !!w && !!b && sameReport(w, b);
+  for (const color of ['w', 'b'] as const) {
+    const playerId = color === 'w' ? row.white_id : row.black_id;
+    const source = agreed ? (w!.best ? w! : b!) : analysis.reports[color === 'w' ? 'b' : 'w'];
+    if (!playerId || !source?.best) continue;
+    const signals = gameSignals({
+      moves: row.moves,
+      scores: source.scores,
+      best: source.best,
+      color,
+      moveMs: row.move_ms ?? null,
+      away: analysis.reports[color]?.away ?? null,
+    });
+    const me = color === 'w' ? analysis.game.white : analysis.game.black;
+    const { error } = await admin.from('fairplay_games').upsert({
+      game_id: row.id,
+      player_id: playerId,
+      kind: analysis.game.kind,
+      mmr: me.mmr,
+      source: agreed ? 'agreed' : 'opponent',
+      signals,
+      played_at: analysis.created_at,
+    });
+    if (error) throw error;
+
+    const { data: recent, error: e2 } = await admin
+      .from('fairplay_games')
+      .select('signals, source')
+      .eq('player_id', playerId)
+      .order('played_at', { ascending: false })
+      .limit(FAIRPLAY.window);
+    if (e2) throw e2;
+    const r = review(recent as Parameters<typeof review>[0]);
+    const { error: e3 } = await admin.rpc('fairplay_flag', { p_player: playerId, p_level: r.level, p_reasons: r.reasons, p_stats: r.stats });
+    if (e3) throw e3;
+  }
 }

@@ -39,6 +39,7 @@ The platform is meant to earn money for its operator. What pays today and what i
 | Puzzle modules | 100,000 coins each; Openings free (4.2) | ✅ |
 | Learn | chapters 1–2 free, the rest 75,000 coins (≈ €20) (4.3) | planned |
 | Shop items | piece sets, boards, effects for coins (4.5) | ✅ |
+| Fair play (phase 1) | Engine help detected from the analysis (engine match, quiet moves, accuracy), the server's move times (relay to a second device) and leaving the game; coin games analysed too; review queue for the operator, nothing automatic (6.4) | ✅ built (October 2026); sanctions are phase 2 |
 | Premium (subscription) | Apprentice €4.99, Wizard €9.99, Archmage €19.99 a month (a year = 8 months): every puzzle module and Learn chapter, coins every month, Game Review, streak shields, the Wardrobe (4.9) | ✅ built (October 2026); sandbox until live payments |
 
 Coins can also be earned by playing, so every paid part is reachable without money; buying
@@ -878,6 +879,8 @@ only cancel the performance part, never gain from it. The result screen shows th
 analysis progress, the player's accuracy and whether the performance part was added;
 the analysis keeps running when the player leaves the game screen and resumes after a
 reload (for a day). It takes about 5–15 s per game on a computer, longer on a phone.
+Coin games are analysed the same way, but only for the accuracy shown on the result and for
+fair play (6.4): their stake alone decides the coins.
 
 **Win streak.** Ranked wins in a row. The 3rd consecutive win gives **+10%** of the
 baseline (+2), each further win **+2%** more (4th: +12%, 5th: +14%, …), capped at **+30%**
@@ -1024,6 +1027,49 @@ shop purchases are the other one, and streak shields (2,500 coins, 4.9) a small 
   after the release), such as 100 games an hour, two accounts from the same IP address, or
   the same two players handing each other wins. Storing IP addresses for this needs the
   Privacy Policy updated first.
+
+### 6.4 Fair play: engine help ✅ (built October 2026, phase 1)
+
+Engine help is detected in the moves and the time, not on the device: an engine on a second
+device (a phone next to the screen) leaves no trace in the browser. The rules are in
+`supabase/functions/_shared/fairplay.ts` (tests: `tests/fairplay.test.ts`), the data in
+migration `20261027090000_fair_play.sql`.
+
+- **What is measured.** Every ranked, casual and coin game is analysed by both players'
+  browsers (5.2; coin games too since October 2026, only for the accuracy and fair play, the
+  stake alone decides the coins). The report now also carries Stockfish's first choice per
+  position. The server records each move's think time (`games.move_ms`, from its clock). The
+  player's browser records how long the game was hidden or out of focus during each of their
+  moves (`src/features/game/modes/away.ts`) and sends it with its report.
+- **Per game** (`fairplay_games`, per player): moves counted (after the first 8 moves of each
+  side, with more than one legal move, in positions not yet decided: under 4 pawns), how many
+  were the engine's first choice, the same for quiet moves (no capture, check or promotion: the
+  hard ones), accuracy, think times of all moves and of obvious ones (the only legal move,
+  taking back at once), and moves made after leaving the game.
+- **Who is judged by which report.** By the agreed analysis when both reports match; until
+  then, or when they differ, by the opponent's report (marked `opponent`, since it could be
+  made up). A player who withholds or alters their own report is still analysed.
+- **Per player** (`fairplay_flags`), over the last 20 analysed games, points for:
+  engine match well above a strong human (a fixed bar of 50%, z ≥ 3 with the spread widened
+  1.5×, at least 60 counted moves: 2 points, z ≥ 5: 3), a game played like an engine (≥ 20
+  moves, ≥ 85% match, ≥ 95% accuracy: 2), quiet moves found ≥ 70% (1), average accuracy ≥ 92
+  over 5+ games (1), accuracy up by 15+ in the last 5 games (1), obvious moves as slow as the
+  rest (median ≥ 3 s and ≥ 60% of the overall median: the relay to a second device; 1), and
+  leaving the game during ≥ 10% of counted moves (1, or 2 when ≥ 70% of those were the
+  engine's move). MMR is not used for the bar: it is a ladder, not strength, and while ranked
+  is closed everyone is near 1,000.
+- **Review.** `fairplay_queue` (dashboard, service role only) lists open flags from level 2 and
+  anyone with an open cheating report, highest first; `report_queue` shows the reported
+  player's level. The operator sets `status` to `cleared` or `confirmed` (and a `note`); a
+  cleared player comes back when the level rises above the one reviewed. **Nothing is automatic**:
+  sanctions follow the Terms §4 after a person looked at the games.
+- **Thresholds are first guesses.** Calibrate them with real games after the release
+  (the measurements in 9); a strong honest player may reach level 2 and be cleared.
+- **Kept** 12 months per game (cron `cleanup-fairplay`); the flag until the account is deleted.
+  The legal pages say so (Privacy "Fair play", §3, §6; Terms §4, §6), effective 27 October 2026.
+- **Phase 2 (the user decides):** the sanctions themselves (proposed: no ranked and coin games,
+  the season's MMR reset, the MMR lost to the cheater given back to the opponents, bought coins
+  and items kept), and later perhaps a check of engine match in critical positions only.
 
 ## 7. In-game interface (redesign)
 

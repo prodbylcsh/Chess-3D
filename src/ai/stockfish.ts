@@ -46,16 +46,20 @@ export class Stockfish {
     });
   }
 
-  /** Score of a position (FEN) in the report's encoding: White's point of view, mates as ±(10,000 − n). */
-  async score(fen: string): Promise<number> {
+  /**
+   * Score of a position (FEN) in the report's encoding (White's point of view, mates as
+   * ±(10,000 − n)) and the engine's first choice (UCI, '' when there is none).
+   */
+  async score(fen: string): Promise<{ score: number; best: string }> {
     await this.ready;
     let score = 0;
     const whiteToMove = fen.split(' ')[1] === 'w';
-    await this.until('bestmove', ['ucinewgame', `position fen ${fen}`, `go nodes ${ANALYSIS.nodes}`], (line) => {
-      const m = / score (cp|mate) (-?\d+)/.exec(line);
+    const line = await this.until('bestmove', ['ucinewgame', `position fen ${fen}`, `go nodes ${ANALYSIS.nodes}`], (l) => {
+      const m = / score (cp|mate) (-?\d+)/.exec(l);
       if (m) score = encodeScore(m[1] as 'cp' | 'mate', Number(m[2]), whiteToMove);
     });
-    return score;
+    const best = line.split(' ')[1] ?? '';
+    return { score, best: /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(best) ? best : '' };
   }
 
   /**

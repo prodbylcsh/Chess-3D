@@ -39,7 +39,11 @@ The first run pulls images and takes several minutes, so start it with
 Logs: `/tmp/supabase-local/*.log`. If `supabase start` or `db reset` fails pulling
 `storage-api` (Docker Hub 429: the CLI pulls it to set up the schema even though it is skipped),
 set `enabled = false` under `[storage]` in `supabase/config.toml` for that command only and
-`git checkout supabase/config.toml` right after; the app uses no storage. After a `db reset`
+`git checkout supabase/config.toml` right after; the app uses no storage. When Docker Hub answers
+429 for the other images, pull them through Google's Docker Hub mirror and tag them back
+(`docker pull mirror.gcr.io/supabase/postgres:<tag> && docker tag mirror.gcr.io/supabase/postgres:<tag>
+docker.io/supabase/postgres:<tag>`, the same for `gotrue`, `realtime`, `edge-runtime`, `storage-api`; tags in
+the 429 errors of `/tmp/supabase-local/start.log`), then run the script again. After a `db reset`
 run `node supabase/catalog.ts --local` (the shop catalogue). After a container restart, run the script again
 (Docker images survive, processes don't).
 

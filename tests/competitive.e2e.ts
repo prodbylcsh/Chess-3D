@@ -212,9 +212,64 @@ test('engine analysis: identical reports add the performance part; different one
   const mine = (await admin.from('game_results').select('accuracy').eq('game_id', c.id)).data!;
   assert.deepEqual(mine.map((r) => r.accuracy), [null, null]);
 
-  // friend games, coin games and other people's games have no analysis
+  // other people's games: no analysis
   const outsider = await player('uma');
   assert.equal((await play(outsider, { action: 'analysis', gameId: row.id, report })).code, 'not_found');
+});
+
+test('fair play: coin games are analysed too; a player is judged by the agreed analysis or the opponent\'s report', async () => {
+  const { ANALYSIS } = await import('../supabase/functions/_shared/analysis.ts');
+  const a = await player('vic');
+  const b = await player('wes');
+  const row = await match(a, b, 'wager', 'rapid', 'low');
+  const [white, black] = seats(row, a, b);
+  await playPlies(row, white, black, 20);
+  await game(white, { action: 'resign', id: row.id });
+  const timed = (await admin.from('games').select('move_ms').eq('id', row.id).single()).data!;
+  assert.equal(timed.move_ms.length, 20, 'the server timed every move');
+
+  // every move was the engine's first choice; Black left the game before its last two moves
+  const scores = Array(21).fill(0);
+  const best = [...UCI.slice(0, 20), ''];
+  const away = Array.from({ length: 20 }, (_, i) => (i === 17 || i === 19 ? 5_000 : 0));
+  const first = await play(black, { action: 'analysis', gameId: row.id, report: { engine: ANALYSIS.engine, scores, best, away } });
+  assert.equal(first.status, 'waiting');
+  const fair = async () => (await admin.from('fairplay_games').select('*').eq('game_id', row.id)).data!;
+  let rows = await fair();
+  assert.deepEqual(rows.map((r) => [r.player_id, r.source, r.kind]), [[white.id, 'opponent', 'wager']], 'White is judged by Black\'s report until White\'s arrives');
+  assert.equal(rows[0].signals.counted, 2);
+  assert.equal(rows[0].signals.matched, 2);
+  assert.equal(rows[0].signals.times.length, 9, 'think times from the server');
+
+  const done = await play(white, { action: 'analysis', gameId: row.id, report: { engine: ANALYSIS.engine, scores, best } });
+  assert.equal(done.status, 'applied');
+  rows = await fair();
+  assert.deepEqual(rows.map((r) => r.source), ['agreed', 'agreed']);
+  assert.equal(rows.find((r) => r.player_id === black.id).signals.away, 2, 'the away times are the player\'s own');
+  const res = await play(black, { action: 'result', gameId: row.id });
+  assert.equal(res.result.coins_delta, 80, 'a coin game still pays just its stake');
+  assert.equal(res.result.accuracy, 100);
+  assert.equal((await state(black)).coins, 580);
+
+  // a review per player, for the operator only
+  const flag = (await admin.from('fairplay_flags').select('*').eq('player_id', black.id).single()).data!;
+  assert.equal(flag.status, 'open');
+  assert.equal(flag.stats.games, 1);
+  for (const table of ['fairplay_games', 'fairplay_flags', 'fairplay_queue']) {
+    const read = await black.client.from(table).select('*');
+    assert.ok(read.error || read.data!.length === 0, `players cannot read ${table}`);
+  }
+  // the operator's verdict remembers the level; a higher level brings the player back
+  await admin.from('fairplay_flags').update({ status: 'cleared', note: 'checked' }).eq('player_id', black.id);
+  const cleared = (await admin.from('fairplay_flags').select('*').eq('player_id', black.id).single()).data!;
+  assert.equal(cleared.reviewed_level, flag.level);
+  assert.ok(cleared.reviewed_at);
+  assert.ifError((await admin.rpc('fairplay_flag', { p_player: black.id, p_level: flag.level, p_reasons: [], p_stats: {} })).error);
+  assert.equal((await admin.from('fairplay_flags').select('status').eq('player_id', black.id).single()).data!.status, 'cleared');
+  assert.ifError((await admin.rpc('fairplay_flag', { p_player: black.id, p_level: flag.level + 2, p_reasons: [], p_stats: {} })).error);
+  assert.equal((await admin.from('fairplay_flags').select('status').eq('player_id', black.id).single()).data!.status, 'open');
+  const queue = (await admin.from('fairplay_queue').select('player_id, level').eq('player_id', black.id)).data!;
+  assert.equal(queue.length, 1);
 });
 
 test('coin games: stakes are taken at the start; the winner gets the pot minus 10%', async () => {

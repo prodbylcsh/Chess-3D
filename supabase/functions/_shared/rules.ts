@@ -32,6 +32,8 @@ export interface GameRow {
   turn_started_at?: string | null;
   stake?: number | null;
   settled_at?: string | null;
+  /** games with clocks: how long each move took (ms, from the side's turn starting), for fair play */
+  move_ms?: number[] | null;
 }
 
 export type Patch = Partial<Omit<GameRow, 'id' | 'version'>>;
@@ -141,7 +143,10 @@ export function move(row: GameRow, userId: string, input: MoveInput, now = Date.
     // making a move declines any offer made to you; your own offer stands
     draw_offer: row.draw_offer === side ? side : null,
   };
-  if (next) Object.assign(patch, { clock_w: next.white, clock_b: next.black, turn_started_at: new Date(next.turnStartedAt).toISOString() });
+  if (next) {
+    Object.assign(patch, { clock_w: next.white, clock_b: next.black, turn_started_at: new Date(next.turnStartedAt).toISOString() });
+    patch.move_ms = [...(row.move_ms ?? []), Math.max(0, Math.round(now - clocks!.turnStartedAt))];
+  }
   const end = outcome(chess);
   if (end) Object.assign(patch, { status: 'finished', draw_offer: null, ...end });
   return patch;

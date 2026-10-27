@@ -48,6 +48,11 @@ npm test         # rules, rating/coin, seasons, shop, translations and AI unit t
   with the better move as an arrow; one a day free, more with Premium.
 - **Blocking and reporting**: block a player from their profile (no friendship, requests,
   chat or matches between you; Settings lists them) and report a player or a message.
+- **Fair play**: every ranked, casual and coin game is checked for engine help from the
+  players' Stockfish analyses (how often the engine's first choice was played, quiet moves,
+  accuracy), the server's move times (a relay to a second device plays obvious moves as slowly
+  as hard ones) and leaving the game during a move; unusual players go to the operator's review
+  queue (`fairplay_queue`), nothing is automatic.
 - **Spectating**: watch a running online game through its watch link (Share in the game) or a
   friend's "Playing now" (Community, profiles, chats), on the same 3D board with the players'
   items; how many are watching; ranked and coin games two moves behind; "Who can watch my

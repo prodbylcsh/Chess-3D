@@ -1,4 +1,4 @@
-# Handoff: where the work stands (25 October 2026)
+# Handoff: where the work stands (27 October 2026)
 
 Read this, then `CLAUDE.md` (rules, loaded automatically), `docs/PLATFORM.md` (every
 product decision; §4.2 is Puzzles) and the skills in `.claude/skills/` before changing
@@ -30,6 +30,23 @@ How the user works:
 - **Secrets.** No secrets in chat or in commits; keys live in GitHub secrets.
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
+
+## Fair play, phase 1 (built 27 October 2026, on `claude/fair-play`, not merged)
+
+The user asked for engine-help detection, including an engine on a second device (which
+leaves no trace in the browser, so it is found in the moves and the time). Built as flags for
+the operator only, nothing automatic (`PLATFORM.md` §6.4):
+
+- Rules `_shared/fairplay.ts` (+ `tests/fairplay.test.ts`): per-game signals (engine first
+  choice match after the opening, quiet moves, accuracy, think times incl. obvious moves,
+  moves after leaving the game) and a review over the last 20 games (level + reasons).
+- The analysis report carries Stockfish's first choice per position (`best`) and the player's
+  away times (`away`, `src/features/game/modes/away.ts`); the server times every move
+  (`games.move_ms`). Coin games are analysed too (accuracy only, the stake pays as before).
+- Migration `20261027090000_fair_play.sql`: `fairplay_games`, `fairplay_flags`, the
+  `fairplay_queue` view, `fair_play_level` in `report_queue`. Legal pages dated 27 October 2026.
+- **Open (the user's):** the sanctions (phase 2, proposal in §6.4); the thresholds are first
+  guesses to calibrate with real games.
 
 ## Premium, the subscription (built 26 October 2026, on the branch, not merged)
 

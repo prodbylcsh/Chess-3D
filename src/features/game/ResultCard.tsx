@@ -292,7 +292,10 @@ export function ResultCard({ s, mode, engine, onHide }: { s: GameState; mode: Mo
             <ProgressBar value={result.accuracy / 100} tone={result.accuracy >= 70 ? 'success' : 'gold'} />
           </section>
         )}
-        {result?.analysis && ANALYSIS_NOTE[result.analysis.status] && <p className="faint result-note">{t(ANALYSIS_NOTE[result.analysis.status]!)}</p>}
+        {/* a coin game's analysis shows just the accuracy: there is no performance part */}
+        {result?.analysis && ANALYSIS_NOTE[result.analysis.status] && (data?.wager == null || result.analysis.status === 'running') && (
+          <p className="faint result-note">{t(ANALYSIS_NOTE[result.analysis.status]!)}</p>
+        )}
 
         {me && !s.puzzle && !s.lesson && !s.spectator && !s.review && engine.game.history.length >= 4 && <ReviewOffer s={s} mode={mode} engine={engine} />}
 

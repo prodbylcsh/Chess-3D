@@ -12,6 +12,7 @@ import type { ClockView, GameState, PlayerView } from '../store';
 import type { EndAction, Mode, ModeAction, ModeContext } from './types';
 import { dressGame, playerFromProfile } from './types';
 import { shareWatchLink } from './share';
+import { AwayTracker } from './away';
 import { watcherCount } from '#shared/spectate.ts';
 
 const other = (s: Side): Side => (s === 'w' ? 'b' : 'w');
@@ -37,6 +38,8 @@ export class OnlineMode implements Mode {
   private disposed = false;
   private dismiss: Record<'offer' | 'rematch', (() => void) | null> = { offer: null, rematch: null };
   private stopAnalysis: (() => void) | null = null;
+  /** matchmade games: time away from the game during our turns (fair play) */
+  private away: AwayTracker | null = null;
 
   constructor(
     private readonly ctx: ModeContext,
@@ -90,6 +93,7 @@ export class OnlineMode implements Mode {
     this.side = online!.sideOf(row);
     this.seat.side = this.side;
     this.seat.active = row.status === 'active';
+    if (this.side && row.kind && row.kind !== 'friend') this.away = new AwayTracker();
     this.refresh();
     // each side in its player's items (invite-link opponents use the standard set)
     if (this.side) {
@@ -110,6 +114,8 @@ export class OnlineMode implements Mode {
     this.dismiss.rematch?.();
     this.stopAnalysis?.();
     this.stopAnalysis = null;
+    this.away?.dispose();
+    this.away = null;
   }
 
   // ---------------------------------------------------------------- actions
@@ -195,6 +201,7 @@ export class OnlineMode implements Mode {
   private async send(move: Move): Promise<void> {
     const row = this.row;
     if (!row || !online) return;
+    this.away?.turn(null);
     this.pending++;
     try {
       this.onRow(await online.move(row.id, { from: move.from, to: move.to, promotion: move.promotion }));
@@ -344,11 +351,12 @@ export class OnlineMode implements Mode {
       const data = await api.matchmaking.result(row.id);
       if (this.disposed) return;
       store.set({ result: { loading: false, data, accuracy: null, error: null } });
-      // ranked and casual games: Stockfish analyses the game here and the opponent's
-      // browser; the performance part follows when both agree
-      if (data && this.side && (row.kind === 'ranked' || row.kind === 'casual')) {
+      // Stockfish analyses the game here and in the opponent's browser: in ranked and
+      // casual games the performance part follows when both agree; every one is checked
+      // for engine help (fair play)
+      if (data && this.side && this.matchmade) {
         this.followAnalysis(row.id);
-        analyseGame(row.id, row.moves, this.side);
+        analyseGame(row.id, row.moves, this.side, this.away?.values(row.moves.length));
       }
       await this.ctx.refreshProfile();
     } catch (err) {
@@ -375,6 +383,8 @@ export class OnlineMode implements Mode {
   private refresh(): void {
     const row = this.row;
     if (!row || !online) return;
+    const myTurn = row.status === 'active' && !!this.side && (row.moves.length % 2 === 0) === (this.side === 'w');
+    this.away?.turn(myTurn ? row.moves.length : null);
     const player = (side: Side): PlayerView => {
       const id = side === 'w' ? row.white_id : row.black_id;
       if (!id) return { name: t('Waiting…'), iconId: 'guest' };

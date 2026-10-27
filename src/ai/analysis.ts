@@ -1,9 +1,10 @@
-// Engine analysis of the player's finished ranked and casual games, in the background:
+// Engine analysis of the player's finished ranked, casual and coin games, in the background:
 // Stockfish scores every position, the app shows the player's accuracy and sends the
 // report to the server, which adds the performance part once the opponent's report agrees
-// (supabase/functions/_shared/analysis.ts). Jobs survive a reload for as long as the
-// server takes reports; the player can leave the game screen meanwhile.
-import { ANALYSIS, accuracies, positions, type AnalysisStatus } from '#shared/analysis.ts';
+// (supabase/functions/_shared/analysis.ts) and looks for engine help (fairplay.ts). Jobs
+// survive a reload for as long as the server takes reports; the player can leave the game
+// screen meanwhile.
+import { ANALYSIS, accuracies, positions, type AnalysisReport, type AnalysisStatus } from '#shared/analysis.ts';
 import { api, ApiError, type MatchResult, type Side } from '../api';
 import { Stockfish, engineSupported } from './stockfish';
 
@@ -12,6 +13,8 @@ interface Job {
   /** UCI moves */
   moves: string[];
   color: Side;
+  /** how long the player was away from the game during each ply (fair play) */
+  away?: number[];
   /** when the game ended (ms) */
   at: number;
 }
@@ -68,13 +71,13 @@ export function onAnalysis(listener: (gameId: string, state: Analysis) => void):
 export const analysisOf = (gameId: string): Analysis | null => states.get(gameId) ?? null;
 
 /** Analyse a finished game the player took part in (once). */
-export function analyseGame(gameId: string, moves: string[], color: Side): void {
+export function analyseGame(gameId: string, moves: string[], color: Side, away?: number[]): void {
   if (!api.matchmaking.analysis || states.has(gameId) || queue.some((j) => j.gameId === gameId)) return;
   if (!engineSupported()) {
     set(gameId, { status: 'failed' });
     return;
   }
-  queue.push({ gameId, moves, color, at: Date.now() });
+  queue.push({ gameId, moves, color, away, at: Date.now() });
   save();
   set(gameId, { status: 'running', progress: 0 });
   void run();
@@ -114,18 +117,22 @@ async function run(): Promise<void> {
 async function analyse(engine: Stockfish, job: Job): Promise<void> {
   const { fens, final } = positions(job.moves);
   const scores: number[] = [];
+  const best: string[] = [];
   for (let i = 0; i < fens.length; i++) {
-    scores.push(i === fens.length - 1 && final !== null ? final : await engine.score(fens[i]));
+    const { score, best: choice } = i === fens.length - 1 && final !== null ? { score: final, best: '' } : await engine.score(fens[i]);
+    scores.push(score);
+    best.push(choice);
     set(job.gameId, { status: 'running', progress: (i + 1) / fens.length });
   }
   set(job.gameId, { accuracy: accuracies(scores)[job.color] });
-  await report(job.gameId, { engine: ANALYSIS.engine, scores });
+  const away = job.away?.length === job.moves.length ? job.away : undefined;
+  await report(job.gameId, { engine: ANALYSIS.engine, scores, best, ...(away ? { away } : {}) });
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Send the report (a few tries when offline); then, while waiting, ask again now and then. */
-async function report(gameId: string, body: { engine: string; scores: number[] }): Promise<void> {
+async function report(gameId: string, body: AnalysisReport): Promise<void> {
   for (let attempt = 0; ; attempt++) {
     try {
       const { status, result } = await api.matchmaking.analysis!(gameId, body);
