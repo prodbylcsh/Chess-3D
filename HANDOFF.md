@@ -31,7 +31,7 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## Premium, the subscription (built 26 October 2026, on the branch, not merged)
+## Premium, the subscription (merged to `main` and deployed on 27 October 2026, the user's yes)
 
 The user decided every point of `docs/SUBSCRIPTION.md` §8 (all "yes"; monthly coins 35,000 /
 75,000; the Wardrobe's items are lost when the plan ends unless bought). Built in full, rules in
