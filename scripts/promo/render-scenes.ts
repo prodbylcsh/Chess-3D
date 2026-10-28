@@ -109,7 +109,8 @@ const SCENES: Record<string, Scene> = {
     fen: 'rn4k1/p4ppp/b7/3P4/4qBn1/7P/PP2QPP1/2R1KB1R b K - 1 20',
     move: 'a6e2',
     frames: { taken: 5 },
-    camera: { at: [0, 0, 0.6], dist: 7.2, height: 13.5 },
+    // steep, with the board in the upper part of the frame: the text sits below it
+    camera: { at: [0, 0, 2.1], dist: 4.6, height: 22.5 },
   },
   'puzzle-mate2-mate': {
     fen: 'rnR1q1k1/p4ppp/8/3P4/5Bn1/7P/PP2bPP1/4KB1R w K - 2 22',

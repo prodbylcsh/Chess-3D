@@ -224,7 +224,7 @@ Where would you land? Comment your guess 👇
     slides: [
       {
         type: 'cover',
-        img: 'set-monolith-still',
+        img: 'fx-frostbite-hit',
         tag: 'Collection',
         kicker: 'Piece sets · boards · effects',
         title: 'Make the board yours.',
@@ -307,6 +307,7 @@ Which set would you play? 👇
         type: 'cover',
         img: 'puzzle-mate2-taken',
         tag: 'Puzzle',
+        focus: 'board',
         kicker: 'White to move · mate in 2',
         title: 'Black just took your queen.',
         sub: 'Comment your answer before you swipe.',

@@ -146,7 +146,7 @@ function slideBody(s: Slide): { body: string; cls: string } {
   switch (s.type) {
     case 'cover':
       return {
-        cls: 'cover',
+        cls: `cover${s.focus === 'board' ? ' compact' : ''}`,
         body: `<div class="bg" style="background-image:url(${render(s.img)})"></div><div class="fade"></div>
           ${s.focus === 'emblem' ? `<div class="cover-emblem">${emblem('challenger', undefined, 460)}</div>` : ''}
           <div class="content">${kicker(s.kicker)}<h1>${esc(s.title)}</h1>${s.sub ? `<p class="sub">${esc(s.sub)}</p>` : ''}</div>
@@ -239,6 +239,8 @@ h1,h2{font-family:Cinzel,serif;margin:0;letter-spacing:.01em;line-height:1.04;
   filter:drop-shadow(0 4px 22px rgba(0,0,0,.7))}
 h1{font-weight:800;font-size:112px}
 h2{font-weight:700;font-size:80px}
+.compact h1{font-size:84px}
+.compact .fade{background:linear-gradient(180deg,rgba(10,11,16,.5) 0%,rgba(10,11,16,0) 10%,rgba(10,11,16,0) 60%,rgba(10,11,16,.9) 72%,#0a0b10 82%)}
 .sub{font:500 42px/1.3 Inter;margin:28px 0 0;color:#efeae1}
 .body{font:400 37px/1.38 Inter;color:#d9d3c9;margin:26px 0 0;max-width:900px}
 .center .body{margin-left:auto;margin-right:auto}
