@@ -31,7 +31,7 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## Promo and the logo (28 October 2026, on the branch, not merged)
+## Promo and the logo (merged to `main` on 28 October 2026, the user's yes)
 
 The user is starting promotion and ads. The Instagram account is **@wizardchess3d**
 (blank so far). Instagram's official API can publish posts, Reels and Stories and manage
