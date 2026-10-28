@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1080" height="1080"><defs>
+  <linearGradient id="g" x1="0.2" y1="0" x2="0.8" y2="1">
+    <stop offset="0" stop-color="#f9dca8"/>
+    <stop offset="0.55" stop-color="#e3a858"/>
+    <stop offset="1" stop-color="#c98a3c"/>
+  </linearGradient>
+  <radialGradient id="bg" cx="0.5" cy="0.38" r="0.7">
+    <stop offset="0" stop-color="#231d3a"/>
+    <stop offset="0.55" stop-color="#141620"/>
+    <stop offset="1" stop-color="#0a0b10"/>
+  </radialGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur stdDeviation="10" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter><linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#a58cff" stop-opacity="0.15"/>
+          <stop offset="0.5" stop-color="#a58cff"/>
+          <stop offset="1" stop-color="#e2d8ff"/>
+        </linearGradient>
+        <clipPath id="front"><rect x="0" y="500" width="1000" height="500"/></clipPath></defs><rect width="1000" height="1000" fill="url(#bg)"/>
+       <g transform="rotate(-18 500 500)">
+         <ellipse cx="500" cy="500" rx="400" ry="120" fill="none" stroke="url(#ring)" stroke-width="16" opacity="0.55"/>
+       </g>
+       <path transform="translate(69.30000000000001 95.80000000000001) scale(8.6)" fill-rule="evenodd" fill="url(#g)" d="M36 75 C35 66 40 60 46 55 C41 56 35 58 31 55 C27 52 28 47 32 44 C38 40 41 34 43 28 L41 19 L49 23 C55 22 63 26 67 34 C72 44 71 58 66 75 Z M51 33 a2.6 2.6 0 1 0 0.01 0 Z" />
+       <g transform="rotate(-18 500 500)">
+         <ellipse cx="500" cy="500" rx="400" ry="120" fill="none" stroke="url(#ring)" stroke-width="16" clip-path="url(#front)" filter="url(#glow)"/>
+       </g>
+       <path d="M855 345 Q863 387 905 395 Q863 403 855 445 Q847 403 805 395 Q847 387 855 345 Z" fill="#ffffff" filter="url(#glow)"/></svg>
