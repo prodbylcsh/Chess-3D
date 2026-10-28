@@ -46,6 +46,15 @@ for the Instagram profile photo, the app's logo (`LogoMark`) and the browser-tab
 (`night-knight.png` is the profile photo) and `public/favicon.svg`, `favicon-32.png`,
 `apple-touch-icon.png`. Change the mark there and in `LogoMark` together.
 
+**Marketing is planned for the finished platform** (the user, 28 October 2026, said firmly):
+treat everything on the roadmap (ranked and seasons, tournaments, replays, more items and
+effects, …) as already built. The user starts posting only once it is done, but the
+thinking happens now. Don't write marketing around "ranked is closed" or "coming soon".
+Everything is in **`docs/marketing/`**: `README.md` (rules, the bio), `AUDIENCE.md` (the
+target group and three more), `INSTAGRAM-DESIGN.md` (how posts look). The first six
+carousel posts are built by `scripts/promo/render-scenes.ts` (3D shots from the real game)
+and `scripts/promo/build-posts.ts` (slides, captions, zips) into `promo/instagram/`.
+
 ## Fair play, phase 1 (merged to `main` on 28 October 2026, the user's yes)
 
 The user asked for engine-help detection, including an engine on a second device (which

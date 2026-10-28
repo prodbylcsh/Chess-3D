@@ -5,3 +5,6 @@ dist
 assets-src
 # local secrets for `supabase functions serve` (written by the local-supabase start script)
 supabase/functions/.env
+
+# Instagram post zips (built by scripts/promo/build-posts.ts)
+promo/instagram/zips/

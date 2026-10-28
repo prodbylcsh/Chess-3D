@@ -11,6 +11,9 @@ user wants, decisions, approaches that failed, and the next steps.
 parts (coin packs, puzzle modules, Learn, the planned subscription) earn. Say how a feature
 helps that, and propose prices; the user decides them (`docs/PLATFORM.md` §1 "Earning money").
 
+**Marketing** (Instagram, ads, copy) is in **`docs/marketing/`**. It is planned for the
+*finished* platform: everything on the roadmap counts as built.
+
 ## Hard rules
 
 - **Git:** work on the session's development branch and push there. **Never push to or

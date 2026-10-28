@@ -47,6 +47,9 @@ coins is the shortcut. When a feature is designed, say how it supports this (bri
 players in, keeping them, or a reason to buy) and propose prices to the user; prices are
 the user's decision.
 
+**Marketing** (who the platform is for, Instagram, posts) is in `docs/marketing/`. It
+describes the finished platform: everything in the roadmap (§9) counts as built.
+
 ## 2. Accounts and onboarding
 
 Registration is required to play online. Sign-up options:
