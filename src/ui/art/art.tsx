@@ -225,24 +225,36 @@ export function RankEmblem({ tier, division, size = 48 }: { tier: TierId; divisi
   );
 }
 
-/** The platform's mark: a knight on a gold medallion. */
+/**
+ * The platform's mark, "Night Knight": a gold knight with a violet spark on a night tile.
+ * The tab icon (public/favicon.svg) is the same drawing, written by scripts/promo/build-logo.ts.
+ */
 export function LogoMark({ size = 34 }: { size?: number }) {
   const uid = useId().replace(/:/g, '');
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden style={{ flex: 'none', display: 'block' }}>
       <defs>
-        <linearGradient id={`lg${uid}`} x1="0" y1="0" x2="0" y2="1">
+        <radialGradient id={`lb${uid}`} cx="0.5" cy="0.38" r="0.7">
+          <stop offset="0" stopColor="#2a2245" />
+          <stop offset="0.6" stopColor="#141620" />
+          <stop offset="1" stopColor="#0a0b10" />
+        </radialGradient>
+        <linearGradient id={`lg${uid}`} x1="0.2" y1="0" x2="0.8" y2="1">
           <stop offset="0" stopColor="#f9dca8" />
+          <stop offset="0.55" stopColor="#e3a858" />
           <stop offset="1" stopColor="#c98a3c" />
         </linearGradient>
       </defs>
-      <rect x="4" y="4" width="92" height="92" rx="26" fill={`url(#lg${uid})`} />
-      <g transform="translate(14 10) scale(0.72)">
-        <PieceGlyph piece="knight" fill="#1a1308" />
-      </g>
+      <rect x="4" y="4" width="92" height="92" rx="26" fill={`url(#lb${uid})`} />
+      <rect x="4.75" y="4.75" width="90.5" height="90.5" rx="25.25" fill="none" stroke="#f2c27a" strokeOpacity="0.5" strokeWidth="1.5" />
+      <path transform="translate(-1.5 5)" fillRule="evenodd" fill={`url(#lg${uid})`} d={PIECE_PATHS.knight[1]} />
+      <path d={LOGO_SPARK} fill="#d9ceff" />
     </svg>
   );
 }
+
+/** Four-point spark beside the knight's ear, centred on (75, 26). */
+const LOGO_SPARK = 'M75 18 Q76.3 24.7 83 26 Q76.3 27.3 75 34 Q73.7 27.3 67 26 Q73.7 24.7 75 18 Z';
 
 /** Badge for a season reward: a pennant in the bracket's colours with the season number. */
 export function SeasonBadge({ season, bracket, size = 44 }: { season: number; bracket: string; size?: number }) {

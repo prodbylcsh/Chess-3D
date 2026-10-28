@@ -121,7 +121,9 @@ modules and a "More" sheet.
 
 Modules marked 🔜 currently show a placeholder page listing their planned features.
 
-The top of the sidebar shows the logo; the bottom shows the signed-in player (icon,
+The top of the sidebar shows the logo ("Night Knight": a gold knight with a violet spark on
+a night tile; the same mark is the browser-tab icon and the Instagram profile photo, all
+drawn by `scripts/promo/build-logo.ts`); the bottom shows the signed-in player (icon,
 username, rank) and the coin balance.
 
 ## 4. Modules

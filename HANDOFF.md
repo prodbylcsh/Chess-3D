@@ -31,6 +31,21 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## Promo and the logo (28 October 2026, on the branch, not merged)
+
+The user is starting promotion and ads. The Instagram account is **@wizardchess3d**
+(blank so far). Instagram's official API can publish posts, Reels and Stories and manage
+comments, but **not** the profile picture, bio or name; there is no official Instagram
+MCP. Automated posting needs a Professional account, a Meta developer app ("Instagram
+API with Instagram Login") and a token in GitHub secrets; not set up yet. Don't use
+unofficial password-based tools (ban risk).
+
+The user picked the **Night Knight** logo (gold knight, violet spark, night background)
+for the Instagram profile photo, the app's logo (`LogoMark`) and the browser-tab icon.
+`scripts/promo/build-logo.ts` draws all of it: the Instagram variants in `promo/logo/`
+(`night-knight.png` is the profile photo) and `public/favicon.svg`, `favicon-32.png`,
+`apple-touch-icon.png`. Change the mark there and in `LogoMark` together.
+
 ## Fair play, phase 1 (merged to `main` on 28 October 2026, the user's yes)
 
 The user asked for engine-help detection, including an engine on a second device (which

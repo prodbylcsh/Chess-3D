@@ -1,6 +1,7 @@
-// Builds the Wizard Chess logo variants for social profiles (Instagram first).
-// Writes SVG + 1080×1080 PNG per variant to promo/logo/, plus a preview sheet with the
-// circle crop at the sizes Instagram shows it. Run: node scripts/promo/build-logo.ts
+// Builds the Wizard Chess logo: the social profile variants (Instagram uses Night Knight)
+// as SVG + 1080×1080 PNG in promo/logo/ with a preview sheet of the circle crop at the
+// sizes Instagram shows it, and the browser-tab icons in public/.
+// Run: node scripts/promo/build-logo.ts
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
@@ -122,15 +123,43 @@ const VARIANTS: Record<string, { title: string; svg: string }> = {
   },
 };
 
+/**
+ * Night Knight as the app tile (same drawing as LogoMark in src/ui/art/art.tsx).
+ * `fullBleed` drops the rounded corners and the frame, for icons the OS rounds itself.
+ */
+function appTile(size: number, fullBleed = false): string {
+  const tile = fullBleed
+    ? `<rect width="100" height="100" fill="url(#b)"/>`
+    : `<rect x="4" y="4" width="92" height="92" rx="26" fill="url(#b)"/>
+       <rect x="4.75" y="4.75" width="90.5" height="90.5" rx="25.25" fill="none" stroke="${C.gold}" stroke-opacity="0.5" stroke-width="1.5"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}"><defs>
+    <radialGradient id="b" cx="0.5" cy="0.38" r="0.7">
+      <stop offset="0" stop-color="#2a2245"/><stop offset="0.6" stop-color="${C.panel}"/><stop offset="1" stop-color="${C.bg}"/>
+    </radialGradient>${goldGradient('g')}</defs>
+    ${tile}
+    <path transform="translate(-1.5 5)" fill-rule="evenodd" fill="url(#g)" d="${KNIGHT}"/>
+    ${sparkle(75, 26, 8, '#d9ceff')}
+  </svg>\n`;
+}
+
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1080, height: 1080 } });
 
+async function renderPng(svgText: string, path: string, background = 'transparent') {
+  await page.setContent(`<html><body style="margin:0;background:${background}">${svgText}</body></html>`);
+  await page.locator('svg').screenshot({ path, omitBackground: background === 'transparent' });
+}
+
 for (const [name, v] of Object.entries(VARIANTS)) {
   writeFileSync(join(OUT, `${name}.svg`), v.svg);
-  await page.setContent(`<html><body style="margin:0;background:#000">${v.svg}</body></html>`);
-  await page.locator('svg').screenshot({ path: join(OUT, `${name}.png`) });
+  await renderPng(v.svg, join(OUT, `${name}.png`), '#000');
 }
+
+// Browser-tab and home-screen icons (linked from index.html).
+writeFileSync('public/favicon.svg', appTile(32));
+await renderPng(appTile(32), 'public/favicon-32.png');
+await renderPng(appTile(180, true), 'public/apple-touch-icon.png', C.bg);
 
 // Preview: each variant as Instagram crops it (circle) at profile and feed sizes, light and dark.
 const rows = Object.entries(VARIANTS)
