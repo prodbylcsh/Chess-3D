@@ -31,7 +31,7 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## Fair play, phase 1 (built 27 October 2026, on `claude/fair-play`, not merged)
+## Fair play, phase 1 (merged to `main` on 28 October 2026, the user's yes)
 
 The user asked for engine-help detection, including an engine on a second device (which
 leaves no trace in the browser, so it is found in the moves and the time). Built as flags for

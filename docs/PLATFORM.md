@@ -39,7 +39,7 @@ The platform is meant to earn money for its operator. What pays today and what i
 | Puzzle modules | 100,000 coins each; Openings free (4.2) | ✅ |
 | Learn | chapters 1–2 free, the rest 75,000 coins (≈ €20) (4.3) | planned |
 | Shop items | piece sets, boards, effects for coins (4.5) | ✅ |
-| Fair play (phase 1) | Engine help detected from the analysis (engine match, quiet moves, accuracy), the server's move times (relay to a second device) and leaving the game; coin games analysed too; review queue for the operator, nothing automatic (6.4) | ✅ built (October 2026); sanctions are phase 2 |
+| Fair play (phase 1) | Engine help detected from the analysis (engine match, quiet moves, accuracy), the server's move times (relay to a second device) and leaving the game; coin games analysed too; review queue for the operator, nothing automatic (6.4) | ✅ live (October 2026); sanctions are phase 2 |
 | Premium (subscription) | Apprentice €4.99, Wizard €9.99, Archmage €19.99 a month (a year = 8 months): every puzzle module and Learn chapter, coins every month, Game Review, streak shields, the Wardrobe (4.9) | ✅ built (October 2026); sandbox until live payments |
 
 Coins can also be earned by playing, so every paid part is reachable without money; buying
