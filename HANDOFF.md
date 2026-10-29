@@ -54,6 +54,9 @@ Everything is in **`docs/marketing/`**: `README.md` (rules, the bio), `AUDIENCE.
 target group and three more), `INSTAGRAM-DESIGN.md` (how posts look). The first six
 carousel posts are built by `scripts/promo/render-scenes.ts` (3D shots from the real game)
 and `scripts/promo/build-posts.ts` (slides, captions, zips) into `promo/instagram/`.
+Merged to `main` on 29 October 2026 (the user's yes). Not posted yet: the user posts once
+the platform is finished. The capture effects in post 03 (embers, frostbite, implode, comet,
+levitate) must be shop items by then.
 
 ## Fair play, phase 1 (merged to `main` on 28 October 2026, the user's yes)
 
