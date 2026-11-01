@@ -36,6 +36,7 @@ export const PREVIEW_IMAGES: Record<string, string> = {
   'glanc-set': assetUrl('shop/glanc-set.webp'),
   'aurum-set': assetUrl('shop/aurum-set.webp'),
   'crystalic-set': assetUrl('shop/crystalic-set.webp'),
+  'medenka-set': assetUrl('shop/medenka-set.webp'),
   'hallow-set': assetUrl('shop/hallow-set.webp'),
   'maple-board': assetUrl('shop/maple-board.webp'),
   'mozaic-board': assetUrl('shop/mozaic-board.webp'),

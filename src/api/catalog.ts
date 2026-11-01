@@ -70,6 +70,7 @@ const TEXT: Record<string, [name: string, description: string]> = {
   'glanc-set': [tk('Glanc'), tk('Glossy resin with teal swirls on polished copper bases.')],
   'aurum-set': [tk('Aurum'), tk('Matte ivory and black on brushed brass, finished in gold.')],
   'crystalic-set': [tk('Crystalic'), tk('Classic pieces in clear crystal and black obsidian glass.')],
+  'medenka-set': [tk('Medenka'), tk('Stained oak streaked with blue-green patina, crowned with hammered brass.')],
   'hallow-set': [tk('Hallow'), tk('Kings, queens and knights cast as silver figures with gold gilding.')],
   'marble-board': [tk('Classic Marble'), tk('Veined marble squares in a dark frame.')],
   'monolith-board': [tk('Monolith'), tk('Graphite oak and matte black squares on a polished chrome hull.')],

@@ -612,7 +612,7 @@ includes a board).
 
 | Category | Items (price, rarity) |
 | --- | --- |
-| Piece sets | Classic Marble (free) · **Squircle** 25,000 common (own models in both colours: pieces that melt from circle to square; low-mid tier) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) · *November 2026 (own models in both colours; prices proposed, not yet confirmed by the user):* Cut 18,000 common · Cylindra 18,000 common · Hexalith 20,000 common · Henge 20,000 common · Teel 20,000 common · Phyrm 22,000 common · Marb 22,000 common · Domina 24,000 common · Frost 24,000 common · Dune 30,000 rare · Minima 30,000 rare · Metal 32,000 rare · Titani 32,000 rare · Ferro Orbis 35,000 rare · Stoni 35,000 rare · Dismorph 36,000 rare · Hexa 38,000 rare · Lithoxyl 40,000 rare · Spirl 45,000 epic · Serpentina 48,000 epic · Cobalt 50,000 epic · Glanc 52,000 epic · Aurum 55,000 epic · Crystalic 58,000 epic · Hallow 65,000 legendary |
+| Piece sets | Classic Marble (free) · **Squircle** 25,000 common (own models in both colours: pieces that melt from circle to square; low-mid tier) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) · *November 2026 (own models in both colours; prices proposed, not yet confirmed by the user):* Cut 18,000 common · Cylindra 18,000 common · Hexalith 20,000 common · Henge 20,000 common · Teel 20,000 common · Phyrm 22,000 common · Marb 22,000 common · Domina 24,000 common · Frost 24,000 common · Dune 30,000 rare · Minima 30,000 rare · Metal 32,000 rare · Titani 32,000 rare · Ferro Orbis 35,000 rare · Stoni 35,000 rare · Dismorph 36,000 rare · Hexa 38,000 rare · Lithoxyl 40,000 rare · Spirl 45,000 epic · Medenka 46,000 epic · Serpentina 48,000 epic · Cobalt 50,000 epic · Glanc 52,000 epic · Aurum 55,000 epic · Crystalic 58,000 epic · Hallow 65,000 legendary |
 | Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) · *November 2026 (own models; prices proposed):* Maple 12,000 common · Mozaic 14,000 common · Frost 15,000 common · Zlata 16,000 common · Greel 20,000 rare · Classie 22,000 rare · Gappa 24,000 rare · Azure Lagoon 26,000 rare · Beton 28,000 rare · Legoed 32,000 epic · Argentum 36,000 epic |
 | Backgrounds | Candlelit Study (free) |
 | Move animations | Glide (free) |
@@ -687,7 +687,10 @@ the browser, add the shop item. `inspect` also writes small previews of the orig
 proportions (king 1.65 squares, no base wider than 0.8 of a square); a board's squares
 must sit at the top (`surface` when a frame stands higher) and a1 must be dark (`turn`);
 a piece missing or wrong in one colour can be made from the other with its lightness
-inverted (`derive`; Glanc's white queen, Cobalt's black knight in November 2026). The session cannot reach Cloudflare, so the workflow
+inverted (`derive`; used for Glanc's white queen and Cobalt's black knight until the user
+uploaded them; `scripts/assets/derive-original.ts` makes such a file at full quality for
+the bucket). A set that names its pieces its own way maps them with `names` (Medenka).
+The session cannot reach Cloudflare, so the workflow
 `.github/workflows/models.yml` pulls the originals on GitHub's machine: a commit of
 `scripts/assets/request.json` (`inspect` a folder, or `build` an item) starts it, and it
 commits the report (`scripts/assets/reports/`) or the built files (`public/assets/`) to
@@ -1461,5 +1464,6 @@ Open:
 1. **The November 2026 sets and boards** (4.5): prices and rarities are proposals; whether
    they all open at once or are released over time (`releaseAt`, Archmage early access);
    Roni and Titani are near-duplicates (same queen and pawn files) and only Titani is in
-   the shop; Medenka has five pieces (Smyčka, Mince, Lupa, Příčka, Oblouk) and needs a
-   sixth and which is which.
+   the shop; Medenka's pieces have their own names and were matched in the order of the
+   user's numbered sets (Smyčka king, Mince queen, Lupa bishop, Příčka knight, Oblouk rook,
+   Spendlík pawn), to be confirmed.

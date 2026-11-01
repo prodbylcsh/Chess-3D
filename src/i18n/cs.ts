@@ -93,6 +93,8 @@ export const cs: Record<string, string> = {
   'Matte ivory and black on brushed brass, finished in gold.': 'Matná slonovina a čerň na kartáčované mosazi, zakončené zlatem.',
   'Crystalic': 'Crystalic',
   'Classic pieces in clear crystal and black obsidian glass.': 'Klasické figury z čirého křišťálu a černého obsidiánového skla.',
+  'Medenka': 'Medenka',
+  'Stained oak streaked with blue-green patina, crowned with hammered brass.': 'Mořený dub s modrozelenými tahy patiny, korunovaný tepanou mosazí.',
   'Hallow': 'Hallow',
   'Kings, queens and knights cast as silver figures with gold gilding.': 'Králové, královny a rytíři odlití jako stříbrné postavy se zlacením.',
   'Veined marble squares in a dark frame.': 'Žilkovaná mramorová pole v tmavém rámu.',

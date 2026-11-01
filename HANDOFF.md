@@ -35,7 +35,7 @@ How the user works:
 
 The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)
 and 11 boards (`boards/<name>_chessboard.glb`) to the R2 originals bucket and asked for them
-in the app and the shop. Built and in the shop: **25 sets and 11 boards** (`PLATFORM.md` §4.5).
+in the app and the shop. Built and in the shop: **26 sets and 11 boards** (`PLATFORM.md` §4.5).
 
 - Pipeline: the models workflow takes several `targets`; `inspect` writes small previews of
   the originals (`scripts/assets/reports/previews/`) that `scripts/assets/look/` renders
@@ -46,13 +46,13 @@ in the app and the shop. Built and in the shop: **25 sets and 11 boards** (`PLAT
   checked to look at −z; Hallow's figures all turned 180°. Board grids measured from top
   renders; Frost's board turned 90° (a1 dark); Beton, Classie, Frost, Legoed, Zlata have
   `surface` (frame higher than the squares).
-- Delivery problems handled in the build: Glanc has no white queen (made from the black one),
-  Cobalt's black knight was the white one (darkened). Better files from the user can replace
-  both (drop the `derive`).
+- Delivery problems: Glanc had no white queen and Cobalt's black knight was the white one;
+  the user uploaded both (made by `scripts/assets/derive-original.ts`, the workflow's
+  `derive` task). Medenka got its sixth piece; its pieces have their own names (`names`).
 - **Open (the user's):** prices and rarities are proposals; release all at once or over time
   (`releaseAt`); Roni and Titani are the same set once built (only Titani is in the shop,
-  Roni's settings stay in `MODELS`); Medenka has five pieces with their own names (Smyčka,
-  Mince, Lupa, Příčka, Oblouk) and needs a sixth and which is which. The Season 1 reward
+  Roni's settings stay in `MODELS`); Medenka's piece order (Smyčka king, Mince queen,
+  Lupa bishop, Příčka knight, Oblouk rook, Spendlík pawn) is a guess from the numbering. The Season 1 reward
   preview now draws from the bigger pool.
 
 ## Promo and the logo (merged to `main` on 28 October 2026, the user's yes)

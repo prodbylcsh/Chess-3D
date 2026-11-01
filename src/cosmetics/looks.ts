@@ -83,6 +83,7 @@ export const PIECE_SETS: Record<string, PieceSetLook> = {
   'glanc-set': { light: null, dark: null, model: { dir: 'pieces/glanc' } },
   'aurum-set': { light: null, dark: null, model: { dir: 'pieces/aurum' } },
   'crystalic-set': { light: null, dark: null, model: { dir: 'pieces/crystalic' } },
+  'medenka-set': { light: null, dark: null, model: { dir: 'pieces/medenka' } },
   'hallow-set': { light: null, dark: null, model: { dir: 'pieces/hallow' } },
 };
 
