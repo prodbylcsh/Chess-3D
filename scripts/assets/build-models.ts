@@ -56,6 +56,8 @@ interface PieceSetModels {
   triangles: { game: number; hd: number };
   /** texture size in pixels */
   textureSize: number;
+  /** texture size of the board files (default `textureSize`); the 3D view keeps `textureSize` */
+  gameTextureSize?: number;
 }
 
 interface BoardModels {
@@ -110,7 +112,8 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     textureSize: 2048,
   },
   // the sets and boards of November 2026 (heights keep each designer's proportions, king 1.65
-  // squares, bases at most 0.8 wide; board grids measured from top renders of the originals)
+  // squares, bases at most 0.8 wide; board grids measured from top renders of the originals;
+  // 512 px textures on the board: some sets have six materials with three maps each)
   'aurum-set': {
     kind: 'pieces',
     source: 'pieces/aurum',
@@ -120,6 +123,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'cobalt-set': {
     // the black knight was delivered with the white knight's colours: made from it, darkened
@@ -132,6 +136,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     derive: ['knight-black'],
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'crystalic-set': {
     kind: 'pieces',
@@ -142,6 +147,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'cut-set': {
     kind: 'pieces',
@@ -151,6 +157,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'cylindra-set': {
     kind: 'pieces',
@@ -161,6 +168,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'dismorph-set': {
     kind: 'pieces',
@@ -171,6 +179,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'domina-set': {
     kind: 'pieces',
@@ -181,6 +190,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'dune-set': {
     kind: 'pieces',
@@ -191,6 +201,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'ferro-orbis-set': {
     kind: 'pieces',
@@ -200,6 +211,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'frost-glass-set': {
     // the id frost-set is retired (an old placeholder): never reuse it
@@ -210,6 +222,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'glanc-set': {
     // no white queen was delivered: made from the black one, lightened
@@ -221,6 +234,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     derive: ['queen-white'],
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'hallow-set': {
     // figures: every piece looks to +z as delivered
@@ -232,6 +246,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'henge-set': {
     kind: 'pieces',
@@ -241,6 +256,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'hexa-set': {
     // every original is 2 units tall: heights set by hand from their widths
@@ -252,6 +268,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'hexalith-set': {
     kind: 'pieces',
@@ -261,6 +278,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'lithoxyl-set': {
     kind: 'pieces',
@@ -271,6 +289,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'marb-set': {
     kind: 'pieces',
@@ -280,6 +299,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'metal-set': {
     // squat bells: the designer's proportions (the widest base fills 0.8 of a square)
@@ -290,6 +310,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'minima-set': {
     kind: 'pieces',
@@ -300,6 +321,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'phyrm-set': {
     kind: 'pieces',
@@ -310,6 +332,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'roni-set': {
     kind: 'pieces',
@@ -320,6 +343,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'serpentina-set': {
     kind: 'pieces',
@@ -330,6 +354,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'spirl-set': {
     kind: 'pieces',
@@ -340,6 +365,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'stoni-set': {
     kind: 'pieces',
@@ -350,6 +376,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'teel-set': {
     kind: 'pieces',
@@ -359,6 +386,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'titani-set': {
     kind: 'pieces',
@@ -369,6 +397,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
+    gameTextureSize: 512,
   },
   'argentum-board': {
     kind: 'board',
@@ -399,7 +428,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     top: 0.3,
     surface: 0.0666, // the frame stands higher than the squares
     triangles: 12_000,
-    textureSize: 2048,
+    textureSize: 1024, // several materials, each with its own maps
   },
   'classie-board': {
     kind: 'board',
@@ -453,7 +482,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     top: 0.3,
     surface: 0.035, // the frame stands higher than the squares
     triangles: 20_000,
-    textureSize: 2048,
+    textureSize: 1024, // several materials, each with its own maps
   },
   'maple-board': {
     kind: 'board',
@@ -513,22 +542,23 @@ async function main(itemId: string, sourceDir: string) {
     for (const piece of PIECES) {
       for (const [lod, suffix] of [['game', ''], ['hd', '-hd']] as const) {
         const triangles = config.triangles[lod];
+        const size = lod === 'game' ? (config.gameTextureSize ?? config.textureSize) : config.textureSize;
         const place = (doc: Document) => fitPiece(doc, config.heights[piece], config.turn?.[piece] ?? 0);
         if (config.delivered === 'both') {
           for (const colour of ['white', 'black'] as const) {
             const derived = config.derive?.includes(`${piece}-${colour}`);
             const doc = await prepare(find(sourceDir, [piece, derived ? (colour === 'white' ? 'black' : 'white') : colour]), place, triangles);
             if (derived) await invertLightness(doc, config.textureSize);
-            await write(config.textureSize, doc, join(out, `${piece}-${colour}${suffix}.glb`));
+            await write(size, doc, join(out, `${piece}-${colour}${suffix}.glb`));
           }
           continue;
         }
         const src = find(sourceDir, [piece]);
         const other = config.delivered === 'black' ? 'white' : 'black';
-        await write(config.textureSize, await prepare(src, place, triangles), join(out, `${piece}-${config.delivered}${suffix}.glb`));
+        await write(size, await prepare(src, place, triangles), join(out, `${piece}-${config.delivered}${suffix}.glb`));
         const recoloured = await prepare(src, place, triangles);
         await recolor(recoloured, config.recolor!, config.textureSize);
-        await write(config.textureSize, recoloured, join(out, `${piece}-${other}${suffix}.glb`));
+        await write(size, recoloured, join(out, `${piece}-${other}${suffix}.glb`));
       }
     }
   } else {

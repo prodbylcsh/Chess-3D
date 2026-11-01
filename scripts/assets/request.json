@@ -1,17 +1,6 @@
 {
  "task": "build",
  "targets": [
-  "argentum-board",
-  "azure-lagoon-board",
-  "beton-board",
-  "classie-board",
-  "frost-board",
-  "gappa-board",
-  "greel-board",
-  "legoed-board",
-  "maple-board",
-  "mozaic-board",
-  "zlata-board",
   "aurum-set",
   "cobalt-set",
   "crystalic-set",
@@ -32,11 +21,12 @@
   "metal-set",
   "minima-set",
   "phyrm-set",
-  "roni-set",
   "serpentina-set",
   "spirl-set",
   "stoni-set",
   "teel-set",
-  "titani-set"
+  "titani-set",
+  "beton-board",
+  "legoed-board"
  ]
 }

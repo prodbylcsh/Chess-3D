@@ -1,5 +1,6 @@
 // Renders a piece set for its shop card: king, queen and knight of both colours on a dark,
-// softly lit stage, 16:10. `?dir=pieces/<set>` (the built files in public/assets/).
+// softly lit stage, 16:10. `?dir=pieces/<set>` (the built files in public/assets/), or a
+// board on the same stage, seen from above at an angle: `?dir=boards/<board>`.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -48,26 +49,43 @@ glow.position.y = 0.002;
 scene.add(glow);
 
 const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-const place: [string, string, number, number, number][] = [
-  // piece, colour, x, z, turn
-  ['knight', 'black', -1.55, -0.35, 0.5],
-  ['queen', 'black', -0.75, -0.75, 0],
-  ['king', 'white', 0, -0.2, 0],
-  ['queen', 'white', 0.8, 0.25, 0],
-  ['knight', 'white', 1.6, -0.25, -0.6],
-];
-await Promise.all(
-  place.map(async ([piece, colour, x, z, turn]) => {
-    const gltf = await loader.loadAsync(`/public/assets/${dir}/${piece}-${colour}-hd.glb`);
-    const obj = gltf.scene;
-    obj.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (m.isMesh) m.castShadow = m.receiveShadow = true;
-    });
-    obj.position.set(x, 0, z);
-    obj.rotation.y = turn + (colour === 'black' ? Math.PI : 0);
-    scene.add(obj);
-  }),
-);
+if (dir.startsWith('boards/')) {
+  const board = (await loader.loadAsync(`/public/assets/${dir}/board.glb`)).scene;
+  board.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (m.isMesh) m.castShadow = m.receiveShadow = true;
+  });
+  // the 8×8 grid is 8 units: about 2.7 units wide on the card, standing on the floor
+  board.scale.setScalar(0.34);
+  board.rotation.y = -0.38;
+  const box = new THREE.Box3().setFromObject(board);
+  board.position.y = -box.min.y;
+  board.position.z = -0.35;
+  scene.add(board);
+  camera.position.set(0, 3.3, 4.4);
+  camera.lookAt(0, 0.05, -0.45);
+} else {
+  const place: [string, string, number, number, number][] = [
+    // piece, colour, x, z, turn
+    ['knight', 'black', -1.55, -0.35, 0.5],
+    ['queen', 'black', -0.75, -0.75, 0],
+    ['king', 'white', 0, -0.2, 0],
+    ['queen', 'white', 0.8, 0.25, 0],
+    ['knight', 'white', 1.6, -0.25, -0.6],
+  ];
+  await Promise.all(
+    place.map(async ([piece, colour, x, z, turn]) => {
+      const gltf = await loader.loadAsync(`/public/assets/${dir}/${piece}-${colour}-hd.glb`);
+      const obj = gltf.scene;
+      obj.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (m.isMesh) m.castShadow = m.receiveShadow = true;
+      });
+      obj.position.set(x, 0, z);
+      obj.rotation.y = turn + (colour === 'black' ? Math.PI : 0);
+      scene.add(obj);
+    }),
+  );
+}
 renderer.render(scene, camera);
 document.body.dataset.ready = '1';
