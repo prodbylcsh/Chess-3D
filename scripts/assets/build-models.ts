@@ -235,7 +235,7 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     gameTextureSize: 512,
   },
   'medenka-set': {
-    // the pieces have their own names; numbered in the order of the user's Roni and Titani files
+    // the pieces have their own names (the order confirmed by the user)
     kind: 'pieces',
     source: 'pieces/medenka',
     dir: 'medenka',

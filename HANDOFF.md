@@ -31,9 +31,9 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
-## New sets and boards (1 November 2026, on the branch, not merged)
+## New sets and boards (merged to `main` on 1 November 2026, the user's yes)
 
-The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)
+Squash-merged (the branch carried three rounds of rebuilt models). The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)
 and 11 boards (`boards/<name>_chessboard.glb`) to the R2 originals bucket and asked for them
 in the app and the shop. Built and in the shop: **26 sets and 11 boards** (`PLATFORM.md` §4.5).
 
@@ -50,12 +50,11 @@ in the app and the shop. Built and in the shop: **26 sets and 11 boards** (`PLAT
   the user uploaded both (made by `scripts/assets/derive-original.ts`, the workflow's
   `derive` task). Medenka got its sixth piece; its pieces have their own names (`names`).
 - **Decided (1 November 2026, the user):** rarities per item (`PLATFORM.md` §4.5; Squircle
-  is rare now), all released at once, Roni dropped (deleted from the bucket).
-- **Open (the user's):** the prices are proposals, one per rarity (sets 18,000 / 25,000 /
-  40,000 / 55,000, boards 12,000 / 20,000 / 30,000 / 40,000; Monolith and Squircle keep
-  theirs); Medenka's piece order (Smyčka king, Mince queen, Lupa bishop, Příčka knight,
-  Oblouk rook, Spendlík pawn) is a guess from the numbering. The Season 1 reward preview
-  draws from the bigger pool.
+  is rare now, still 25,000), one price per rarity (sets 18,000 / 25,000 / 40,000 / 55,000,
+  boards 12,000 / 20,000 / 30,000 / 40,000; Monolith keeps 68,000 and 42,500), all released
+  at once, Roni dropped (deleted from the bucket), Medenka's pieces confirmed (Smyčka king,
+  Mince queen, Lupa bishop, Příčka knight, Oblouk rook, Spendlík pawn). The Season 1
+  reward preview draws from the bigger pool.
 
 ## Promo and the logo (merged to `main` on 28 October 2026, the user's yes)
 

@@ -38,7 +38,7 @@ export const ITEMS: readonly ShopItemDef[] = [
   item('marble-set', 'pieces', 0, 'standard'),
   item('monolith-set', 'pieces', 68_000, 'legendary'),
   item('squircle-set', 'pieces', 25_000, 'rare'),
-  // the November 2026 sets: rarities the user's; one price per rarity (proposed, to be confirmed)
+  // the November 2026 sets: the user's rarities, one price per rarity (decided 1 November 2026)
   item('aurum-set', 'pieces', 18_000, 'common'),
   item('cobalt-set', 'pieces', 18_000, 'common'),
   item('crystalic-set', 'pieces', 18_000, 'common'),
@@ -68,7 +68,7 @@ export const ITEMS: readonly ShopItemDef[] = [
   // boards
   item('marble-board', 'board', 0, 'standard'),
   item('monolith-board', 'board', 42_500, 'legendary'),
-  // the November 2026 boards: rarities the user's; one price per rarity (proposed, to be confirmed)
+  // the November 2026 boards: the user's rarities, one price per rarity (decided 1 November 2026)
   item('beton-board', 'board', 12_000, 'common'),
   item('frost-board', 'board', 12_000, 'common'),
   item('greel-board', 'board', 12_000, 'common'),
