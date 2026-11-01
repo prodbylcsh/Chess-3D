@@ -12,7 +12,12 @@ name: Models from R2
 #            the target `map` builds the puzzle map's scenery from the originals' map/ folder
 #            (scripts/assets/build-map.ts → public/assets/map/)
 #
-# Both commit their result to the branch they run on. Run it by hand, or commit
+#   derive   makes a missing or wrong piece of a delivered set from its other colour at full
+#            quality (scripts/assets/derive-original.ts), for the user to upload to the
+#            originals bucket: targets "pieces/glanc/dama_cerna.glb>dama_bila.glb"; the files
+#            are the run's artifact "derived-originals", nothing is committed
+#
+# Inspect and build commit their result to the branch they run on. Run it by hand, or commit
 # scripts/assets/request.json ({ "task": "inspect", "target": "pieces/squircle" }) on any
 # branch: a session can do that, and it works before this file reaches main. A request can
 # name several: "targets": ["pieces/aurum", "boards"] or ["aurum-set", "argentum-board"].
@@ -26,9 +31,9 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: inspect or build
+        description: inspect, build or derive
         type: choice
-        options: [inspect, build]
+        options: [inspect, build, derive]
         default: inspect
       target:
         description: 'inspect: an originals folder (e.g. pieces/squircle), empty lists all; build: an item id (e.g. squircle-set)'
@@ -112,6 +117,32 @@ jobs:
             fi
           done < "$RUNNER_TEMP/targets"
           cat scripts/assets/reports/build.txt
+
+      - name: Derive
+        if: env.TASK == 'derive'
+        run: |
+          mkdir -p "$RUNNER_TEMP/derived"
+          while IFS= read -r target; do
+            [ -z "$target" ] && continue
+            src="${target%%>*}"
+            name="${target##*>}"
+            folder=$(dirname "$src")
+            rm -rf "$RUNNER_TEMP/originals"
+            node scripts/assets/r2.ts pull-originals "$folder" "$RUNNER_TEMP/originals" > /dev/null
+            mkdir -p "$RUNNER_TEMP/derived/$folder"
+            if node scripts/assets/derive-original.ts "$RUNNER_TEMP/originals/$(basename "$src")" "$RUNNER_TEMP/derived/$folder/$name"; then
+              ls -la "$RUNNER_TEMP/derived/$folder/$name"
+            else
+              echo "::error::derive $target failed"; echo "$target" >> "$RUNNER_TEMP/failed"
+            fi
+          done < "$RUNNER_TEMP/targets"
+
+      - name: Derived files
+        if: env.TASK == 'derive'
+        uses: actions/upload-artifact@v4
+        with:
+          name: derived-originals
+          path: ${{ runner.temp }}/derived
 
       - name: Commit
         run: |

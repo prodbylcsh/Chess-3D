@@ -1,4 +1,7 @@
 {
- "task": "build",
- "targets": ["minima-set", "spirl-set", "metal-set", "ferro-orbis-set"]
+ "task": "derive",
+ "targets": [
+  "pieces/glanc/dama_cerna.glb>dama_bila.glb",
+  "pieces/cobalt/cobalt_vein_white_knight.glb>cobalt_vein_black_knight.glb"
+ ]
 }

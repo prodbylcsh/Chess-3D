@@ -686,8 +686,12 @@ async function recolor(doc: Document, cfg: PieceSetModels['recolor'], size: numb
   await doc.transform(prune());
 }
 
-/** The other colour of a piece (`derive`): lightness of non-metal parts inverted, hue kept. */
-async function invertLightness(doc: Document, size: number): Promise<void> {
+/**
+ * The other colour of a piece (`derive`): lightness of non-metal parts inverted, hue kept.
+ * Without `size` textures keep their own size and format (a full-quality original,
+ * scripts/assets/derive-original.ts).
+ */
+export async function invertLightness(doc: Document, size?: number): Promise<void> {
   const flip = (r: number, g: number, b: number): [number, number, number] => {
     // HSL: L → 1 − L keeps hue and saturation
     const max = Math.max(r, g, b);
@@ -713,13 +717,19 @@ async function invertLightness(doc: Document, size: number): Promise<void> {
     if (metal.has(material)) continue;
     const base = material.getBaseColorTexture();
     if (base) {
-      const rgb = await raw(base, size);
+      const own = await sharp(Buffer.from(base.getImage()!)).metadata();
+      const [width, height] = size ? [size, size] : [own.width!, own.height!];
+      const rgb = await raw(base, width, height);
       for (let i = 0; i < rgb.length; i += 3) {
         const c = flip(rgb[i] / 255, rgb[i + 1] / 255, rgb[i + 2] / 255);
         for (let k = 0; k < 3; k++) rgb[i + k] = Math.round(c[k] * 255);
       }
-      const png = await sharp(rgb, { raw: { width: size, height: size, channels: 3 } }).png().toBuffer();
-      material.setBaseColorTexture(doc.createTexture(`${base.getName() || 'base'}-inverted`).setImage(png).setMimeType('image/png'));
+      const image = sharp(rgb, { raw: { width, height, channels: 3 } });
+      const jpeg = !size && base.getMimeType() === 'image/jpeg';
+      const data = jpeg ? await image.jpeg({ quality: 95 }).toBuffer() : await image.png().toBuffer();
+      material.setBaseColorTexture(
+        doc.createTexture(`${base.getName() || 'base'}-inverted`).setImage(data).setMimeType(jpeg ? 'image/jpeg' : 'image/png'),
+      );
     } else {
       const [r, g, b, a] = material.getBaseColorFactor();
       const usesVertexColour = doc
@@ -748,8 +758,8 @@ async function invertLightness(doc: Document, size: number): Promise<void> {
   await doc.transform(prune());
 }
 
-async function raw(texture: Texture, size: number): Promise<Buffer> {
-  return sharp(Buffer.from(texture.getImage()!)).resize(size, size).removeAlpha().raw().toBuffer();
+async function raw(texture: Texture, width: number, height = width): Promise<Buffer> {
+  return sharp(Buffer.from(texture.getImage()!)).resize(width, height).removeAlpha().raw().toBuffer();
 }
 
 async function write(size: number, doc: Document, file: string): Promise<void> {
