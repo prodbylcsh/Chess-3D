@@ -1,1 +1,1 @@
-{ "task": "build", "target": "squircle-set", "try": 3 }
+{ "task": "inspect", "target": "", "try": 4 }
