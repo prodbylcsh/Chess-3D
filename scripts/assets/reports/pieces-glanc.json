@@ -1,5 +1,62 @@
 [
   {
+    "file": "dama_bila.glb",
+    "kb": 2526,
+    "nodes": [
+      "dama_bila"
+    ],
+    "meshes": 1,
+    "triangles": 99648,
+    "vertices": 50750,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.125,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.125,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
     "file": "dama_cerna.glb",
     "kb": 2464,
     "nodes": [

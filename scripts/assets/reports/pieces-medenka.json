@@ -678,5 +678,155 @@
         "normal": "1024x1024 image/jpeg"
       }
     ]
+  },
+  {
+    "file": "Medenka_06_Spendlik_bila.glb",
+    "kb": 3926,
+    "nodes": [
+      "Telo",
+      "Objimka",
+      "Jehla",
+      "Hlavicka",
+      "Medenka_Spendlik_bila"
+    ],
+    "meshes": 4,
+    "triangles": 33504,
+    "vertices": 17812,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.069,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.069,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_06_Spendlik_cerna.glb",
+    "kb": 4242,
+    "nodes": [
+      "Telo",
+      "Objimka",
+      "Jehla",
+      "Hlavicka",
+      "Medenka_Spendlik_cerna"
+    ],
+    "meshes": 4,
+    "triangles": 33504,
+    "vertices": 17812,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.069,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.069,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
   }
 ]

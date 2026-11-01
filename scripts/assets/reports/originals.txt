@@ -231,6 +231,7 @@
      129 KB  pieces/frost/monolith_strelec_cerny.glb
      880 KB  pieces/frost/monolith_vez_bily.glb
      265 KB  pieces/frost/monolith_vez_cerny.glb
+    2526 KB  pieces/glanc/dama_bila.glb
     2464 KB  pieces/glanc/dama_cerna.glb
     2331 KB  pieces/glanc/jezdec_bila.glb
     2348 KB  pieces/glanc/jezdec_cerna.glb
@@ -324,6 +325,8 @@
     6102 KB  pieces/medenka/Medenka_04_Pricka_cerna.glb
     5082 KB  pieces/medenka/Medenka_05_Oblouk_bila.glb
     5372 KB  pieces/medenka/Medenka_05_Oblouk_cerna.glb
+    3926 KB  pieces/medenka/Medenka_06_Spendlik_bila.glb
+    4242 KB  pieces/medenka/Medenka_06_Spendlik_cerna.glb
     6795 KB  pieces/metal/01_pesec_bila.glb
     1627 KB  pieces/metal/01_pesec_bila.png
     6795 KB  pieces/metal/01_pesec_cerna.glb
@@ -380,18 +383,6 @@
     3484 KB  pieces/phyrm/white_pawn.glb
     3483 KB  pieces/phyrm/white_queen.glb
     3497 KB  pieces/phyrm/white_rook.glb
-    7186 KB  pieces/roni/01_kral_bila.glb
-    7149 KB  pieces/roni/01_kral_cerna.glb
-    4769 KB  pieces/roni/02_dama_bila.glb
-    4685 KB  pieces/roni/02_dama_cerna.glb
-    5611 KB  pieces/roni/03_strelec_bila.glb
-    5577 KB  pieces/roni/03_strelec_cerna.glb
-    7517 KB  pieces/roni/04_jezdec_bila.glb
-    7484 KB  pieces/roni/04_jezdec_cerna.glb
-    6225 KB  pieces/roni/05_vez_bila.glb
-    6192 KB  pieces/roni/05_vez_cerna.glb
-    3754 KB  pieces/roni/06_pesec_bila.glb
-    3686 KB  pieces/roni/06_pesec_cerna.glb
     5403 KB  pieces/serpentina/Serpentina_bishop_black.glb
     5380 KB  pieces/serpentina/Serpentina_bishop_white.glb
     6639 KB  pieces/serpentina/Serpentina_king_black.glb
