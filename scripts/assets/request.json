@@ -1,32 +1,4 @@
 {
  "task": "build",
- "targets": [
-  "aurum-set",
-  "cobalt-set",
-  "crystalic-set",
-  "cut-set",
-  "cylindra-set",
-  "dismorph-set",
-  "domina-set",
-  "dune-set",
-  "ferro-orbis-set",
-  "frost-glass-set",
-  "glanc-set",
-  "hallow-set",
-  "henge-set",
-  "hexa-set",
-  "hexalith-set",
-  "lithoxyl-set",
-  "marb-set",
-  "metal-set",
-  "minima-set",
-  "phyrm-set",
-  "serpentina-set",
-  "spirl-set",
-  "stoni-set",
-  "teel-set",
-  "titani-set",
-  "beton-board",
-  "legoed-board"
- ]
+ "targets": ["minima-set", "spirl-set", "metal-set", "ferro-orbis-set"]
 }

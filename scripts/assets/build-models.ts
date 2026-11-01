@@ -753,6 +753,12 @@ async function raw(texture: Texture, size: number): Promise<Buffer> {
 }
 
 async function write(size: number, doc: Document, file: string): Promise<void> {
+  // authoring metadata (`extras`, e.g. a modeller's original_components) is not for the game:
+  // in Minima and Spirl it outweighed the geometry ten times
+  const root = doc.getRoot();
+  for (const property of [root, ...root.listScenes(), ...root.listNodes(), ...root.listMeshes(), ...root.listMeshes().flatMap((m) => m.listPrimitives()), ...root.listMaterials(), ...root.listTextures(), ...root.listAccessors()]) {
+    property.setExtras({});
+  }
   await doc.transform(
     textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [size, size], quality: 88 }),
     meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
