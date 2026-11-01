@@ -344,17 +344,6 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     textureSize: 1024,
     gameTextureSize: 512,
   },
-  'roni-set': {
-    kind: 'pieces',
-    source: 'pieces/roni',
-    dir: 'roni',
-    heights: { pawn: 0.88, rook: 1.16, knight: 1.41, bishop: 1.36, queen: 1.62, king: 1.65 },
-    turn: { knight: 270 },
-    delivered: 'both',
-    triangles: { game: 6000, hd: 24_000 },
-    textureSize: 1024,
-    gameTextureSize: 512,
-  },
   'serpentina-set': {
     kind: 'pieces',
     source: 'pieces/serpentina',

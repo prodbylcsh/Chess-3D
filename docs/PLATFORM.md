@@ -612,8 +612,8 @@ includes a board).
 
 | Category | Items (price, rarity) |
 | --- | --- |
-| Piece sets | Classic Marble (free) · **Squircle** 25,000 common (own models in both colours: pieces that melt from circle to square; low-mid tier) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) · *November 2026 (own models in both colours; prices proposed, not yet confirmed by the user):* Cut 18,000 common · Cylindra 18,000 common · Hexalith 20,000 common · Henge 20,000 common · Teel 20,000 common · Phyrm 22,000 common · Marb 22,000 common · Domina 24,000 common · Frost 24,000 common · Dune 30,000 rare · Minima 30,000 rare · Metal 32,000 rare · Titani 32,000 rare · Ferro Orbis 35,000 rare · Stoni 35,000 rare · Dismorph 36,000 rare · Hexa 38,000 rare · Lithoxyl 40,000 rare · Spirl 45,000 epic · Medenka 46,000 epic · Serpentina 48,000 epic · Cobalt 50,000 epic · Glanc 52,000 epic · Aurum 55,000 epic · Crystalic 58,000 epic · Hallow 65,000 legendary |
-| Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) · *November 2026 (own models; prices proposed):* Maple 12,000 common · Mozaic 14,000 common · Frost 15,000 common · Zlata 16,000 common · Greel 20,000 rare · Classie 22,000 rare · Gappa 24,000 rare · Azure Lagoon 26,000 rare · Beton 28,000 rare · Legoed 32,000 epic · Argentum 36,000 epic |
+| Piece sets | Classic Marble (free) · **Squircle** 25,000 rare (own models in both colours: pieces that melt from circle to square; rare since November 2026) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) · *November 2026 (own models in both colours; rarities the user's, prices one per rarity, proposed):* Aurum 18,000 common · Cobalt 18,000 common · Crystalic 18,000 common · Cut 18,000 common · Cylindra 18,000 common · Hexa 18,000 common · Lithoxyl 18,000 common · Metal 18,000 common · Minima 18,000 common · Phyrm 18,000 common · Spirl 18,000 common · Stoni 18,000 common · Domina 25,000 rare · Frost 25,000 rare · Glanc 25,000 rare · Henge 25,000 rare · Hexalith 25,000 rare · Serpentina 25,000 rare · Ferro Orbis 40,000 epic · Marb 40,000 epic · Teel 40,000 epic · Titani 40,000 epic · Dismorph 55,000 legendary · Dune 55,000 legendary · Hallow 55,000 legendary · Medenka 55,000 legendary |
+| Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) · *November 2026 (own models; rarities the user's, prices proposed):* Beton 12,000 common · Frost 12,000 common · Greel 12,000 common · Maple 12,000 common · Mozaic 12,000 common · Argentum 20,000 rare · Gappa 20,000 rare · Azure Lagoon 30,000 epic · Legoed 30,000 epic · Zlata 30,000 epic · Classie 40,000 legendary |
 | Backgrounds | Candlelit Study (free) |
 | Move animations | Glide (free) |
 | Destruction effects | Shatter (free) |
@@ -1458,12 +1458,14 @@ Decided:
   payment); Founders; plan names the same in every language; the placements in 4.9. The legal
   pages say so (Terms §6 "Premium", Privacy §2, §4, §6; effective 26 October 2026).
 
+- **The November 2026 sets and boards** (1 November 2026, the user): rarities per item as
+  in 4.5 (Squircle moves to rare); all released at once; Roni was dropped (the same set as
+  Titani once built).
+
 Open:
 
 1. Which languages come after Czech?
-1. **The November 2026 sets and boards** (4.5): prices and rarities are proposals; whether
-   they all open at once or are released over time (`releaseAt`, Archmage early access);
-   Roni and Titani are near-duplicates (same queen and pawn files) and only Titani is in
-   the shop; Medenka's pieces have their own names and were matched in the order of the
-   user's numbered sets (Smyčka king, Mince queen, Lupa bishop, Příčka knight, Oblouk rook,
-   Spendlík pawn), to be confirmed.
+1. **Prices of the November 2026 sets and boards** (4.5): one price per rarity, proposed
+   (sets 18,000 / 25,000 / 40,000 / 55,000, boards 12,000 / 20,000 / 30,000 / 40,000;
+   Monolith and Squircle keep their prices); Medenka's piece order is a guess from the
+   numbering of the user's files.

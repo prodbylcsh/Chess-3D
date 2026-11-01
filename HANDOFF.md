@@ -49,11 +49,13 @@ in the app and the shop. Built and in the shop: **26 sets and 11 boards** (`PLAT
 - Delivery problems: Glanc had no white queen and Cobalt's black knight was the white one;
   the user uploaded both (made by `scripts/assets/derive-original.ts`, the workflow's
   `derive` task). Medenka got its sixth piece; its pieces have their own names (`names`).
-- **Open (the user's):** prices and rarities are proposals; release all at once or over time
-  (`releaseAt`); Roni and Titani are the same set once built (only Titani is in the shop,
-  Roni's settings stay in `MODELS`); Medenka's piece order (Smyčka king, Mince queen,
-  Lupa bishop, Příčka knight, Oblouk rook, Spendlík pawn) is a guess from the numbering. The Season 1 reward
-  preview now draws from the bigger pool.
+- **Decided (1 November 2026, the user):** rarities per item (`PLATFORM.md` §4.5; Squircle
+  is rare now), all released at once, Roni dropped (deleted from the bucket).
+- **Open (the user's):** the prices are proposals, one per rarity (sets 18,000 / 25,000 /
+  40,000 / 55,000, boards 12,000 / 20,000 / 30,000 / 40,000; Monolith and Squircle keep
+  theirs); Medenka's piece order (Smyčka king, Mince queen, Lupa bishop, Příčka knight,
+  Oblouk rook, Spendlík pawn) is a guess from the numbering. The Season 1 reward preview
+  draws from the bigger pool.
 
 ## Promo and the logo (merged to `main` on 28 October 2026, the user's yes)
 
@@ -221,7 +223,7 @@ map has a "Review (n)" button.
 
 - Puzzles v1 and v2: 7 modules, a 3D world map with a hopping piece, briefing and coach.
 - The R2 model pipeline (GitHub Action `models.yml` pulls originals from R2).
-- The Squircle set (common, 25,000).
+- The Squircle set (25,000; common then, rare since November 2026).
 - The knight facing fix.
 
 **Legal pages** (EN and CS) describe the reviews, the daily puzzle, the streak and the
