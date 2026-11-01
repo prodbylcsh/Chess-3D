@@ -1,0 +1,1106 @@
+[
+  {
+    "file": "ferro-orbis_bishop_black.glb",
+    "kb": 4311,
+    "nodes": [
+      "ferro-orbis_bishop_black"
+    ],
+    "meshes": 1,
+    "triangles": 42624,
+    "vertices": 23932,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.082,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.082,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_bishop_white.glb",
+    "kb": 4305,
+    "nodes": [
+      "ferro-orbis_bishop_white"
+    ],
+    "meshes": 1,
+    "triangles": 42624,
+    "vertices": 23932,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.082,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.082,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_king_black.glb",
+    "kb": 4368,
+    "nodes": [
+      "ferro-orbis_king_black"
+    ],
+    "meshes": 1,
+    "triangles": 44544,
+    "vertices": 24704,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.1,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.1,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_king_white.glb",
+    "kb": 4362,
+    "nodes": [
+      "ferro-orbis_king_white"
+    ],
+    "meshes": 1,
+    "triangles": 44544,
+    "vertices": 24704,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.1,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.1,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_knight_black.glb",
+    "kb": 5806,
+    "nodes": [
+      "ferro-orbis_knight_black"
+    ],
+    "meshes": 1,
+    "triangles": 83712,
+    "vertices": 45548,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.08,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.08,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_knight_white.glb",
+    "kb": 5800,
+    "nodes": [
+      "ferro-orbis_knight_white"
+    ],
+    "meshes": 1,
+    "triangles": 83712,
+    "vertices": 45548,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.08,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.08,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_pawn_black.glb",
+    "kb": 4261,
+    "nodes": [
+      "ferro-orbis_pawn_black"
+    ],
+    "meshes": 1,
+    "triangles": 41472,
+    "vertices": 23160,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.052,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.052,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_pawn_white.glb",
+    "kb": 4255,
+    "nodes": [
+      "ferro-orbis_pawn_white"
+    ],
+    "meshes": 1,
+    "triangles": 41472,
+    "vertices": 23160,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.052,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.052,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_queen_black.glb",
+    "kb": 4324,
+    "nodes": [
+      "ferro-orbis_queen_black"
+    ],
+    "meshes": 1,
+    "triangles": 43008,
+    "vertices": 24125,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.088,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.088,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_queen_white.glb",
+    "kb": 4318,
+    "nodes": [
+      "ferro-orbis_queen_white"
+    ],
+    "meshes": 1,
+    "triangles": 43008,
+    "vertices": 24125,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.088,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.088,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "polished_chrome",
+        "color": [
+          0.96,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.04,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "satin_steel_stem",
+        "color": [
+          0.86,
+          0.86,
+          0.88,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.16,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_rook_black.glb",
+    "kb": 3455,
+    "nodes": [
+      "ferro-orbis_rook_black"
+    ],
+    "meshes": 1,
+    "triangles": 17664,
+    "vertices": 11966,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.06,
+        0.016
+      ],
+      "size": [
+        0.031,
+        0.06,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "blackened_patinated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "ferro-orbis_rook_white.glb",
+    "kb": 3449,
+    "nodes": [
+      "ferro-orbis_rook_white"
+    ],
+    "meshes": 1,
+    "triangles": 17664,
+    "vertices": 11966,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.06,
+        0.016
+      ],
+      "size": [
+        0.031,
+        0.06,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "spun_brushed_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "worn_turned_steel_base",
+        "color": [
+          0.82,
+          0.82,
+          0.82,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1.35,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "ivory_ceramic_coated_steel",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]
