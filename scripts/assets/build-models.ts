@@ -16,8 +16,8 @@ import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { Document, NodeIO, getBounds, type Texture } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, meshopt, prune, simplify, textureCompress, transformMesh, weld } from '@gltf-transform/functions';
-import { MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer';
+import { clearNodeTransform, dedup, dequantize, flatten, meshopt, prune, simplify, textureCompress, transformMesh, weld } from '@gltf-transform/functions';
+import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer';
 import sharp from 'sharp';
 
 type PieceName = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
@@ -44,6 +44,12 @@ interface PieceSetModels {
    */
   recolor?: { tone: [number, number, number]; contrast: number };
   /**
+   * With `delivered: 'both'`: pieces whose file is missing or wrong in one colour, made from
+   * the other colour's file instead, with the lightness of every non-metal part inverted
+   * (hue kept: black resin with teal swirls → white resin with teal swirls; metal stays).
+   */
+  derive?: `${PieceName}-${'white' | 'black'}`[];
+  /**
    * At most this many triangles per piece: `game` for the board (32 pieces at once),
    * `hd` for the close-up 3D preview in the shop (`<piece>-<colour>-hd.glb`).
    */
@@ -63,6 +69,10 @@ interface BoardModels {
   grid: { x: [number, number]; z: [number, number] };
   /** where the playing surface ends up (the classic board's top, `layout.boardTop`) */
   top: number;
+  /** height of the squares in model units, when a frame stands higher (default: the model's top) */
+  surface?: number;
+  /** quarter turns round the vertical axis, in degrees, so that a1 (front left from White) is dark */
+  turn?: number;
   triangles: number;
   textureSize: number;
 }
@@ -99,6 +109,383 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     triangles: 12_000,
     textureSize: 2048,
   },
+  // the sets and boards of November 2026 (heights keep each designer's proportions, king 1.65
+  // squares, bases at most 0.8 wide; board grids measured from top renders of the originals)
+  'aurum-set': {
+    kind: 'pieces',
+    source: 'pieces/aurum',
+    dir: 'aurum',
+    heights: { pawn: 0.96, rook: 1.06, knight: 1.24, bishop: 1.32, queen: 1.52, king: 1.65 },
+    turn: { knight: 90 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'cobalt-set': {
+    // the black knight was delivered with the white knight's colours: made from it, darkened
+    kind: 'pieces',
+    source: 'pieces/cobalt',
+    dir: 'cobalt',
+    heights: { pawn: 0.86, rook: 0.96, knight: 1.19, bishop: 1.15, queen: 1.39, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    derive: ['knight-black'],
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'crystalic-set': {
+    kind: 'pieces',
+    source: 'pieces/crystalic',
+    dir: 'crystalic',
+    heights: { pawn: 0.9, rook: 0.96, knight: 1.18, bishop: 1.32, queen: 1.49, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'cut-set': {
+    kind: 'pieces',
+    source: 'pieces/cut',
+    dir: 'cut',
+    heights: { pawn: 0.49, rook: 0.87, knight: 0.97, bishop: 1.02, queen: 1.5, king: 1.65 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'cylindra-set': {
+    kind: 'pieces',
+    source: 'pieces/cylindra',
+    dir: 'cylindra',
+    heights: { pawn: 0.44, rook: 0.71, knight: 0.8, bishop: 0.89, queen: 1, king: 1.23 },
+    turn: { knight: 180 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'dismorph-set': {
+    kind: 'pieces',
+    source: 'pieces/dismorph',
+    dir: 'dismorph',
+    heights: { pawn: 0.62, rook: 0.93, knight: 1.12, bishop: 1.19, queen: 1.48, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'domina-set': {
+    kind: 'pieces',
+    source: 'pieces/domina',
+    dir: 'domina',
+    heights: { pawn: 0.75, rook: 1.27, knight: 1.31, bishop: 1.45, queen: 1.45, king: 1.42 },
+    turn: { knight: 180 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'dune-set': {
+    kind: 'pieces',
+    source: 'pieces/dune',
+    dir: 'dune',
+    heights: { pawn: 0.82, rook: 1.03, knight: 1.15, bishop: 1.35, queen: 1.5, king: 1.62 },
+    turn: { knight: 180 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'ferro-orbis-set': {
+    kind: 'pieces',
+    source: 'pieces/ferro orbis',
+    dir: 'ferro-orbis',
+    heights: { pawn: 0.86, rook: 0.99, knight: 1.32, bishop: 1.35, queen: 1.45, king: 1.65 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'frost-glass-set': {
+    // the id frost-set is retired (an old placeholder): never reuse it
+    kind: 'pieces',
+    source: 'pieces/frost',
+    dir: 'frost-glass',
+    heights: { pawn: 0.82, rook: 0.93, knight: 1.2, bishop: 1.31, queen: 1.44, king: 1.6 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'glanc-set': {
+    // no white queen was delivered: made from the black one, lightened
+    kind: 'pieces',
+    source: 'pieces/glanc',
+    dir: 'glanc',
+    heights: { pawn: 1.08, rook: 1.22, knight: 1.35, bishop: 1.34, queen: 1.45, king: 1.65 },
+    delivered: 'both',
+    derive: ['queen-white'],
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'hallow-set': {
+    // figures: every piece looks to +z as delivered
+    kind: 'pieces',
+    source: 'pieces/hallow',
+    dir: 'hallow',
+    heights: { pawn: 0.96, rook: 1.17, knight: 1.29, bishop: 1.39, queen: 1.53, king: 1.65 },
+    turn: { king: 180, queen: 180, rook: 180, bishop: 180, knight: 180, pawn: 180 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'henge-set': {
+    kind: 'pieces',
+    source: 'pieces/henge',
+    dir: 'henge',
+    heights: { pawn: 1.32, rook: 0.99, knight: 1.32, bishop: 1.51, queen: 1.53, king: 1.58 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'hexa-set': {
+    // every original is 2 units tall: heights set by hand from their widths
+    kind: 'pieces',
+    source: 'pieces/hexa',
+    dir: 'hexa',
+    heights: { pawn: 0.95, rook: 1.1, knight: 1.25, bishop: 1.3, queen: 1.45, king: 1.6 },
+    turn: { knight: 180 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'hexalith-set': {
+    kind: 'pieces',
+    source: 'pieces/hexalith',
+    dir: 'hexalith',
+    heights: { pawn: 0.88, rook: 1, knight: 1.12, bishop: 1.4, queen: 1.47, king: 1.65 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'lithoxyl-set': {
+    kind: 'pieces',
+    source: 'pieces/lithoxyl',
+    dir: 'lithoxyl',
+    heights: { pawn: 0.96, rook: 1.01, knight: 1.11, bishop: 1.3, queen: 1.53, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'marb-set': {
+    kind: 'pieces',
+    source: 'pieces/marb',
+    dir: 'marb',
+    heights: { pawn: 1.09, rook: 1.22, knight: 1.18, bishop: 1.52, queen: 1.58, king: 1.65 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'metal-set': {
+    // squat bells: the designer's proportions (the widest base fills 0.8 of a square)
+    kind: 'pieces',
+    source: 'pieces/metal',
+    dir: 'metal',
+    heights: { pawn: 0.65, rook: 0.78, knight: 0.84, bishop: 0.96, queen: 1.04, king: 1.07 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'minima-set': {
+    kind: 'pieces',
+    source: 'pieces/minima',
+    dir: 'minima',
+    heights: { pawn: 1.15, rook: 1.32, knight: 1.39, bishop: 1.48, queen: 1.55, king: 1.65 },
+    turn: { knight: 90 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'phyrm-set': {
+    kind: 'pieces',
+    source: 'pieces/phyrm',
+    dir: 'phyrm',
+    heights: { pawn: 0.72, rook: 0.99, knight: 0.99, bishop: 1.01, queen: 1.35, king: 1.65 },
+    turn: { knight: 90 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'roni-set': {
+    kind: 'pieces',
+    source: 'pieces/roni',
+    dir: 'roni',
+    heights: { pawn: 0.88, rook: 1.16, knight: 1.41, bishop: 1.36, queen: 1.62, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'serpentina-set': {
+    kind: 'pieces',
+    source: 'pieces/serpentina',
+    dir: 'serpentina',
+    heights: { pawn: 0.95, rook: 1.22, knight: 1.36, bishop: 1.48, queen: 1.62, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'spirl-set': {
+    kind: 'pieces',
+    source: 'pieces/spirl',
+    dir: 'spirl',
+    heights: { pawn: 1.15, rook: 1.34, knight: 1.6, bishop: 1.44, queen: 1.53, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'stoni-set': {
+    kind: 'pieces',
+    source: 'pieces/stoni',
+    dir: 'stoni',
+    heights: { pawn: 0.87, rook: 1.01, knight: 1.15, bishop: 1.32, queen: 1.49, king: 1.65 },
+    turn: { knight: 90 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'teel-set': {
+    kind: 'pieces',
+    source: 'pieces/teel',
+    dir: 'teel',
+    heights: { pawn: 1.12, rook: 1.39, knight: 1.46, bishop: 1.65, queen: 1.45, king: 1.42 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'titani-set': {
+    kind: 'pieces',
+    source: 'pieces/titani',
+    dir: 'titani',
+    heights: { pawn: 0.88, rook: 1.16, knight: 1.41, bishop: 1.36, queen: 1.62, king: 1.65 },
+    turn: { knight: 270 },
+    delivered: 'both',
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+  },
+  'argentum-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['argentum', 'chessboard'],
+    dir: 'argentum',
+    grid: { x: [-0.2013, 0.2013], z: [-0.2013, 0.2013] },
+    top: 0.3,
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'azure-lagoon-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['azure', 'lagoon'],
+    dir: 'azure-lagoon',
+    grid: { x: [-0.1998, 0.1998], z: [-0.1998, 0.1998] },
+    top: 0.3,
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'beton-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['beton', 'chessboard'],
+    dir: 'beton',
+    grid: { x: [-0.1843, 0.1843], z: [-0.1843, 0.1843] },
+    top: 0.3,
+    surface: 0.0666, // the frame stands higher than the squares
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'classie-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['classie', 'chessboard'],
+    dir: 'classie',
+    grid: { x: [-0.2003, 0.2003], z: [-0.2003, 0.2003] },
+    top: 0.3,
+    surface: 0.0593, // the frame stands higher than the squares
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'frost-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['frost', 'chessboard'],
+    dir: 'frost',
+    grid: { x: [-0.1881, 0.1881], z: [-0.1881, 0.1881] },
+    top: 0.3,
+    surface: 0.0208, // the frame stands higher than the squares
+    turn: 90, // a1 must be dark
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'gappa-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['gappa', 'chessboard'],
+    dir: 'gappa',
+    grid: { x: [-0.1841, 0.1841], z: [-0.1841, 0.1841] },
+    top: 0.3,
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'greel-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['greel', 'chessboard'],
+    dir: 'greel',
+    grid: { x: [-0.1591, 0.1591], z: [-0.1591, 0.1591] },
+    top: 0.3,
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'legoed-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['legoed', 'chessboard'],
+    dir: 'legoed',
+    grid: { x: [-0.18, 0.18], z: [-0.18, 0.18] },
+    top: 0.3,
+    surface: 0.035, // the frame stands higher than the squares
+    triangles: 20_000,
+    textureSize: 2048,
+  },
+  'maple-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['maple', 'chessboard'],
+    dir: 'maple',
+    grid: { x: [-0.1994, 0.1994], z: [-0.1994, 0.1994] },
+    top: 0.3,
+    triangles: 12_000,
+    textureSize: 2048,
+  },
+  'mozaic-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['mozaic', 'chessboard'],
+    dir: 'mozaic',
+    grid: { x: [-0.1989, 0.1989], z: [-0.1989, 0.1989] },
+    top: 0.3,
+    triangles: 20_000,
+    textureSize: 2048,
+  },
+  'zlata-board': {
+    kind: 'board',
+    source: 'boards',
+    match: ['zlata', 'chessboard'],
+    dir: 'zlata',
+    grid: { x: [-0.1927, 0.1927], z: [-0.1927, 0.1927] },
+    top: 0.3,
+    surface: 0.0135, // the frame stands higher than the squares
+    triangles: 12_000,
+    textureSize: 2048,
+  },
 };
 
 const PIECES: PieceName[] = ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'];
@@ -106,8 +493,6 @@ const OUT = 'public/assets';
 
 let io: NodeIO;
 
-// run as a script (the models workflow only imports MODELS)
-if (process.argv[1]?.endsWith('build-models.ts')) await main(process.argv[2], process.argv[3]);
 
 async function main(itemId: string, sourceDir: string) {
   const config = MODELS[itemId];
@@ -116,9 +501,11 @@ async function main(itemId: string, sourceDir: string) {
     process.exit(1);
   }
 
-  await MeshoptEncoder.ready;
-  await MeshoptSimplifier.ready;
-  io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.encoder': MeshoptEncoder });
+  await Promise.all([MeshoptDecoder.ready, MeshoptEncoder.ready, MeshoptSimplifier.ready]);
+  // the decoder too: originals (or the inspect previews, for a quick local try) may come compressed
+  io = new NodeIO()
+    .registerExtensions(ALL_EXTENSIONS)
+    .registerDependencies({ 'meshopt.decoder': MeshoptDecoder, 'meshopt.encoder': MeshoptEncoder });
 
   if (config.kind === 'pieces') {
     const out = join(OUT, 'pieces', config.dir);
@@ -129,7 +516,10 @@ async function main(itemId: string, sourceDir: string) {
         const place = (doc: Document) => fitPiece(doc, config.heights[piece], config.turn?.[piece] ?? 0);
         if (config.delivered === 'both') {
           for (const colour of ['white', 'black'] as const) {
-            await write(config.textureSize, await prepare(find(sourceDir, [piece, colour]), place, triangles), join(out, `${piece}-${colour}${suffix}.glb`));
+            const derived = config.derive?.includes(`${piece}-${colour}`);
+            const doc = await prepare(find(sourceDir, [piece, derived ? (colour === 'white' ? 'black' : 'white') : colour]), place, triangles);
+            if (derived) await invertLightness(doc, config.textureSize);
+            await write(config.textureSize, doc, join(out, `${piece}-${colour}${suffix}.glb`));
           }
           continue;
         }
@@ -149,10 +539,27 @@ async function main(itemId: string, sourceDir: string) {
   }
 }
 
-/** The one .glb in the folder (or below it) whose name has all these words. */
+/**
+ * Words in the originals' file names, by meaning: the user names files in English or Czech
+ * (`kral_bila.glb`, `Rez_Dama_cerny.glb`, `hexa_king_white.glb`).
+ */
+const SYNONYMS: Record<string, string[]> = {
+  king: ['king', 'kral'],
+  queen: ['queen', 'dama'],
+  rook: ['rook', 'vez'],
+  bishop: ['bishop', 'strelec'],
+  knight: ['knight', 'jezdec'],
+  pawn: ['pawn', 'pesec'],
+  white: ['white', 'bily', 'bila', 'bile'],
+  black: ['black', 'cerny', 'cerna', 'cerne'],
+};
+
+/** The one .glb in the folder (or below it) whose name has all these words (whole words, any synonym). */
 function find(dir: string, words: string[]): string {
   const all = (d: string): string[] => readdirSync(d).flatMap((n) => (statSync(join(d, n)).isDirectory() ? all(join(d, n)) : [join(d, n)]));
-  const hits = all(dir).filter((f) => f.toLowerCase().endsWith('.glb') && words.every((w) => basename(f).toLowerCase().includes(w)));
+  const tokens = (f: string) => basename(f).toLowerCase().replace(/\.glb$/, '').split(/[^a-z0-9]+/);
+  const has = (f: string, word: string) => (SYNONYMS[word] ?? [word]).some((w) => tokens(f).includes(w));
+  const hits = all(dir).filter((f) => f.toLowerCase().endsWith('.glb') && words.every((w) => has(f, w)));
   if (hits.length !== 1) throw new Error(`${dir}: ${hits.length} files named with ${words.join(' + ')}${hits.length ? `: ${hits.join(', ')}` : ''}`);
   return hits[0];
 }
@@ -160,6 +567,10 @@ function find(dir: string, words: string[]): string {
 /** Read a model, place it, simplify it. Textures are resized when written. */
 async function prepare(file: string, place: (doc: Document) => void, maxTriangles: number): Promise<Document> {
   const doc = await io.read(file);
+  // plain float vertices (a quantized input would lose its normals when transformed), and
+  // node transforms into the meshes, so the bounds `place` measures are what gets baked
+  await doc.transform(dequantize(), flatten());
+  for (const node of doc.getRoot().listNodes()) if (node.getMesh()) clearNodeTransform(node);
   place(doc);
   await doc.transform(weld());
   const triangles = doc
@@ -198,7 +609,12 @@ function fitBoard(doc: Document, cfg: BoardModels): void {
   const sy = sx; // thickness follows the width
   const cx = (cfg.grid.x[0] + cfg.grid.x[1]) / 2;
   const cz = (cfg.grid.z[0] + cfg.grid.z[1]) / 2;
-  bake(doc, [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, -cx * sx, cfg.top - b.max[1] * sy, -cz * sz, 1]);
+  const surface = cfg.surface ?? b.max[1];
+  const a = ((cfg.turn ?? 0) * Math.PI) / 180;
+  const c = Math.cos(a);
+  const n = Math.sin(a);
+  // scale and centre, then turn about y (column-major)
+  bake(doc, [c * sx, 0, -n * sx, 0, 0, sy, 0, 0, n * sz, 0, c * sz, 0, c * -cx * sx + n * -cz * sz, cfg.top - surface * sy, -n * -cx * sx + c * -cz * sz, 1]);
 }
 
 /** Apply a column-major 4×4 matrix to every mesh and clear the node transforms. */
@@ -240,6 +656,68 @@ async function recolor(doc: Document, cfg: PieceSetModels['recolor'], size: numb
   await doc.transform(prune());
 }
 
+/** The other colour of a piece (`derive`): lightness of non-metal parts inverted, hue kept. */
+async function invertLightness(doc: Document, size: number): Promise<void> {
+  const flip = (r: number, g: number, b: number): [number, number, number] => {
+    // HSL: L → 1 − L keeps hue and saturation
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const l = (max + min) / 2;
+    const d = max - min;
+    const l2 = 1 - l;
+    if (d === 0) return [l2, l2, l2];
+    const sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    const h = max === r ? ((g - b) / d + (g < b ? 6 : 0)) / 6 : max === g ? ((b - r) / d + 2) / 6 : ((r - g) / d + 4) / 6;
+    const q = l2 < 0.5 ? l2 * (1 + sat) : l2 + sat - l2 * sat;
+    const p = 2 * l2 - q;
+    const hue = (t: number) => {
+      t = (t + 1) % 1;
+      return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p;
+    };
+    return [hue(h + 1 / 3), hue(h), hue(h - 1 / 3)];
+  };
+  const toSrgb = (v: number) => (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055);
+  const toLinear = (v: number) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  const metal = new Set(doc.getRoot().listMaterials().filter((m) => m.getMetallicFactor() >= 0.5));
+  for (const material of doc.getRoot().listMaterials()) {
+    if (metal.has(material)) continue;
+    const base = material.getBaseColorTexture();
+    if (base) {
+      const rgb = await raw(base, size);
+      for (let i = 0; i < rgb.length; i += 3) {
+        const c = flip(rgb[i] / 255, rgb[i + 1] / 255, rgb[i + 2] / 255);
+        for (let k = 0; k < 3; k++) rgb[i + k] = Math.round(c[k] * 255);
+      }
+      const png = await sharp(rgb, { raw: { width: size, height: size, channels: 3 } }).png().toBuffer();
+      material.setBaseColorTexture(doc.createTexture(`${base.getName() || 'base'}-inverted`).setImage(png).setMimeType('image/png'));
+    } else {
+      const [r, g, b, a] = material.getBaseColorFactor();
+      const usesVertexColour = doc
+        .getRoot()
+        .listMeshes()
+        .some((m) => m.listPrimitives().some((p) => p.getMaterial() === material && p.getAttribute('COLOR_0')));
+      // a white factor multiplies vertex colours: those are flipped below instead
+      if (!usesVertexColour) material.setBaseColorFactor([...flip(toSrgb(r), toSrgb(g), toSrgb(b)).map(toLinear), a] as [number, number, number, number]);
+    }
+  }
+  // vertex colours (linear) of non-metal parts
+  const done = new Set<unknown>();
+  for (const mesh of doc.getRoot().listMeshes()) {
+    for (const prim of mesh.listPrimitives()) {
+      const colours = prim.getAttribute('COLOR_0');
+      if (!colours || done.has(colours) || (prim.getMaterial() && metal.has(prim.getMaterial()!))) continue;
+      done.add(colours);
+      const v: number[] = [];
+      for (let i = 0; i < colours.getCount(); i++) {
+        colours.getElement(i, v);
+        const c = flip(toSrgb(v[0]), toSrgb(v[1]), toSrgb(v[2])).map(toLinear);
+        colours.setElement(i, v.length === 4 ? [...c, v[3]] : c);
+      }
+    }
+  }
+  await doc.transform(prune());
+}
+
 async function raw(texture: Texture, size: number): Promise<Buffer> {
   return sharp(Buffer.from(texture.getImage()!)).resize(size, size).removeAlpha().raw().toBuffer();
 }
@@ -262,3 +740,6 @@ async function write(size: number, doc: Document, file: string): Promise<void> {
     .reduce((n, p) => n + (p.getIndices()?.getCount() ?? 0) / 3, 0);
   console.log(`${file}  ${(statSync(file).size / 1024).toFixed(0)} KB  ${vertices} vertices  ${triangles} triangles`);
 }
+
+// run as a script (the models workflow only imports MODELS)
+if (process.argv[1]?.endsWith('build-models.ts')) await main(process.argv[2], process.argv[3]);
