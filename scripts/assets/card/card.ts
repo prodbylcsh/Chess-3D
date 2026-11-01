@@ -6,7 +6,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
-const dir = new URLSearchParams(location.search).get('dir') ?? 'pieces/monolith';
+const query = new URLSearchParams(location.search);
+const dir = query.get('dir') ?? 'pieces/monolith';
+// `flip=1`: pieces turned round (figures that face the enemy show their faces to the camera)
+const flip = query.get('flip') === '1' ? Math.PI : 0;
 const W = 1280;
 const H = 800;
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -82,7 +85,7 @@ if (dir.startsWith('boards/')) {
         if (m.isMesh) m.castShadow = m.receiveShadow = true;
       });
       obj.position.set(x, 0, z);
-      obj.rotation.y = turn + (colour === 'black' ? Math.PI : 0);
+      obj.rotation.y = turn + (colour === 'black' ? Math.PI : 0) + flip;
       scene.add(obj);
     }),
   );
