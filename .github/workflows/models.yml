@@ -15,7 +15,8 @@ name: Models from R2
 #   derive   makes a missing or wrong piece of a delivered set from its other colour at full
 #            quality (scripts/assets/derive-original.ts), for the user to upload to the
 #            originals bucket: targets "pieces/glanc/dama_cerna.glb>dama_bila.glb"; the files
-#            are the run's artifact "derived-originals", nothing is committed
+#            are the run's artifact "derived-originals" and are committed to derived-originals/
+#            (a session cannot download artifacts; delete the folder once they are uploaded)
 #
 # Inspect and build commit their result to the branch they run on. Run it by hand, or commit
 # scripts/assets/request.json ({ "task": "inspect", "target": "pieces/squircle" }) on any
@@ -146,7 +147,9 @@ jobs:
 
       - name: Commit
         run: |
+          if [ "$TASK" = "derive" ]; then mkdir -p derived-originals && cp -r "$RUNNER_TEMP/derived/." derived-originals/; fi
           git add scripts/assets/reports public/assets
+          [ -d derived-originals ] && git add derived-originals
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

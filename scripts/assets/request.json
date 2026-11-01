@@ -1,5 +1,5 @@
 {
- "task": "derive",
+ "task": "derive", "try": 2,
  "targets": [
   "pieces/glanc/dama_cerna.glb>dama_bila.glb",
   "pieces/cobalt/cobalt_vein_white_knight.glb>cobalt_vein_black_knight.glb"
