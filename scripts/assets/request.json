@@ -1,4 +1,4 @@
 {
- "task": "inspect",
- "targets": ["pieces/glanc", "pieces/cobalt", "pieces/medenka"]
+ "task": "build",
+ "targets": ["glanc-set", "cobalt-set", "medenka-set"]
 }

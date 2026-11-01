@@ -28,6 +28,8 @@ interface PieceSetModels {
   source: string;
   /** output folder under public/assets/pieces/ */
   dir: string;
+  /** a word in the file names that stands for the piece, when the set names its pieces its own way */
+  names?: Partial<Record<PieceName, string>>;
   /** turn pieces round the vertical axis, in degrees, when they face the wrong way (the knight must look to −z) */
   turn?: Partial<Record<PieceName, number>>;
   /** height of each piece in board squares (the classic set: pawn 0.93 … king 1.64) */
@@ -126,14 +128,12 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     gameTextureSize: 512,
   },
   'cobalt-set': {
-    // the black knight was delivered with the white knight's colours: made from it, darkened
     kind: 'pieces',
     source: 'pieces/cobalt',
     dir: 'cobalt',
     heights: { pawn: 0.86, rook: 0.96, knight: 1.19, bishop: 1.15, queen: 1.39, king: 1.65 },
     turn: { knight: 270 },
     delivered: 'both',
-    derive: ['knight-black'],
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
     gameTextureSize: 512,
@@ -225,13 +225,23 @@ export const MODELS: Record<string, PieceSetModels | BoardModels> = {
     gameTextureSize: 512,
   },
   'glanc-set': {
-    // no white queen was delivered: made from the black one, lightened
     kind: 'pieces',
     source: 'pieces/glanc',
     dir: 'glanc',
     heights: { pawn: 1.08, rook: 1.22, knight: 1.35, bishop: 1.34, queen: 1.45, king: 1.65 },
     delivered: 'both',
-    derive: ['queen-white'],
+    triangles: { game: 6000, hd: 24_000 },
+    textureSize: 1024,
+    gameTextureSize: 512,
+  },
+  'medenka-set': {
+    // the pieces have their own names; numbered in the order of the user's Roni and Titani files
+    kind: 'pieces',
+    source: 'pieces/medenka',
+    dir: 'medenka',
+    names: { king: 'smycka', queen: 'mince', bishop: 'lupa', knight: 'pricka', rook: 'oblouk', pawn: 'spendlik' },
+    heights: { pawn: 1.1, rook: 1.42, knight: 1.54, bishop: 1.38, queen: 1.62, king: 1.52 },
+    delivered: 'both',
     triangles: { game: 6000, hd: 24_000 },
     textureSize: 1024,
     gameTextureSize: 512,
@@ -547,7 +557,8 @@ async function main(itemId: string, sourceDir: string) {
         if (config.delivered === 'both') {
           for (const colour of ['white', 'black'] as const) {
             const derived = config.derive?.includes(`${piece}-${colour}`);
-            const doc = await prepare(find(sourceDir, [piece, derived ? (colour === 'white' ? 'black' : 'white') : colour]), place, triangles);
+            const word = config.names?.[piece] ?? piece;
+            const doc = await prepare(find(sourceDir, [word, derived ? (colour === 'white' ? 'black' : 'white') : colour]), place, triangles);
             if (derived) await invertLightness(doc, config.textureSize);
             await write(size, doc, join(out, `${piece}-${colour}${suffix}.glb`));
           }
