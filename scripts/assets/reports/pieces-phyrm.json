@@ -1,0 +1,690 @@
+[
+  {
+    "file": "black_bishop.glb",
+    "kb": 3316,
+    "nodes": [
+      "Black_Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 50,
+    "vertices": 150,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.05,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.05,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "black_king.glb",
+    "kb": 3319,
+    "nodes": [
+      "Black_King"
+    ],
+    "meshes": 1,
+    "triangles": 66,
+    "vertices": 198,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.082,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.082,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "black_knight.glb",
+    "kb": 3312,
+    "nodes": [
+      "Black_Knight"
+    ],
+    "meshes": 1,
+    "triangles": 20,
+    "vertices": 60,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.018,
+        0.049,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.049,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "black_pawn.glb",
+    "kb": 3313,
+    "nodes": [
+      "Black_Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 28,
+    "vertices": 84,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.036,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.036,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "black_queen.glb",
+    "kb": 3312,
+    "nodes": [
+      "Black_Queen"
+    ],
+    "meshes": 1,
+    "triangles": 22,
+    "vertices": 66,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.067,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.067,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "black_rook.glb",
+    "kb": 3327,
+    "nodes": [
+      "Black_Rook"
+    ],
+    "meshes": 1,
+    "triangles": 124,
+    "vertices": 372,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.049,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.049,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "build_chess.py",
+    "kb": 17
+  },
+  {
+    "file": "white_bishop.glb",
+    "kb": 3487,
+    "nodes": [
+      "White_Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 50,
+    "vertices": 150,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.05,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.05,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "white_king.glb",
+    "kb": 3489,
+    "nodes": [
+      "White_King"
+    ],
+    "meshes": 1,
+    "triangles": 66,
+    "vertices": 198,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.082,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.082,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "white_knight.glb",
+    "kb": 3482,
+    "nodes": [
+      "White_Knight"
+    ],
+    "meshes": 1,
+    "triangles": 20,
+    "vertices": 60,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.018,
+        0.049,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.049,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "white_pawn.glb",
+    "kb": 3484,
+    "nodes": [
+      "White_Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 28,
+    "vertices": 84,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.036,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.036,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "white_queen.glb",
+    "kb": 3483,
+    "nodes": [
+      "White_Queen"
+    ],
+    "meshes": 1,
+    "triangles": 22,
+    "vertices": 66,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.067,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.067,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "white_rook.glb",
+    "kb": 3497,
+    "nodes": [
+      "White_Rook"
+    ],
+    "meshes": 1,
+    "triangles": 124,
+    "vertices": 372,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.049,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.049,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Interior_Black",
+        "color": [
+          0.012,
+          0.012,
+          0.012,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,518 @@
+[
+  {
+    "file": "01_pesec_bila.glb",
+    "kb": 3479,
+    "nodes": [
+      "01_pesec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 24064,
+    "vertices": 12593,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.071,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.071,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1708 image/jpeg",
+        "metallicRoughness": "2048x1708 image/jpeg",
+        "normal": "2048x1708 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "01_pesec_cerna.glb",
+    "kb": 3475,
+    "nodes": [
+      "01_pesec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 24064,
+    "vertices": 12593,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.071,
+        0.017
+      ],
+      "size": [
+        0.034,
+        0.071,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1708 image/jpeg",
+        "metallicRoughness": "2048x1708 image/jpeg",
+        "normal": "2048x1708 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "02_dama_bila.glb",
+    "kb": 4840,
+    "nodes": [
+      "02_dama_bila"
+    ],
+    "meshes": 1,
+    "triangles": 44032,
+    "vertices": 22616,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.082,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.082,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "02_dama_cerna.glb",
+    "kb": 4832,
+    "nodes": [
+      "02_dama_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 44032,
+    "vertices": 22616,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.082,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.082,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "03_vez_bila.glb",
+    "kb": 3825,
+    "nodes": [
+      "03_vez_bila"
+    ],
+    "meshes": 1,
+    "triangles": 33792,
+    "vertices": 17476,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.053,
+        0.021
+      ],
+      "size": [
+        0.043,
+        0.053,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1456 image/jpeg",
+        "metallicRoughness": "2048x1456 image/jpeg",
+        "normal": "2048x1456 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "03_vez_cerna.glb",
+    "kb": 3848,
+    "nodes": [
+      "03_vez_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 33792,
+    "vertices": 17476,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.053,
+        0.021
+      ],
+      "size": [
+        0.043,
+        0.053,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1456 image/jpeg",
+        "metallicRoughness": "2048x1456 image/jpeg",
+        "normal": "2048x1456 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "04_kral_bila.glb",
+    "kb": 4930,
+    "nodes": [
+      "04_kral_bila"
+    ],
+    "meshes": 1,
+    "triangles": 45568,
+    "vertices": 23387,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.085,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.085,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "04_kral_cerna.glb",
+    "kb": 4954,
+    "nodes": [
+      "04_kral_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 45568,
+    "vertices": 23387,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.085,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.085,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "05_jezdec_bila.glb",
+    "kb": 4495,
+    "nodes": [
+      "05_jezdec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 35840,
+    "vertices": 18504,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.071,
+        0.021
+      ],
+      "size": [
+        0.041,
+        0.071,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1792 image/jpeg",
+        "metallicRoughness": "2048x1792 image/jpeg",
+        "normal": "2048x1792 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "05_jezdec_cerna.glb",
+    "kb": 4521,
+    "nodes": [
+      "05_jezdec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 35840,
+    "vertices": 18504,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.071,
+        0.021
+      ],
+      "size": [
+        0.041,
+        0.071,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1792 image/jpeg",
+        "metallicRoughness": "2048x1792 image/jpeg",
+        "normal": "2048x1792 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "06_strelec_bila.glb",
+    "kb": 4569,
+    "nodes": [
+      "06_strelec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 39936,
+    "vertices": 20560,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.081,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.081,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1872 image/jpeg",
+        "metallicRoughness": "2048x1872 image/jpeg",
+        "normal": "2048x1872 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "06_strelec_cerna.glb",
+    "kb": 4577,
+    "nodes": [
+      "06_strelec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 39936,
+    "vertices": 20560,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.081,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.081,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1872 image/jpeg",
+        "metallicRoughness": "2048x1872 image/jpeg",
+        "normal": "2048x1872 image/jpeg"
+      }
+    ]
+  }
+]

@@ -1,0 +1,686 @@
+[
+  {
+    "file": "Rez_Dama_bily.glb",
+    "kb": 3023,
+    "nodes": [
+      "Rez_Dama_bily"
+    ],
+    "meshes": 1,
+    "triangles": 1784,
+    "vertices": 5352,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.062,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.062,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Dama_cerny.glb",
+    "kb": 2696,
+    "nodes": [
+      "Rez_Dama_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 1784,
+    "vertices": 5352,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.062,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.062,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Jezdec_bily.glb",
+    "kb": 2980,
+    "nodes": [
+      "Rez_Jezdec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 1492,
+    "vertices": 4476,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.01,
+        0.04,
+        0.014
+      ],
+      "size": [
+        0.02,
+        0.04,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Jezdec_cerny.glb",
+    "kb": 2654,
+    "nodes": [
+      "Rez_Jezdec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 1492,
+    "vertices": 4476,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.01,
+        0.04,
+        0.014
+      ],
+      "size": [
+        0.02,
+        0.04,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Kral_bily.glb",
+    "kb": 4663,
+    "nodes": [
+      "Rez_Kral_bily"
+    ],
+    "meshes": 1,
+    "triangles": 12982,
+    "vertices": 38946,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.068,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.068,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Kral_cerny.glb",
+    "kb": 4337,
+    "nodes": [
+      "Rez_Kral_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 12982,
+    "vertices": 38946,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.068,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.068,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Pesec_bily.glb",
+    "kb": 2932,
+    "nodes": [
+      "Rez_Pesec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.02,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.02,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Pesec_cerny.glb",
+    "kb": 2606,
+    "nodes": [
+      "Rez_Pesec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.02,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.02,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Strelec_bily.glb",
+    "kb": 2932,
+    "nodes": [
+      "Rez_Strelec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.01,
+        0.042,
+        0.014
+      ],
+      "size": [
+        0.02,
+        0.042,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Strelec_cerny.glb",
+    "kb": 2606,
+    "nodes": [
+      "Rez_Strelec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.01,
+        0.042,
+        0.014
+      ],
+      "size": [
+        0.02,
+        0.042,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Vez_bily.glb",
+    "kb": 2932,
+    "nodes": [
+      "Rez_Vez_bily"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.036,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.036,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_white_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_white_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.74,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Rez_Vez_cerny.glb",
+    "kb": 2606,
+    "nodes": [
+      "Rez_Vez_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 1164,
+    "vertices": 3492,
+    "bounds": {
+      "min": [
+        -0.01,
+        0,
+        -0.01
+      ],
+      "max": [
+        0.01,
+        0.036,
+        0.01
+      ],
+      "size": [
+        0.02,
+        0.036,
+        0.02
+      ]
+    },
+    "materials": [
+      {
+        "name": "Rez_linden_black_long_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Rez_linden_black_end_grain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

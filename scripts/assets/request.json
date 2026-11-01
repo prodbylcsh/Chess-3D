@@ -1,1 +1,4 @@
-{ "task": "build", "target": "squircle-set", "try": 3 }
+{
+ "task": "build",
+ "targets": ["glanc-set", "cobalt-set", "medenka-set"]
+}

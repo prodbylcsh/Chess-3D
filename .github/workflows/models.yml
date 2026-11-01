@@ -5,15 +5,23 @@ name: Models from R2
 #
 #   inspect  lists the originals bucket and, for `target` (a folder such as pieces/squircle),
 #            reports every model (size, triangles, bounds, textures) into
-#            scripts/assets/reports/, to write the item's build settings from
+#            scripts/assets/reports/, to write the item's build settings from, with small
+#            unscaled preview models in scripts/assets/reports/previews/ to look at
 #   build    pulls the originals of `target` (an item id in scripts/assets/build-models.ts,
 #            whose `source` names its folder) and builds the game files into public/assets/;
 #            the target `map` builds the puzzle map's scenery from the originals' map/ folder
 #            (scripts/assets/build-map.ts → public/assets/map/)
 #
-# Both commit their result to the branch they run on. Run it by hand, or commit
+#   derive   makes a missing or wrong piece of a delivered set from its other colour at full
+#            quality (scripts/assets/derive-original.ts), for the user to upload to the
+#            originals bucket: targets "pieces/glanc/dama_cerna.glb>dama_bila.glb"; the files
+#            are the run's artifact "derived-originals" and are committed to derived-originals/
+#            (a session cannot download artifacts; delete the folder once they are uploaded)
+#
+# Inspect and build commit their result to the branch they run on. Run it by hand, or commit
 # scripts/assets/request.json ({ "task": "inspect", "target": "pieces/squircle" }) on any
-# branch: a session can do that, and it works before this file reaches main.
+# branch: a session can do that, and it works before this file reaches main. A request can
+# name several: "targets": ["pieces/aurum", "boards"] or ["aurum-set", "argentum-board"].
 # Needs the secrets R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY.
 
 on:
@@ -24,9 +32,9 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: inspect or build
+        description: inspect, build or derive
         type: choice
-        options: [inspect, build]
+        options: [inspect, build, derive]
         default: inspect
       target:
         description: 'inspect: an originals folder (e.g. pieces/squircle), empty lists all; build: an item id (e.g. squircle-set)'
@@ -58,43 +66,98 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             task=$(node -p "require('./scripts/assets/request.json').task")
-            target=$(node -p "require('./scripts/assets/request.json').target ?? ''")
+            # one target per line (folder names may hold spaces)
+            node -e "const r = require('./scripts/assets/request.json'); console.log((r.targets ?? [r.target ?? '']).join('\n'))" > "$RUNNER_TEMP/targets"
           else
             task="${{ inputs.task }}"
-            target="${{ inputs.target }}"
+            echo "${{ inputs.target }}" > "$RUNNER_TEMP/targets"
           fi
           echo "TASK=$task" >> "$GITHUB_ENV"
-          echo "TARGET=$target" >> "$GITHUB_ENV"
-          echo "$task $target"
+          echo "TARGET=$(paste -sd ' ' "$RUNNER_TEMP/targets")" >> "$GITHUB_ENV"
+          echo "$task:"; cat "$RUNNER_TEMP/targets"
 
       - name: Inspect
         if: env.TASK == 'inspect'
         run: |
           mkdir -p scripts/assets/reports
           node scripts/assets/r2.ts list originals | tee scripts/assets/reports/originals.txt
-          if [ -n "$TARGET" ]; then
-            node scripts/assets/r2.ts pull-originals "$TARGET" "$RUNNER_TEMP/originals"
-            node scripts/assets/inspect.ts "$RUNNER_TEMP/originals" "scripts/assets/reports/$(echo "$TARGET" | tr '/' '-').json"
-          fi
+          while IFS= read -r target; do
+            [ -z "$target" ] && continue
+            name=$(echo "$target" | tr '/ ' '--')
+            rm -rf "$RUNNER_TEMP/originals"
+            node scripts/assets/r2.ts pull-originals "$target" "$RUNNER_TEMP/originals" > /dev/null
+            if node scripts/assets/inspect.ts "$RUNNER_TEMP/originals" "scripts/assets/reports/$name.json" "scripts/assets/reports/previews/$name" > /dev/null; then
+              echo "inspected $target"
+            else
+              echo "::error::inspect $target failed"; echo "$target" >> "$RUNNER_TEMP/failed"
+            fi
+          done < "$RUNNER_TEMP/targets"
 
       - name: Build
         if: env.TASK == 'build'
         run: |
-          if [ "$TARGET" = "map" ]; then
-            node scripts/assets/r2.ts pull-originals map "$RUNNER_TEMP/originals"
-            node scripts/assets/build-map.ts "$RUNNER_TEMP/originals"
-            exit 0
-          fi
-          source=$(node -e "import('./scripts/assets/build-models.ts').then(({ MODELS }) => console.log(MODELS[process.env.TARGET]?.source ?? ''))")
-          if [ -z "$source" ]; then echo "::error::no item $TARGET with a source in build-models.ts"; exit 1; fi
-          node scripts/assets/r2.ts pull-originals "$source" "$RUNNER_TEMP/originals"
-          node scripts/assets/build-models.ts "$TARGET" "$RUNNER_TEMP/originals"
+          # the sizes of what was built, for the session that asked (failures don't stop the others)
+          mkdir -p scripts/assets/reports
+          : > scripts/assets/reports/build.txt
+          while IFS= read -r target; do
+            [ -z "$target" ] && continue
+            rm -rf "$RUNNER_TEMP/originals"
+            if [ "$target" = "map" ]; then
+              node scripts/assets/r2.ts pull-originals map "$RUNNER_TEMP/originals" > /dev/null
+              node scripts/assets/build-map.ts "$RUNNER_TEMP/originals"
+              continue
+            fi
+            source=$(TARGET="$target" node -e "import('./scripts/assets/build-models.ts').then(({ MODELS }) => console.log(MODELS[process.env.TARGET]?.source ?? ''))")
+            if [ -z "$source" ]; then
+              echo "::error::no item $target with a source in build-models.ts"; echo "$target" >> "$RUNNER_TEMP/failed"; continue
+            fi
+            node scripts/assets/r2.ts pull-originals "$source" "$RUNNER_TEMP/originals" > /dev/null
+            echo "== $target" >> scripts/assets/reports/build.txt
+            if ! node scripts/assets/build-models.ts "$target" "$RUNNER_TEMP/originals" >> scripts/assets/reports/build.txt 2>&1; then
+              echo "::error::build $target failed"; echo "$target" >> "$RUNNER_TEMP/failed"; echo "FAILED" >> scripts/assets/reports/build.txt
+            fi
+          done < "$RUNNER_TEMP/targets"
+          cat scripts/assets/reports/build.txt
+
+      - name: Derive
+        if: env.TASK == 'derive'
+        run: |
+          mkdir -p "$RUNNER_TEMP/derived"
+          while IFS= read -r target; do
+            [ -z "$target" ] && continue
+            src="${target%%>*}"
+            name="${target##*>}"
+            folder=$(dirname "$src")
+            rm -rf "$RUNNER_TEMP/originals"
+            node scripts/assets/r2.ts pull-originals "$folder" "$RUNNER_TEMP/originals" > /dev/null
+            mkdir -p "$RUNNER_TEMP/derived/$folder"
+            if node scripts/assets/derive-original.ts "$RUNNER_TEMP/originals/$(basename "$src")" "$RUNNER_TEMP/derived/$folder/$name"; then
+              ls -la "$RUNNER_TEMP/derived/$folder/$name"
+            else
+              echo "::error::derive $target failed"; echo "$target" >> "$RUNNER_TEMP/failed"
+            fi
+          done < "$RUNNER_TEMP/targets"
+
+      - name: Derived files
+        if: env.TASK == 'derive'
+        uses: actions/upload-artifact@v4
+        with:
+          name: derived-originals
+          path: ${{ runner.temp }}/derived
 
       - name: Commit
         run: |
+          if [ "$TASK" = "derive" ]; then mkdir -p derived-originals && cp -r "$RUNNER_TEMP/derived/." derived-originals/; fi
           git add scripts/assets/reports public/assets
+          [ -d derived-originals ] && git add derived-originals
           if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Models from R2: $TASK $TARGET"
+          git commit -m "Models from R2: $TASK ${TARGET:0:200}"
+          # the session may have pushed meanwhile
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push
+
+      - name: Failed targets
+        run: |
+          if [ -s "$RUNNER_TEMP/failed" ]; then echo "::error::failed: $(paste -sd ', ' "$RUNNER_TEMP/failed")"; exit 1; fi

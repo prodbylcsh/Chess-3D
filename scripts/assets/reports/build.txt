@@ -1,0 +1,389 @@
+== glanc-set
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (11)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (7)
+public/assets/pieces/glanc/king-white.glb  80 KB  3551 vertices  5996 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (11)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (7)
+public/assets/pieces/glanc/king-black.glb  82 KB  3551 vertices  5996 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (11)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (7)
+public/assets/pieces/glanc/king-white-hd.glb  246 KB  12654 vertices  23996 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (11)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (7)
+public/assets/pieces/glanc/king-black-hd.glb  248 KB  12654 vertices  23996 triangles
+prune: Removed types... Accessor (7)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (4)
+public/assets/pieces/glanc/queen-white.glb  80 KB  3305 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (4)
+public/assets/pieces/glanc/queen-black.glb  81 KB  3546 vertices  5998 triangles
+prune: Removed types... Accessor (7)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (4)
+public/assets/pieces/glanc/queen-white-hd.glb  246 KB  12388 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (4)
+public/assets/pieces/glanc/queen-black-hd.glb  246 KB  12659 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/rook-white.glb  72 KB  3560 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/rook-black.glb  74 KB  3560 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/rook-white-hd.glb  220 KB  12668 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/rook-black-hd.glb  222 KB  12668 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/bishop-white.glb  72 KB  3558 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/bishop-black.glb  73 KB  3558 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/bishop-white-hd.glb  220 KB  12670 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/bishop-black-hd.glb  222 KB  12670 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/knight-white.glb  72 KB  3546 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/knight-black.glb  73 KB  3546 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/knight-white-hd.glb  218 KB  12671 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/knight-black-hd.glb  220 KB  12671 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/pawn-white.glb  72 KB  3573 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/pawn-black.glb  73 KB  3573 vertices  5998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/pawn-white-hd.glb  218 KB  12672 vertices  23998 triangles
+prune: Removed types... Accessor (1)
+prune: Removed types... Accessor (7)
+prune: Removed types... Accessor (5)
+public/assets/pieces/glanc/pawn-black-hd.glb  220 KB  12672 vertices  23998 triangles
+== cobalt-set
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/king-white.glb  211 KB  3249 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/king-black.glb  146 KB  3249 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/king-white-hd.glb  775 KB  12337 vertices  24000 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/king-black-hd.glb  539 KB  12337 vertices  24000 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/queen-white.glb  219 KB  3234 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/queen-black.glb  149 KB  3234 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/queen-white-hd.glb  770 KB  12319 vertices  24000 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/queen-black-hd.glb  522 KB  12319 vertices  24000 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/rook-white.glb  211 KB  3419 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/rook-black.glb  146 KB  3419 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/rook-white-hd.glb  730 KB  12492 vertices  23999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/rook-black-hd.glb  509 KB  12492 vertices  23999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/bishop-white.glb  211 KB  3236 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/bishop-black.glb  149 KB  3236 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/bishop-white-hd.glb  730 KB  12324 vertices  23999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/bishop-black-hd.glb  513 KB  12324 vertices  23999 triangles
+prune: Removed types... Accessor (5)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/knight-white.glb  174 KB  7757 vertices  7012 triangles
+prune: Removed types... Accessor (5)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/knight-black.glb  167 KB  7757 vertices  7012 triangles
+prune: Removed types... Accessor (5)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/knight-white-hd.glb  485 KB  22266 vertices  24000 triangles
+prune: Removed types... Accessor (5)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/knight-black-hd.glb  465 KB  22266 vertices  24000 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/pawn-white.glb  211 KB  3236 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/pawn-black.glb  151 KB  3236 vertices  5999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/pawn-white-hd.glb  685 KB  12309 vertices  23999 triangles
+prune: Removed types... Accessor (4)
+prune: Removed types... Accessor (3)
+public/assets/pieces/cobalt/pawn-black-hd.glb  488 KB  12309 vertices  23999 triangles
+== medenka-set
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/king-white.glb  294 KB  3468 vertices  5999 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/king-black.glb  338 KB  3468 vertices  5999 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/king-white-hd.glb  945 KB  12927 vertices  23998 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/king-black-hd.glb  1049 KB  12927 vertices  23998 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (25)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (15)
+public/assets/pieces/medenka/queen-white.glb  322 KB  3898 vertices  5996 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (25)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (15)
+public/assets/pieces/medenka/queen-black.glb  367 KB  3898 vertices  5996 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (25)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (15)
+public/assets/pieces/medenka/queen-white-hd.glb  1015 KB  13148 vertices  23995 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (25)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (15)
+public/assets/pieces/medenka/queen-black-hd.glb  1118 KB  13148 vertices  23995 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/rook-white.glb  301 KB  3464 vertices  5997 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/rook-black.glb  343 KB  3464 vertices  5997 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/rook-white-hd.glb  964 KB  12992 vertices  23998 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (10)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (6)
+public/assets/pieces/medenka/rook-black-hd.glb  1064 KB  12992 vertices  23998 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (35)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (23)
+public/assets/pieces/medenka/bishop-white.glb  309 KB  3718 vertices  6021 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (35)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (23)
+public/assets/pieces/medenka/bishop-black.glb  352 KB  3718 vertices  6021 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (35)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (23)
+public/assets/pieces/medenka/bishop-white-hd.glb  966 KB  13189 vertices  23993 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (35)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (23)
+public/assets/pieces/medenka/bishop-black-hd.glb  1071 KB  13189 vertices  23993 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (55)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (33)
+public/assets/pieces/medenka/knight-white.glb  333 KB  3797 vertices  5992 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (55)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (33)
+public/assets/pieces/medenka/knight-black.glb  378 KB  3797 vertices  5992 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (55)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (33)
+public/assets/pieces/medenka/knight-white-hd.glb  1037 KB  13678 vertices  23989 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (55)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (33)
+public/assets/pieces/medenka/knight-black-hd.glb  1139 KB  13678 vertices  23989 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (20)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (13)
+public/assets/pieces/medenka/pawn-white.glb  308 KB  3567 vertices  5997 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (20)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (13)
+public/assets/pieces/medenka/pawn-black.glb  354 KB  3567 vertices  5997 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (20)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (13)
+public/assets/pieces/medenka/pawn-white-hd.glb  964 KB  12936 vertices  23996 triangles
+prune: Removed types... Node (1)
+prune: Removed types... Accessor (20)
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+quantize: Skipping TEXCOORD_0; out of [0,1] range.
+prune: Removed types... Accessor (13)
+public/assets/pieces/medenka/pawn-black-hd.glb  1067 KB  12936 vertices  23996 triangles

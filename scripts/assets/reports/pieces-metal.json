@@ -1,0 +1,1398 @@
+[
+  {
+    "file": "01_pesec_bila.glb",
+    "kb": 6795,
+    "nodes": [
+      "Pěšec V2 / bila",
+      "Wide satin body and integral base",
+      "Deep ball seating ring",
+      "Recessed polished spherical head",
+      "Beveled deep seating collar",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam"
+    ],
+    "meshes": 6,
+    "triangles": 165888,
+    "vertices": 85470,
+    "bounds": {
+      "min": [
+        -0.011,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.011,
+        0.036,
+        0.011
+      ],
+      "size": [
+        0.021,
+        0.036,
+        0.021
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Bright spherical seating collar / bila",
+        "color": [
+          0.84,
+          0.852,
+          0.864,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.19,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "01_pesec_bila.png",
+    "kb": 1627
+  },
+  {
+    "file": "01_pesec_cerna.glb",
+    "kb": 6795,
+    "nodes": [
+      "Pěšec V2 / cerna",
+      "Wide satin body and integral base",
+      "Deep ball seating ring",
+      "Recessed polished spherical head",
+      "Beveled deep seating collar",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam"
+    ],
+    "meshes": 6,
+    "triangles": 165888,
+    "vertices": 85470,
+    "bounds": {
+      "min": [
+        -0.011,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.011,
+        0.036,
+        0.011
+      ],
+      "size": [
+        0.021,
+        0.036,
+        0.021
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Bright spherical seating collar / cerna",
+        "color": [
+          0.192,
+          0.181,
+          0.162,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.19,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "01_pesec_cerna.png",
+    "kb": 1309
+  },
+  {
+    "file": "02_vez_bila.glb",
+    "kb": 7263,
+    "nodes": [
+      "Věž V3 / bila",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Broad rounded machined opening and cut edges",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Circular band defining inclined rook head",
+      "Fine seam below rook shoulder ring"
+    ],
+    "meshes": 7,
+    "triangles": 178560,
+    "vertices": 92247,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.043,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.043,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / bila",
+        "color": [
+          0.518,
+          0.525,
+          0.533,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "02_vez_bila.png",
+    "kb": 1702
+  },
+  {
+    "file": "02_vez_cerna.glb",
+    "kb": 7263,
+    "nodes": [
+      "Věž V3 / cerna",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Broad rounded machined opening and cut edges",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Circular band defining inclined rook head",
+      "Fine seam below rook shoulder ring"
+    ],
+    "meshes": 7,
+    "triangles": 178560,
+    "vertices": 92247,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.043,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.043,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / cerna",
+        "color": [
+          0.118,
+          0.112,
+          0.1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "02_vez_cerna.png",
+    "kb": 1450
+  },
+  {
+    "file": "03_jezdec_bila.glb",
+    "kb": 11532,
+    "nodes": [
+      "Jezdec V3 / bila",
+      "Body below true carved U boundary",
+      "Body wrapping around open front carving",
+      "Thick continuous inner wall",
+      "Rounded back rim adjoining shorter V",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Left folded shield face",
+      "Recessed shield side wall -1",
+      "Recessed shield curved lower wall -1",
+      "Shield side recessed seam -1",
+      "Shield bottom recessed seam -1",
+      "Right folded shield face",
+      "Recessed shield side wall 1",
+      "Recessed shield curved lower wall 1",
+      "Shield side recessed seam 1",
+      "Shield bottom recessed seam 1",
+      "Sharp carved ridge leading to short V",
+      "Broad polished V collar -1",
+      "Broad polished V collar 1"
+    ],
+    "meshes": 19,
+    "triangles": 297724,
+    "vertices": 153255,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.046,
+        0.018
+      ],
+      "size": [
+        0.035,
+        0.046,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / bila",
+        "color": [
+          0.518,
+          0.525,
+          0.533,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Folded knight face / bila",
+        "color": [
+          0.721,
+          0.731,
+          0.742,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "03_jezdec_bila.png",
+    "kb": 1644
+  },
+  {
+    "file": "03_jezdec_cerna.glb",
+    "kb": 11532,
+    "nodes": [
+      "Jezdec V3 / cerna",
+      "Body below true carved U boundary",
+      "Body wrapping around open front carving",
+      "Thick continuous inner wall",
+      "Rounded back rim adjoining shorter V",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Left folded shield face",
+      "Recessed shield side wall -1",
+      "Recessed shield curved lower wall -1",
+      "Shield side recessed seam -1",
+      "Shield bottom recessed seam -1",
+      "Right folded shield face",
+      "Recessed shield side wall 1",
+      "Recessed shield curved lower wall 1",
+      "Shield side recessed seam 1",
+      "Shield bottom recessed seam 1",
+      "Sharp carved ridge leading to short V",
+      "Broad polished V collar -1",
+      "Broad polished V collar 1"
+    ],
+    "meshes": 19,
+    "triangles": 297724,
+    "vertices": 153255,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.046,
+        0.018
+      ],
+      "size": [
+        0.035,
+        0.046,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / cerna",
+        "color": [
+          0.118,
+          0.112,
+          0.1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Folded knight face / cerna",
+        "color": [
+          0.165,
+          0.156,
+          0.139,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "03_jezdec_cerna.png",
+    "kb": 1501
+  },
+  {
+    "file": "04_strelec_bila.glb",
+    "kb": 6726,
+    "nodes": [
+      "Střelec V2 / bila",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Broad rounded machined opening and cut edges",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam"
+    ],
+    "meshes": 5,
+    "triangles": 164448,
+    "vertices": 84373,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.053,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.053,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / bila",
+        "color": [
+          0.518,
+          0.525,
+          0.533,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "04_strelec_bila.png",
+    "kb": 1767
+  },
+  {
+    "file": "04_strelec_cerna.glb",
+    "kb": 6726,
+    "nodes": [
+      "Střelec V2 / cerna",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Broad rounded machined opening and cut edges",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam"
+    ],
+    "meshes": 5,
+    "triangles": 164448,
+    "vertices": 84373,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.053,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.053,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / cerna",
+        "color": [
+          0.118,
+          0.112,
+          0.1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "04_strelec_cerna.png",
+    "kb": 1732
+  },
+  {
+    "file": "05_dama_bila.glb",
+    "kb": 10744,
+    "nodes": [
+      "Dáma V3 / bila",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Body upper shoulder join",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Satin band under broad crown arches / arch 1",
+      "Satin band under broad crown arches / arch 2",
+      "Satin band under broad crown arches / arch 3",
+      "Crown band inner wall",
+      "Broad arched satin crown face / arch 1",
+      "Broad arched satin crown face / arch 2",
+      "Broad arched satin crown face / arch 3",
+      "Arched crown underside / arch 1",
+      "Arched crown underside / arch 2",
+      "Arched crown underside / arch 3",
+      "Solid arched crown rim / arch 1",
+      "Solid arched crown rim / arch 2",
+      "Solid arched crown rim / arch 3",
+      "Machined central crown bore",
+      "Crown lower circular seam"
+    ],
+    "meshes": 20,
+    "triangles": 274176,
+    "vertices": 142297,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.057,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.057,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / bila",
+        "color": [
+          0.518,
+          0.525,
+          0.533,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Machined crown cylinder / bila",
+        "color": [
+          0.636,
+          0.639,
+          0.642,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.31,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Turned satin crown annulus / bila",
+        "color": [
+          0.777,
+          0.781,
+          0.785,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "05_dama_bila.png",
+    "kb": 1743
+  },
+  {
+    "file": "05_dama_cerna.glb",
+    "kb": 10744,
+    "nodes": [
+      "Dáma V3 / cerna",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Body upper shoulder join",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Satin band under broad crown arches / arch 1",
+      "Satin band under broad crown arches / arch 2",
+      "Satin band under broad crown arches / arch 3",
+      "Crown band inner wall",
+      "Broad arched satin crown face / arch 1",
+      "Broad arched satin crown face / arch 2",
+      "Broad arched satin crown face / arch 3",
+      "Arched crown underside / arch 1",
+      "Arched crown underside / arch 2",
+      "Arched crown underside / arch 3",
+      "Solid arched crown rim / arch 1",
+      "Solid arched crown rim / arch 2",
+      "Solid arched crown rim / arch 3",
+      "Machined central crown bore",
+      "Crown lower circular seam"
+    ],
+    "meshes": 20,
+    "triangles": 274176,
+    "vertices": 142297,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.057,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.057,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / cerna",
+        "color": [
+          0.118,
+          0.112,
+          0.1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Machined crown cylinder / cerna",
+        "color": [
+          0.137,
+          0.135,
+          0.129,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.31,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Turned satin crown annulus / cerna",
+        "color": [
+          0.168,
+          0.164,
+          0.158,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "05_dama_cerna.png",
+    "kb": 1503
+  },
+  {
+    "file": "06_kral_bila.glb",
+    "kb": 12976,
+    "nodes": [
+      "Král V3 / bila",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Body upper shoulder join",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Short cylindrical crown band",
+      "Crown band inner wall",
+      "Gentle upward outer king facet",
+      "Steeper inward downward king facet",
+      "King crown underside",
+      "Solid outer crown lip",
+      "Machined central crown bore",
+      "Crown lower circular seam",
+      "Rounded king tab 1",
+      "King tab underside 1",
+      "King tab side 0 0",
+      "King tab side 0 1",
+      "King tab end 0 0",
+      "King tab end 0 1",
+      "Rounded king tab 2",
+      "King tab underside 2",
+      "King tab side 1 0",
+      "King tab side 1 1",
+      "King tab end 1 0",
+      "King tab end 1 1",
+      "Rounded king tab 3",
+      "King tab underside 3",
+      "King tab side 2 0",
+      "King tab side 2 1",
+      "King tab end 2 0",
+      "King tab end 2 1",
+      "Rounded king tab 4",
+      "King tab underside 4",
+      "King tab side 3 0",
+      "King tab side 3 1",
+      "King tab end 3 0",
+      "King tab end 3 1"
+    ],
+    "meshes": 37,
+    "triangles": 334784,
+    "vertices": 174362,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.059,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.059,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / bila",
+        "color": [
+          0.7,
+          0.71,
+          0.72,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / bila",
+        "color": [
+          0.798,
+          0.809,
+          0.821,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / bila",
+        "color": [
+          0.518,
+          0.525,
+          0.533,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / bila",
+        "color": [
+          0.266,
+          0.27,
+          0.274,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Machined crown cylinder / bila",
+        "color": [
+          0.567,
+          0.575,
+          0.583,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.25,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Turned satin crown annulus / bila",
+        "color": [
+          0.826,
+          0.838,
+          0.85,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.26,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "06_kral_bila.png",
+    "kb": 1722
+  },
+  {
+    "file": "06_kral_cerna.glb",
+    "kb": 12976,
+    "nodes": [
+      "Král V3 / cerna",
+      "Wide satin body and integral base",
+      "Thick continuous inner wall",
+      "Body upper shoulder join",
+      "Rounded bottom wall",
+      "Narrow engraved foot seam",
+      "Short cylindrical crown band",
+      "Crown band inner wall",
+      "Gentle upward outer king facet",
+      "Steeper inward downward king facet",
+      "King crown underside",
+      "Solid outer crown lip",
+      "Machined central crown bore",
+      "Crown lower circular seam",
+      "Rounded king tab 1",
+      "King tab underside 1",
+      "King tab side 0 0",
+      "King tab side 0 1",
+      "King tab end 0 0",
+      "King tab end 0 1",
+      "Rounded king tab 2",
+      "King tab underside 2",
+      "King tab side 1 0",
+      "King tab side 1 1",
+      "King tab end 1 0",
+      "King tab end 1 1",
+      "Rounded king tab 3",
+      "King tab underside 3",
+      "King tab side 2 0",
+      "King tab side 2 1",
+      "King tab end 2 0",
+      "King tab end 2 1",
+      "Rounded king tab 4",
+      "King tab underside 4",
+      "King tab side 3 0",
+      "King tab side 3 1",
+      "King tab end 3 0",
+      "King tab end 3 1"
+    ],
+    "meshes": 37,
+    "triangles": 334784,
+    "vertices": 174362,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.059,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.059,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed satin stainless body / cerna",
+        "color": [
+          0.16,
+          0.151,
+          0.135,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Polished machined edge / cerna",
+        "color": [
+          0.182,
+          0.172,
+          0.154,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Brushed steel interior / cerna",
+        "color": [
+          0.118,
+          0.112,
+          0.1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Fine recessed seam / cerna",
+        "color": [
+          0.061,
+          0.057,
+          0.051,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Machined crown cylinder / cerna",
+        "color": [
+          0.13,
+          0.122,
+          0.109,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.25,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Turned satin crown annulus / cerna",
+        "color": [
+          0.189,
+          0.178,
+          0.159,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.26,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "06_kral_cerna.png",
+    "kb": 1494
+  }
+]

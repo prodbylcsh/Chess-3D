@@ -1,0 +1,1198 @@
+[
+  {
+    "file": "argentum_chessboard.glb",
+    "kb": 11361,
+    "nodes": [
+      "Argentum_Noctis_Chessboard"
+    ],
+    "meshes": 1,
+    "triangles": 21976,
+    "vertices": 12210,
+    "bounds": {
+      "min": [
+        -0.252,
+        0,
+        -0.252
+      ],
+      "max": [
+        0.252,
+        0.032,
+        0.252
+      ],
+      "size": [
+        0.504,
+        0.032,
+        0.504
+      ]
+    },
+    "materials": [
+      {
+        "name": "Top_SpunAluminium_BlackLeather",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "4096x4096 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      },
+      {
+        "name": "Polished_Aluminium",
+        "color": [
+          0.75,
+          0.755,
+          0.76,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Shadow_Line_Black",
+        "color": [
+          0.008,
+          0.008,
+          0.009,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.45,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Chrome_Bead",
+        "color": [
+          0.9,
+          0.9,
+          0.91,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.07,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Black_Leather",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Satin_Base",
+        "color": [
+          0.015,
+          0.015,
+          0.016,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.4,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Black_Felt_Bottom",
+        "color": [
+          0.02,
+          0.02,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "azure lagoon_chessboard.glb",
+    "kb": 3478,
+    "nodes": [
+      "Frame",
+      "a1",
+      "b1",
+      "c1",
+      "d1",
+      "e1",
+      "f1",
+      "g1",
+      "h1",
+      "a2",
+      "b2",
+      "c2",
+      "d2",
+      "e2",
+      "f2",
+      "g2",
+      "h2",
+      "a3",
+      "b3",
+      "c3",
+      "d3",
+      "e3",
+      "f3",
+      "g3",
+      "h3",
+      "a4",
+      "b4",
+      "c4",
+      "d4",
+      "e4",
+      "f4",
+      "g4",
+      "h4",
+      "a5",
+      "b5",
+      "c5",
+      "d5",
+      "e5",
+      "f5",
+      "g5",
+      "h5",
+      "a6",
+      "b6",
+      "c6",
+      "d6",
+      "e6",
+      "f6",
+      "g6",
+      "h6",
+      "a7",
+      "b7",
+      "c7",
+      "d7",
+      "e7",
+      "f7",
+      "g7",
+      "h7",
+      "a8",
+      "b8",
+      "c8",
+      "d8",
+      "e8",
+      "f8",
+      "g8",
+      "h8",
+      "Chessboard"
+    ],
+    "meshes": 65,
+    "triangles": 828,
+    "vertices": 1656,
+    "bounds": {
+      "min": [
+        -0.236,
+        0,
+        -0.236
+      ],
+      "max": [
+        0.236,
+        0.046,
+        0.236
+      ],
+      "size": [
+        0.472,
+        0.046,
+        0.472
+      ]
+    },
+    "materials": [
+      {
+        "name": "Oak_EndGrain_Varnished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.38,
+        "base": "4096x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "2048x1024 image/jpeg"
+      },
+      {
+        "name": "Oak_LongGrain_Varnished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Cyan_Epoxy_Resin",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.05,
+        "base": "1024x512 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "beton_chessboard.glb",
+    "kb": 8328,
+    "nodes": [
+      "Concrete_Chessboard",
+      "Base_Box",
+      "Lid_Rim",
+      "Tiles_Light",
+      "Tiles_Dark"
+    ],
+    "meshes": 4,
+    "triangles": 58896,
+    "vertices": 43016,
+    "bounds": {
+      "min": [
+        -0.201,
+        0,
+        -0.201
+      ],
+      "max": [
+        0.201,
+        0.068,
+        0.201
+      ],
+      "size": [
+        0.402,
+        0.068,
+        0.402
+      ]
+    },
+    "materials": [
+      {
+        "name": "Concrete_Base",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Concrete_Lid_Rim",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Stone_Tile_Light",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Stone_Tile_Dark",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Grout",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "classie_chessboard.glb",
+    "kb": 3468,
+    "nodes": [
+      "Walnut_Frame",
+      "Brass_Inlay",
+      "Squares_Dark",
+      "Squares_Light",
+      "Joint_Bed",
+      "Chessboard"
+    ],
+    "meshes": 5,
+    "triangles": 2892,
+    "vertices": 3576,
+    "bounds": {
+      "min": [
+        -0.235,
+        0,
+        -0.235
+      ],
+      "max": [
+        0.235,
+        0.06,
+        0.235
+      ],
+      "size": [
+        0.469,
+        0.06,
+        0.469
+      ]
+    },
+    "materials": [
+      {
+        "name": "Walnut_Oiled",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x1024 image/jpeg",
+        "metallicRoughness": "2048x1024 image/jpeg",
+        "normal": "2048x1024 image/jpeg"
+      },
+      {
+        "name": "Brass_Brushed",
+        "color": [
+          0.91,
+          0.71,
+          0.36,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Leather_Black",
+        "color": [
+          0.018,
+          0.018,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Leather_Cream",
+        "color": [
+          0.88,
+          0.82,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Joint_Dark",
+        "color": [
+          0.012,
+          0.011,
+          0.01,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.9,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "frost_chessboard.glb",
+    "kb": 1204,
+    "nodes": [
+      "Podklad",
+      "Ram",
+      "Hraci_deska",
+      "Matovana_pole",
+      "Rohove_koliky",
+      "Sachovnice"
+    ],
+    "meshes": 5,
+    "triangles": 2432,
+    "vertices": 7296,
+    "bounds": {
+      "min": [
+        -0.2,
+        0,
+        -0.2
+      ],
+      "max": [
+        0.2,
+        0.022,
+        0.2
+      ],
+      "size": [
+        0.4,
+        0.022,
+        0.4
+      ]
+    },
+    "materials": [
+      {
+        "name": "Akrylat_cira_ram",
+        "color": [
+          0.8,
+          0.93,
+          0.92,
+          0.42
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Akrylat_matny_frost",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "512x512 image/png",
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      },
+      {
+        "name": "Akrylat_kolik",
+        "color": [
+          0.88,
+          0.95,
+          0.95,
+          0.65
+        ],
+        "metallic": 0,
+        "roughness": 0.12,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Podklad_grafit",
+        "color": [
+          0.038,
+          0.039,
+          0.042,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.22,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Akrylat_cira_deska",
+        "color": [
+          0.95,
+          0.99,
+          0.99,
+          0.08
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "gappa_chessboard.glb",
+    "kb": 5482,
+    "nodes": [
+      "square_a1",
+      "square_b1",
+      "square_c1",
+      "square_d1",
+      "square_e1",
+      "square_f1",
+      "square_g1",
+      "square_h1",
+      "square_a2",
+      "square_b2",
+      "square_c2",
+      "square_d2",
+      "square_e2",
+      "square_f2",
+      "square_g2",
+      "square_h2",
+      "square_a3",
+      "square_b3",
+      "square_c3",
+      "square_d3",
+      "square_e3",
+      "square_f3",
+      "square_g3",
+      "square_h3",
+      "square_a4",
+      "square_b4",
+      "square_c4",
+      "square_d4",
+      "square_e4",
+      "square_f4",
+      "square_g4",
+      "square_h4",
+      "square_a5",
+      "square_b5",
+      "square_c5",
+      "square_d5",
+      "square_e5",
+      "square_f5",
+      "square_g5",
+      "square_h5",
+      "square_a6",
+      "square_b6",
+      "square_c6",
+      "square_d6",
+      "square_e6",
+      "square_f6",
+      "square_g6",
+      "square_h6",
+      "square_a7",
+      "square_b7",
+      "square_c7",
+      "square_d7",
+      "square_e7",
+      "square_f7",
+      "square_g7",
+      "square_h7",
+      "square_a8",
+      "square_b8",
+      "square_c8",
+      "square_d8",
+      "square_e8",
+      "square_f8",
+      "square_g8",
+      "square_h8",
+      "base",
+      "rib_x1",
+      "rib_z1",
+      "rib_x2",
+      "rib_z2",
+      "rib_x3",
+      "rib_z3",
+      "rib_x4",
+      "rib_z4",
+      "rib_x5",
+      "rib_z5",
+      "rib_x6",
+      "rib_z6",
+      "rib_x7",
+      "rib_z7",
+      "Chessboard"
+    ],
+    "meshes": 79,
+    "triangles": 60672,
+    "vertices": 38394,
+    "bounds": {
+      "min": [
+        -0.182,
+        0,
+        -0.182
+      ],
+      "max": [
+        0.182,
+        0.062,
+        0.182
+      ],
+      "size": [
+        0.364,
+        0.062,
+        0.364
+      ]
+    },
+    "materials": [
+      {
+        "name": "Maple_Natural",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Wood_DarkStained",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Felt_DarkGreen",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "512x512 image/png",
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "greel_chessboard.glb",
+    "kb": 9642,
+    "nodes": [
+      "Chessboard"
+    ],
+    "meshes": 1,
+    "triangles": 3448,
+    "vertices": 3038,
+    "bounds": {
+      "min": [
+        -0.225,
+        0,
+        -0.225
+      ],
+      "max": [
+        0.225,
+        0.028,
+        0.225
+      ],
+      "size": [
+        0.45,
+        0.028,
+        0.45
+      ]
+    },
+    "materials": [
+      {
+        "name": "Marquetry_Top",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "4096x4096 image/jpeg"
+      },
+      {
+        "name": "Frame_EdgeGrain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.48,
+        "base": "2048x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Bottom_Wood",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.7,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "legoed_chessboard.glb",
+    "kb": 25510,
+    "nodes": [
+      "Chessboard",
+      "Frame",
+      "SquaresDark",
+      "SquaresLight",
+      "PadsDark",
+      "PadsLight"
+    ],
+    "meshes": 5,
+    "triangles": 179659,
+    "vertices": 97840,
+    "bounds": {
+      "min": [
+        -0.209,
+        0,
+        -0.209
+      ],
+      "max": [
+        0.209,
+        0.037,
+        0.209
+      ],
+      "size": [
+        0.419,
+        0.037,
+        0.419
+      ]
+    },
+    "materials": [
+      {
+        "name": "BlackOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "4096x1024 image/jpeg",
+        "metallicRoughness": "4096x1024 image/jpeg",
+        "normal": "4096x1024 image/jpeg"
+      },
+      {
+        "name": "Maple",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "BlackOakEndGrain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "MapleEndGrain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "maple_chessboard.glb",
+    "kb": 5202,
+    "nodes": [
+      "Chessboard_Walnut_Maple"
+    ],
+    "meshes": 1,
+    "triangles": 6272,
+    "vertices": 3422,
+    "bounds": {
+      "min": [
+        -0.2,
+        0,
+        -0.2
+      ],
+      "max": [
+        0.2,
+        0.032,
+        0.2
+      ],
+      "size": [
+        0.4,
+        0.032,
+        0.4
+      ]
+    },
+    "materials": [
+      {
+        "name": "Walnut_Maple_Oiled",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_chessboard_rolls_royce.glb",
+    "kb": 20727,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 62260,
+    "vertices": 36768,
+    "bounds": {
+      "min": [
+        -0.952,
+        -0.151,
+        -0.648
+      ],
+      "max": [
+        0.951,
+        0.15,
+        0.647
+      ],
+      "size": [
+        1.903,
+        0.301,
+        1.295
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "mozaic_chessboard.glb",
+    "kb": 13340,
+    "nodes": [
+      "Ceramic_Chessboard",
+      "Backing",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "b8",
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c5",
+      "c6",
+      "c7",
+      "c8",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "e1",
+      "e2",
+      "e3",
+      "e4",
+      "e5",
+      "e6",
+      "e7",
+      "e8",
+      "f1",
+      "f2",
+      "f3",
+      "f4",
+      "f5",
+      "f6",
+      "f7",
+      "f8",
+      "g1",
+      "g2",
+      "g3",
+      "g4",
+      "g5",
+      "g6",
+      "g7",
+      "g8",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "h7",
+      "h8"
+    ],
+    "meshes": 65,
+    "triangles": 216204,
+    "vertices": 121432,
+    "bounds": {
+      "min": [
+        -0.199,
+        -0.001,
+        -0.199
+      ],
+      "max": [
+        0.199,
+        0.007,
+        0.199
+      ],
+      "size": [
+        0.397,
+        0.007,
+        0.397
+      ]
+    },
+    "materials": [
+      {
+        "name": "Glaze_SlateBlue_Crackle",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      },
+      {
+        "name": "Matte_Cream_Porcelain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      },
+      {
+        "name": "Mosaic_Backing",
+        "color": [
+          0.11,
+          0.1,
+          0.09,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "zlata_chessboard.glb",
+    "kb": 4651,
+    "nodes": [
+      "Squares_Brass",
+      "Squares_Dark",
+      "Frame",
+      "Joint_Floor",
+      "Chessboard"
+    ],
+    "meshes": 4,
+    "triangles": 1276,
+    "vertices": 2552,
+    "bounds": {
+      "min": [
+        -0.2,
+        0,
+        -0.2
+      ],
+      "max": [
+        0.2,
+        0.014,
+        0.2
+      ],
+      "size": [
+        0.4,
+        0.014,
+        0.4
+      ]
+    },
+    "materials": [
+      {
+        "name": "Brushed_Brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Blackened_Patina_Metal",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Antique_Bronze_Frame",
+        "color": [
+          0.74,
+          0.56,
+          0.4,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      },
+      {
+        "name": "Joint_Shadow",
+        "color": [
+          0.025,
+          0.022,
+          0.02,
+          1
+        ],
+        "metallic": 0.4,
+        "roughness": 0.85,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

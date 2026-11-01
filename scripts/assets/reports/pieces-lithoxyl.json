@@ -1,0 +1,602 @@
+[
+  {
+    "file": "lithoxyl_bishop_black.glb",
+    "kb": 2167,
+    "nodes": [
+      "Lithoxyl_Bishop_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 4862,
+    "vertices": 3448,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.075,
+        0.013
+      ],
+      "size": [
+        0.025,
+        0.075,
+        0.025
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_bishop_white.glb",
+    "kb": 2197,
+    "nodes": [
+      "Lithoxyl_Bishop_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 4862,
+    "vertices": 3448,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.075,
+        0.013
+      ],
+      "size": [
+        0.025,
+        0.075,
+        0.025
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_king_black.glb",
+    "kb": 5713,
+    "nodes": [
+      "Lithoxyl_King_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 4852,
+    "vertices": 3418,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.095,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.095,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_FossilStone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Onyx_PaleStone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Onyx_BurlWood",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_king_white.glb",
+    "kb": 5700,
+    "nodes": [
+      "Lithoxyl_King_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 4852,
+    "vertices": 3418,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.095,
+        0.017
+      ],
+      "size": [
+        0.033,
+        0.095,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_FossilStone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Ivory_PaleStone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Ivory_BurlWood",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_knight_black.glb",
+    "kb": 2007,
+    "nodes": [
+      "Lithoxyl_Knight_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 206,
+    "vertices": 618,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.064,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.064,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_knight_white.glb",
+    "kb": 2037,
+    "nodes": [
+      "Lithoxyl_Knight_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 206,
+    "vertices": 618,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.064,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.064,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_pawn_black.glb",
+    "kb": 2033,
+    "nodes": [
+      "Lithoxyl_Pawn_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 7824,
+    "vertices": 4592,
+    "bounds": {
+      "min": [
+        -0.011,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.011,
+        0.055,
+        0.011
+      ],
+      "size": [
+        0.021,
+        0.055,
+        0.021
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_VeinedWood",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_pawn_white.glb",
+    "kb": 2029,
+    "nodes": [
+      "Lithoxyl_Pawn_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 7824,
+    "vertices": 4592,
+    "bounds": {
+      "min": [
+        -0.011,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.011,
+        0.055,
+        0.011
+      ],
+      "size": [
+        0.021,
+        0.055,
+        0.021
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_VeinedWood",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_queen_black.glb",
+    "kb": 4084,
+    "nodes": [
+      "Lithoxyl_Queen_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 6036,
+    "vertices": 3823,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.088,
+        0.014
+      ],
+      "size": [
+        0.029,
+        0.088,
+        0.029
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Onyx_WengeGrain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_queen_white.glb",
+    "kb": 4003,
+    "nodes": [
+      "Lithoxyl_Queen_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 6036,
+    "vertices": 3823,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.088,
+        0.014
+      ],
+      "size": [
+        0.029,
+        0.088,
+        0.029
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Lithoxyl_Ivory_WengeGrain",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_rook_black.glb",
+    "kb": 2098,
+    "nodes": [
+      "Lithoxyl_Rook_Onyx"
+    ],
+    "meshes": 1,
+    "triangles": 2800,
+    "vertices": 2215,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.058,
+        0.014
+      ],
+      "size": [
+        0.029,
+        0.058,
+        0.029
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Onyx_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "lithoxyl_rook_white.glb",
+    "kb": 2127,
+    "nodes": [
+      "Lithoxyl_Rook_Ivory"
+    ],
+    "meshes": 1,
+    "triangles": 2800,
+    "vertices": 2215,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.058,
+        0.014
+      ],
+      "size": [
+        0.029,
+        0.058,
+        0.029
+      ]
+    },
+    "materials": [
+      {
+        "name": "Lithoxyl_Ivory_PetrifiedOak",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

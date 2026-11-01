@@ -1,0 +1,518 @@
+[
+  {
+    "file": "cobalt_vein_black_bishop.glb",
+    "kb": 4430,
+    "nodes": [
+      "Cobalt Vein black bishop"
+    ],
+    "meshes": 1,
+    "triangles": 101472,
+    "vertices": 51376,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.07,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.07,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_black_king.glb",
+    "kb": 4646,
+    "nodes": [
+      "Cobalt Vein black king"
+    ],
+    "meshes": 1,
+    "triangles": 104160,
+    "vertices": 52728,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.1,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.1,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_black_knight.glb",
+    "kb": 14242,
+    "nodes": [
+      "Cobalt Vein black knight"
+    ],
+    "meshes": 1,
+    "triangles": 449684,
+    "vertices": 251487,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.072,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.072,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_black_pawn.glb",
+    "kb": 4342,
+    "nodes": [
+      "Cobalt Vein black pawn"
+    ],
+    "meshes": 1,
+    "triangles": 101472,
+    "vertices": 51376,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.052,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.052,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_black_queen.glb",
+    "kb": 4208,
+    "nodes": [
+      "Cobalt Vein black queen"
+    ],
+    "meshes": 1,
+    "triangles": 91728,
+    "vertices": 46475,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.084,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.084,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_black_rook.glb",
+    "kb": 6482,
+    "nodes": [
+      "Cobalt Vein black rook"
+    ],
+    "meshes": 1,
+    "triangles": 176344,
+    "vertices": 89039,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.058,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.058,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_black_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_bishop.glb",
+    "kb": 5171,
+    "nodes": [
+      "Cobalt Vein white bishop"
+    ],
+    "meshes": 1,
+    "triangles": 101472,
+    "vertices": 51376,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.017
+      ],
+      "max": [
+        0.017,
+        0.07,
+        0.017
+      ],
+      "size": [
+        0.035,
+        0.07,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_king.glb",
+    "kb": 5514,
+    "nodes": [
+      "Cobalt Vein white king"
+    ],
+    "meshes": 1,
+    "triangles": 104160,
+    "vertices": 52728,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.1,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.1,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_knight.glb",
+    "kb": 14242,
+    "nodes": [
+      "Cobalt Vein white knight"
+    ],
+    "meshes": 1,
+    "triangles": 449684,
+    "vertices": 251487,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.072,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.072,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_pawn.glb",
+    "kb": 4973,
+    "nodes": [
+      "Cobalt Vein white pawn"
+    ],
+    "meshes": 1,
+    "triangles": 101472,
+    "vertices": 51376,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.052,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.052,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_queen.glb",
+    "kb": 5073,
+    "nodes": [
+      "Cobalt Vein white queen"
+    ],
+    "meshes": 1,
+    "triangles": 91728,
+    "vertices": 46475,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.084,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.084,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cobalt_vein_white_rook.glb",
+    "kb": 7200,
+    "nodes": [
+      "Cobalt Vein white rook"
+    ],
+    "meshes": 1,
+    "triangles": 176344,
+    "vertices": 89039,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.058,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.058,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "CobaltVein_white_stone",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  }
+]

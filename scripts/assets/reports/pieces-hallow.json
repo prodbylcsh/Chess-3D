@@ -1,0 +1,686 @@
+[
+  {
+    "file": "Argent_Reliquary_Black_Bishop.glb",
+    "kb": 5691,
+    "nodes": [
+      "Argent Reliquary – Black Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 162008,
+    "vertices": 85609,
+    "bounds": {
+      "min": [
+        -0.016,
+        -0.001,
+        -0.014
+      ],
+      "max": [
+        0.015,
+        0.08,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.081,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_Black_King.glb",
+    "kb": 6148,
+    "nodes": [
+      "Argent Reliquary – Black King"
+    ],
+    "meshes": 1,
+    "triangles": 176400,
+    "vertices": 93820,
+    "bounds": {
+      "min": [
+        -0.02,
+        -0.001,
+        -0.017
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.017
+      ],
+      "size": [
+        0.038,
+        0.096,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_Black_Knight.glb",
+    "kb": 6955,
+    "nodes": [
+      "Argent Reliquary – Black Knight"
+    ],
+    "meshes": 1,
+    "triangles": 200962,
+    "vertices": 108592,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.007
+      ],
+      "max": [
+        0.016,
+        0.075,
+        0.018
+      ],
+      "size": [
+        0.032,
+        0.075,
+        0.025
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_Black_Pawn.glb",
+    "kb": 7696,
+    "nodes": [
+      "Argent Reliquary – Black Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 226540,
+    "vertices": 121139,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.018,
+        0.056,
+        0.013
+      ],
+      "size": [
+        0.036,
+        0.056,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_Black_Queen.glb",
+    "kb": 5903,
+    "nodes": [
+      "Argent Reliquary – Black Queen"
+    ],
+    "meshes": 1,
+    "triangles": 167036,
+    "vertices": 89969,
+    "bounds": {
+      "min": [
+        -0.018,
+        -0.001,
+        -0.015
+      ],
+      "max": [
+        0.016,
+        0.088,
+        0.015
+      ],
+      "size": [
+        0.034,
+        0.089,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_Black_Rook.glb",
+    "kb": 8741,
+    "nodes": [
+      "Argent Reliquary – Black Rook"
+    ],
+    "meshes": 1,
+    "triangles": 257236,
+    "vertices": 140632,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.018,
+        0.068,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.068,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Blackened_Silver",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.4,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_Bishop.glb",
+    "kb": 5691,
+    "nodes": [
+      "Argent Reliquary – White Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 162008,
+    "vertices": 85609,
+    "bounds": {
+      "min": [
+        -0.016,
+        -0.001,
+        -0.014
+      ],
+      "max": [
+        0.015,
+        0.08,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.081,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_King.glb",
+    "kb": 6148,
+    "nodes": [
+      "Argent Reliquary – White King"
+    ],
+    "meshes": 1,
+    "triangles": 176400,
+    "vertices": 93820,
+    "bounds": {
+      "min": [
+        -0.02,
+        -0.001,
+        -0.017
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.017
+      ],
+      "size": [
+        0.038,
+        0.096,
+        0.034
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_Knight.glb",
+    "kb": 6955,
+    "nodes": [
+      "Argent Reliquary – White Knight"
+    ],
+    "meshes": 1,
+    "triangles": 200962,
+    "vertices": 108592,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.007
+      ],
+      "max": [
+        0.016,
+        0.075,
+        0.018
+      ],
+      "size": [
+        0.032,
+        0.075,
+        0.025
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_Pawn.glb",
+    "kb": 7696,
+    "nodes": [
+      "Argent Reliquary – White Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 226540,
+    "vertices": 121139,
+    "bounds": {
+      "min": [
+        -0.017,
+        0,
+        -0.011
+      ],
+      "max": [
+        0.018,
+        0.056,
+        0.013
+      ],
+      "size": [
+        0.036,
+        0.056,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_Queen.glb",
+    "kb": 5903,
+    "nodes": [
+      "Argent Reliquary – White Queen"
+    ],
+    "meshes": 1,
+    "triangles": 167036,
+    "vertices": 89969,
+    "bounds": {
+      "min": [
+        -0.018,
+        -0.001,
+        -0.015
+      ],
+      "max": [
+        0.016,
+        0.088,
+        0.015
+      ],
+      "size": [
+        0.034,
+        0.089,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Argent_Reliquary_White_Rook.glb",
+    "kb": 8741,
+    "nodes": [
+      "Argent Reliquary – White Rook"
+    ],
+    "meshes": 1,
+    "triangles": 257236,
+    "vertices": 140632,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.018,
+        0.068,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.068,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Silver_Gilt",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.34,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Gold_Gilding",
+        "color": [
+          1,
+          0.74,
+          0.33,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.22,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

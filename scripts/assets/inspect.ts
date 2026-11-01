@@ -2,24 +2,29 @@
 // (scripts/assets/build-models.ts): per .glb file its size, meshes, triangles, bounds,
 // materials and textures. The workflow .github/workflows/models.yml runs it on a folder
 // pulled from the originals bucket and commits the report, so a session without access to
-// Cloudflare can read it.
+// Cloudflare can read it. With a previews folder it also writes a small copy of every model
+// (≤ 3,000 triangles, 256 px textures, original scale and orientation) to render and measure:
+// which way the knight looks, which colour arrived, a board's 8×8 grid in model units.
 //
-//   node scripts/assets/inspect.ts <folder> [report.json]
-import { readdirSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+//   node scripts/assets/inspect.ts <folder> [report.json] [previews folder]
+import { mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { NodeIO, getBounds } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { MeshoptDecoder } from 'meshoptimizer';
+import { dedup, meshopt, prune, simplify, textureCompress, weld } from '@gltf-transform/functions';
+import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer';
 import sharp from 'sharp';
 
-const [folder, out] = process.argv.slice(2);
+const [folder, out, previews] = process.argv.slice(2);
 if (!folder) {
-  console.error('usage: node scripts/assets/inspect.ts <folder> [report.json]');
+  console.error('usage: node scripts/assets/inspect.ts <folder> [report.json] [previews folder]');
   process.exit(1);
 }
 
-await MeshoptDecoder.ready;
-const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ 'meshopt.decoder': MeshoptDecoder });
+await Promise.all([MeshoptDecoder.ready, MeshoptEncoder.ready, MeshoptSimplifier.ready]);
+const io = new NodeIO()
+  .registerExtensions(ALL_EXTENSIONS)
+  .registerDependencies({ 'meshopt.decoder': MeshoptDecoder, 'meshopt.encoder': MeshoptEncoder });
 
 const walk = (dir: string): string[] =>
   readdirSync(dir).flatMap((name) => {
@@ -34,7 +39,14 @@ for (const file of walk(folder)) {
     report.push(entry);
     continue;
   }
-  const doc = await io.read(file);
+  const doc = await io.read(file).catch((e: Error) => {
+    entry.error = e.message;
+    return null;
+  });
+  if (!doc) {
+    report.push(entry);
+    continue;
+  }
   const root = doc.getRoot();
   const prims = root.listMeshes().flatMap((m) => m.listPrimitives());
   const b = getBounds(root.listScenes()[0]);
@@ -62,6 +74,24 @@ for (const file of walk(folder)) {
       };
     }),
   );
+  if (previews) {
+    try {
+      const ratio = Math.min(1, 3000 / Math.max(1, entry.triangles as number));
+      await doc.transform(
+        weld(),
+        simplify({ simplifier: MeshoptSimplifier, ratio, error: 0.02, lockBorder: false }),
+        dedup(),
+        prune(),
+        textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [256, 256], quality: 70 }),
+        meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
+      );
+      const target = join(previews, relative(folder, file).replace(/\s+/g, '-'));
+      mkdirSync(dirname(target), { recursive: true });
+      await io.write(target, doc);
+    } catch (e) {
+      entry.previewError = (e as Error).message;
+    }
+  }
   report.push(entry);
 }
 

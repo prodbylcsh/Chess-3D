@@ -1,0 +1,518 @@
+[
+  {
+    "file": "obsidian_crystal_black_bishop.glb",
+    "kb": 5041,
+    "nodes": [
+      "Obsidian & Crystal – Bishop (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 215012,
+    "vertices": 107508,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.076,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.076,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_black_king.glb",
+    "kb": 6594,
+    "nodes": [
+      "Obsidian & Crystal – King (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 281276,
+    "vertices": 140640,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.095,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.095,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_black_knight.glb",
+    "kb": 4880,
+    "nodes": [
+      "Obsidian & Crystal – Knight (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 208146,
+    "vertices": 104075,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.022,
+        0.068,
+        0.018
+      ],
+      "size": [
+        0.041,
+        0.068,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_black_pawn.glb",
+    "kb": 3031,
+    "nodes": [
+      "Obsidian & Crystal – Pawn (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 129264,
+    "vertices": 64634,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.052,
+        0.016
+      ],
+      "size": [
+        0.033,
+        0.052,
+        0.033
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_black_queen.glb",
+    "kb": 7556,
+    "nodes": [
+      "Obsidian & Crystal – Queen (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 322306,
+    "vertices": 161145,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.086,
+        0.021
+      ],
+      "size": [
+        0.043,
+        0.086,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_black_rook.glb",
+    "kb": 4277,
+    "nodes": [
+      "Obsidian & Crystal – Rook (Black)"
+    ],
+    "meshes": 1,
+    "triangles": 182396,
+    "vertices": 91200,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.055,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.055,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Obsidián (černé sklo)",
+        "color": [
+          0.045,
+          0.04,
+          0.036,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_bishop.glb",
+    "kb": 4705,
+    "nodes": [
+      "Obsidian & Crystal – Bishop (White)"
+    ],
+    "meshes": 1,
+    "triangles": 200656,
+    "vertices": 100330,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.076,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.076,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_king.glb",
+    "kb": 5810,
+    "nodes": [
+      "Obsidian & Crystal – King (White)"
+    ],
+    "meshes": 1,
+    "triangles": 247796,
+    "vertices": 123900,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.095,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_knight.glb",
+    "kb": 5126,
+    "nodes": [
+      "Obsidian & Crystal – Knight (White)"
+    ],
+    "meshes": 1,
+    "triangles": 218612,
+    "vertices": 109308,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.021,
+        0.068,
+        0.02
+      ],
+      "size": [
+        0.043,
+        0.068,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_pawn.glb",
+    "kb": 2789,
+    "nodes": [
+      "Obsidian & Crystal – Pawn (White)"
+    ],
+    "meshes": 1,
+    "triangles": 118912,
+    "vertices": 59458,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.052,
+        0.016
+      ],
+      "size": [
+        0.031,
+        0.052,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_queen.glb",
+    "kb": 7188,
+    "nodes": [
+      "Obsidian & Crystal – Queen (White)"
+    ],
+    "meshes": 1,
+    "triangles": 306598,
+    "vertices": 153301,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.086,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.086,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "obsidian_crystal_white_rook.glb",
+    "kb": 3924,
+    "nodes": [
+      "Obsidian & Crystal – Rook (White)"
+    ],
+    "meshes": 1,
+    "triangles": 167336,
+    "vertices": 83670,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.055,
+        0.018
+      ],
+      "size": [
+        0.035,
+        0.055,
+        0.035
+      ]
+    },
+    "materials": [
+      {
+        "name": "Krystal (čiré sklo)",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.02,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

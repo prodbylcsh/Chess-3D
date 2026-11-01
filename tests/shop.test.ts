@@ -33,3 +33,15 @@ test('purchase rules', () => {
   assert.equal(purchaseProblem('season-2-iron', [], 99_999), 'not-for-sale');
   assert.equal(purchaseProblem('nope', [], 99_999), 'unknown');
 });
+
+test('within a category a higher rarity never costs less (PLATFORM 4.5)', () => {
+  const rank = ['standard', 'common', 'rare', 'epic', 'legendary'];
+  const forSale = ITEMS.filter((i) => i.forSale);
+  for (const a of forSale) {
+    for (const b of forSale) {
+      if (a.category === b.category && rank.indexOf(a.rarity) > rank.indexOf(b.rarity)) {
+        assert.ok(a.price >= b.price, `${a.id} (${a.rarity}, ${a.price}) is cheaper than ${b.id} (${b.rarity}, ${b.price})`);
+      }
+    }
+  }
+});

@@ -31,6 +31,31 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## New sets and boards (merged to `main` on 1 November 2026, the user's yes)
+
+Squash-merged (the branch carried three rounds of rebuilt models). The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)
+and 11 boards (`boards/<name>_chessboard.glb`) to the R2 originals bucket and asked for them
+in the app and the shop. Built and in the shop: **26 sets and 11 boards** (`PLATFORM.md` §4.5).
+
+- Pipeline: the models workflow takes several `targets`; `inspect` writes small previews of
+  the originals (`scripts/assets/reports/previews/`) that `scripts/assets/look/` renders
+  (side, front, top with a ruler); `build-models.ts` reads Czech names, has board `surface`
+  and `turn`, `derive` (a piece made from its other colour, lightness inverted) and
+  `gameTextureSize` (512 px on the board; 1024 for the 3D view).
+- Heights keep each designer's proportions (king 1.65 squares, bases ≤ 0.8); every knight
+  checked to look at −z; Hallow's figures all turned 180°. Board grids measured from top
+  renders; Frost's board turned 90° (a1 dark); Beton, Classie, Frost, Legoed, Zlata have
+  `surface` (frame higher than the squares).
+- Delivery problems: Glanc had no white queen and Cobalt's black knight was the white one;
+  the user uploaded both (made by `scripts/assets/derive-original.ts`, the workflow's
+  `derive` task). Medenka got its sixth piece; its pieces have their own names (`names`).
+- **Decided (1 November 2026, the user):** rarities per item (`PLATFORM.md` §4.5; Squircle
+  is rare now, still 25,000), one price per rarity (sets 18,000 / 25,000 / 40,000 / 55,000,
+  boards 12,000 / 20,000 / 30,000 / 40,000; Monolith keeps 68,000 and 42,500), all released
+  at once, Roni dropped (deleted from the bucket), Medenka's pieces confirmed (Smyčka king,
+  Mince queen, Lupa bishop, Příčka knight, Oblouk rook, Spendlík pawn). The Season 1
+  reward preview draws from the bigger pool.
+
 ## Promo and the logo (merged to `main` on 28 October 2026, the user's yes)
 
 The user is starting promotion and ads. The Instagram account is **@wizardchess3d**
@@ -197,7 +222,7 @@ map has a "Review (n)" button.
 
 - Puzzles v1 and v2: 7 modules, a 3D world map with a hopping piece, briefing and coach.
 - The R2 model pipeline (GitHub Action `models.yml` pulls originals from R2).
-- The Squircle set (common, 25,000).
+- The Squircle set (25,000; common then, rare since November 2026).
 - The knight facing fix.
 
 **Legal pages** (EN and CS) describe the reviews, the daily puzzle, the streak and the

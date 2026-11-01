@@ -1,0 +1,686 @@
+[
+  {
+    "file": "dama_bila.glb",
+    "kb": 939,
+    "nodes": [
+      "queen_white"
+    ],
+    "meshes": 1,
+    "triangles": 3096,
+    "vertices": 2836,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.09,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.09,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "dama_cerna.glb",
+    "kb": 939,
+    "nodes": [
+      "queen_black"
+    ],
+    "meshes": 1,
+    "triangles": 3096,
+    "vertices": 2836,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.013,
+        0.09,
+        0.013
+      ],
+      "size": [
+        0.026,
+        0.09,
+        0.026
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "jezdec_bily.glb",
+    "kb": 900,
+    "nodes": [
+      "knight_white"
+    ],
+    "meshes": 1,
+    "triangles": 2154,
+    "vertices": 2110,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.025
+      ],
+      "max": [
+        0.015,
+        0.069,
+        0.023
+      ],
+      "size": [
+        0.03,
+        0.069,
+        0.048
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "jezdec_cerny.glb",
+    "kb": 900,
+    "nodes": [
+      "knight_black"
+    ],
+    "meshes": 1,
+    "triangles": 2154,
+    "vertices": 2110,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.025
+      ],
+      "max": [
+        0.015,
+        0.069,
+        0.023
+      ],
+      "size": [
+        0.03,
+        0.069,
+        0.048
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "kral_bily.glb",
+    "kb": 886,
+    "nodes": [
+      "king_white"
+    ],
+    "meshes": 1,
+    "triangles": 1664,
+    "vertices": 1880,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.097,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.097,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "kral_cerny.glb",
+    "kb": 886,
+    "nodes": [
+      "king_black"
+    ],
+    "meshes": 1,
+    "triangles": 1664,
+    "vertices": 1880,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.097,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.097,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "pesec_bily.glb",
+    "kb": 846,
+    "nodes": [
+      "pawn_white"
+    ],
+    "meshes": 1,
+    "triangles": 868,
+    "vertices": 1136,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.049,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.049,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "pesec_cerny.glb",
+    "kb": 846,
+    "nodes": [
+      "pawn_black"
+    ],
+    "meshes": 1,
+    "triangles": 868,
+    "vertices": 1136,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.049,
+        0.015
+      ],
+      "size": [
+        0.031,
+        0.049,
+        0.031
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "strelec_bily.glb",
+    "kb": 893,
+    "nodes": [
+      "bishop_white"
+    ],
+    "meshes": 1,
+    "triangles": 1768,
+    "vertices": 2028,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.081,
+        0.014
+      ],
+      "size": [
+        0.027,
+        0.081,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "strelec_cerny.glb",
+    "kb": 893,
+    "nodes": [
+      "bishop_black"
+    ],
+    "meshes": 1,
+    "triangles": 1768,
+    "vertices": 2028,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.081,
+        0.014
+      ],
+      "size": [
+        0.027,
+        0.081,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "vez_bila.glb",
+    "kb": 1030,
+    "nodes": [
+      "rook_white"
+    ],
+    "meshes": 1,
+    "triangles": 3724,
+    "vertices": 4696,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.062,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.062,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "White_Patina",
+        "color": [
+          0.93,
+          0.915,
+          0.87,
+          1
+        ],
+        "metallic": 0.18,
+        "roughness": 0.52,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "White_Edge_Polished",
+        "color": [
+          0.95,
+          0.9,
+          0.78,
+          1
+        ],
+        "metallic": 0.85,
+        "roughness": 0.3,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "vez_cerna.glb",
+    "kb": 1030,
+    "nodes": [
+      "rook_black"
+    ],
+    "meshes": 1,
+    "triangles": 3724,
+    "vertices": 4696,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.062,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.062,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "Black_Patina",
+        "color": [
+          0.045,
+          0.042,
+          0.038,
+          1
+        ],
+        "metallic": 0.7,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Black_Edge_Bronze",
+        "color": [
+          0.42,
+          0.31,
+          0.19,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.36,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

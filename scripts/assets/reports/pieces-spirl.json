@@ -1,0 +1,518 @@
+[
+  {
+    "file": "dama_bila.glb",
+    "kb": 1273,
+    "nodes": [
+      "Dáma – bila"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 23223,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.088,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.088,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "dama_cerna.glb",
+    "kb": 1273,
+    "nodes": [
+      "Dáma – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 23223,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.088,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.088,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_bila.glb",
+    "kb": 1949,
+    "nodes": [
+      "Jezdec – bila"
+    ],
+    "meshes": 1,
+    "triangles": 65000,
+    "vertices": 34809,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.092,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.092,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_cerna.glb",
+    "kb": 1949,
+    "nodes": [
+      "Jezdec – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 65000,
+    "vertices": 34809,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.092,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.092,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_bila.glb",
+    "kb": 1260,
+    "nodes": [
+      "Král – bila"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 22668,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.095,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_cerna.glb",
+    "kb": 1260,
+    "nodes": [
+      "Král – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 22668,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.095,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_bila.glb",
+    "kb": 1302,
+    "nodes": [
+      "Pěšec – bila"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 24472,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.066,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.066,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_cerna.glb",
+    "kb": 1302,
+    "nodes": [
+      "Pěšec – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 24472,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.066,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.066,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_bila.glb",
+    "kb": 1229,
+    "nodes": [
+      "Střelec – bila"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 21357,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.083,
+        0.019
+      ],
+      "size": [
+        0.037,
+        0.083,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_cerna.glb",
+    "kb": 1229,
+    "nodes": [
+      "Střelec – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 42000,
+    "vertices": 21357,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.083,
+        0.019
+      ],
+      "size": [
+        0.037,
+        0.083,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_bila.glb",
+    "kb": 3516,
+    "nodes": [
+      "Věž – bila"
+    ],
+    "meshes": 1,
+    "triangles": 115370,
+    "vertices": 63255,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.077,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.077,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bílá keramika",
+        "color": [
+          0.878,
+          0.863,
+          0.804,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_cerna.glb",
+    "kb": 3516,
+    "nodes": [
+      "Věž – cerna"
+    ],
+    "meshes": 1,
+    "triangles": 115370,
+    "vertices": 63255,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.077,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.077,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Černá keramika",
+        "color": [
+          0.012,
+          0.016,
+          0.02,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.32,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

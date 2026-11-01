@@ -1,0 +1,686 @@
+[
+  {
+    "file": "cylindra_dama_bily.glb",
+    "kb": 1750,
+    "nodes": [
+      "Cylindra_Dáma_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 10944,
+    "vertices": 7332,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.056,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.056,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_dama_cerny.glb",
+    "kb": 1643,
+    "nodes": [
+      "Cylindra_Dáma_černý"
+    ],
+    "meshes": 1,
+    "triangles": 10944,
+    "vertices": 7332,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.056,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.056,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_jezdec_bily.glb",
+    "kb": 1482,
+    "nodes": [
+      "Cylindra_Jezdec_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 2808,
+    "vertices": 1806,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.023,
+        0.045,
+        0.015
+      ],
+      "size": [
+        0.045,
+        0.045,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_jezdec_cerny.glb",
+    "kb": 1375,
+    "nodes": [
+      "Cylindra_Jezdec_černý"
+    ],
+    "meshes": 1,
+    "triangles": 2808,
+    "vertices": 1806,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.023,
+        0.045,
+        0.015
+      ],
+      "size": [
+        0.045,
+        0.045,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_kral_bily.glb",
+    "kb": 1666,
+    "nodes": [
+      "Cylindra_Král_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 8544,
+    "vertices": 5566,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.069,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.069,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_kral_cerny.glb",
+    "kb": 1560,
+    "nodes": [
+      "Cylindra_Král_černý"
+    ],
+    "meshes": 1,
+    "triangles": 8544,
+    "vertices": 5566,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.069,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.069,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_pesec_bily.glb",
+    "kb": 1496,
+    "nodes": [
+      "Cylindra_Pěšec_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 3456,
+    "vertices": 2024,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.025,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.025,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_pesec_cerny.glb",
+    "kb": 1390,
+    "nodes": [
+      "Cylindra_Pěšec_černý"
+    ],
+    "meshes": 1,
+    "triangles": 3456,
+    "vertices": 2024,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.025,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.025,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_strelec_bily.glb",
+    "kb": 1505,
+    "nodes": [
+      "Cylindra_Střelec_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 3744,
+    "vertices": 2216,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.05,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.05,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_strelec_cerny.glb",
+    "kb": 1399,
+    "nodes": [
+      "Cylindra_Střelec_černý"
+    ],
+    "meshes": 1,
+    "triangles": 3744,
+    "vertices": 2216,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.05,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.05,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_vez_bily.glb",
+    "kb": 1924,
+    "nodes": [
+      "Cylindra_Věž_bílý"
+    ],
+    "meshes": 1,
+    "triangles": 18720,
+    "vertices": 10007,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.04,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.04,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "bílý buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "bílý buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.58,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "cylindra_vez_cerny.glb",
+    "kb": 1818,
+    "nodes": [
+      "Cylindra_Věž_černý"
+    ],
+    "meshes": 1,
+    "triangles": 18720,
+    "vertices": 10007,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.04,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.04,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "černě mořený buk – podélné vlákno",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "černě mořený buk – čelní dřevo",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.42,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

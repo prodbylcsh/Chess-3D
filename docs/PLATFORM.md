@@ -603,7 +603,8 @@ At roughly 10 games a day this means a new icon every 2–3 days and a piece set
 weeks, which keeps the shop meaningful without feeling out of reach.
 
 **Names** of piece sets and boards are the same in every language (the user's rule, October
-2026: Classic Marble, Monolith, Squircle); their Czech entries repeat the English.
+2026: Classic Marble, Monolith, Squircle, and the November 2026 sets and boards); their
+Czech entries repeat the English.
 
 **Catalogue.** Every category has one free standard item that everyone owns; profile
 icons have six free starters. Piece sets and boards are separate items (a set never
@@ -611,8 +612,8 @@ includes a board).
 
 | Category | Items (price, rarity) |
 | --- | --- |
-| Piece sets | Classic Marble (free) · **Squircle** 25,000 common (own models in both colours: pieces that melt from circle to square; low-mid tier) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) |
-| Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) |
+| Piece sets | Classic Marble (free) · **Squircle** 25,000 rare (own models in both colours: pieces that melt from circle to square; rare since November 2026) · **Monolith** 68,000 legendary (own models; Black as delivered, White recoloured to ivory marble) · *November 2026 (own models in both colours; one price per rarity, decided by the user):* Aurum 18,000 common · Cobalt 18,000 common · Crystalic 18,000 common · Cut 18,000 common · Cylindra 18,000 common · Hexa 18,000 common · Lithoxyl 18,000 common · Metal 18,000 common · Minima 18,000 common · Phyrm 18,000 common · Spirl 18,000 common · Stoni 18,000 common · Domina 25,000 rare · Frost 25,000 rare · Glanc 25,000 rare · Henge 25,000 rare · Hexalith 25,000 rare · Serpentina 25,000 rare · Ferro Orbis 40,000 epic · Marb 40,000 epic · Teel 40,000 epic · Titani 40,000 epic · Dismorph 55,000 legendary · Dune 55,000 legendary · Hallow 55,000 legendary · Medenka 55,000 legendary |
+| Boards | Classic Marble (free) · **Monolith** 42,500 legendary (own model: graphite oak and black squares on a chrome hull) · *November 2026 (own models; one price per rarity, decided by the user):* Beton 12,000 common · Frost 12,000 common · Greel 12,000 common · Maple 12,000 common · Mozaic 12,000 common · Argentum 20,000 rare · Gappa 20,000 rare · Azure Lagoon 30,000 epic · Legoed 30,000 epic · Zlata 30,000 epic · Classie 40,000 legendary |
 | Backgrounds | Candlelit Study (free) |
 | Move animations | Glide (free) |
 | Destruction effects | Shatter (free) |
@@ -674,10 +675,22 @@ animations/<id>/…                     move animations: a reference video or GI
 sounds/<id>/…                         WAV or OGG
 ```
 
-(Monolith's originals are in `pieces/monolith/` and `boards/`.) Turning originals into
+(Monolith's originals are in `pieces/monolith/` and `boards/`; the November 2026 sets are
+in `pieces/<set>/` with both colours per piece, named in English or Czech: `kral`, `dama`,
+`vez`, `strelec`, `jezdec`, `pesec`, `bila`/`cerna` all work; boards are
+`boards/<name>_chessboard.glb`.) Turning originals into
 game files is a step Claude does in a session, once per item: inspect the model, set
 heights, the knight's direction, the recolour and the triangle budget, build, check it in
-the browser, add the shop item. The session cannot reach Cloudflare, so the workflow
+the browser, add the shop item. `inspect` also writes small previews of the originals
+(`scripts/assets/reports/previews/`) that `scripts/assets/look/` renders as contact sheets
+(side, front, top with a ruler to measure a board's grid). Heights keep each designer's
+proportions (king 1.65 squares, no base wider than 0.8 of a square); a board's squares
+must sit at the top (`surface` when a frame stands higher) and a1 must be dark (`turn`);
+a piece missing or wrong in one colour can be made from the other with its lightness
+inverted (`derive`; used for Glanc's white queen and Cobalt's black knight until the user
+uploaded them; `scripts/assets/derive-original.ts` makes such a file at full quality for
+the bucket). A set that names its pieces its own way maps them with `names` (Medenka).
+The session cannot reach Cloudflare, so the workflow
 `.github/workflows/models.yml` pulls the originals on GitHub's machine: a commit of
 `scripts/assets/request.json` (`inspect` a folder, or `build` an item) starts it, and it
 commits the report (`scripts/assets/reports/`) or the built files (`public/assets/`) to
@@ -1370,9 +1383,9 @@ Decided:
   recolouring; boards are always separate items. All placeholder items except the
   profile icons left the shop (retired, nobody owned any). Ownership is recorded per
   item in `player_items`. Every season hands out items; with fewer items than brackets
-  the most expensive go to the highest brackets (with today's pool, season 1: Challenger
-  the Monolith set, Master & Grandmaster the Monolith board, Emerald & Diamond the
-  Squircle set). Season 1 starts when ranked opens (5.5).
+  the most expensive go to the highest brackets (the pool holds every
+  for-sale set, board, move and capture, so it grew with the November 2026 items).
+  Season 1 starts when ranked opens (5.5).
   The legal pages say so (Privacy §3, Terms §6, effective 11 October 2026); Terms §5
   covers clocks, leaving and the first-move window.
 - **No coins under 20 half-moves**, MMR still counts; **30 s first-move window**, else the
@@ -1444,6 +1457,12 @@ Decided:
   packs; monthly icons; early access; badges; a 7-day Wizard trial (coins from the first
   payment); Founders; plan names the same in every language; the placements in 4.9. The legal
   pages say so (Terms §6 "Premium", Privacy §2, §4, §6; effective 26 October 2026).
+- **The November 2026 sets and boards** (1 November 2026, the user): rarities per item as
+  in 4.5 (Squircle moves to rare, keeping 25,000); one price per rarity: sets 18,000 /
+  25,000 / 40,000 / 55,000, boards 12,000 / 20,000 / 30,000 / 40,000 (Monolith keeps
+  68,000 and 42,500); all released at once; Roni was dropped (the same set as Titani once
+  built); Medenka's pieces: Smyčka king, Mince queen, Lupa bishop, Příčka knight, Oblouk
+  rook, Spendlík pawn.
 
 Open:
 
