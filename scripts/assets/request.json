@@ -1,9 +1,31 @@
 {
  "task": "inspect",
  "targets": [
-  "pieces/aurum cobalt crystalic cut cylindra dismorph domina dune",
-  "pieces/ferro orbis",
-  "pieces/frost glanc hallow henge hexa hexalith lithoxyl marb medenka metal minima phyrm roni serpentina spirl stoni teel titani",
-  "boards"
+  "pieces/aurum",
+  "pieces/cobalt",
+  "pieces/crystalic",
+  "pieces/cut",
+  "pieces/cylindra",
+  "pieces/dismorph",
+  "pieces/domina",
+  "pieces/dune",
+  "pieces/frost",
+  "pieces/glanc",
+  "pieces/hallow",
+  "pieces/henge",
+  "pieces/hexa",
+  "pieces/hexalith",
+  "pieces/lithoxyl",
+  "pieces/marb",
+  "pieces/medenka",
+  "pieces/metal",
+  "pieces/minima",
+  "pieces/phyrm",
+  "pieces/roni",
+  "pieces/serpentina",
+  "pieces/spirl",
+  "pieces/stoni",
+  "pieces/teel",
+  "pieces/titani"
  ]
 }
