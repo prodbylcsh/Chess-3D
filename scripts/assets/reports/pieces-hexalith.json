@@ -1,0 +1,518 @@
+[
+  {
+    "file": "hexalith_black_bishop.glb",
+    "kb": 7071,
+    "nodes": [
+      "HEXALITH_black_bishop"
+    ],
+    "meshes": 1,
+    "triangles": 96,
+    "vertices": 205,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.08,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.08,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_black_king.glb",
+    "kb": 7079,
+    "nodes": [
+      "HEXALITH_black_king"
+    ],
+    "meshes": 1,
+    "triangles": 168,
+    "vertices": 349,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.094,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_black_knight.glb",
+    "kb": 7075,
+    "nodes": [
+      "HEXALITH_black_knight"
+    ],
+    "meshes": 1,
+    "triangles": 144,
+    "vertices": 266,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.064,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.064,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_black_pawn.glb",
+    "kb": 7072,
+    "nodes": [
+      "HEXALITH_black_pawn"
+    ],
+    "meshes": 1,
+    "triangles": 120,
+    "vertices": 218,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.05,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.05,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_black_queen.glb",
+    "kb": 7072,
+    "nodes": [
+      "HEXALITH_black_queen"
+    ],
+    "meshes": 1,
+    "triangles": 120,
+    "vertices": 218,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.084,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.084,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_black_rook.glb",
+    "kb": 7075,
+    "nodes": [
+      "HEXALITH_black_rook"
+    ],
+    "meshes": 1,
+    "triangles": 144,
+    "vertices": 266,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.057,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.057,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_bishop.glb",
+    "kb": 7181,
+    "nodes": [
+      "HEXALITH_white_bishop"
+    ],
+    "meshes": 1,
+    "triangles": 96,
+    "vertices": 205,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.08,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.08,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_king.glb",
+    "kb": 7189,
+    "nodes": [
+      "HEXALITH_white_king"
+    ],
+    "meshes": 1,
+    "triangles": 168,
+    "vertices": 349,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.094,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_knight.glb",
+    "kb": 7184,
+    "nodes": [
+      "HEXALITH_white_knight"
+    ],
+    "meshes": 1,
+    "triangles": 144,
+    "vertices": 266,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.064,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.064,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_pawn.glb",
+    "kb": 7182,
+    "nodes": [
+      "HEXALITH_white_pawn"
+    ],
+    "meshes": 1,
+    "triangles": 120,
+    "vertices": 218,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.05,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.05,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_queen.glb",
+    "kb": 7182,
+    "nodes": [
+      "HEXALITH_white_queen"
+    ],
+    "meshes": 1,
+    "triangles": 120,
+    "vertices": 218,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.084,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.084,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexalith_white_rook.glb",
+    "kb": 7184,
+    "nodes": [
+      "HEXALITH_white_rook"
+    ],
+    "meshes": 1,
+    "triangles": 144,
+    "vertices": 266,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.013
+      ],
+      "max": [
+        0.015,
+        0.057,
+        0.013
+      ],
+      "size": [
+        0.031,
+        0.057,
+        0.027
+      ]
+    },
+    "materials": [
+      {
+        "name": "HEXALITH_concrete_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      }
+    ]
+  }
+]

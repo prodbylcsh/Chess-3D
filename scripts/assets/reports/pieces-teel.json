@@ -1,0 +1,518 @@
+[
+  {
+    "file": "01_kral_bila.glb",
+    "kb": 762,
+    "nodes": [
+      "01_kral_bila"
+    ],
+    "meshes": 1,
+    "triangles": 4922,
+    "vertices": 9462,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.091,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.091,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "01_kral_cerna.glb",
+    "kb": 741,
+    "nodes": [
+      "01_kral_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 4922,
+    "vertices": 9462,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.091,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.091,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "02_strelec_bila.glb",
+    "kb": 594,
+    "nodes": [
+      "02_strelec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 3326,
+    "vertices": 6270,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.106,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.106,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "02_strelec_cerna.glb",
+    "kb": 573,
+    "nodes": [
+      "02_strelec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 3326,
+    "vertices": 6270,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.106,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.106,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "03_dama_bila.glb",
+    "kb": 757,
+    "nodes": [
+      "03_dama_bila"
+    ],
+    "meshes": 1,
+    "triangles": 4872,
+    "vertices": 9362,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.093,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.093,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "03_dama_cerna.glb",
+    "kb": 736,
+    "nodes": [
+      "03_dama_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 4872,
+    "vertices": 9362,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.093,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.093,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "04_jezdec_bila.glb",
+    "kb": 673,
+    "nodes": [
+      "04_jezdec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 4076,
+    "vertices": 7770,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.094,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "04_jezdec_cerna.glb",
+    "kb": 652,
+    "nodes": [
+      "04_jezdec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 4076,
+    "vertices": 7770,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.094,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "05_pesec_bila.glb",
+    "kb": 587,
+    "nodes": [
+      "05_pesec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 3264,
+    "vertices": 6146,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.072,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.072,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "05_pesec_cerna.glb",
+    "kb": 566,
+    "nodes": [
+      "05_pesec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 3264,
+    "vertices": 6146,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.072,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.072,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "06_vez_bila.glb",
+    "kb": 590,
+    "nodes": [
+      "06_vez_bila"
+    ],
+    "meshes": 1,
+    "triangles": 3288,
+    "vertices": 6194,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.089,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.089,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_bila",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "06_vez_cerna.glb",
+    "kb": 569,
+    "nodes": [
+      "06_vez_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 3288,
+    "vertices": 6194,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.089,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.089,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "kartacovany_kov_cerna",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/png",
+        "metallicRoughness": "1024x1024 image/png",
+        "normal": "1024x1024 image/png"
+      }
+    ]
+  }
+]

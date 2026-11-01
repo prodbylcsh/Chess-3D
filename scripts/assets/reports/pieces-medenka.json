@@ -1,0 +1,682 @@
+[
+  {
+    "file": "Medenka_01_Smycka_bila.glb",
+    "kb": 4958,
+    "nodes": [
+      "Telo",
+      "Smycka",
+      "Medenka_Smycka_bila"
+    ],
+    "meshes": 2,
+    "triangles": 65520,
+    "vertices": 34075,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.095,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.095,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_01_Smycka_cerna.glb",
+    "kb": 5270,
+    "nodes": [
+      "Telo",
+      "Smycka",
+      "Medenka_Smycka_cerna"
+    ],
+    "meshes": 2,
+    "triangles": 65520,
+    "vertices": 34075,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.095,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.095,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_02_Mince_bila.glb",
+    "kb": 5436,
+    "nodes": [
+      "Telo",
+      "Tyc",
+      "Mince_1",
+      "Mince_2",
+      "Mince_3",
+      "Medenka_Mince_bila"
+    ],
+    "meshes": 5,
+    "triangles": 75664,
+    "vertices": 39461,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.101,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.101,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_02_Mince_cerna.glb",
+    "kb": 5752,
+    "nodes": [
+      "Telo",
+      "Tyc",
+      "Mince_1",
+      "Mince_2",
+      "Mince_3",
+      "Medenka_Mince_cerna"
+    ],
+    "meshes": 5,
+    "triangles": 75664,
+    "vertices": 39461,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.101,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.101,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_03_Lupa_bila.glb",
+    "kb": 4966,
+    "nodes": [
+      "Telo",
+      "Vlozka_cocky",
+      "Sloupek",
+      "Rameno",
+      "Kulicka",
+      "Ram_cocky",
+      "Objimka",
+      "Medenka_Lupa_bila"
+    ],
+    "meshes": 7,
+    "triangles": 65298,
+    "vertices": 34298,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.031,
+        0.086,
+        0.02
+      ],
+      "size": [
+        0.05,
+        0.086,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_03_Lupa_cerna.glb",
+    "kb": 5275,
+    "nodes": [
+      "Telo",
+      "Vlozka_cocky",
+      "Sloupek",
+      "Rameno",
+      "Kulicka",
+      "Ram_cocky",
+      "Objimka",
+      "Medenka_Lupa_cerna"
+    ],
+    "meshes": 7,
+    "triangles": 65298,
+    "vertices": 34298,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.031,
+        0.086,
+        0.02
+      ],
+      "size": [
+        0.05,
+        0.086,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_04_Pricka_bila.glb",
+    "kb": 5796,
+    "nodes": [
+      "Telo",
+      "Sloupek_1",
+      "Sloupek_2",
+      "Koralek_1",
+      "Koralek_2",
+      "Koralek_3",
+      "Koralek_4",
+      "Koralek_5",
+      "Koralek_6",
+      "Koralek_7",
+      "Koralek_8",
+      "Medenka_Pricka_bila"
+    ],
+    "meshes": 11,
+    "triangles": 84896,
+    "vertices": 44728,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.022,
+        0.096,
+        0.02
+      ],
+      "size": [
+        0.044,
+        0.096,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_04_Pricka_cerna.glb",
+    "kb": 6102,
+    "nodes": [
+      "Telo",
+      "Sloupek_1",
+      "Sloupek_2",
+      "Koralek_1",
+      "Koralek_2",
+      "Koralek_3",
+      "Koralek_4",
+      "Koralek_5",
+      "Koralek_6",
+      "Koralek_7",
+      "Koralek_8",
+      "Medenka_Pricka_cerna"
+    ],
+    "meshes": 11,
+    "triangles": 84896,
+    "vertices": 44728,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.022,
+        0.096,
+        0.02
+      ],
+      "size": [
+        0.044,
+        0.096,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Mosaz_tepana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_05_Oblouk_bila.glb",
+    "kb": 5082,
+    "nodes": [
+      "Telo",
+      "Oblouk",
+      "Medenka_Oblouk_bila"
+    ],
+    "meshes": 2,
+    "triangles": 67332,
+    "vertices": 35184,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.089,
+        0.02
+      ],
+      "size": [
+        0.041,
+        0.089,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_bílá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "Medenka_05_Oblouk_cerna.glb",
+    "kb": 5372,
+    "nodes": [
+      "Telo",
+      "Oblouk",
+      "Medenka_Oblouk_cerna"
+    ],
+    "meshes": 2,
+    "triangles": 67332,
+    "vertices": 35184,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.089,
+        0.02
+      ],
+      "size": [
+        0.041,
+        0.089,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Dub_moreny_černá",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "2048x2048 image/jpeg"
+      },
+      {
+        "name": "Mosaz_patinovana",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

@@ -1,0 +1,702 @@
+[
+  {
+    "file": "01_pesec_bila.glb",
+    "kb": 1952,
+    "nodes": [
+      "01_pesec_telo_0",
+      "01_pesec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66816,
+    "vertices": 33796,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.07,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.07,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "01_pesec_cerna.glb",
+    "kb": 1952,
+    "nodes": [
+      "01_pesec_telo_0",
+      "01_pesec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66816,
+    "vertices": 33796,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.07,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.07,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "02_vez_bila.glb",
+    "kb": 1963,
+    "nodes": [
+      "02_vez_telo_0",
+      "02_vez_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 67200,
+    "vertices": 33988,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.08,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.08,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "02_vez_cerna.glb",
+    "kb": 1963,
+    "nodes": [
+      "02_vez_telo_0",
+      "02_vez_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 67200,
+    "vertices": 33988,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.08,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.08,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "03_jezdec_bila.glb",
+    "kb": 1941,
+    "nodes": [
+      "03_jezdec_telo_0",
+      "03_jezdec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66432,
+    "vertices": 33604,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.084,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.084,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "03_jezdec_cerna.glb",
+    "kb": 1941,
+    "nodes": [
+      "03_jezdec_telo_0",
+      "03_jezdec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66432,
+    "vertices": 33604,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.084,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.084,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "04_strelec_bila.glb",
+    "kb": 1940,
+    "nodes": [
+      "04_strelec_telo_0",
+      "04_strelec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66244,
+    "vertices": 33716,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.09,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.09,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "04_strelec_cerna.glb",
+    "kb": 1940,
+    "nodes": [
+      "04_strelec_telo_0",
+      "04_strelec_podstavec"
+    ],
+    "meshes": 2,
+    "triangles": 66244,
+    "vertices": 33716,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.09,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.09,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "05_dama_bila.glb",
+    "kb": 2009,
+    "nodes": [
+      "05_dama_telo_0",
+      "05_dama_telo_1",
+      "05_dama_podstavec"
+    ],
+    "meshes": 3,
+    "triangles": 68352,
+    "vertices": 35142,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.094,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.094,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "05_dama_cerna.glb",
+    "kb": 2009,
+    "nodes": [
+      "05_dama_telo_0",
+      "05_dama_telo_1",
+      "05_dama_podstavec"
+    ],
+    "meshes": 3,
+    "triangles": 68352,
+    "vertices": 35142,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.094,
+        0.022
+      ],
+      "size": [
+        0.044,
+        0.094,
+        0.044
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "06_kral_bila.glb",
+    "kb": 2005,
+    "nodes": [
+      "06_kral_telo_0",
+      "06_kral_telo_1",
+      "06_kral_podstavec"
+    ],
+    "meshes": 3,
+    "triangles": 68352,
+    "vertices": 34966,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.023,
+        0.1,
+        0.023
+      ],
+      "size": [
+        0.046,
+        0.1,
+        0.046
+      ]
+    },
+    "materials": [
+      {
+        "name": "Bila",
+        "color": [
+          0.89,
+          0.871,
+          0.82,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.5,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "06_kral_cerna.glb",
+    "kb": 2005,
+    "nodes": [
+      "06_kral_telo_0",
+      "06_kral_telo_1",
+      "06_kral_podstavec"
+    ],
+    "meshes": 3,
+    "triangles": 68352,
+    "vertices": 34966,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.023,
+        0.1,
+        0.023
+      ],
+      "size": [
+        0.046,
+        0.1,
+        0.046
+      ]
+    },
+    "materials": [
+      {
+        "name": "Cerna",
+        "color": [
+          0.012,
+          0.012,
+          0.016,
+          1
+        ],
+        "metallic": 0.035,
+        "roughness": 0.58,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "Zlato",
+        "color": [
+          0.678,
+          0.42,
+          0.106,
+          1
+        ],
+        "metallic": 0.86,
+        "roughness": 0.29,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,518 @@
+[
+  {
+    "file": "dama_bily.glb",
+    "kb": 703,
+    "nodes": [
+      "dama_bily"
+    ],
+    "meshes": 1,
+    "triangles": 9152,
+    "vertices": 6743,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.088,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.088,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "dama_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "dama_cerny.glb",
+    "kb": 619,
+    "nodes": [
+      "dama_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 9152,
+    "vertices": 6743,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.088,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.088,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "dama_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_bily.glb",
+    "kb": 709,
+    "nodes": [
+      "jezdec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 11120,
+    "vertices": 6798,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.066,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.066,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "jezdec_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_cerny.glb",
+    "kb": 619,
+    "nodes": [
+      "jezdec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 11120,
+    "vertices": 6798,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.066,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.066,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "jezdec_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_bily.glb",
+    "kb": 645,
+    "nodes": [
+      "kral_bily"
+    ],
+    "meshes": 1,
+    "triangles": 7830,
+    "vertices": 5347,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.092,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.092,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "kral_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_cerny.glb",
+    "kb": 552,
+    "nodes": [
+      "kral_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 7830,
+    "vertices": 5347,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.092,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.092,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "kral_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_bily.glb",
+    "kb": 1383,
+    "nodes": [
+      "pesec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 25818,
+    "vertices": 23160,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.061,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.061,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "pesec_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_cerny.glb",
+    "kb": 1318,
+    "nodes": [
+      "pesec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 25818,
+    "vertices": 23160,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.061,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.061,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "pesec_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_bily.glb",
+    "kb": 595,
+    "nodes": [
+      "strelec_bily"
+    ],
+    "meshes": 1,
+    "triangles": 7376,
+    "vertices": 4729,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.085,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.085,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "strelec_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_cerny.glb",
+    "kb": 546,
+    "nodes": [
+      "strelec_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 7376,
+    "vertices": 4729,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.085,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.085,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "strelec_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_bily.glb",
+    "kb": 666,
+    "nodes": [
+      "vez_bily"
+    ],
+    "meshes": 1,
+    "triangles": 8694,
+    "vertices": 5977,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.068,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.068,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "vez_bily_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.3,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_cerny.glb",
+    "kb": 565,
+    "nodes": [
+      "vez_cerny"
+    ],
+    "meshes": 1,
+    "triangles": 8694,
+    "vertices": 5977,
+    "bounds": {
+      "min": [
+        -0.012,
+        0,
+        -0.012
+      ],
+      "max": [
+        0.012,
+        0.068,
+        0.012
+      ],
+      "size": [
+        0.024,
+        0.068,
+        0.024
+      ]
+    },
+    "materials": [
+      {
+        "name": "vez_cerny_marble",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.24,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

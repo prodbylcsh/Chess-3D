@@ -1,0 +1,518 @@
+[
+  {
+    "file": "monolith_dama_bily.glb",
+    "kb": 631,
+    "nodes": [
+      "MONOLITH Dáma – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 924,
+    "vertices": 590,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.065,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.065,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_dama_cerny.glb",
+    "kb": 28,
+    "nodes": [
+      "MONOLITH Dáma – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 924,
+    "vertices": 464,
+    "bounds": {
+      "min": [
+        -0.014,
+        0,
+        -0.014
+      ],
+      "max": [
+        0.014,
+        0.065,
+        0.014
+      ],
+      "size": [
+        0.028,
+        0.065,
+        0.028
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "monolith_jezdec_bily.glb",
+    "kb": 631,
+    "nodes": [
+      "MONOLITH Jezdec – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 928,
+    "vertices": 588,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.013,
+        0.054,
+        0.018
+      ],
+      "size": [
+        0.026,
+        0.054,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_jezdec_cerny.glb",
+    "kb": 28,
+    "nodes": [
+      "MONOLITH Jezdec – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 928,
+    "vertices": 466,
+    "bounds": {
+      "min": [
+        -0.013,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.013,
+        0.054,
+        0.018
+      ],
+      "size": [
+        0.026,
+        0.054,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "monolith_kral_bily.glb",
+    "kb": 631,
+    "nodes": [
+      "MONOLITH Král – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 908,
+    "vertices": 580,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.072,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.072,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_kral_cerny.glb",
+    "kb": 27,
+    "nodes": [
+      "MONOLITH Král – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 908,
+    "vertices": 456,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.072,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.072,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "monolith_pesec_bily.glb",
+    "kb": 1159,
+    "nodes": [
+      "MONOLITH Pěšec – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 19200,
+    "vertices": 10610,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.037,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.037,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_pesec_cerny.glb",
+    "kb": 528,
+    "nodes": [
+      "MONOLITH Pěšec – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 19200,
+    "vertices": 9602,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.037,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.037,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "monolith_strelec_bily.glb",
+    "kb": 746,
+    "nodes": [
+      "MONOLITH Střelec – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 4612,
+    "vertices": 2878,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.059,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.059,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_strelec_cerny.glb",
+    "kb": 129,
+    "nodes": [
+      "MONOLITH Střelec – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 4612,
+    "vertices": 2308,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.015
+      ],
+      "max": [
+        0.015,
+        0.059,
+        0.015
+      ],
+      "size": [
+        0.03,
+        0.059,
+        0.03
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "monolith_vez_bily.glb",
+    "kb": 880,
+    "nodes": [
+      "MONOLITH Věž – Mráz (bílý)"
+    ],
+    "meshes": 1,
+    "triangles": 9600,
+    "vertices": 5292,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.042,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.042,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "Mléčné sklo – pískované",
+        "color": [
+          0.95,
+          0.96,
+          0.97,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "512x512 image/png",
+        "normal": "512x512 image/png"
+      }
+    ]
+  },
+  {
+    "file": "monolith_vez_cerny.glb",
+    "kb": 265,
+    "nodes": [
+      "MONOLITH Věž – Kouř (černý)"
+    ],
+    "meshes": 1,
+    "triangles": 9600,
+    "vertices": 4802,
+    "bounds": {
+      "min": [
+        -0.016,
+        0,
+        -0.016
+      ],
+      "max": [
+        0.016,
+        0.042,
+        0.016
+      ],
+      "size": [
+        0.032,
+        0.042,
+        0.032
+      ]
+    },
+    "materials": [
+      {
+        "name": "Kouřové sklo – leštěné",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.03,
+        "base": "8x512 image/png",
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

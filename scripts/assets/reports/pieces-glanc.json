@@ -1,0 +1,629 @@
+[
+  {
+    "file": "dama_cerna.glb",
+    "kb": 2464,
+    "nodes": [
+      "dama_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 99648,
+    "vertices": 50750,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.125,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.125,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_bila.glb",
+    "kb": 2331,
+    "nodes": [
+      "jezdec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 94272,
+    "vertices": 48049,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.116,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.116,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "jezdec_cerna.glb",
+    "kb": 2348,
+    "nodes": [
+      "jezdec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 94272,
+    "vertices": 48049,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.116,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.116,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_bila.glb",
+    "kb": 3040,
+    "nodes": [
+      "kral_bila"
+    ],
+    "meshes": 1,
+    "triangles": 126512,
+    "vertices": 64693,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.142,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.142,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "kral_cerna.glb",
+    "kb": 3058,
+    "nodes": [
+      "kral_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 126512,
+    "vertices": 64693,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.142,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.142,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_bila.glb",
+    "kb": 2067,
+    "nodes": [
+      "pesec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 82080,
+    "vertices": 41905,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.093,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.093,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "pesec_cerna.glb",
+    "kb": 2084,
+    "nodes": [
+      "pesec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 82080,
+    "vertices": 41905,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.093,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.093,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_bila.glb",
+    "kb": 2266,
+    "nodes": [
+      "strelec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 91296,
+    "vertices": 46545,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.115,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.115,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "strelec_cerna.glb",
+    "kb": 2283,
+    "nodes": [
+      "strelec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 91296,
+    "vertices": 46545,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.115,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.115,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_bila.glb",
+    "kb": 2154,
+    "nodes": [
+      "vez_bila"
+    ],
+    "meshes": 1,
+    "triangles": 86112,
+    "vertices": 43935,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.105,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.105,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_white",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "vez_cerna.glb",
+    "kb": 2171,
+    "nodes": [
+      "vez_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 86112,
+    "vertices": 43935,
+    "bounds": {
+      "min": [
+        -0.029,
+        0,
+        -0.029
+      ],
+      "max": [
+        0.029,
+        0.105,
+        0.029
+      ],
+      "size": [
+        0.058,
+        0.105,
+        0.058
+      ]
+    },
+    "materials": [
+      {
+        "name": "resin_black",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.14,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": null,
+        "normal": null
+      },
+      {
+        "name": "copper_polished",
+        "color": [
+          0.955,
+          0.58,
+          0.45,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 0.2,
+        "base": null,
+        "metallicRoughness": null,
+        "normal": null
+      }
+    ]
+  }
+]

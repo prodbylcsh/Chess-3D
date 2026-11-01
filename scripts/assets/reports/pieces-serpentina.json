@@ -1,0 +1,518 @@
+[
+  {
+    "file": "Serpentina_bishop_black.glb",
+    "kb": 5403,
+    "nodes": [
+      "Serpentina_bishop_black"
+    ],
+    "meshes": 1,
+    "triangles": 169344,
+    "vertices": 85500,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.087,
+        0.019
+      ],
+      "size": [
+        0.037,
+        0.087,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_bishop_white.glb",
+    "kb": 5380,
+    "nodes": [
+      "Serpentina_bishop_white"
+    ],
+    "meshes": 1,
+    "triangles": 169344,
+    "vertices": 85500,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.087,
+        0.019
+      ],
+      "size": [
+        0.037,
+        0.087,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_king_black.glb",
+    "kb": 6639,
+    "nodes": [
+      "Serpentina_king_black"
+    ],
+    "meshes": 1,
+    "triangles": 214016,
+    "vertices": 107940,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.023,
+        0.097,
+        0.023
+      ],
+      "size": [
+        0.045,
+        0.097,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_king_white.glb",
+    "kb": 6615,
+    "nodes": [
+      "Serpentina_king_white"
+    ],
+    "meshes": 1,
+    "triangles": 214016,
+    "vertices": 107940,
+    "bounds": {
+      "min": [
+        -0.023,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.023,
+        0.097,
+        0.023
+      ],
+      "size": [
+        0.045,
+        0.097,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_knight_black.glb",
+    "kb": 5874,
+    "nodes": [
+      "Serpentina_knight_black"
+    ],
+    "meshes": 1,
+    "triangles": 187264,
+    "vertices": 94500,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.08,
+        0.02
+      ],
+      "size": [
+        0.041,
+        0.08,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_knight_white.glb",
+    "kb": 5841,
+    "nodes": [
+      "Serpentina_knight_white"
+    ],
+    "meshes": 1,
+    "triangles": 187264,
+    "vertices": 94500,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.08,
+        0.02
+      ],
+      "size": [
+        0.041,
+        0.08,
+        0.041
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_pawn_black.glb",
+    "kb": 3791,
+    "nodes": [
+      "Serpentina_pawn_black"
+    ],
+    "meshes": 1,
+    "triangles": 114432,
+    "vertices": 57900,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.056,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.056,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_pawn_white.glb",
+    "kb": 3778,
+    "nodes": [
+      "Serpentina_pawn_white"
+    ],
+    "meshes": 1,
+    "triangles": 114432,
+    "vertices": 57900,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.056,
+        0.019
+      ],
+      "size": [
+        0.039,
+        0.056,
+        0.039
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_queen_black.glb",
+    "kb": 5657,
+    "nodes": [
+      "Serpentina_queen_black"
+    ],
+    "meshes": 1,
+    "triangles": 178304,
+    "vertices": 90000,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.095,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_queen_white.glb",
+    "kb": 5629,
+    "nodes": [
+      "Serpentina_queen_white"
+    ],
+    "meshes": 1,
+    "triangles": 178304,
+    "vertices": 90000,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.095,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.095,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_rook_black.glb",
+    "kb": 4624,
+    "nodes": [
+      "Serpentina_rook_black"
+    ],
+    "meshes": 1,
+    "triangles": 140608,
+    "vertices": 71060,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.072,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.072,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_black_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  },
+  {
+    "file": "Serpentina_rook_white.glb",
+    "kb": 4585,
+    "nodes": [
+      "Serpentina_rook_white"
+    ],
+    "meshes": 1,
+    "triangles": 140608,
+    "vertices": 71060,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.019,
+        0.072,
+        0.019
+      ],
+      "size": [
+        0.038,
+        0.072,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "Serpentina_white_marble_polished",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "2048x2048 image/jpeg",
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": null
+      }
+    ]
+  }
+]

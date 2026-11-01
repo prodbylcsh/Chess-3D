@@ -1,0 +1,518 @@
+[
+  {
+    "file": "dama_bila.glb",
+    "kb": 785,
+    "nodes": [
+      "dama_bila"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 66,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.015,
+        0.096,
+        0.019
+      ],
+      "size": [
+        0.03,
+        0.096,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "dama_cerna.glb",
+    "kb": 1100,
+    "nodes": [
+      "dama_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 66,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.015,
+        0.096,
+        0.019
+      ],
+      "size": [
+        0.03,
+        0.096,
+        0.038
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "jezdec_bila.glb",
+    "kb": 786,
+    "nodes": [
+      "jezdec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 44,
+    "vertices": 90,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.015,
+        0.087,
+        0.02
+      ],
+      "size": [
+        0.03,
+        0.087,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "jezdec_cerna.glb",
+    "kb": 1101,
+    "nodes": [
+      "jezdec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 44,
+    "vertices": 90,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.015,
+        0.087,
+        0.02
+      ],
+      "size": [
+        0.03,
+        0.087,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "kral_bila.glb",
+    "kb": 785,
+    "nodes": [
+      "kral_bila"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 68,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.019
+      ],
+      "size": [
+        0.03,
+        0.094,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "kral_cerna.glb",
+    "kb": 1100,
+    "nodes": [
+      "kral_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 68,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.019
+      ],
+      "max": [
+        0.015,
+        0.094,
+        0.019
+      ],
+      "size": [
+        0.03,
+        0.094,
+        0.037
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "pesec_bila.glb",
+    "kb": 783,
+    "nodes": [
+      "pesec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 12,
+    "vertices": 24,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.015,
+        0.05,
+        0.023
+      ],
+      "size": [
+        0.03,
+        0.05,
+        0.046
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "pesec_cerna.glb",
+    "kb": 1098,
+    "nodes": [
+      "pesec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 12,
+    "vertices": 24,
+    "bounds": {
+      "min": [
+        -0.015,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.015,
+        0.05,
+        0.023
+      ],
+      "size": [
+        0.03,
+        0.05,
+        0.046
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "strelec_bila.glb",
+    "kb": 786,
+    "nodes": [
+      "strelec_bila"
+    ],
+    "meshes": 1,
+    "triangles": 52,
+    "vertices": 96,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.019,
+        0.096,
+        0.023
+      ],
+      "size": [
+        0.038,
+        0.096,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "strelec_cerna.glb",
+    "kb": 1101,
+    "nodes": [
+      "strelec_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 52,
+    "vertices": 96,
+    "bounds": {
+      "min": [
+        -0.019,
+        0,
+        -0.023
+      ],
+      "max": [
+        0.019,
+        0.096,
+        0.023
+      ],
+      "size": [
+        0.038,
+        0.096,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "vez_bila.glb",
+    "kb": 785,
+    "nodes": [
+      "vez_bila"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 72,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.027
+      ],
+      "max": [
+        0.021,
+        0.084,
+        0.027
+      ],
+      "size": [
+        0.041,
+        0.084,
+        0.053
+      ]
+    },
+    "materials": [
+      {
+        "name": "kamen_bily",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.88,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "vez_cerna.glb",
+    "kb": 1100,
+    "nodes": [
+      "vez_cerna"
+    ],
+    "meshes": 1,
+    "triangles": 36,
+    "vertices": 72,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.027
+      ],
+      "max": [
+        0.021,
+        0.084,
+        0.027
+      ],
+      "size": [
+        0.041,
+        0.084,
+        0.053
+      ]
+    },
+    "materials": [
+      {
+        "name": "cerny_mat",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.72,
+        "base": "1024x1024 image/jpeg",
+        "metallicRoughness": null,
+        "normal": "1024x1024 image/jpeg"
+      }
+    ]
+  }
+]

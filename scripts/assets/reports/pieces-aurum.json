@@ -1,0 +1,686 @@
+[
+  {
+    "file": "aurum_bishop_black.glb",
+    "kb": 4292,
+    "nodes": [
+      "Aurum Noir – Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 89856,
+    "vertices": 46053,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.08,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.08,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_bishop_white.glb",
+    "kb": 4292,
+    "nodes": [
+      "Aurum Ivoire – Bishop"
+    ],
+    "meshes": 1,
+    "triangles": 89856,
+    "vertices": 46053,
+    "bounds": {
+      "min": [
+        -0.02,
+        0,
+        -0.02
+      ],
+      "max": [
+        0.02,
+        0.08,
+        0.02
+      ],
+      "size": [
+        0.04,
+        0.08,
+        0.04
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_king_black.glb",
+    "kb": 5437,
+    "nodes": [
+      "Aurum Noir – King"
+    ],
+    "meshes": 1,
+    "triangles": 122828,
+    "vertices": 62223,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.1,
+        0.022
+      ],
+      "size": [
+        0.043,
+        0.1,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_king_white.glb",
+    "kb": 5437,
+    "nodes": [
+      "Aurum Ivoire – King"
+    ],
+    "meshes": 1,
+    "triangles": 122828,
+    "vertices": 62223,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.1,
+        0.022
+      ],
+      "size": [
+        0.043,
+        0.1,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_knight_black.glb",
+    "kb": 8005,
+    "nodes": [
+      "Aurum Noir – Knight"
+    ],
+    "meshes": 1,
+    "triangles": 196016,
+    "vertices": 98713,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.075,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.075,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_knight_white.glb",
+    "kb": 8005,
+    "nodes": [
+      "Aurum Ivoire – Knight"
+    ],
+    "meshes": 1,
+    "triangles": 196016,
+    "vertices": 98713,
+    "bounds": {
+      "min": [
+        -0.021,
+        0,
+        -0.021
+      ],
+      "max": [
+        0.021,
+        0.075,
+        0.021
+      ],
+      "size": [
+        0.042,
+        0.075,
+        0.042
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_pawn_black.glb",
+    "kb": 4162,
+    "nodes": [
+      "Aurum Noir – Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 86528,
+    "vertices": 44118,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.058,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.058,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_pawn_white.glb",
+    "kb": 4162,
+    "nodes": [
+      "Aurum Ivoire – Pawn"
+    ],
+    "meshes": 1,
+    "triangles": 86528,
+    "vertices": 44118,
+    "bounds": {
+      "min": [
+        -0.018,
+        0,
+        -0.018
+      ],
+      "max": [
+        0.018,
+        0.058,
+        0.018
+      ],
+      "size": [
+        0.036,
+        0.058,
+        0.036
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_queen_black.glb",
+    "kb": 4618,
+    "nodes": [
+      "Aurum Noir – Queen"
+    ],
+    "meshes": 1,
+    "triangles": 99072,
+    "vertices": 50697,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.092,
+        0.022
+      ],
+      "size": [
+        0.045,
+        0.092,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_queen_white.glb",
+    "kb": 4618,
+    "nodes": [
+      "Aurum Ivoire – Queen"
+    ],
+    "meshes": 1,
+    "triangles": 99072,
+    "vertices": 50697,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.092,
+        0.022
+      ],
+      "size": [
+        0.045,
+        0.092,
+        0.045
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_rook_black.glb",
+    "kb": 5446,
+    "nodes": [
+      "Aurum Noir – Rook"
+    ],
+    "meshes": 1,
+    "triangles": 123072,
+    "vertices": 62372,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.064,
+        0.022
+      ],
+      "size": [
+        0.043,
+        0.064,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Noir – matte grained black",
+        "color": [
+          0.02,
+          0.021,
+          0.026,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 1,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  },
+  {
+    "file": "aurum_rook_white.glb",
+    "kb": 5446,
+    "nodes": [
+      "Aurum Ivoire – Rook"
+    ],
+    "meshes": 1,
+    "triangles": 123072,
+    "vertices": 62372,
+    "bounds": {
+      "min": [
+        -0.022,
+        0,
+        -0.022
+      ],
+      "max": [
+        0.022,
+        0.064,
+        0.022
+      ],
+      "size": [
+        0.043,
+        0.064,
+        0.043
+      ]
+    },
+    "materials": [
+      {
+        "name": "Aurum Ivoire – matte grained ivory",
+        "color": [
+          0.8,
+          0.775,
+          0.73,
+          1
+        ],
+        "metallic": 0,
+        "roughness": 0.95,
+        "base": null,
+        "metallicRoughness": "1024x1024 image/jpeg",
+        "normal": "1024x1024 image/jpeg"
+      },
+      {
+        "name": "Aurum – brushed brass",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "256x1024 image/png",
+        "metallicRoughness": "256x1024 image/png",
+        "normal": "256x1024 image/png"
+      }
+    ]
+  }
+]

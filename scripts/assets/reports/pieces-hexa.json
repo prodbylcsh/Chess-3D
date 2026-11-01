@@ -1,0 +1,518 @@
+[
+  {
+    "file": "hexa_bishop_black.glb",
+    "kb": 13384,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 99924,
+    "vertices": 55638,
+    "bounds": {
+      "min": [
+        -0.412,
+        -1,
+        -0.372
+      ],
+      "max": [
+        0.412,
+        1,
+        0.372
+      ],
+      "size": [
+        0.824,
+        2,
+        0.744
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_bishop_white.glb",
+    "kb": 22164,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 99924,
+    "vertices": 55637,
+    "bounds": {
+      "min": [
+        -0.412,
+        -1,
+        -0.372
+      ],
+      "max": [
+        0.412,
+        1,
+        0.372
+      ],
+      "size": [
+        0.824,
+        2,
+        0.744
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_king_black.glb",
+    "kb": 12137,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 72866,
+    "vertices": 40872,
+    "bounds": {
+      "min": [
+        -0.364,
+        -1,
+        -0.323
+      ],
+      "max": [
+        0.364,
+        1,
+        0.323
+      ],
+      "size": [
+        0.728,
+        2,
+        0.647
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_king_white.glb",
+    "kb": 19486,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 72866,
+    "vertices": 40872,
+    "bounds": {
+      "min": [
+        -0.364,
+        -1,
+        -0.323
+      ],
+      "max": [
+        0.364,
+        1,
+        0.323
+      ],
+      "size": [
+        0.728,
+        2,
+        0.647
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_knight_black.glb",
+    "kb": 14114,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 83812,
+    "vertices": 46870,
+    "bounds": {
+      "min": [
+        -0.376,
+        -1,
+        -0.464
+      ],
+      "max": [
+        0.376,
+        1,
+        0.464
+      ],
+      "size": [
+        0.753,
+        2,
+        0.928
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_knight_white.glb",
+    "kb": 22051,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 83812,
+    "vertices": 46868,
+    "bounds": {
+      "min": [
+        -0.376,
+        -1,
+        -0.464
+      ],
+      "max": [
+        0.376,
+        1,
+        0.464
+      ],
+      "size": [
+        0.753,
+        2,
+        0.928
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_pawn_black.glb",
+    "kb": 14888,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 97454,
+    "vertices": 53311,
+    "bounds": {
+      "min": [
+        -0.529,
+        -1,
+        -0.545
+      ],
+      "max": [
+        0.529,
+        1,
+        0.545
+      ],
+      "size": [
+        1.057,
+        2,
+        1.09
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_pawn_white.glb",
+    "kb": 19748,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 97454,
+    "vertices": 53311,
+    "bounds": {
+      "min": [
+        -0.529,
+        -1,
+        -0.545
+      ],
+      "max": [
+        0.529,
+        1,
+        0.545
+      ],
+      "size": [
+        1.057,
+        2,
+        1.09
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_queen_black.glb",
+    "kb": 12641,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 83425,
+    "vertices": 47175,
+    "bounds": {
+      "min": [
+        -0.418,
+        -1,
+        -0.382
+      ],
+      "max": [
+        0.418,
+        1,
+        0.382
+      ],
+      "size": [
+        0.836,
+        2,
+        0.764
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_queen_white.glb",
+    "kb": 20916,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 83425,
+    "vertices": 47175,
+    "bounds": {
+      "min": [
+        -0.418,
+        -1,
+        -0.382
+      ],
+      "max": [
+        0.418,
+        1,
+        0.382
+      ],
+      "size": [
+        0.836,
+        2,
+        0.764
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_rook_black.glb",
+    "kb": 12595,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 125814,
+    "vertices": 69551,
+    "bounds": {
+      "min": [
+        -0.564,
+        -1,
+        -0.499
+      ],
+      "max": [
+        0.564,
+        1,
+        0.499
+      ],
+      "size": [
+        1.129,
+        2,
+        0.998
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  },
+  {
+    "file": "hexa_rook_white.glb",
+    "kb": 18164,
+    "nodes": [
+      ""
+    ],
+    "meshes": 1,
+    "triangles": 125814,
+    "vertices": 69551,
+    "bounds": {
+      "min": [
+        -0.564,
+        -1,
+        -0.499
+      ],
+      "max": [
+        0.564,
+        1,
+        0.499
+      ],
+      "size": [
+        1.129,
+        2,
+        0.998
+      ]
+    },
+    "materials": [
+      {
+        "name": "",
+        "color": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "metallic": 1,
+        "roughness": 1,
+        "base": "4096x4096 image/jpeg",
+        "metallicRoughness": "2048x2048 image/jpeg",
+        "normal": "4096x4096 image/jpeg"
+      }
+    ]
+  }
+]
