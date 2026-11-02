@@ -399,8 +399,8 @@ const OPENINGS_TRAP: Reel = {
       dur: 18.0,
       speed: [[0, 1], ...slow(11.0, 1.5)],
       camera: [
-        [0, { at: [0, 0, 0.6], dist: 11, height: 13, yaw: -12 }],
-        [7.6, { at: [0, 0, 0], dist: 10, height: 12, yaw: 6 }],
+        [0, { at: [0, 0, 0.5], dist: 8.5, height: 10.5, yaw: -12 }],
+        [7.6, { at: [0, 0, -0.3], dist: 8, height: 9.5, yaw: 6 }],
         [10.8, { at: 'd7', dist: 7.8, height: 5, yaw: 18 }],
         [18.0, { at: 'd7', dist: 8.6, height: 5.4, yaw: 30 }],
       ],
