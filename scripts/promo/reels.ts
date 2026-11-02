@@ -180,7 +180,7 @@ const PICK_CAPTURE: Reel = {
     capture('shatter', { pieces: 'marble-set', board: 'marble-board' }, undefined, 34),
     capture('embers', { pieces: 'monolith-set', board: 'monolith-board' }, 'embers', 30),
     { ...capture('frostbite', { pieces: 'frost-glass-set', board: 'frost-board' }, 'frostbite', 34), dur: 3.1 },
-    { ...capture('implode', { pieces: 'aurum-set', board: 'zlata-board' }, 'implode', 30), dur: 5.6,
+    { ...capture('implode', { pieces: 'titani-set', board: 'argentum-board' }, 'implode', 30), dur: 5.6,
       speed: [[0, 1], [0.3, 1], [0.42, 0.3], [3.1, 0.3], [3.4, 0.6]] },
   ],
   overlays: [
@@ -198,14 +198,14 @@ const PICK_CAPTURE: Reel = {
 1️⃣ Shatter, Classic Marble
 2️⃣ Embers, Monolith
 3️⃣ Frostbite, Frost
-4️⃣ Implode, Aurum on Zlata
+4️⃣ Implode, Titani on Argentum
 
 Every capture effect, piece set and board shows in every game you play, and your opponent sees it too. Earn coins by playing, spend them in the shop.
 
 Play free, link in bio 👆
 
 #chess #3dchess #chessgame #gaming #indiegame`,
-  alt: 'Four slow-motion clips of the same 3D chess capture, a knight taking a pawn: the pawn shatters on a marble board, burns to embers on the black Monolith set, freezes and cracks on the Frost glass set, and implodes on the gold Aurum set. Labels 1 to 4 ask which one you would pick.',
+  alt: 'Four slow-motion clips of the same 3D chess capture, a knight taking a pawn: the pawn shatters on a marble board, burns to embers on the black Monolith set, freezes and cracks on the Frost glass set, and implodes on the Titani set. Labels 1 to 4 ask which one you would pick.',
   music: { root: 82.41, mood: 'bright' },
 };
 
@@ -275,7 +275,7 @@ const SETS: [string, Loadout, string][] = [
   ['Classic Marble', { pieces: 'marble-set', board: 'marble-board' }, 'free'],
   ['Squircle', { pieces: 'squircle-set', board: 'maple-board' }, 'rare'],
   ['Monolith', { pieces: 'monolith-set', board: 'monolith-board' }, 'legendary'],
-  ['Aurum', { pieces: 'aurum-set', board: 'zlata-board' }, 'common'],
+  ['Titani', { pieces: 'titani-set', board: 'zlata-board' }, 'epic'],
   ['Frost', { pieces: 'frost-glass-set', board: 'frost-board' }, 'rare'],
   ['Hallow', { pieces: 'hallow-set', board: 'beton-board' }, 'legendary'],
   ['Dismorph', { pieces: 'dismorph-set', board: 'azure-lagoon-board' }, 'legendary'],
@@ -312,14 +312,14 @@ const MAKE_IT_YOURS: Reel = {
   cover: { t: 3.5, kicker: 'Piece sets · boards', text: 'Make the board yours' },
   caption: `Same opening, eight different boards. Which set would you play with? 👇
 
-Classic Marble · Squircle · Monolith · Aurum · Frost · Hallow · Dismorph · Medenka
+Classic Marble · Squircle · Monolith · Titani · Frost · Hallow · Dismorph · Medenka
 
 29 piece sets and 13 boards, each one a real 3D model. Your opponent sees your set in every game. Earn coins by playing, or pick them up in the shop.
 
 Play free, link in bio 👆
 
 #chess #chessset #3dchess #chessboard #indiegame`,
-  alt: 'The camera circles a 3D chessboard in one continuous move while the pieces and board change every second: Classic Marble, Squircle on maple, the black Monolith set, gold Aurum, frosted glass Frost, Hallow on concrete, Dismorph on a lagoon-blue board, and copper Medenka. Text: make the board yours, 29 piece sets, 13 boards.',
+  alt: 'The camera circles a 3D chessboard in one continuous move while the pieces and board change every second: Classic Marble, Squircle on maple, the black Monolith set, Titani on the gold Zlata board, frosted glass Frost, Hallow on concrete, Dismorph on a lagoon-blue board, and copper Medenka. Text: make the board yours, 29 piece sets, 13 boards.',
   music: { root: 87.31, mood: 'bright' },
 };
 
