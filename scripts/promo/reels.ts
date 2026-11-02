@@ -275,7 +275,7 @@ const SETS: [string, Loadout, string][] = [
   ['Classic Marble', { pieces: 'marble-set', board: 'marble-board' }, 'free'],
   ['Squircle', { pieces: 'squircle-set', board: 'maple-board' }, 'rare'],
   ['Monolith', { pieces: 'monolith-set', board: 'monolith-board' }, 'legendary'],
-  ['Titani', { pieces: 'titani-set', board: 'zlata-board' }, 'epic'],
+  ['Marb', { pieces: 'marb-set', board: 'zlata-board' }, 'epic'],
   ['Frost', { pieces: 'frost-glass-set', board: 'frost-board' }, 'rare'],
   ['Hallow', { pieces: 'hallow-set', board: 'beton-board' }, 'legendary'],
   ['Dismorph', { pieces: 'dismorph-set', board: 'azure-lagoon-board' }, 'legendary'],
@@ -312,14 +312,14 @@ const MAKE_IT_YOURS: Reel = {
   cover: { t: 3.5, kicker: 'Piece sets · boards', text: 'Make the board yours' },
   caption: `Same opening, eight different boards. Which set would you play with? 👇
 
-Classic Marble · Squircle · Monolith · Titani · Frost · Hallow · Dismorph · Medenka
+Classic Marble · Squircle · Monolith · Marb · Frost · Hallow · Dismorph · Medenka
 
 29 piece sets and 13 boards, each one a real 3D model. Your opponent sees your set in every game. Earn coins by playing, or pick them up in the shop.
 
 Play free, link in bio 👆
 
 #chess #chessset #3dchess #chessboard #indiegame`,
-  alt: 'The camera circles a 3D chessboard in one continuous move while the pieces and board change every second: Classic Marble, Squircle on maple, the black Monolith set, Titani on the gold Zlata board, frosted glass Frost, Hallow on concrete, Dismorph on a lagoon-blue board, and copper Medenka. Text: make the board yours, 29 piece sets, 13 boards.',
+  alt: 'The camera circles a 3D chessboard in one continuous move while the pieces and board change every second: Classic Marble, Squircle on maple, the black Monolith set, cream and black Marb columns on the gold Zlata board, frosted glass Frost, Hallow on concrete, Dismorph on a lagoon-blue board, and copper Medenka. Text: make the board yours, 29 piece sets, 13 boards.',
   music: { root: 87.31, mood: 'bright' },
 };
 

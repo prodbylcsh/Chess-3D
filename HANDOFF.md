@@ -44,7 +44,7 @@ with `build-posts.ts`. Not posted (the user posts once the platform is finished)
 - **Open, worth a look:** the **Aurum** set gives empty (fully black or transparent) frames
   now and then in headless Chromium's software WebGL, with or without a capture, and stays
   black after an Implode capture. No console error. Other sets don't. Check Aurum in a real
-  browser; the Reels use Titani instead.
+  browser; the Reels use Titani (02) and Marb (04) instead. Titani also blooms out the whole frame when it is close to the camera at a low angle (seen in the Reel 04 orbit), so it was swapped for Marb there.
 - Rendering is ~3 s a frame at 1080×1920; the four Reels take about 1.5 hours with two workers.
 
 ## New sets and boards (merged to `main` on 1 November 2026, the user's yes)
