@@ -270,7 +270,7 @@ const PUZZLE_REEL: Reel = {
   overlays: [
     { from: 0.1, to: 2.9, style: 'hook', text: 'Black just took your queen.', y: 560 },
     { from: 3.3, to: 6.0, style: 'title', kicker: 'White to play', text: 'Mate in 2', y: 1390 },
-    { from: 4.6, to: 6.0, style: 'label', kicker: 'Pause now', text: 'Answer in 3 seconds', y: 330 },
+    { from: 4.6, to: 6.0, style: 'label', kicker: 'Pause now', text: 'Answer in 3 seconds', y: 360 },
     { from: 6.4, to: 8.4, style: 'big', text: '1. Rc8+', sub: 'the rook checks the king', y: 1390 },
     { from: 8.6, to: 10.6, style: 'big', text: '1... Qe8', sub: 'the only block', y: 1390 },
     { from: 10.8, to: 13.4, style: 'big', text: '2. Rxe8#', sub: 'checkmate', y: 1390 },
@@ -380,7 +380,7 @@ const TOP_HOLD = (from: number, to: number): [number, Camera][] => [[from, TOP],
 /** slow motion from video time t for `len` seconds */
 const slow = (t: number, len = 1.3, k = 0.45): [number, number][] => [[t, 1], [t + 0.1, k], [t + len, k], [t + len + 0.3, 1]];
 const PAUSE = (from: number, to: number, seconds = 3): Overlay =>
-  ({ from, to, style: 'label', kicker: 'Pause now', text: `Answer in ${seconds} seconds`, y: 330 });
+  ({ from, to, style: 'label', kicker: 'Pause now', text: `Answer in ${seconds} seconds`, y: 360 });
 
 // 05 — Openings (free): the Caro-Kann smothered mate, from the first move
 const OPENINGS_TRAP: Reel = {
@@ -407,7 +407,7 @@ const OPENINGS_TRAP: Reel = {
     }),
   ],
   overlays: [
-    { from: 0.05, to: 3.4, style: 'hook', text: 'Checkmate in 6 moves.', y: 470 },
+    { from: 0.05, to: 3.4, style: 'hook', text: 'Checkmate\nin 6 moves.', y: 470 },
     { from: 3.6, to: 7.6, style: 'label', kicker: 'Caro-Kann trap', text: "Spot Black's mistake", y: 470 },
     { from: 8.0, to: 9.3, style: 'big', text: '5. Qe2', sub: 'White sets the trap', y: 1390 },
     { from: 9.4, to: 10.8, style: 'big', text: '5... Ngf6??', sub: 'the natural move loses', y: 1390 },
@@ -463,7 +463,7 @@ const SPEED_ROUND: Reel = {
     });
   }),
   overlays: [
-    { from: 0.05, to: 2.9, style: 'label', kicker: 'Speed round', text: '3 seconds each', y: 330 },
+    { from: 0.05, to: 2.9, style: 'label', kicker: 'Speed round', text: '3 seconds each', y: 360 },
     ...SPEED.flatMap(([, , , san], i): Overlay[] => {
       const t0 = i * ROUND;
       return [
@@ -571,7 +571,7 @@ const PIN: Reel = {
     { from: 0.1, to: 2.9, style: 'hook', text: 'Black took your queen.', y: 520 },
     { from: 1.1, to: 2.9, style: 'hook', text: 'Big mistake.', y: 760 },
     { from: 3.3, to: 7.0, style: 'title', kicker: 'White to play', text: 'Mate in 1', y: 1390 },
-    { from: 4.8, to: 7.0, style: 'label', kicker: 'Hint', text: 'One black piece is stuck', y: 330 },
+    { from: 4.8, to: 7.0, style: 'label', kicker: 'Hint', text: 'One black piece is stuck', y: 360 },
     { from: 7.2, to: 11.4, style: 'big', text: '1. Re8#', sub: "the f7 rook is pinned, it can't block", y: 1390 },
     { from: 12.0, to: 14.6, style: 'cta', text: '100 pins and skewers, easiest first' },
   ],

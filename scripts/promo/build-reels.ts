@@ -79,7 +79,7 @@ function overlayHtml(o: Overlay): string {
   const at = (inner: string) => `${shade}<div class="block" style="top:${y}px">${inner}</div>`;
   switch (o.style) {
     case 'hook':
-      return at(`<h1 class="cin hook">${esc(o.text)}</h1>${sub}`);
+      return at(`<h1 class="cin hook">${esc(o.text).replace(/\n/g, '<br>')}</h1>${sub}`); // \n: a chosen line break
     case 'title':
       return at(`${kicker}<h1 class="cin title">${esc(o.text)}</h1>${sub}`);
     case 'big':
