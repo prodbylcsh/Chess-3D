@@ -8,6 +8,29 @@
 // keys. Moves are played at game (simulation) times; `simStart` is how far into the take's
 // game clock the first frame is.
 
+import { moduleOf } from '../../supabase/functions/_shared/puzzles.ts';
+
+export const FPS = 30;
+
+/** Game speed at video time v of a take (linear between the keys). */
+export function speedAt(keys: [number, number][] | undefined, v: number): number {
+  if (!keys?.length) return 1;
+  if (v <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    const [t1, s1] = keys[i];
+    const [t0, s0] = keys[i - 1];
+    if (v <= t1) return s0 + (s1 - s0) * ((v - t0) / (t1 - t0));
+  }
+  return keys.at(-1)![1];
+}
+
+/** The game clock at video time v (simStart plus the frames' steps, as render-reels.ts runs it). */
+export function gameAt(keys: [number, number][] | undefined, simStart: number, v: number): number {
+  let g = simStart;
+  for (let i = 0; i < Math.round(v * FPS); i++) g += speedAt(keys, i / FPS) / FPS;
+  return g;
+}
+
 export interface Camera {
   /** square or [x, y, z] the camera looks at */
   at: string | [number, number, number];
@@ -30,6 +53,8 @@ export interface Take {
   loadout?: Loadout;
   /** engine styles switched on for this take (the way a future shop item would) */
   styles?: { move?: string; destruction?: string };
+  /** a puzzle module's colour (`_shared/puzzles.ts`): the scene takes it, as while playing the module */
+  mood?: string;
   fen?: string;
   /** moves already on the board (UCI) */
   before?: string[];
@@ -323,7 +348,358 @@ Play free, link in bio 👆
   music: { root: 87.31, mood: 'bright' },
 };
 
-export const REELS: Reel[] = [PIECES_FIGHT, PICK_CAPTURE, PUZZLE_REEL, MAKE_IT_YOURS];
+// ------------------------------------------------------------------ 05–10: the puzzle worlds
+// One Reel per puzzle world (docs/PLATFORM.md §4.2), each in its world's colour, with a real
+// puzzle from it: the Openings line is hand-made (scripts/puzzles/curated.ts), the others are
+// from the Lichess database (CC0) as stored in _shared/puzzle-data/<module>.json.
 
-export const FPS = 30;
+const mood = (id: string) => moduleOf(id)!.color;
+const PUZZLE_TAGS = '#chess #chesspuzzle #chesstactics #3dchess';
+const WORLDS = `🧩 Seven puzzle worlds, 100 puzzles each, easiest first
+🪙 Coins for every puzzle you solve, a bonus every 10
+🎁 Finish a world, win a random item from the shop
+📅 A free daily puzzle for everyone`;
+
+/** A puzzle take: the opponent's move (`first`) is played before the first frame; the
+ *  solution's moves are given at video times and placed on the game clock here. */
+function puzzleTake(p: {
+  name: string; mood: string; fen?: string; first?: string; moves: [string, number][];
+  simStart?: number; dur: number; speed?: [number, number][]; camera: [number, Camera][];
+}): Take {
+  const simStart = p.simStart ?? 0.3;
+  return {
+    name: p.name, mood: p.mood, fen: p.fen, simStart, dur: p.dur, speed: p.speed, camera: p.camera,
+    moves: [
+      ...(p.first ? [{ uci: p.first, at: 0 }] : []),
+      ...p.moves.map(([uci, v]) => ({ uci, at: gameAt(p.speed, simStart, v) })),
+    ],
+  };
+}
+/** the board seen from above, then a little closer (the puzzle's "pause now" view) */
+const TOP_HOLD = (from: number, to: number): [number, Camera][] => [[from, TOP], [to, { ...TOP, dist: 3, height: 22.5 }]];
+/** slow motion from video time t for `len` seconds */
+const slow = (t: number, len = 1.3, k = 0.45): [number, number][] => [[t, 1], [t + 0.1, k], [t + len, k], [t + len + 0.3, 1]];
+const PAUSE = (from: number, to: number, seconds = 3): Overlay =>
+  ({ from, to, style: 'label', kicker: 'Pause now', text: `Answer in ${seconds} seconds`, y: 330 });
+
+// 05 — Openings (free): the Caro-Kann smothered mate, from the first move
+const OPENINGS_TRAP: Reel = {
+  id: '05-openings-trap',
+  title: 'Checkmate in 6 moves (Openings)',
+  goal: 'saves and shares; the free Openings world brings players in',
+  takes: [
+    puzzleTake({
+      name: 'caro-kann',
+      mood: mood('openings'),
+      simStart: 0,
+      moves: [
+        ['e2e4', 0.4], ['c7c6', 1.2], ['d2d4', 2.0], ['d7d5', 2.8], ['b1c3', 3.6], ['d5e4', 4.4],
+        ['c3e4', 5.8], ['b8d7', 7.2], ['d1e2', 8.0], ['g8f6', 9.4], ['e4d6', 11.0],
+      ],
+      dur: 18.0,
+      speed: [[0, 1], ...slow(11.0, 1.5)],
+      camera: [
+        [0, { at: [0, 0, 0.6], dist: 11, height: 13, yaw: -12 }],
+        [7.6, { at: [0, 0, 0], dist: 10, height: 12, yaw: 6 }],
+        [10.8, { at: 'd7', dist: 7.8, height: 5, yaw: 18 }],
+        [18.0, { at: 'd7', dist: 8.6, height: 5.4, yaw: 30 }],
+      ],
+    }),
+  ],
+  overlays: [
+    { from: 0.05, to: 3.4, style: 'hook', text: 'Checkmate in 6 moves.', y: 470 },
+    { from: 3.6, to: 7.6, style: 'label', kicker: 'Caro-Kann trap', text: "Spot Black's mistake", y: 470 },
+    { from: 8.0, to: 9.3, style: 'big', text: '5. Qe2', sub: 'White sets the trap', y: 1390 },
+    { from: 9.4, to: 10.8, style: 'big', text: '5... Ngf6??', sub: 'the natural move loses', y: 1390 },
+    { from: 11.0, to: 14.8, style: 'big', text: '6. Nd6#', sub: 'smothered mate', y: 1390 },
+    { from: 15.4, to: 18.0, style: 'cta', text: '100 opening lines, free' },
+  ],
+  cover: { t: 12.6, kicker: 'Openings · Caro-Kann trap', text: 'Checkmate in 6 moves' },
+  caption: `Checkmate in 6 moves 😳 Did you spot Black's mistake?
+
+1.e4 c6 2.d4 d5 3.Nc3 dxe4 4.Nxe4 Nd7 5.Qe2 Ngf6?? 6.Nd6#
+
+The knight checks from d6, and nothing can take it: the e7 pawn is pinned to its king by the queen on e2. The king is boxed in by its own pieces. Smothered mate.
+
+The Openings world is free: 100 lines from real games, as White and as Black, with what every move is for, the traps included.
+
+${WORLDS}
+
+Play free, link in bio 👆
+
+#chess #chessopenings #carokann #chesstraps #3dchess`,
+  alt: 'A 3D chess game in an orange-lit room plays the Caro-Kann from the first move. White puts the queen on e2, Black develops the knight to f6, and the white knight jumps to d6: checkmate, the black king boxed in by its own pieces. Text: checkmate in 6 moves, smothered mate.',
+  music: { root: 92.5, mood: 'bright' },
+};
+
+// 06 — First Steps: a speed round of three mates in one
+const SPEED: [string, string, string, string, string][] = [
+  // [puzzle id, position after the opponent's move, the mate, its name, the king's square]
+  ['o8wo0', '5r1k/1pp3pp/pb3R1q/8/2B3b1/2Nr1N2/PP3PPP/R5K1 w - - 1 21', 'f6f8', 'Rxf8#', 'h8'],
+  ['Iz0nf', 'r2q1rk1/ppp3bp/3p4/4p1Np/2Pn4/3Q4/PP3PP1/R1B1K2R w KQ - 0 15', 'd3h7', 'Qxh7#', 'g8'],
+  ['CzEOB', '2kr4/3q4/8/7p/Q4B2/6PP/5P1K/8 w - - 3 66', 'a4a8', 'Qa8#', 'c8'],
+];
+const ROUND = 4.8;
+const SPEED_SUBS = ['the back rank is shut', 'the knight guards h7', 'the bishop covers the escape'];
+const SPEED_ROUND: Reel = {
+  id: '06-speed-round',
+  title: '3 mates, 3 seconds each (First Steps)',
+  goal: 'rewatches and comments ("how many did you get?"); the First Steps world',
+  takes: SPEED.map(([id, fen, mate, , king], i) => {
+    const last = i === SPEED.length - 1;
+    return puzzleTake({
+      name: `mate-${i + 1}-${id}`,
+      mood: mood('first-steps'),
+      fen,
+      simStart: 0.2,
+      moves: [[mate, 3.0]],
+      dur: last ? 7.6 : ROUND,
+      speed: [[0, 1], ...slow(3.1, 0.9, 0.5)],
+      camera: [
+        ...TOP_HOLD(0, 3.0),
+        [4.4, { at: king, dist: 7.4, height: 4.6, yaw: i === 1 ? 16 : -16 }],
+        [last ? 7.6 : ROUND, { at: king, dist: 7.0, height: 4.3, yaw: i === 1 ? 22 : -22 }],
+      ],
+    });
+  }),
+  overlays: [
+    { from: 0.05, to: 2.9, style: 'label', kicker: 'Speed round', text: '3 seconds each', y: 330 },
+    ...SPEED.flatMap(([, , , san], i): Overlay[] => {
+      const t0 = i * ROUND;
+      return [
+        { from: t0 + 0.05, to: t0 + 3.0, style: 'title', kicker: `Puzzle ${i + 1} of 3 · White to play`, text: 'Mate in 1', y: 1300 },
+        ...[3, 2, 1].map((n, k): Overlay => ({ from: t0 + k + 0.05, to: t0 + k + 0.95, style: 'big', text: String(n), y: 1480 })),
+        { from: t0 + 3.05, to: t0 + 4.75, style: 'big', text: san, sub: SPEED_SUBS[i], y: 1390 },
+      ];
+    }),
+    { from: 14.6, to: 17.2, style: 'cta', text: 'Seven puzzle worlds, 100 puzzles each' },
+  ],
+  cover: { t: 1.5, kicker: 'Speed round · mate in 1', text: '3 seconds each' },
+  caption: `Speed round ⏱️ Three mates in one, three seconds each. How many did you get? Comment 1, 2 or 3 👇
+
+1. Rxf8#  2. Qxh7#  3. Qa8#
+
+These are from First Steps, the warm-up world: short puzzles, win material, spot the mate.
+
+${WORLDS}
+
+Puzzles: Lichess (CC0).
+
+Play free, link in bio 👆
+
+${PUZZLE_TAGS} #mateinone`,
+  alt: 'Three 3D chess puzzles seen from above, each with a 3, 2, 1 countdown and the text mate in 1. Then the answer plays: a rook takes on f8, a queen takes on h7 next to a knight, and a queen lands on a8, each one checkmate.',
+  music: { root: 98.0, mood: 'bright' },
+};
+
+// 07 — Forks: one knight, two targets
+const FORK: Reel = {
+  id: '07-fork',
+  title: 'One knight, two targets (Forks)',
+  goal: 'saves, comments; the Forks world',
+  takes: [
+    puzzleTake({
+      name: 'fork',
+      mood: mood('forks'),
+      fen: '3qk2r/1bp2p1p/2n1pp2/1Nbp4/Q7/4PN2/3P1PPP/4KB1R b Kk - 0 14',
+      first: 'd8a8',
+      moves: [['b5c7', 5.2], ['e8e7', 7.6], ['c7a8', 9.0]],
+      dur: 15.4,
+      speed: [[0, 1], ...slow(5.3, 1.3), ...slow(9.1, 1.3)],
+      camera: [
+        [0, { at: 'b7', dist: 8.6, height: 5.6, yaw: 16 }],
+        [1.9, { at: [-0.5, 0.3, 0.8], dist: 7.2, height: 10, yaw: 6 }],
+        ...TOP_HOLD(2.6, 4.9),
+        [5.8, { at: 'c7', dist: 7.6, height: 4.4, yaw: 24 }],
+        [8.6, { at: 'b7', dist: 8.0, height: 4.6, yaw: 10 }],
+        [15.4, { at: 'b7', dist: 9.0, height: 5.2, yaw: -6 }],
+      ],
+    }),
+  ],
+  overlays: [
+    { from: 0.05, to: 2.4, style: 'hook', text: 'One knight.', y: 470 },
+    { from: 0.7, to: 2.4, style: 'hook', text: 'Two targets.', y: 640 },
+    { from: 2.6, to: 5.0, style: 'title', kicker: 'White to play', text: 'Find the fork', y: 1390 },
+    PAUSE(3.2, 5.0, 2),
+    { from: 5.2, to: 7.4, style: 'big', text: '1. Nxc7+', sub: 'check, and the queen hangs', y: 1390 },
+    { from: 7.6, to: 8.8, style: 'big', text: '1... Ke7', sub: 'the king has to move', y: 1390 },
+    { from: 9.0, to: 12.2, style: 'big', text: '2. Nxa8', sub: 'the queen is gone', y: 1390 },
+    { from: 12.8, to: 15.4, style: 'cta', text: '100 fork puzzles, easiest first' },
+  ],
+  cover: { t: 3.8, kicker: 'Puzzle · find the fork', text: 'One knight. Two targets.' },
+  caption: `One knight, two targets 🐴 Found it before the answer?
+
+1.Nxc7+ checks the king and hits the queen on a8 at the same time. The king has to move, and 2.Nxa8 takes the queen.
+
+The Forks world: one piece, two targets, 100 puzzles from easy to hard.
+
+${WORLDS}
+
+Puzzle: Lichess (CC0).
+
+Play free, link in bio 👆
+
+${PUZZLE_TAGS} #chessfork`,
+  alt: 'A 3D chess puzzle in a gold-lit room. The black queen moves to a8. Seen from above, the text says White to play, find the fork. The white knight jumps to c7, taking a pawn with check while attacking the queen; the king steps to e7 and the knight takes the queen on a8.',
+  music: { root: 77.78, mood: 'bright' },
+};
+
+// 08 — Pins & Skewers: the rook that cannot move
+const PIN: Reel = {
+  id: '08-pin',
+  title: 'Black took your queen. Big mistake. (Pins & Skewers)',
+  goal: 'comments, saves; the Pins & Skewers world',
+  takes: [
+    puzzleTake({
+      name: 'pin',
+      mood: mood('pins'),
+      fen: 'r1b2rk1/pppp1Qpp/8/8/2B5/5P2/2n2P1P/R3R1K1 b - - 0 17',
+      first: 'f8f7',
+      moves: [['e1e8', 7.2]],
+      dur: 14.6,
+      speed: [[0, 1], ...slow(7.3)],
+      camera: [
+        [0, { at: 'f7', dist: 8.0, height: 4.8, yaw: -20 }],
+        [2.6, { at: [0.2, 0.3, 1.2], dist: 7, height: 10, yaw: 6 }],
+        ...TOP_HOLD(3.3, 6.8),
+        [7.8, { at: 'e7', dist: 8.4, height: 5, yaw: -18 }],
+        [14.6, { at: 'e7', dist: 9.2, height: 5.6, yaw: -4 }],
+      ],
+    }),
+  ],
+  overlays: [
+    { from: 0.1, to: 2.9, style: 'hook', text: 'Black took your queen.', y: 520 },
+    { from: 1.1, to: 2.9, style: 'hook', text: 'Big mistake.', y: 760 },
+    { from: 3.3, to: 7.0, style: 'title', kicker: 'White to play', text: 'Mate in 1', y: 1390 },
+    { from: 4.8, to: 7.0, style: 'label', kicker: 'Hint', text: 'One black piece is stuck', y: 330 },
+    { from: 7.2, to: 11.4, style: 'big', text: '1. Re8#', sub: "the f7 rook is pinned, it can't block", y: 1390 },
+    { from: 12.0, to: 14.6, style: 'cta', text: '100 pins and skewers, easiest first' },
+  ],
+  cover: { t: 4.4, kicker: 'Puzzle · mate in 1', text: 'Black took your queen. Big mistake.' },
+  caption: `Black took your queen. Big mistake 📌
+
+1.Re8# The rook on f7 would block on f8, but it can't move: the bishop on c4 pins it to its king.
+
+The Pins & Skewers world: pin pieces to their king and skewer what stands behind, 100 puzzles from easy to hard.
+
+${WORLDS}
+
+Puzzle: Lichess (CC0).
+
+Play free, link in bio 👆
+
+${PUZZLE_TAGS} #chesspin`,
+  alt: 'A 3D chess puzzle in a blue-lit room. A black rook captures the white queen on f7. Seen from above, the text says White to play, mate in 1, with the hint that one black piece is stuck. The white rook slides to e8: checkmate, because the black rook on f7 is pinned by the bishop on c4.',
+  music: { root: 65.41, mood: 'dark' },
+};
+
+// 09 — Sacrifices: give up the queen, then mate
+const SACRIFICE: Reel = {
+  id: '09-sacrifice',
+  title: 'Give up your queen. Then mate. (Sacrifices)',
+  goal: 'shares, saves; the Sacrifices world and its finishing reward',
+  takes: [
+    puzzleTake({
+      name: 'sacrifice',
+      mood: mood('sacrifices'),
+      fen: 'rn4k1/ppq3pp/3b1n2/3p2N1/6b1/2N1Q3/PPP2PPP/R3RK2 b - - 6 16',
+      first: 'd6h2',
+      moves: [['e3e8', 6.6], ['f6e8', 8.6], ['e1e8', 10.6]],
+      dur: 17.0,
+      speed: [[0, 1], ...slow(8.7, 1.1), ...slow(10.7)],
+      camera: [
+        [0, { at: 'g2', dist: 8.0, height: 5.0, yaw: 24 }],
+        [2.6, { at: [0.2, 0.3, 1.2], dist: 7, height: 10, yaw: 6 }],
+        ...TOP_HOLD(3.3, 6.2),
+        [7.2, { at: 'e6', dist: 9.0, height: 5.6, yaw: -22 }],
+        [10.4, { at: 'e7', dist: 8.4, height: 5.0, yaw: -10 }],
+        [17.0, { at: 'e7', dist: 9.0, height: 5.6, yaw: 6 }],
+      ],
+    }),
+  ],
+  overlays: [
+    { from: 0.1, to: 2.9, style: 'hook', text: 'Give up your queen.', y: 520 },
+    { from: 1.0, to: 2.9, style: 'hook', text: 'Then mate.', y: 760 },
+    { from: 3.3, to: 6.4, style: 'title', kicker: 'White to play', text: 'Mate in 2', y: 1390 },
+    PAUSE(4.6, 6.4),
+    { from: 6.6, to: 8.4, style: 'big', text: '1. Qe8+!', sub: 'straight into the knight', y: 1390 },
+    { from: 8.6, to: 10.4, style: 'big', text: '1... Nxe8', sub: 'the only move', y: 1390 },
+    { from: 10.6, to: 13.8, style: 'big', text: '2. Rxe8#', sub: 'checkmate', y: 1390 },
+    { from: 14.4, to: 17.0, style: 'cta', text: 'Finish a world, win a shop item' },
+  ],
+  cover: { t: 4.4, kicker: 'Puzzle · mate in 2', text: 'Give up your queen. Then mate.' },
+  caption: `Give up your queen, then mate 👑 Would you have played it?
+
+1.Qe8+! Black has only one move, 2...Nxe8, and the e-file opens for the rook: 2.Rxe8#.
+
+The Sacrifices world: give material away to win something bigger. Solve all 100 and you win a random item from the shop.
+
+${WORLDS}
+
+Puzzle: Lichess (CC0).
+
+Play free, link in bio 👆
+
+${PUZZLE_TAGS} #chesssacrifice`,
+  alt: 'A 3D chess puzzle in a violet-lit room. A black bishop takes the pawn on h2. Seen from above, the text says White to play, mate in 2. The white queen goes to e8 with check, the black knight takes it, and the white rook takes the knight on e8: checkmate.',
+  music: { root: 61.74, mood: 'dark' },
+};
+
+// 10 — Endgames: the pawn race
+const ENDGAME: Reel = {
+  id: '10-endgame-race',
+  title: 'Can a pawn still win? (Endgames)',
+  goal: 'comments, saves; the Endgames world, coins for solving',
+  takes: [
+    puzzleTake({
+      name: 'race',
+      mood: mood('endgames'),
+      fen: '6R1/7K/5P2/p5r1/5kp1/8/8/8 b - - 9 48',
+      first: 'g5g8',
+      moves: [['h7g8', 6.6], ['g4g3', 8.0], ['f6f7', 9.0], ['g3g2', 10.0], ['f7f8q', 11.0]],
+      dur: 17.6,
+      speed: [[0, 1], ...slow(11.1, 1.4)],
+      camera: [
+        [0, { at: 'g7', dist: 7.5, height: 4.6, yaw: -24 }],
+        [2.6, { at: [0.2, 0.3, 1.2], dist: 7, height: 10, yaw: 6 }],
+        ...TOP_HOLD(3.3, 6.2),
+        [7.2, { at: 'f5', dist: 9.0, height: 9.0, yaw: -20 }],
+        [10.6, { at: 'f8', dist: 7.0, height: 4.2, yaw: -20 }],
+        [17.6, { at: 'f8', dist: 7.8, height: 4.8, yaw: -6 }],
+      ],
+    }),
+  ],
+  overlays: [
+    { from: 0.1, to: 2.9, style: 'hook', text: 'Your rook is gone.', y: 520 },
+    { from: 1.0, to: 2.9, style: 'hook', text: 'Can a pawn still win?', y: 800 },
+    { from: 3.3, to: 6.4, style: 'title', kicker: 'White to play', text: 'Win the race', y: 1390 },
+    PAUSE(4.6, 6.4),
+    { from: 6.6, to: 8.6, style: 'big', text: '1. Kxg8', sub: 'take the rook back', y: 1390 },
+    { from: 9.0, to: 10.8, style: 'big', text: '2. f7', sub: 'both pawns run', y: 1390 },
+    { from: 11.0, to: 14.4, style: 'big', text: '3. f8=Q+', sub: 'first to queen, with check', y: 1390 },
+    { from: 15.0, to: 17.6, style: 'cta', text: 'Coins for every puzzle you solve' },
+  ],
+  cover: { t: 4.4, kicker: 'Endgame · white to play', text: 'Can a pawn still win?' },
+  caption: `Your rook is gone. Can a pawn still win? ♟️
+
+1.Kxg8 g3 2.f7 g2 3.f8=Q+ White queens first, and with check, so Black never gets to.
+
+The Endgames world: few pieces, exact moves. Promote, mate and hold, 100 puzzles from easy to hard.
+
+${WORLDS}
+
+Puzzle: Lichess (CC0).
+
+Play free, link in bio 👆
+
+${PUZZLE_TAGS} #chessendgame`,
+  alt: 'A 3D chess endgame in a green-lit room. A black rook takes the white rook on g8. Seen from above, the text says White to play, win the race. The white king takes the rook back, both sides push a pawn, and the white pawn reaches f8 first and becomes a queen with check.',
+  music: { root: 82.41, mood: 'bright' },
+};
+
+export const REELS: Reel[] = [
+  PIECES_FIGHT, PICK_CAPTURE, PUZZLE_REEL, MAKE_IT_YOURS,
+  OPENINGS_TRAP, SPEED_ROUND, FORK, PIN, SACRIFICE, ENDGAME,
+];
+
 export const reelLength = (r: Reel) => r.takes.reduce((s, t) => s + Math.round(t.dur * FPS), 0) / FPS;

@@ -95,8 +95,30 @@ app at about 20% over the original sound if wanted.
 covers are made for that crop. Effects shown in 02 (embers, frostbite, implode) must be
 shop items by then, like post 03's.
 
-**Next:** the puzzle as a weekly Reel series ("Puzzle Monday": copy 03 with a new position
-in `reels.ts`); season launch posts with the season's rewards.
+## The puzzle-world Reels (05–10)
+
+One Reel per puzzle world (`docs/PLATFORM.md` §4.2; 03 already covers Mate in Two), each with
+a real puzzle from that world and the scene in the world's colour, as while playing it
+(`Wardrobe.setMood`). The format is the same as 03: the opponent's move, the board from above
+with "White to play" and "Pause now", then the answer move by move. Lichess puzzles carry
+"Puzzle: Lichess (CC0)" in the caption; the Openings line is our own.
+
+| # | Reel | World | Puzzle | Length | Goal | Earns by |
+| --- | --- | --- | --- | --- | --- | --- |
+| 05 | **Checkmate in 6 moves** (Caro-Kann smothered mate) | Openings (free) | curated line | 18 s | saves, shares | brings players in: the free world |
+| 06 | **Speed round: 3 mates, 3 seconds each** | First Steps | o8wo0, Iz0nf, CzEOB | 17 s | rewatches, comments ("1, 2 or 3?") | world unlocks, Premium |
+| 07 | **One knight. Two targets.** | Forks | bW54g | 15 s | saves, comments | world unlocks, Premium |
+| 08 | **Black took your queen. Big mistake.** | Pins & Skewers | a0QfJ | 15 s | comments | world unlocks, Premium |
+| 09 | **Give up your queen. Then mate.** | Sacrifices | DBdCK | 17 s | shares | world unlocks; the finishing reward (a shop item) |
+| 10 | **Your rook is gone. Can a pawn still win?** | Endgames | LsBga | 18 s | comments | world unlocks; coins per puzzle |
+
+Every caption lists what the worlds give (100 puzzles each, coins per first solve and a bonus
+every 10, a random shop item for finishing, the free daily puzzle). **Posting:** one a week as
+"Puzzle Monday", 05 first (the free world), then 06 → 07 → 08 → 09 → 10; between them the
+carousels and Reels 01–04.
+
+**Next:** season launch posts with the season's rewards; more puzzle Reels by adding a
+`puzzleTake` with another position in `reels.ts`.
 
 ## Rebuilding the posts
 
@@ -105,7 +127,7 @@ VITE_ACCOUNTS=mock npx vite --host 127.0.0.1 --port 5174   # the dev build expos
 node scripts/promo/render-scenes.ts                         # 3D shots → promo/instagram/renders (slow)
 node scripts/promo/build-posts.ts                           # slides, captions, zips, grid preview
 node scripts/promo/render-reels.ts --preview                # Reels: every 10th frame at half size, to check the camera
-node scripts/promo/render-reels.ts                          # Reels: all frames (about 3 s each, 1.5 hours for the four)
+node scripts/promo/render-reels.ts                          # Reels: all frames (about 3 s each; 1.5 hours for 01–04, 2.5 for 05–10)
 node scripts/promo/build-reels.ts                           # Reels: text, sound, reel.mp4, cover, caption
 ```
 

@@ -41,6 +41,10 @@ camera and clock driven from outside, the game's sounds recorded), `build-reels.
 layers, soundtrack from `src/audio/sfx.ts` + a Web Audio bed, ffmpeg). `brand.ts` is shared
 with `build-posts.ts`. Not posted (the user posts once the platform is finished).
 
+Then six puzzle Reels (05–10, README "The puzzle-world Reels"): one per puzzle world with a
+real puzzle from it, the scene in the world's colour (a take's `mood`); `puzzleTake` in
+`reels.ts` places the solution's moves by video time (`gameAt`).
+
 - **Open, worth a look:** the **Aurum** set gives empty (fully black or transparent) frames
   now and then in headless Chromium's software WebGL, with or without a capture, and stays
   black after an Implode capture. No console error. Other sets don't. Check Aurum in a real

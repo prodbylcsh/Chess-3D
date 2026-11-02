@@ -14,7 +14,7 @@
 import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
-import { FPS, REELS, type Camera, type Reel, type Take } from './reels.ts';
+import { FPS, REELS, speedAt, type Camera, type Reel, type Take } from './reels.ts';
 
 const { chromium } = createRequire(import.meta.url)('playwright') as typeof import('playwright');
 
@@ -64,18 +64,6 @@ function cameraAt(keys: [number, Camera][], v: number) {
     position: [tg[0] + Math.sin(yaw) * dist, tg[1] + height, tg[2] + Math.cos(yaw) * dist],
     fov: mix(a.fov ?? 38, b.fov ?? 38, k),
   };
-}
-
-/** Game speed at video time v (linear between the keys). */
-function speedAt(keys: [number, number][] | undefined, v: number): number {
-  if (!keys?.length) return 1;
-  if (v <= keys[0][0]) return keys[0][1];
-  for (let i = 1; i < keys.length; i++) {
-    const [t1, s1] = keys[i];
-    const [t0, s0] = keys[i - 1];
-    if (v <= t1) return mix(s0, s1, (v - t0) / (t1 - t0));
-  }
-  return keys.at(-1)![1];
 }
 
 const DB_KEY = 'wizard-chess.mock-db.v1';
@@ -162,6 +150,8 @@ async function renderTake(browser: Browser, reel: Reel, take: Take): Promise<voi
     if (take.fen) void c.game.begin(null, [], take.fen);
     if (take.before?.length) void c.game.sync(take.before);
     for (let i = 0; i < 40 && (i < 2 || c.game.busy); i++) await c.step(0.5, 6);
+    // a puzzle module's colour on the sky, table, side lights and motes, as while playing it
+    if (take.mood) c.wardrobe.setMood(take.mood);
     // Screen shake reads the wall clock: give it the game clock, so it moves with the video.
     w.__sim = 0;
     performance.now = () => w.__sim * 1000;
