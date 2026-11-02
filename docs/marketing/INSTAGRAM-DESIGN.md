@@ -119,6 +119,25 @@ the brand. No italic, no third font, no emoji in slides (emoji go in captions).
 - **Keywords:** the words people search for ("chess", "chess game", "chess puzzle", "learn
   chess") in the caption and the alt text; Instagram's search reads them.
 
+## 10. Reels
+
+The same brand in motion (`scripts/promo/build-reels.ts` is the reference):
+
+- **1080 × 1920, 30 fps, 12–20 s,** H.264 with AAC sound. Real game footage only, rendered
+  from the game (`render-reels.ts`); slow motion and camera moves are fine, colour changes
+  are not.
+- **Hook in the first second:** a Cinzel line in gold over the board ("Chess, but the
+  pieces fight."), never a logo intro.
+- **Safe area:** text between y 250 and 1450 and x 90–990; nothing important in the right
+  140 px below mid-height (Instagram's buttons).
+- **Text:** short lines that fade in with a small rise and fade out; a soft night shade
+  behind them instead of boxes. Chess moves in Inter, never in Cinzel.
+- **The mark** (logo + WIZARD CHESS) small at the top centre; **the CTA card** for the last
+  3 s, as on the carousels.
+- **Cover:** a strong frame with the headline inside the middle 3:4 (y 240–1680), which is
+  what the profile grid shows.
+- **Sound:** the game's own sounds and a quiet bed; one low hit on each cut.
+
 ## Sources
 
 - [Kapwing: Instagram's 3:4 grid](https://www.kapwing.com/resources/instagrams-new-grid-layout-size-and-dimensions-2025/), [Postnitro: the 20-slide carousel](https://postnitro.ai/blog/post/instagram-carousel-limit-20-photos-per-post-guide), [Decktopus: carousel sizes](https://www.decktopus.com/blog/instagram-carousel-size-dimensions)

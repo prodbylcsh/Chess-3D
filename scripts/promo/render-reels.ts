@@ -208,7 +208,7 @@ async function renderTake(browser: Browser, reel: Reel, take: Take): Promise<voi
     const pose = cameraAt(take.camera, v);
     const dt = speedAt(take.speed, v) / FPS;
     const shoot = i % step === 0;
-    const url: string | null = await page.evaluate(async ({ pose, dt, v, shoot }) => {
+    const url: string | null = await page.evaluate(async ({ pose, dt, v, shoot, preview }) => {
       const w = window as any;
       const c = w.__chess;
       const s = c.stage;
@@ -220,11 +220,16 @@ async function renderTake(browser: Browser, reel: Reel, take: Take): Promise<voi
       s.controls.target.set(...pose.target);
       s.camera.updateProjectionMatrix();
       s.controls.update();
-      s.frame(dt);
+      // a preview only draws the frames it keeps (the game still runs every step)
+      if (shoot || !preview) s.frame(dt);
+      else s.update(dt);
       w.__sim += dt;
+      // read the canvas before yielding: the browser may clear the WebGL buffer after that
+      const url = shoot ? s.renderer.domElement.toDataURL('image/jpeg', 0.95) : null;
       await new Promise((r) => setTimeout(r, 0)); // let the game's promise chains advance
-      return shoot ? s.renderer.domElement.toDataURL('image/jpeg', 0.95) : null;
-    }, { pose, dt, v, shoot });
+      return url;
+    }, { pose, dt, v, shoot, preview: PREVIEW });
+    if (url && url.length < 20000) console.warn(`${reel.id}/${take.name}: frame ${i} looks empty`);
     if (url) writeFileSync(join(dir, `${String(i).padStart(4, '0')}.jpg`), Buffer.from(url.slice(url.indexOf(',') + 1), 'base64'));
     if (i % 30 === 0) console.log(`${reel.id}/${take.name}: frame ${i}/${total}`);
   }
