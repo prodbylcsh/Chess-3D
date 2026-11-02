@@ -10,3 +10,4 @@ supabase/functions/.env
 promo/instagram/zips/
 promo/instagram/reels/.frames/
 promo/instagram/reels/.preview/
+promo/instagram/reels/.build/

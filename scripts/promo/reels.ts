@@ -124,7 +124,9 @@ const PIECES_FIGHT: Reel = {
       camera: [
         [0, queenCam(-38, 9.2)],
         [3.0, queenCam(-24, 8.4)],
-        [8.6, queenCam(-6, 10.5, 4.2)],
+        // over to the mated king on e8
+        [5.2, { at: [1.1, 1.0, -2.9], dist: 8.2, height: 3.2, yaw: -14 }],
+        [8.6, { at: [1.0, 1.0, -2.9], dist: 10, height: 4.4, yaw: 4 }],
       ],
     },
   ],
