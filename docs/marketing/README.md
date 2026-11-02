@@ -78,7 +78,7 @@ explain. Each folder has `reel.mp4`, `cover.jpg` (headline inside the 3:4 grid c
 
 | # | Reel | Length | For | Goal | Earns by |
 | --- | --- | --- | --- | --- | --- |
-| 01 | **Chess, but the pieces fight** (knight leap, queen's spell, checkmate) | 15 s | everyone | the promise, reach | bringing players in |
+| 01 | **Chess, but the pieces fight** (knight leap, queen's spell, checkmate) | 17 s | everyone | the promise, reach | bringing players in |
 | 02 | **Pick your capture** (shatter, embers, frostbite, implode; comment 1–4) | 15 s | primary + collectors | comments, desire for items | coin packs, Premium |
 | 03 | **Mate in 2: Black just took your queen** (pause, then the answer) | 17 s | primary + beginners | comments, rewatches, saves | puzzle worlds, Premium |
 | 04 | **Make the board yours** (one orbit, eight sets and boards) | 15 s | primary + collectors | desire for items | coin packs, Premium |

@@ -118,7 +118,7 @@ const PIECES_FIGHT: Reel = {
       before: SCHOLAR,
       moves: [{ uci: 'h5f7', at: 0 }],
       simStart: 0.35,
-      dur: 8.6,
+      dur: 10.6,
       // the bolt in slow motion, then on to the checkmate scene, which then lingers
       speed: [[0, 1], [0.45, 1], [0.6, 0.32], [2.6, 0.32], [2.9, 1.25], [4.6, 1.25], [5.0, 0.55]],
       camera: [
@@ -126,7 +126,8 @@ const PIECES_FIGHT: Reel = {
         [3.0, queenCam(-24, 8.4)],
         // over to the mated king on e8
         [5.2, { at: [1.1, 1.0, -2.9], dist: 8.2, height: 3.2, yaw: -14 }],
-        [8.6, { at: [1.0, 1.0, -2.9], dist: 10, height: 4.4, yaw: 4 }],
+        [8.4, { at: [1.0, 1.0, -2.9], dist: 9.6, height: 4.2, yaw: 2 }],
+        [10.6, { at: [0.8, 1.0, -2.6], dist: 11.5, height: 5.2, yaw: 10 }],
       ],
     },
   ],
@@ -135,8 +136,8 @@ const PIECES_FIGHT: Reel = {
     { from: 0.6, to: 2.2, style: 'hook', text: 'but the pieces fight.', y: 700 },
     { from: 2.6, to: 6.0, style: 'label', kicker: 'The knight', text: 'leaps and slams down', y: 1330 },
     { from: 6.7, to: 9.4, style: 'label', kicker: 'The queen', text: 'casts a spell', y: 1330 },
-    { from: 9.6, to: 11.6, style: 'big', text: 'Checkmate.', y: 560 },
-    { from: 11.8, to: 15.0, style: 'cta', text: 'Chess where the pieces really fight' },
+    { from: 10.4, to: 13.8, style: 'big', text: 'Checkmate.', y: 560 },
+    { from: 14.6, to: 17.0, style: 'cta', text: 'Chess where the pieces really fight' },
   ],
   cover: { t: 3.6, kicker: '3D chess · free in your browser', text: 'Chess, but the pieces fight' },
   caption: `Chess, but the pieces actually fight ⚔️ Knights leap and slam down, queens cast spells, checkmate gets its own scene.
