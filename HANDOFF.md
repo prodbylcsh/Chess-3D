@@ -31,6 +31,22 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## Instagram Reels (2 November 2026, on the branch, not merged)
+
+The user asked for promo Reels. Four are built (`docs/marketing/README.md` "The first four
+Reels"): 01 Chess, but the pieces fight · 02 Pick your capture · 03 Mate in 2 · 04 Make
+the board yours, each `promo/instagram/reels/<reel>/reel.mp4` + `cover.jpg` + `caption.md`.
+`scripts/promo/reels.ts` (shots, text), `render-reels.ts` (frames from the real game, the
+camera and clock driven from outside, the game's sounds recorded), `build-reels.ts` (text
+layers, soundtrack from `src/audio/sfx.ts` + a Web Audio bed, ffmpeg). `brand.ts` is shared
+with `build-posts.ts`. Not posted (the user posts once the platform is finished).
+
+- **Open, worth a look:** the **Aurum** set gives empty (fully black or transparent) frames
+  now and then in headless Chromium's software WebGL, with or without a capture, and stays
+  black after an Implode capture. No console error. Other sets don't. Check Aurum in a real
+  browser; the Reels use Titani instead.
+- Rendering is ~3 s a frame at 1080×1920; the four Reels take about 1.5 hours with two workers.
+
 ## New sets and boards (merged to `main` on 1 November 2026, the user's yes)
 
 Squash-merged (the branch carried three rounds of rebuilt models). The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)
