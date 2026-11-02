@@ -8,7 +8,7 @@
 //   VITE_ACCOUNTS=mock npx vite --host 127.0.0.1 --port 5174
 // and Playwright (not a project dependency; NODE_PATH may point at an install):
 //   node scripts/promo/render-reels.ts [--only 01,03] [--take knight] [--workers 2]
-//                                      [--preview] [--force]
+//                                      [--preview] [--every n] [--force]
 // --preview renders every 10th frame at half size into .preview/ (to check the framing).
 // Software WebGL takes about 3 s a frame: a 15-second Reel is about 25 minutes.
 import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -178,7 +178,7 @@ async function renderTake(browser: Browser, reel: Reel, take: Take): Promise<voi
 
   // The game clock runs from 0; moves start at their times; frames are taken from simStart.
   const total = Math.round(take.dur * FPS);
-  const step = PREVIEW ? 10 : 1;
+  const step = Number(arg('every') ?? (PREVIEW ? 10 : 1));
   await page.evaluate(async ({ take }) => {
     const w = window as any;
     const c = w.__chess;
