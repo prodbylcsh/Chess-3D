@@ -210,7 +210,8 @@ Play free, link in bio 👆
 
 // ------------------------------------------------------------------ 03: mate in two
 
-const TOP: Camera = { at: [0, 0, 1.4], dist: 5.2, height: 15.5, yaw: 0, fov: 40 };
+// nearly straight down, the whole board in the upper part of the frame (the text sits below)
+const TOP: Camera = { at: [0, 0, 1.6], dist: 3.6, height: 24, yaw: 0, fov: 40 };
 const PUZZLE_REEL: Reel = {
   id: '03-mate-in-two',
   title: 'Mate in 2: Black just took your queen',
@@ -233,9 +234,9 @@ const PUZZLE_REEL: Reel = {
         [0, { at: [1, 0.6, 0.8], dist: 8.2, height: 5.2, yaw: 18 }],
         [2.6, { at: [0.2, 0.3, 1.2], dist: 7, height: 10, yaw: 6 }],
         [3.3, TOP],
-        [6.0, { ...TOP, dist: 4.6, height: 14.5 }],
-        [7.2, { at: [-1, 0.6, -1], dist: 8.5, height: 6.5, yaw: -24 }],
-        [10.9, { at: [0.5, 0.8, -2.6], dist: 7.4, height: 4.4, yaw: -8 }],
+        [6.0, { ...TOP, dist: 3, height: 22.5 }],
+        [7.2, { at: [0, 0.6, -2.2], dist: 9.6, height: 6.8, yaw: -14 }],
+        [10.9, { at: [0.6, 0.8, -2.8], dist: 8.4, height: 4.8, yaw: -6 }],
         [17.2, { at: [1.2, 0.8, -3], dist: 8.6, height: 5.4, yaw: 10 }],
       ],
     },
