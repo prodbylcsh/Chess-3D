@@ -27,6 +27,9 @@ import {
   type PurchaseStatus,
   type PuzzleModuleProgress,
   type PuzzleSolve,
+  type PuzzleStart,
+  type PuzzleMove,
+  type PuzzleHint,
   type DailyPuzzle,
   type DailySolve,
   type GuestClaim,
@@ -320,6 +323,8 @@ export function createCompetitive(
           throw new ApiError('guest_limit', t('Create a free account to keep going.'));
         case 'too_fast':
           throw new ApiError('too_fast', t('That was quick. Take the lesson again a little slower.'));
+        case 'not_done':
+          throw new ApiError('not_done', t('Finish every step of the lesson first.'));
         case 'shields_full':
           throw new ApiError('shields_full', t('You hold as many streak shields as you can.'));
         default:
@@ -344,10 +349,17 @@ export function createCompetitive(
       return took(await puzzleCall<{ modules: PuzzleModuleProgress[]; player?: PlayerRecord; guest?: { coins: number } }>('progress')).modules;
     },
     async start(module, index) {
-      await puzzleCall('start', { module, index });
+      const { next } = await puzzleCall<PuzzleStart>('start', { module, index });
+      return { next };
     },
-    async solve(module, index, moves, mistakes, hints) {
-      return took(await puzzleCall<PuzzleSolve & { player?: PlayerRecord; guest?: { coins: number } }>('solve', { module, index, moves, mistakes, hints }));
+    move(module, index, uci) {
+      return puzzleCall<PuzzleMove>('move', { module, index, move: uci });
+    },
+    async hint(module, index) {
+      return (await puzzleCall<{ hint: PuzzleHint | null }>('hint', { module, index })).hint;
+    },
+    async solve(module, index) {
+      return took(await puzzleCall<PuzzleSolve & { player?: PlayerRecord; guest?: { coins: number } }>('solve', { module, index }));
     },
     async unlock(module) {
       const { modules, player } = await puzzleCall<{ modules: PuzzleModuleProgress[]; player: PlayerRecord }>('unlock', { module });
@@ -355,17 +367,18 @@ export function createCompetitive(
       return modules;
     },
     async reveal(module, index) {
-      const { modules } = await puzzleCall<{ modules: PuzzleModuleProgress[] }>('reveal', { module, index });
-      return modules;
+      const { modules, line } = await puzzleCall<{ modules: PuzzleModuleProgress[]; line: string }>('reveal', { module, index });
+      return { modules, line };
     },
     daily() {
       return puzzleCall<DailyPuzzle>('daily');
     },
     async dailyStart() {
-      await puzzleCall('daily_start');
+      const { next } = await puzzleCall<PuzzleStart>('daily_start');
+      return { next };
     },
-    async dailySolve(moves, mistakes, hints) {
-      return took(await puzzleCall<DailySolve & { player?: PlayerRecord; guest?: { coins: number } }>('daily_solve', { moves, mistakes, hints }));
+    async dailySolve() {
+      return took(await puzzleCall<DailySolve & { player?: PlayerRecord; guest?: { coins: number } }>('daily_solve'));
     },
     async guest() {
       if (deps.me()) return null;
@@ -390,8 +403,8 @@ export function createCompetitive(
     async progress() {
       return took(await puzzleCall<LearnProgress & { player?: PlayerRecord; guest?: { coins: number } }>('learn'));
     },
-    async done(lesson) {
-      return took(await puzzleCall<LessonDone & { player?: PlayerRecord; guest?: { coins: number } }>('learn_done', { lesson }));
+    async done(lesson, steps) {
+      return took(await puzzleCall<LessonDone & { player?: PlayerRecord; guest?: { coins: number } }>('learn_done', { lesson, steps }));
     },
     async unlock() {
       try {

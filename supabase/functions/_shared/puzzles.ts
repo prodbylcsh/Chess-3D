@@ -128,6 +128,55 @@ export interface Puzzle {
   themes?: string[];
 }
 
+/**
+ * What the app gets of a puzzle: everything but the solution (audit, November 2026). The
+ * server alone knows the moves; it judges each move the player makes (puzzle-attempt.ts).
+ * Built by scripts/puzzles/client-data.ts into src/features/puzzles/data/.
+ */
+export interface PuzzleInfo {
+  id: string;
+  fen: string;
+  rating: number;
+  playerFirst?: boolean;
+  goal?: string;
+  themes?: string[];
+  /** the opponent's move that sets the puzzle up (played before the player's turn), or null */
+  setup: string | null;
+  /** the player's moves to find */
+  moves: number;
+  /** the solution ends in mate */
+  mate: boolean;
+  /** material the solution wins for the player (pawns), for the goal text */
+  gain: number;
+}
+
+const VALUE: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+
+function material(chess: Chess, side: 'w' | 'b'): number {
+  let sum = 0;
+  for (const row of chess.board()) for (const sq of row) if (sq) sum += (sq.color === side ? 1 : -1) * VALUE[sq.type];
+  return sum;
+}
+
+/** The app's view of a puzzle: no solution. */
+export function infoOf(p: Puzzle): PuzzleInfo {
+  const chess = new Chess(p.fen);
+  const setup = setupMove(p);
+  if (setup) chess.move(toMove(setup));
+  const side = playerSide(p);
+  const before = material(chess, side);
+  solution(p).forEach((m, i) => {
+    chess.move(toMove(m));
+    const reply = replyAfter(p, i + 1);
+    if (reply && !chess.isGameOver()) chess.move(toMove(reply));
+  });
+  const info: PuzzleInfo = { id: p.id, fen: p.fen, rating: p.rating, setup, moves: solution(p).length, mate: chess.isCheckmate(), gain: material(chess, side) - before };
+  if (p.playerFirst) info.playerFirst = true;
+  if (p.goal) info.goal = p.goal;
+  if (p.themes) info.themes = p.themes;
+  return info;
+}
+
 const lineOf = (p: Puzzle) => p.moves.split(' ');
 const firstAnswer = (p: Puzzle) => (p.playerFirst ? 0 : 1);
 
@@ -139,6 +188,18 @@ export const solution = (p: Puzzle): string[] => lineOf(p).filter((_, i) => i >=
 export const answerAt = (p: Puzzle, n: number): string | undefined => lineOf(p)[firstAnswer(p) + 2 * n];
 /** The opponent's reply to the player's `n`th move (from 1), if the line goes on. */
 export const replyAfter = (p: Puzzle, n: number): string | undefined => lineOf(p)[firstAnswer(p) + 2 * n - 1];
+
+/** Below this loss (centipawns) a different move is as good as the puzzle's: not a mistake. */
+export const SAME_LOSS = 40;
+/** Nodes the engine searches per move when judging a different move (scripts/puzzles/alternatives.ts). */
+export const JUDGE_NODES = 80_000;
+
+/**
+ * Is a different move about as good as the puzzle's (another way to the same goal, not a
+ * mistake)? Scores are the player's for each move searched alone (a mate as ±(10,000 − n)).
+ */
+export const asGood = (rightScore: number, otherScore: number): boolean =>
+  rightScore - otherScore < SAME_LOSS || (otherScore >= 900 && rightScore < 9_000);
 
 /** Coins for solving a puzzle the first time: 25 for the easiest, up to 50 for the hardest. */
 export function puzzleCoins(rating: number): number {
@@ -169,7 +230,7 @@ export function stars(mistakes: number, hints: number): 1 | 2 | 3 {
 }
 
 /** The side the player plays in a puzzle (the one to move after the opponent's setup move). */
-export function playerSide(p: Puzzle): 'w' | 'b' {
+export function playerSide(p: Pick<Puzzle, 'fen' | 'playerFirst'>): 'w' | 'b' {
   const toMove = p.fen.split(' ')[1] === 'w' ? 'w' : 'b';
   return p.playerFirst ? toMove : toMove === 'w' ? 'b' : 'w';
 }

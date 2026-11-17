@@ -169,6 +169,7 @@ export const cs: Record<string, string> = {
   'Search cancelled.': 'Hledání zrušeno.',
   'Match not found.': 'Zápas nenalezen.',
   'This result was already recorded.': 'Tento výsledek už byl zaznamenán.',
+  'Finish every step of the lesson first.': 'Nejdřív projdi všechny kroky lekce.',
   'Create a free account to keep going.': 'Pokračuj s účtem zdarma.',
   'Finish the lessons before this one first.': 'Nejdřív dokonči lekce před touhle.',
   'That was quick. Take the lesson again a little slower.': 'To bylo rychlé. Projdi lekci ještě jednou, trochu pomaleji.',

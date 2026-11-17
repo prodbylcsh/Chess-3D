@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { ArrowLeft, Eye, Gift, Lock, Play, Repeat, RotateCcw, Star, UserPlus } from 'lucide-react';
-import { BONUS_COINS, BONUS_EVERY, GUEST_PUZZLES, PUZZLES_PER_MODULE, guestMayPlay, moduleOf, type Puzzle, type PuzzleModule } from '#shared/puzzles.ts';
+import { BONUS_COINS, BONUS_EVERY, GUEST_PUZZLES, PUZZLES_PER_MODULE, guestMayPlay, moduleOf, type PuzzleInfo, type PuzzleModule } from '#shared/puzzles.ts';
 import type { PuzzleModuleProgress } from '../../api';
 import { itemName } from '../../api/catalog';
 import { modulePuzzles } from '../../api/puzzleData';
@@ -58,7 +58,7 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
   const host = useRef<HTMLDivElement>(null);
   const world = useRef<World | null>(null);
   const [webgl, setWebgl] = useState(true);
-  const [puzzles, setPuzzles] = useState<Puzzle[] | null>(null);
+  const [puzzles, setPuzzles] = useState<PuzzleInfo[] | null>(null);
   const next = nextOpen(mine);
   const solved = solvedCount(mine);
   const ready = reviewReady(mine);
@@ -185,7 +185,7 @@ function LevelCard(props: {
   module: PuzzleModule;
   mine: PuzzleModuleProgress;
   index: number;
-  puzzle: Puzzle | null;
+  puzzle: PuzzleInfo | null;
   next: number;
   /** a guest went past the levels they may try: the way in instead of Play */
   guest: boolean;

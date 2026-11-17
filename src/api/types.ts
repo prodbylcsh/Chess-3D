@@ -10,6 +10,9 @@ import type { ControlId } from '#shared/play.ts';
 import type { AnalysisReport, AnalysisStatus } from '#shared/analysis.ts';
 import type { WatchPolicy } from '#shared/spectate.ts';
 import type { Period, PlanId, PremiumState, PremiumView } from '#shared/subscription.ts';
+import type { Marks, MoveOutcome } from '#shared/puzzle-attempt.ts';
+import type { NextGoal } from '#shared/puzzle-intent.ts';
+import type { StepRecord } from '#shared/learn-check.ts';
 
 export type { Side, Outcome, GameKind, StakeId, TierId, ItemCategory, Rarity, SeasonReward, ControlId, AnalysisReport, AnalysisStatus, WatchPolicy };
 export type { Period, PlanId, PremiumState, PremiumView };
@@ -424,22 +427,45 @@ export interface PuzzleSolve {
   solved: number;
   /** finishing the module */
   reward: { item: string | null; coins: number | null } | null;
+  /** the whole line (UCI, the setup move first), for "Replay the solution" */
+  line: string;
+}
+
+/** A puzzle opened (the server times the solve from here): what the first move is for. */
+export interface PuzzleStart {
+  next: NextGoal | null;
+}
+
+/** The server's verdict on a move (it alone knows the solution), with the counts so far. */
+export type PuzzleMove = MoveOutcome & { mistakes: number; hints: number };
+
+/** A hint from the server: the marks the board shows now, and the hints taken so far. */
+export interface PuzzleHint {
+  marks: Marks;
+  hints: number;
 }
 
 export interface PuzzlesService {
   progress(): Promise<PuzzleModuleProgress[]>;
   /** the player opened a puzzle (the server times the solve from here) */
-  start(module: string, index: number): Promise<void>;
-  /** the player's moves (UCI) for a puzzle; the server checks them and pays the rewards */
-  solve(module: string, index: number, moves: string[], mistakes: number, hints: number): Promise<PuzzleSolve>;
+  start(module: string, index: number): Promise<PuzzleStart>;
+  /**
+   * The player's move (UCI) in the open puzzle (`module` 'daily': today's daily puzzle). The
+   * server judges it and counts the mistakes; the browser never sees the solution.
+   */
+  move(module: string, index: number, uci: string): Promise<PuzzleMove>;
+  /** the next hint for the current move (the piece, then the square); null when all is shown */
+  hint(module: string, index: number): Promise<PuzzleHint | null>;
+  /** the open puzzle is done: the server pays the rewards from what it counted */
+  solve(module: string, index: number): Promise<PuzzleSolve>;
   /** unlock a paid module with coins */
   unlock(module: string): Promise<PuzzleModuleProgress[]>;
-  /** show the solution of an open puzzle (after `start`): seen, the next one opens, no coins */
-  reveal(module: string, index: number): Promise<PuzzleModuleProgress[]>;
+  /** show the solution of an open puzzle (after `start`): seen, the next one opens, no coins; the line to replay */
+  reveal(module: string, index: number): Promise<{ modules: PuzzleModuleProgress[]; line: string }>;
   /** today's daily puzzle and the player's streak */
   daily(): Promise<DailyPuzzle>;
-  dailyStart(): Promise<void>;
-  dailySolve(moves: string[], mistakes: number, hints: number): Promise<DailySolve>;
+  dailyStart(): Promise<PuzzleStart>;
+  dailySolve(): Promise<DailySolve>;
   /**
    * Signed out: the guest's coins so far (they move into the account on signing up or in).
    * Null for a signed-in player. Guests play the first GUEST_PUZZLES of the free module and
@@ -485,7 +511,8 @@ export interface LessonDone extends LearnProgress {
 /** Guests may take the free chapters (like the first puzzles); their lessons move into an account later. */
 export interface LearnService {
   progress(): Promise<LearnProgress>;
-  done(lesson: string): Promise<LessonDone>;
+  /** the lesson is finished: `steps` (what was done in each step) is replayed by the server first */
+  done(lesson: string, steps: StepRecord[]): Promise<LessonDone>;
   /** open the paid chapters for LEARN_PRICE coins */
   unlock(): Promise<LearnProgress>;
 }
@@ -547,6 +574,8 @@ export interface DailySolve {
   streak: StreakView;
   /** a milestone the streak reached today */
   milestone: { days: number; coins: number; item: string | null } | null;
+  /** the whole line, for "Replay the solution" */
+  line: string;
 }
 
 // ------------------------------------------------------------------ buying coins

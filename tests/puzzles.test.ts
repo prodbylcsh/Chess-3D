@@ -5,6 +5,7 @@ import {
   MODULES,
   bonusFor,
   hintPenalty,
+  infoOf,
   solveCoins,
   completionItem,
   moduleOf,
@@ -140,7 +141,7 @@ test('every puzzle explains itself: lessons for hand-made lines, themes for the 
       } else {
         assert.ok(p.themes?.length, `${m.id} ${p.id}: no themes`);
       }
-      const d = describe(p);
+      const d = describe(infoOf(p));
       assert.ok(d.intro, `${m.id} ${p.id}: nothing to say`);
       if ('mateIn' in d.goal) assert.ok(p.themes?.some((x) => x.startsWith('mate')), `${p.id}: a mate the themes don't know`);
     }
@@ -148,7 +149,7 @@ test('every puzzle explains itself: lessons for hand-made lines, themes for the 
   // a themed module names its own motif first
   for (const module of ['forks', 'pins', 'sacrifices']) {
     const themes = moduleOf(module)!.select.themes!;
-    const named = PUZZLES[module].filter((p) => themes.includes(describe(p, themes).motifs[0]?.theme));
+    const named = PUZZLES[module].filter((p) => themes.includes(describe(infoOf(p), themes).motifs[0]?.theme));
     assert.equal(named.length, 100, module);
   }
   assert.ok(MOTIFS.length > 40);

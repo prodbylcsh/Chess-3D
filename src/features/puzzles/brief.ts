@@ -1,6 +1,6 @@
 // What a puzzle asks of the player, in their language (docs/PLATFORM.md §4.2): a title, the
 // task, the line's story or what to look for, and the motifs. See describe.ts.
-import type { Puzzle } from '#shared/puzzles.ts';
+import type { PuzzleInfo } from '#shared/puzzles.ts';
 import { t, tk, tn } from '../../i18n';
 import { describe } from './describe';
 import type { Lesson, Motif } from './lessons';
@@ -31,7 +31,7 @@ export const BRIEF_TEXT = [
 ];
 
 /** `prefer`: the module's own themes, named first. */
-export function briefOf(p: Puzzle, prefer: readonly string[] = []): Brief {
+export function briefOf(p: PuzzleInfo, prefer: readonly string[] = []): Brief {
   const d = describe(p, prefer);
   const you = d.side === 'w' ? t('You play White') : t('You play Black');
   return {

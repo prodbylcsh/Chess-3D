@@ -5,6 +5,11 @@ import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
 import { CHAPTER_REWARD, LEARN_PRICE, chapterOf } from '../supabase/functions/_shared/learn.ts';
+import { LESSONS } from '../supabase/functions/_shared/learn-lessons.ts';
+import { solveLesson } from './learn-solve.ts';
+
+/** What the player did in each step of a lesson (the server replays it). */
+const steps = (lesson: string) => (LESSONS[lesson] ? solveLesson(LESSONS[lesson]) : []);
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const KEY = process.env.SUPABASE_ANON_KEY;
@@ -53,19 +58,22 @@ test('lessons go in order, not too fast, and a finished chapter pays once', asyn
   const p = await player('lrna');
   const start = await call(p.client, { action: 'learn' });
   assert.deepEqual({ lessons: start.lessons, unlocked: start.unlocked, rewarded: start.rewarded }, { lessons: [], unlocked: false, rewarded: [] });
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'rook' })).code, 'locked', 'in order');
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'nope' })).code, 'bad_request');
-  const board = await call(p.client, { action: 'learn_done', lesson: 'board' });
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'rook', steps: steps('rook') })).code, 'locked', 'in order');
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'nope', steps: steps('nope') })).code, 'bad_request');
+  // the lesson must have been done: every task and quiz, replayed by the server
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'board' })).code, 'not_done');
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'board', steps: steps('board').map(() => ({ moves: [] })) })).code, 'not_done');
+  const board = await call(p.client, { action: 'learn_done', lesson: 'board', steps: steps('board') });
   assert.equal(board.first, true, JSON.stringify(board));
   assert.equal(board.reward, 0);
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'board' })).first, false, 'a replay records nothing');
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'rook' })).code, 'too_fast');
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'board', steps: steps('board') })).first, false, 'a replay records nothing');
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'rook', steps: steps('rook') })).code, 'too_fast');
 
   const pieces = chapterOf('pieces')!.lessons;
   await admin.from('learn_lessons').delete().eq('player_id', p.id);
   await doneBefore(p.id, pieces.slice(0, -1));
   const before = await coins(p.id);
-  const last = await call(p.client, { action: 'learn_done', lesson: pieces.at(-1) });
+  const last = await call(p.client, { action: 'learn_done', lesson: pieces.at(-1), steps: steps(pieces.at(-1)) });
   assert.deepEqual([last.chapterDone, last.reward, last.rewarded], [true, CHAPTER_REWARD, ['pieces']], JSON.stringify(last));
   assert.equal(last.player.coins, before + CHAPTER_REWARD);
   const ledger = (await admin.from('coin_ledger').select('amount, reason, ref').eq('player_id', p.id).eq('reason', 'learn_reward')).data;
@@ -77,14 +85,14 @@ test('lessons go in order, not too fast, and a finished chapter pays once', asyn
 test('the paid chapters open together for the price, once', async () => {
   const p = await player('lrnb');
   await call(p.client, { action: 'learn' });
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'stalemate' })).code, 'locked');
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'stalemate', steps: steps('stalemate') })).code, 'locked');
   assert.equal((await call(p.client, { action: 'learn_unlock' })).code, 'insufficient_coins');
   await admin.from('players').update({ coins: LEARN_PRICE + 100 }).eq('id', p.id);
   const open = await call(p.client, { action: 'learn_unlock' });
   assert.equal(open.unlocked, true, JSON.stringify(open));
   assert.equal(open.player.coins, 100);
   assert.equal((await call(p.client, { action: 'learn_unlock' })).player.coins, 100, 'only once');
-  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'stalemate' })).first, true);
+  assert.equal((await call(p.client, { action: 'learn_done', lesson: 'stalemate', steps: steps('stalemate') })).first, true);
 });
 
 test('guests take the free chapters; the account they sign in to keeps the lessons and the reward', async () => {
@@ -97,11 +105,11 @@ test('guests take the free chapters; the account they sign in to keeps the lesso
   assert.equal((await call(guest, { action: 'learn_unlock' })).code, 'guest');
   const pieces = chapterOf('pieces')!.lessons;
   await doneBefore(gid, pieces.slice(0, -1));
-  const last = await call(guest, { action: 'learn_done', lesson: pieces.at(-1) });
+  const last = await call(guest, { action: 'learn_done', lesson: pieces.at(-1), steps: steps(pieces.at(-1)) });
   assert.equal(last.reward, CHAPTER_REWARD, JSON.stringify(last));
   assert.deepEqual(last.guest, { coins: CHAPTER_REWARD }, 'waits in the ledger');
   await doneBefore(gid, ['check']);
-  assert.equal((await call(guest, { action: 'learn_done', lesson: 'stalemate' })).code, 'guest_limit');
+  assert.equal((await call(guest, { action: 'learn_done', lesson: 'stalemate', steps: steps('stalemate') })).code, 'guest_limit');
 
   const p = await player('lrnc');
   const before = await coins(p.id);

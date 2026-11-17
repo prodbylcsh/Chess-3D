@@ -24,7 +24,11 @@ export function scanKeys(root = 'src'): Map<string, string> {
   const found = new Map<string, string>();
   for (const file of files(root)) {
     if (file.includes(`${join('src', 'i18n')}`) && !file.endsWith('keys.ts')) continue;
-    const source = readFileSync(file, 'utf8');
+    let source = readFileSync(file, 'utf8');
+    // app text kept with the server's rules (the lessons): `export * from '#shared/…'` scans it here
+    for (const [, shared] of source.matchAll(/export \* from '#shared\/([\w-]+\.ts)'/g)) {
+      source += readFileSync(join('supabase', 'functions', '_shared', shared), 'utf8');
+    }
     for (const [, text] of source.matchAll(CALL)) found.set(unquote(text), file);
     for (const [, one, other] of source.matchAll(COUNT)) {
       found.set(unquote(one), file);

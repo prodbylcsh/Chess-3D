@@ -6,7 +6,11 @@ import openings from '../puzzle-data/openings.json' with { type: 'json' };
 import mateIn2 from '../puzzle-data/mate-in-2.json' with { type: 'json' };
 import pins from '../puzzle-data/pins.json' with { type: 'json' };
 import sacrifices from '../puzzle-data/sacrifices.json' with { type: 'json' };
+import alternatives from '../puzzle-data/alternatives.json' with { type: 'json' };
 import type { Puzzle } from '../puzzles.ts';
+
+/** Other moves as good as each puzzle's own, per player move (scripts/puzzles/alternatives.ts). */
+export const ALTERNATIVES: Record<string, Record<string, string[][]>> = alternatives;
 
 export const PUZZLES: Record<string, Puzzle[]> = {
   'first-steps': firstSteps,

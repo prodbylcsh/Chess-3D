@@ -6,6 +6,7 @@ import { api, ApiError } from '../../../api';
 import { FEEL, haptics } from '../../../audio/haptics';
 import { toast } from '../../../ui/kit';
 import { LESSONS, hasKings, type Lesson, type Step } from '../../learn/lessons';
+import type { StepRecord } from '#shared/learn-check.ts';
 import type { GameState, LessonView } from '../store';
 import { dressGame, playerFromProfile, randomSeed, sleep, type EndAction, type Mode, type ModeAction, type ModeContext } from './types';
 
@@ -37,6 +38,8 @@ export class LearnMode implements Mode {
   private free = false;
   /** stars still to collect */
   private stars = new Set<string>();
+  /** what the player did in each step, for the server to replay (`checkLesson`) */
+  private record: StepRecord[] = [];
 
   constructor(
     private readonly ctx: ModeContext,
@@ -140,6 +143,8 @@ export class LearnMode implements Mode {
     const { game } = this.ctx.engine;
     this.stepIndex = i;
     const step = this.step;
+    this.record[i] = { moves: [] };
+    this.record.length = i + 1; // a step started again: what came after it is gone
     game.hold(true);
     game.goals([]);
     game.showMoves(null);
@@ -199,8 +204,11 @@ export class LearnMode implements Mode {
     if (!task || !view || view.taskDone) return;
     const { game } = this.ctx.engine;
     const after = game.fen; // the move is applied; it plays out on the board now
+    // the moves that stay on the board (a wrong one is taken back and forgotten)
+    const keep = () => this.record[this.stepIndex]?.moves.push(m.lan);
     switch (task.kind) {
       case 'collect': {
+        keep();
         if (this.stars.delete(m.to)) game.goals([...this.stars] as Square[]);
         if (this.stars.size === 0) return this.done();
         this.setLesson({ left: this.stars.size });
@@ -208,6 +216,7 @@ export class LearnMode implements Mode {
         return;
       }
       case 'capture': {
+        keep();
         const left = opponentPieces(after);
         if (left === 0) return this.done();
         this.setLesson({ left });
@@ -215,18 +224,19 @@ export class LearnMode implements Mode {
         return;
       }
       case 'move':
-        return task.moves.includes(m.lan) ? this.done() : void this.wrong(t(task.wrong), token);
+        return task.moves.includes(m.lan) ? (keep(), this.done()) : void this.wrong(t(task.wrong), token);
       case 'check':
-        return new Chess(after).inCheck() ? this.done() : void this.wrong(t('That is not check: attack the king with your move.'), token);
+        return new Chess(after).inCheck() ? (keep(), this.done()) : void this.wrong(t('That is not check: attack the king with your move.'), token);
       case 'mate': {
         const c = new Chess(after);
-        if (c.isCheckmate()) return this.done();
+        if (c.isCheckmate()) return (keep(), this.done());
         return void this.wrong(
           c.isStalemate() ? t('Stalemate! The king is not in check but has no move, so it is a draw. Try another move.') : t('Not checkmate yet: the king can still get out.'),
           token,
         );
       }
       case 'escape':
+        keep();
         return this.done();
     }
   }
@@ -258,6 +268,7 @@ export class LearnMode implements Mode {
     const view = this.view;
     if (!quiz || !view?.quiz || view.quiz.right) return;
     const right = !!quiz.options[i]?.correct;
+    if (right && this.record[this.stepIndex]) this.record[this.stepIndex].answer = i;
     this.setLesson({
       quiz: { ...view.quiz, chosen: i, right },
       message: right ? { tone: 'good', text: t(quiz.why) } : { tone: 'bad', text: t('Not quite. Think again.') },
@@ -271,7 +282,7 @@ export class LearnMode implements Mode {
     const current = () => !this.disposed && token === this.token;
     this.setLesson({ saving: true, error: null });
     try {
-      const done = await api.learn.done(this.lesson.id);
+      const done = await api.learn.done(this.lesson.id, this.record.slice(0, this.lesson.steps.length));
       if (!current()) {
         // the lesson was left while saving: it is recorded, the coins still reach the profile
         if (done.reward) await this.ctx.refreshProfile().catch(() => {});

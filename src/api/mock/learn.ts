@@ -1,4 +1,6 @@
 // Mock Learn: lessons, the chapter reward and the unlock in the browser, with the server's rules.
+import { LESSONS } from '#shared/learn-lessons.ts';
+import { checkLesson, stepRecords } from '#shared/learn-check.ts';
 import { t } from '../../i18n';
 import { CHAPTER_REWARD, LEARN_PRICE, MIN_LESSON_MS, lessonOf, lessonOpen } from '#shared/learn.ts';
 import { learnUnlocked } from '#shared/subscription.ts';
@@ -22,10 +24,12 @@ export const learn: LearnService = {
     return view(learnOf(who()));
   },
 
-  async done(lesson) {
+  async done(lesson, steps) {
     await wait(150, 300);
     const at = lessonOf(lesson);
     if (!at) throw new ApiError('bad_request', t('Something went wrong. Please try again.'));
+    // replayed like the server does: every task done, every quiz answered
+    if (checkLesson(LESSONS[lesson], stepRecords(steps) ?? [])) throw new ApiError('not_done', t('Finish every step of the lesson first.'));
     const profile = player();
     const l = learnOf(who());
     if (!profile && !at.chapter.free) throw new ApiError('guest_limit', t('Create a free account to keep going.'));

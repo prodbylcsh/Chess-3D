@@ -2,6 +2,7 @@
 // (.claude/skills/local-supabase). Like tests/payments.e2e.ts this test plays Paddle: a fake
 // API on :4875 and webhooks signed with the local secret.
 //   SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... npm run test:e2e
+import { playPuzzle } from './puzzle-play.ts';
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
@@ -212,10 +213,7 @@ test('with a plan hints cost no coins; without one they do', async () => {
   const cy = await player('sbc');
   await subscribed(cy, 'apprentice');
   const module = 'first-steps';
-  const moves = solution(PUZZLES[module][0]);
-  assert.ok((await call(cy.client, { action: 'start', module, index: 0 }, 'puzzles')).ok);
-  await wait(2100);
-  const solved = await call(cy.client, { action: 'solve', module, index: 0, moves, mistakes: 0, hints: 4 }, 'puzzles');
+  const solved = await playPuzzle(call as never, cy.client, module, 0, { allHints: true });
   assert.equal(solved.first, true, JSON.stringify(solved));
   assert.equal(solved.coins, puzzleCoins(PUZZLES[module][0].rating));
   assert.equal(solved.hintCost, 0);

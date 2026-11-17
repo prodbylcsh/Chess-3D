@@ -58,9 +58,30 @@ The user shared an audit (revision `3ea6f24`) and asked for the fixes. Done:
   45 s only while the app is visible. Vite 8.3.5 (the `picomatch` advisory has no fix yet; dev only).
 - Legal: Privacy (EN, CS) dated 17 November 2026 (invite recipient, early refunds, guest claim).
 
-**Not done (needs the user or devices):** skill rewards computed in the browser (puzzle
-mistakes/hints, lessons) and the browser analysis feeding MMR/coins and fair play need a
-product decision (server analysis costs money; or call them progress rewards); the classic set's
+**Second round (the user, 17 November 2026: "rework it on the server if you can"):**
+
+- **Puzzles judged by the server.** The app has no solutions any more (`PuzzleInfo`,
+  `src/features/puzzles/data/`, rebuilt by `node scripts/puzzles/client-data.ts`; a test fails
+  when it is stale). Each move → `move`, hints → `hint`, `solve`/`daily_solve` take no counts
+  (the attempt's `state`). Rules: `_shared/puzzle-attempt.ts` (server and demo back-end).
+  "A good move too" from `_shared/puzzle-data/alternatives.json`, made by
+  `node scripts/puzzles/alternatives.ts` (Stockfish from `public/engine/` in Node, ~40 min for
+  all modules; run it after changing the puzzle data). `intent.ts` moved to
+  `_shared/puzzle-intent.ts`. Migration `20261117110000_puzzle_attempt_state.sql`.
+  The demo back-end (`dev:mock`) keeps the solutions; the live build has none (checked).
+- **Learn checked by the server.** `learn_done` takes `steps` (the moves each task kept, the
+  quiz answers) and replays them (`_shared/learn-check.ts`); the lessons moved to
+  `_shared/learn-lessons.ts` (the i18n scanner follows `export * from '#shared/…'`).
+  `tests/learn-solve.ts` finds a way through every lesson for the tests.
+- Honest limit: someone with an engine on another device still solves puzzles cleanly; this
+  stops made-up counts and reading the solutions from the app.
+
+**⚠️ Critical and open:** the game analysis that feeds MMR, coins and fair play runs in the
+players' browsers and can be made up by two players together (`PLATFORM.md` §6.3a: the risk,
+why the server costs money, the options). The user decides; recommended: the engine server
+(`engine/`) analyses ranked and coin games once ranked opens.
+
+**Not done (needs the user or devices):** the classic set's
 textures (KTX2/smaller) and render cost (DPR, shadows, idle frame rate) change the look and need
 measuring on real phones first.
 

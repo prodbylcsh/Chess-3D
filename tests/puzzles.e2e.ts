@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
 import { BONUS_COINS, DAILY_COINS, GUEST_PUZZLES, MODULE_PRICE, dailyPuzzle, dayOf, puzzleCoins, solution } from '../supabase/functions/_shared/puzzles.ts';
 import { PUZZLES } from '../supabase/functions/_shared/server/puzzle-data.ts';
+import { playPuzzle, type PlayOptions } from './puzzle-play.ts';
 
 const URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const KEY = process.env.SUPABASE_ANON_KEY;
@@ -42,12 +43,10 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const answer = (module: string, index: number) => solution(PUZZLES[module][index]);
 const coins = async (id: string) => (await admin.from('players').select('coins').eq('id', id).single()).data!.coins;
 
-/** Open a puzzle, think for the minimum time, send the moves. */
-async function solve(p: { client: SupabaseClient }, module: string, index: number, moves = answer(module, index), extra = {}) {
-  const started = await call(p.client, { action: 'start', module, index });
-  if (!started.ok) return started;
-  await wait(2100);
-  return call(p.client, { action: 'solve', module, index, moves, mistakes: 0, hints: 0, ...extra });
+/** Open a puzzle, play it move by move against the server, think for the minimum time, solve. */
+// deno-lint-ignore no-explicit-any
+async function solve(p: { client: SupabaseClient }, module: string, index: number, moves = answer(module, index), extra: PlayOptions = {}): Promise<any> {
+  return playPuzzle(call as never, p.client, module, index, { moves, ...extra });
 }
 
 test('progress: Openings is free and open, the others locked', async () => {
@@ -63,12 +62,17 @@ test('progress: Openings is free and open, the others locked', async () => {
 
 test('solving: checked by the server, coins only the first time, stars kept at their best', async () => {
   const p = await player('pzb');
-  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0, moves: answer('openings', 0) })).code, 'not_started');
+  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0 })).code, 'not_started');
+  assert.equal((await call(p.client, { action: 'move', module: 'openings', index: 0, move: answer('openings', 0)[0] })).code, 'not_started');
   await call(p.client, { action: 'start', module: 'openings', index: 0 });
-  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0, moves: answer('openings', 0) })).code, 'not_started', 'too fast');
-  assert.equal((await solve(p, 'openings', 0, ['a1a2'])).code, 'wrong');
-
+  assert.equal((await call(p.client, { action: 'move', module: 'openings', index: 0, move: 'a1a2' })).code, 'illegal_move');
+  for (const move of answer('openings', 0)) await call(p.client, { action: 'move', module: 'openings', index: 0, move });
+  assert.equal((await call(p.client, { action: 'move', module: 'openings', index: 0, move: answer('openings', 0)[0] })).code, 'solved');
+  assert.equal((await call(p.client, { action: 'solve', module: 'openings', index: 0 })).code, 'not_started', 'too fast');
+  assert.equal((await solve(p, 'openings', 0, [])).code, 'wrong', 'not solved on the board');
+  // one mistake, counted by the server: two stars, whatever the browser says
   const first = await solve(p, 'openings', 0, answer('openings', 0), { mistakes: 1 });
+  assert.equal(first.stars, 2);
   assert.equal(first.first, true, JSON.stringify(first));
   assert.equal(first.stars, 2);
   assert.equal(first.coins, puzzleCoins(PUZZLES['openings'][0].rating));
@@ -107,7 +111,7 @@ test('every tenth solve pays a bonus; the hundredth gives an item from the shop'
   await call(p.client, { action: 'progress' });
   assert.ifError((await fill(0, 9)).error);
   // every hint and more: the coins lose 10 at most
-  const tenth = await solve(p, 'openings', 9, answer('openings', 9), { hints: 99 });
+  const tenth = await solve(p, 'openings', 9, answer('openings', 9), { allHints: true });
   assert.equal(tenth.hintCost, 10);
   assert.equal(tenth.coins, puzzleCoins(PUZZLES.openings[9].rating) - 10);
   assert.equal(tenth.stars, 1);
@@ -148,6 +152,10 @@ test('openings: hand-made lines where the player moves first are checked too', a
   await admin.from('puzzle_solves').insert(Array.from({ length: first }, (_, i) => ({ player_id: p.id, module: 'openings', idx: i, stars: 3 })));
   const wrong = [...answer('openings', first)];
   wrong[0] = wrong[0] === 'd2d4' ? 'e2e4' : 'd2d4';
+  const judged = await call(p.client, { action: 'start', module: 'openings', index: first }).then(() =>
+    call(p.client, { action: 'move', module: 'openings', index: first, move: wrong[0] }),
+  );
+  assert.notEqual(judged.kind, 'right', 'another first move is not the line');
   assert.equal((await solve(p, 'openings', first, wrong)).code, 'wrong');
   assert.equal((await solve(p, 'openings', first)).first, true);
 });
@@ -189,13 +197,9 @@ test('the daily puzzle: once a day, a streak and its milestones', async () => {
   const state = await call(p.client, { action: 'daily' });
   assert.deepEqual({ day: state.day, module: state.module, index: state.index, solved: state.solved }, { day: today, module, index, solved: null });
   assert.deepEqual(state.streak, { current: 0, best: 0, lastDay: null, shields: 0, shielded: 0 });
-  const moves = answer(module, index);
-  assert.equal((await call(p.client, { action: 'daily_solve', moves })).code, 'not_started');
-  const dailySolve = async (extra = {}) => {
-    await call(p.client, { action: 'daily_start' });
-    await wait(2100);
-    return call(p.client, { action: 'daily_solve', moves, mistakes: 0, hints: 0, ...extra });
-  };
+  assert.equal((await call(p.client, { action: 'daily_solve' })).code, 'not_started');
+  // deno-lint-ignore no-explicit-any
+  const dailySolve = (extra: PlayOptions = {}): Promise<any> => playPuzzle(call as never, p.client, 'daily', 0, extra);
   assert.equal((await dailySolve({ moves: ['a1a2'] })).code, 'wrong');
   const first = await dailySolve();
   assert.equal(first.already, false, JSON.stringify(first));
@@ -210,7 +214,7 @@ test('the daily puzzle: once a day, a streak and its milestones', async () => {
   const yesterday = dayOf(Date.now() - 86_400_000);
   await admin.from('puzzle_daily').delete().eq('player_id', p.id);
   await admin.from('puzzle_streaks').update({ current: 6, best: 6, last_day: yesterday }).eq('player_id', p.id);
-  const seventh = await dailySolve({ hints: 99 });
+  const seventh = await dailySolve({ allHints: true });
   assert.deepEqual(seventh.streak, { current: 7, best: 7, lastDay: today });
   assert.deepEqual(seventh.milestone, { days: 7, coins: 300, item: null });
   assert.equal(seventh.coins, DAILY_COINS - 10, 'hints cost here too');
@@ -251,10 +255,7 @@ test('guests: the first puzzles of Openings and the daily puzzle, then the accou
   assert.equal((await call(guest, { action: 'start', module: 'forks', index: 0 })).code, 'guest_limit');
   assert.equal((await call(guest, { action: 'unlock', module: 'forks' })).code, 'guest');
   assert.equal((await call(guest, { action: 'me' }, 'account')).code, 'guest', 'still no account');
-  const { module, index } = dailyPuzzle(dayOf());
-  await call(guest, { action: 'daily_start' });
-  await wait(2100);
-  const daily = await call(guest, { action: 'daily_solve', moves: answer(module, index), mistakes: 0, hints: 0 });
+  const daily = await playPuzzle(call as never, guest, 'daily', 0);
   assert.equal(daily.already, false, JSON.stringify(daily));
   const earned = first.coins + second.coins + DAILY_COINS;
   assert.deepEqual(daily.guest, { coins: earned });

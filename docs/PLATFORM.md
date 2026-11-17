@@ -447,6 +447,22 @@ Decided (October 2026):
   (`solve_puzzle`, `unlock_module`, `complete_module`; ledger reasons `puzzle`,
   `puzzle_bonus`, `puzzle_unlock`, `puzzle_reward`; reward items in `player_items` with
   source `puzzle`).
+- **The solutions stay on the server** (audit, November 2026). The app gets the puzzles
+  without their moves (`PuzzleInfo`, `src/features/puzzles/data/`, built by
+  `scripts/puzzles/client-data.ts`; the live build has no copy of the solutions, only the
+  demo back-end's builds do). Every move goes to the `puzzles` function (`move`), which judges
+  it with `_shared/puzzle-attempt.ts`: right (the reply and what the next move is for come
+  back), a good move too, or a mistake (the marks: the target square, after three misses also
+  the piece, which counts as a hint). Hints come from the server (`hint`). The attempt keeps
+  the moves, mistakes and hints (`puzzle_attempts.state`); `solve` takes the stars and coins
+  from there, not from the browser. The line comes back only after a solve or a reveal (for
+  "Replay the solution"). "A good move too" is judged ahead of time: every legal move at every
+  step was searched by the same Stockfish at the same 80,000 nodes and the same rule
+  (`asGood`) the app used, by `scripts/puzzles/alternatives.ts` into
+  `_shared/puzzle-data/alternatives.json` (run it after changing the puzzles). The app's
+  engine still explains a mistake ("Watch: then your opponent takes your queen"), measured
+  against its own best move. A player can always ask an engine on another device; this stops
+  made-up counts and solutions read from the app's files.
 - **Guests** (October 2026): without an account, visitors play the first **10** puzzles of
   the free module (`GUEST_PUZZLES`, `guestMayPlay` in `_shared/puzzles.ts`) and the daily
   puzzle, under an anonymous session ("Try puzzles without an account" on the sign-in page;
@@ -514,7 +530,10 @@ is enough to play a whole game.
 - **Server** (`puzzles` function, actions `learn`, `learn_done`, `learn_unlock`; tables
   `learn_lessons`, `learn_chapters`, `learn_unlocks`, migration `20261021120000`): lessons in
   order, at least 8 s apart (`MIN_LESSON_MS`), the reward once per chapter in the same
-  transaction. Guests take the free chapters; their lessons and rewards move into the
+  transaction. A finished lesson comes with what the player did in each step (the moves the
+  task kept, the quiz answers): the server replays it on the lesson's boards
+  (`_shared/learn-check.ts`; the lessons live in `_shared/learn-lessons.ts`) and records the
+  lesson only when every task is done and every quiz answered right (audit, November 2026). Guests take the free chapters; their lessons and rewards move into the
   account with the puzzles (`claim`).
 - **Pages:** `/learn` (chapters, the unlock), `/learn/:chapter` (lessons), `/game/learn/:id`;
   a Learn card on the Play hub; Learn in the guest's tab bar.
@@ -1056,6 +1075,42 @@ shop purchases are the other one, and streak shields (2,500 coins, 4.9) a small 
   after the release), such as 100 games an hour, two accounts from the same IP address, or
   the same two players handing each other wins. Storing IP addresses for this needs the
   Privacy Policy updated first.
+
+### 6.3a ⚠️ Critical, open: the game analysis is computed in the players' browsers
+
+Found by the platform audit (17 November 2026), not fixed yet; the user knows (decision pending).
+
+**The risk.** The engine analysis of ranked, casual and coin games (5.2) runs in the players'
+browsers, and the server trusts what they send:
+
+- **MMR and coins.** The performance part of MMR and coins is added when both reports
+  agree. Two players who work together (or one person with two accounts) can send the same
+  made-up report and give themselves high accuracy, so more MMR and more coins. One
+  player alone can only cancel the performance part (send nothing or something else).
+- **Fair play (6.4).** When the reports differ, a player is judged by the opponent's report,
+  which the opponent can make up: an honest player can be flagged by a dishonest opponent,
+  and a cheater with a friend can look clean. The flags are only for the operator (no
+  automatic sanctions), so today nobody is punished by it, but the flags can't be trusted.
+
+**Why the browser is free and the server is not.** Stockfish is heavy: one game is about 80
+positions at 30,000 nodes, some 5–15 s of full CPU on a computer, more on a phone. In the
+browser that CPU is the player's own device, so it costs us nothing, however many people play.
+On our side the Supabase Edge Functions can't do it at all (each request gets about 2 s of
+CPU), so it needs a machine of our own that runs all day: a VPS from about €5–20 a month,
+more as the number of games grows (one 2-core machine handles roughly 10,000–15,000 games a
+day at today's depth). The engine server is already written (`engine/`, made for Oracle
+Cloud's Always Free VM, which is free but often has no capacity), just not deployed.
+
+**Ways to fix it (proposal, the user decides):**
+
+1. Run the analysis of ranked and coin games on the engine server (`engine/`) and use only
+   its result for MMR, coins and fair play; the browsers' analysis stays for the result
+   screen. Cost: one small server. Recommended once ranked opens (`SEASON_ONE`).
+2. Cheaper meanwhile: the server re-analyses only disputed games (the reports differ) and a
+   random sample of agreed ones; a made-up agreed report found in the sample takes the
+   performance part back and adds a fair play flag.
+3. Until then: the performance part stays small (it is a bonus on top of the result) and the
+   fair play queue says which report a flag came from (`opponent`).
 
 ### 6.4 Fair play: engine help ✅ (built October 2026, phase 1)
 

@@ -2,6 +2,7 @@
 // right and the wrong move and its answer to the wrong one, turned into what the player is
 // told. Pure, so the tests can run it; the search is in modes/puzzle.ts.
 import { Chess, type PieceSymbol } from 'chess.js';
+import { asGood } from '#shared/puzzles.ts';
 
 export type WhyNot =
   /** about as good as the puzzle's move: a different idea, not a mistake */
@@ -14,8 +15,6 @@ export type WhyNot =
   | { kind: 'mate' | 'check' | 'worse' | 'slip'; reply: string }
   | { kind: 'takes'; reply: string; piece: PieceSymbol };
 
-/** Below this loss (centipawns) the wrong move is as good as the right one. */
-const SAME = 40;
 /** Below this it is only a little weaker. */
 const CLOSE = 120;
 
@@ -27,7 +26,7 @@ const CLOSE = 120;
 export function whyNot(fen: string, wrong: string, rightScore: number, wrongScore: number, reply: string | undefined): WhyNot {
   const loss = rightScore - wrongScore;
   // a different way to win (a slower mate, or a big advantage either way)
-  if (loss < SAME || (wrongScore >= 900 && rightScore < 9_000)) return { kind: 'alternative' };
+  if (asGood(rightScore, wrongScore)) return { kind: 'alternative' };
   if (rightScore >= 9_000 && wrongScore >= 300 && wrongScore < 9_000) return { kind: 'missedMate' };
   const chess = new Chess(fen);
   try {

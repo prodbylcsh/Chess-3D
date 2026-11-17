@@ -2,20 +2,25 @@
 // lessons of Learn (../_shared/learn.ts).
 //
 // POST { action: 'progress' }                                  → { modules, player }
-// POST { action: 'start', module, index }                      → { ok } the player opened a puzzle
-// POST { action: 'solve', module, index, moves, mistakes, hints } → { first, coins, hintCost, bonus, stars, solved, reward, player }
-//      `moves`: the player's moves (UCI); the server checks them. Coins only for the first
-//      solve, a bonus every 10 solved, and a reward (an item, or coins) for the 100th.
+// POST { action: 'start', module, index }                      → { ok, attempt, next } the player opened a puzzle
+// POST { action: 'move', module, index, move }                  → { kind: right | alternative | wrong, …, mistakes, hints }
+//      a move (UCI) in the open puzzle (`module: 'daily'`: today's). The solutions never leave
+//      the server (audit, November 2026): it judges each move, plays the reply, counts mistakes.
+// POST { action: 'hint', module, index }                        → { hint: { marks, hints } | null }
+// POST { action: 'solve', module, index }                       → { first, coins, hintCost, bonus, stars, solved, reward, line, player }
+//      the attempt is complete; stars and coins from what the server counted. Coins only for
+//      the first solve, a bonus every 10 solved, and a reward (an item, or coins) for the 100th.
 // POST { action: 'unlock', module }                            → { modules, player } pay MODULE_PRICE coins
-// POST { action: 'reveal', module, index }                     → { modules } show the solution: the puzzle
+// POST { action: 'reveal', module, index }                     → { modules, line } show the solution: the puzzle
 //      counts as seen (no coins, no stars), the next one opens; a later solve (a review) pays
 // POST { action: 'daily' }                                     → { day, module, index, solved, streak }
-// POST { action: 'daily_start' }                               → { ok }
-// POST { action: 'daily_solve', moves, mistakes, hints }        → { coins, hintCost, stars, already, streak, milestone, player }
+// POST { action: 'daily_start' }                               → { ok, attempt, next }
+// POST { action: 'daily_solve' }                                → { coins, hintCost, stars, already, streak, milestone, line, player }
 //
 // POST { action: 'learn' }                                     → { lessons, unlocked, rewarded, player | guest }
-// POST { action: 'learn_done', lesson }                        → { first, chapterDone, reward, …progress } a lesson
-//      was finished: in order, in an open chapter; the last lesson of a chapter pays CHAPTER_REWARD once
+// POST { action: 'learn_done', lesson, steps }                 → { first, chapterDone, reward, …progress } a lesson
+//      was finished: in order, in an open chapter; `steps` (each step's kept moves and quiz answer)
+//      is replayed on the lesson's boards first; the last lesson of a chapter pays CHAPTER_REWARD once
 // POST { action: 'learn_unlock' }                              → { …progress } the paid chapters for LEARN_PRICE
 // POST { action: 'claim', guest }                              → { claimed, player } move a guest's puzzles
 //      (`guest`: the access token of this device's anonymous session) into this account
@@ -60,10 +65,13 @@ import {
   guestMayPlay,
 } from '../_shared/puzzles.ts';
 import { CHAPTER_REWARD, LEARN_PRICE, MIN_LESSON_MS, lessonOf, lessonOpen } from '../_shared/learn.ts';
+import { LESSONS } from '../_shared/learn-lessons.ts';
+import { checkLesson, stepRecords } from '../_shared/learn-check.ts';
 import { ITEMS } from '../_shared/shop.ts';
 import { SHIELD_PRICE, activePlan, hintsFree, learnUnlocked, moduleOpen, released, reviewsPerDay, shieldCap, type PlanId } from '../_shared/subscription.ts';
 import { subscriptionsOf } from '../_shared/server/premium.ts';
-import { PUZZLES } from '../_shared/server/puzzle-data.ts';
+import { ALTERNATIVES, PUZZLES } from '../_shared/server/puzzle-data.ts';
+import { AttemptError, attemptState, freshAttempt, nextOf, playMove, takeHint, type AttemptState } from '../_shared/puzzle-attempt.ts';
 import { ensurePlayer, getPlayer, publishShowcase } from '../_shared/server/competitive.ts';
 
 const CORS = {
@@ -148,7 +156,10 @@ async function openAttempt(me: string, module: string, idx: number, day: string 
   if (cleared.error) throw cleared.error;
   const { data, error } = await admin
     .from('puzzle_attempts')
-    .upsert({ player_id: me, module, idx, day, id: crypto.randomUUID(), started_at: new Date().toISOString() }, { onConflict: 'player_id,module,idx' })
+    .upsert(
+      { player_id: me, module, idx, day, id: crypto.randomUUID(), started_at: new Date().toISOString(), state: freshAttempt(), rev: 0 },
+      { onConflict: 'player_id,module,idx' },
+    )
     .select('id')
     .single();
   if (error) throw error;
@@ -159,14 +170,77 @@ interface Attempt {
   id: string;
   started_at: string;
   day: string | null;
+  rev: number;
+  state: AttemptState;
 }
 
 /** The open attempt at this puzzle, if it was opened at least `minMs` ago. */
 async function attemptAt(me: string, module: string, idx: number, minMs: number): Promise<Attempt> {
-  const { data, error } = await admin.from('puzzle_attempts').select('id, started_at, day').eq('player_id', me).eq('module', module).eq('idx', idx).maybeSingle();
+  const { data, error } = await admin.from('puzzle_attempts').select('id, started_at, day, rev, state').eq('player_id', me).eq('module', module).eq('idx', idx).maybeSingle();
   if (error) throw error;
   if (!data || Date.now() - Date.parse(data.started_at) < minMs) throw fail('not_started', 'Open the puzzle first.', 409);
-  return data as Attempt;
+  return { ...data, state: attemptState(data.state) } as Attempt;
+}
+
+/** Store the attempt's new state, unless another request changed it first (then: try again). */
+async function saveAttempt(me: string, attempt: Attempt, state: AttemptState): Promise<void> {
+  const { data, error } = await admin
+    .from('puzzle_attempts')
+    .update({ state, rev: attempt.rev + 1 })
+    .eq('player_id', me)
+    .eq('id', attempt.id)
+    .eq('rev', attempt.rev)
+    .select('id');
+  if (error) throw error;
+  if (!data?.length) throw fail('busy', 'The puzzle is busy, please try again.', 409);
+}
+
+/**
+ * The puzzle a move or hint is about: a module's (checked like opening it) or, for
+ * `module: 'daily'`, today's daily puzzle (its attempt must be today's).
+ */
+async function target(me: string, body: Record<string, unknown>, guest: boolean) {
+  if (body.module === DAILY) {
+    const day = dayOf();
+    const { module, index } = dailyPuzzle(day);
+    const attempt = await attemptAt(me, `${DAILY}:${module}`, index, 0).catch(async (err) => {
+      throw (await dailyChanged(me, day)) ? fail('day_changed', 'A new daily puzzle is out.', 409) : err;
+    });
+    if (attempt.day !== day) throw fail('day_changed', 'A new daily puzzle is out.', 409);
+    return { module, index, puzzle: PUZZLES[module][index], attempt };
+  }
+  const { module, index, puzzle } = await playable(me, body, guest);
+  return { module: module.id, index, puzzle, attempt: await attemptAt(me, module.id, index, 0) };
+}
+
+/** A daily attempt of an earlier day is open (the day changed while the player was at it). */
+async function dailyChanged(me: string, day: string): Promise<boolean> {
+  const { data, error } = await admin.from('puzzle_attempts').select('day').eq('player_id', me).like('module', `${DAILY}:%`);
+  if (error) throw error;
+  return data.length > 0 && !data.some((a) => a.day === day);
+}
+
+/** The player's move in the open puzzle: judged here, the solution stays on the server. */
+async function move(me: string, body: Record<string, unknown>, guest: boolean) {
+  const { module, puzzle, attempt } = await target(me, body, guest);
+  let played;
+  try {
+    played = playMove(puzzle, ALTERNATIVES[module]?.[puzzle.id], attempt.state, body.move as string, module === 'openings');
+  } catch (err) {
+    if (err instanceof AttemptError) throw fail(err.code === 'illegal' ? 'illegal_move' : 'solved', err.message, 409);
+    throw err;
+  }
+  await saveAttempt(me, attempt, played.state);
+  return { ...played.outcome, mistakes: played.state.mistakes, hints: played.state.hints };
+}
+
+/** The next hint for the current move (null when the piece and the square are both shown). */
+async function hint(me: string, body: Record<string, unknown>, guest: boolean) {
+  const { puzzle, attempt } = await target(me, body, guest);
+  const taken = takeHint(puzzle, attempt.state);
+  if (!taken) return { hint: null };
+  await saveAttempt(me, attempt, taken.state);
+  return { hint: { marks: taken.marks, hints: taken.state.hints } };
 }
 
 /** Use up exactly this attempt (a newer one, opened meanwhile, stays). */
@@ -176,18 +250,22 @@ async function consume(me: string, attempt: Attempt): Promise<void> {
 }
 
 async function start(me: string, body: Record<string, unknown>, guest: boolean) {
-  const { module, index } = await playable(me, body, guest);
-  return { ok: true, attempt: await openAttempt(me, module.id, index, null) };
+  const { module, index, puzzle } = await playable(me, body, guest);
+  return { ok: true, attempt: await openAttempt(me, module.id, index, null), next: nextOf(puzzle, [], module.id === 'openings') };
+}
+
+/** The attempt is complete: its moves solve the puzzle (checked again) and the counts are the server's. */
+function finished(puzzle: Parameters<typeof solves>[0], attempt: Attempt): AttemptState {
+  if (!attempt.state.done || !solves(puzzle, attempt.state.played)) throw fail('wrong', 'That is not the solution.', 409);
+  return attempt.state;
 }
 
 async function solve(me: string, body: Record<string, unknown>, guest: boolean) {
   const { module, index, puzzle, plan } = await playable(me, body, guest);
   const attempt = await attemptAt(me, module.id, index, MIN_SOLVE_MS);
-  const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
-  if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
-  const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
-  const hints = count(body.hints);
-  const earned = stars(count(body.mistakes), hints);
+  // what this server counted while the puzzle was played, never the browser's word
+  const { mistakes, hints } = finished(puzzle, attempt);
+  const earned = stars(mistakes, hints);
   // with Premium hints cost no coins (the stars still count them)
   const paidHints = hintsFree(plan) ? 0 : hints;
 
@@ -228,6 +306,7 @@ async function solve(me: string, body: Record<string, unknown>, guest: boolean) 
     reviewFrom: reviewFrom(result.stars, result.tried_at),
     solved: result.solved,
     reward,
+    line: puzzle.moves,
     ...(await whoAfter(me, guest, !!reward?.item)),
   };
 }
@@ -241,7 +320,7 @@ async function reveal(me: string, body: Record<string, unknown>, guest: boolean)
   const { error: e2 } = await admin.rpc('reveal_puzzle', { p_player: me, p_module: module.id, p_idx: index });
   if (e2) throw e2;
   await consume(me, attempt);
-  return { modules: await progress(me) };
+  return { modules: await progress(me), line: PUZZLES[module.id][index].moves };
 }
 
 // ---------------------------------------------------------------- daily puzzle
@@ -311,27 +390,22 @@ async function dailyStart(me: string) {
   // an earlier day's daily attempt is over
   const old = await admin.from('puzzle_attempts').delete().eq('player_id', me).like('module', `${DAILY}:%`).neq('day', day);
   if (old.error) throw old.error;
-  return { ok: true, attempt: await openAttempt(me, `${DAILY}:${module}`, index, day) };
+  return { ok: true, attempt: await openAttempt(me, `${DAILY}:${module}`, index, day), next: nextOf(PUZZLES[module][index], [], module === 'openings') };
 }
 
 // milestones as the database gets them: the table, then every 100 days after 1000
 const MILESTONES = [...STREAK_MILESTONES, ...Array.from({ length: 90 }, (_, i) => ({ days: 1100 + i * 100, coins: 10_000 }))];
 
-async function dailySolve(me: string, body: Record<string, unknown>, guest: boolean) {
+async function dailySolve(me: string, guest: boolean) {
   const day = dayOf();
   const { module, index } = dailyPuzzle(day);
   const puzzle = PUZZLES[module][index];
   // opened before midnight (UTC): that day's puzzle is over, the app offers the new one
-  const { data: any_, error } = await admin.from('puzzle_attempts').select('day').eq('player_id', me).like('module', `${DAILY}:%`);
-  if (error) throw error;
-  if (any_.length && !any_.some((a) => a.day === day)) throw fail('day_changed', 'A new daily puzzle is out.', 409);
+  if (await dailyChanged(me, day)) throw fail('day_changed', 'A new daily puzzle is out.', 409);
   const attempt = await attemptAt(me, `${DAILY}:${module}`, index, MIN_SOLVE_MS);
   if (attempt.day !== day) throw fail('day_changed', 'A new daily puzzle is out.', 409);
-  const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
-  if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
-  const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
-  const hints = count(body.hints);
-  const earned = stars(count(body.mistakes), hints);
+  const { mistakes, hints } = finished(puzzle, attempt);
+  const earned = stars(mistakes, hints);
   const plan = guest ? null : await planNow(me);
   const paidHints = hintsFree(plan) ? 0 : hints;
   const coins = dailyCoins(paidHints, solution(puzzle).length);
@@ -362,6 +436,7 @@ async function dailySolve(me: string, body: Record<string, unknown>, guest: bool
     stars: earned,
     streak: { current: result.streak.current, best: result.streak.best, lastDay: result.streak.last_day },
     milestone: result.milestone,
+    line: puzzle.moves,
   };
 }
 
@@ -504,6 +579,13 @@ async function learnDone(me: string, body: Record<string, unknown>, guest: boole
   const state = await learnState(me);
   if (!at.chapter.free && guest) throw fail('guest_limit', 'Create a free account to keep going.', 403);
   if (!lessonOpen(at.chapter.lessons[at.index], state.lessons, state.unlocked)) throw fail('locked', 'Finish the lessons before this one first.', 403);
+  // what the player did in each step, replayed on the lesson's boards (audit, November 2026)
+  const steps = stepRecords(body.steps);
+  const problem = steps ? checkLesson(LESSONS[at.chapter.lessons[at.index]], steps) : 'no steps';
+  if (problem) {
+    console.warn(`learn_done ${at.chapter.lessons[at.index]}: ${problem}`);
+    throw fail('not_done', 'Finish every step of the lesson first.', 409);
+  }
   if (!guest) await ensurePlayer(admin, me);
   const { data, error } = await admin.rpc('complete_lesson', {
     p_player: me,
@@ -554,7 +636,7 @@ async function claimLessons(me: string, guestId: string): Promise<number> {
 }
 
 /** Actions a guest may use (the free module's first puzzles, the daily puzzle, the free lessons). */
-const GUEST_ACTIONS = ['progress', 'start', 'solve', 'reveal', 'daily', 'daily_start', 'daily_solve', 'learn', 'learn_done'];
+const GUEST_ACTIONS = ['progress', 'start', 'move', 'hint', 'solve', 'reveal', 'daily', 'daily_start', 'daily_solve', 'learn', 'learn_done'];
 
 async function handle(user: User, body: Record<string, unknown>): Promise<unknown> {
   const guest = !!user.is_anonymous;
@@ -573,6 +655,10 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
     }
     case 'start':
       return start(user.id, body, guest);
+    case 'move':
+      return move(user.id, body, guest);
+    case 'hint':
+      return hint(user.id, body, guest);
     case 'solve':
       return solve(user.id, body, guest);
     case 'unlock':
@@ -584,7 +670,7 @@ async function handle(user: User, body: Record<string, unknown>): Promise<unknow
     case 'daily_start':
       return dailyStart(user.id);
     case 'daily_solve':
-      return dailySolve(user.id, body, guest);
+      return dailySolve(user.id, guest);
     case 'claim':
       return claim(user.id, body);
     case 'learn':

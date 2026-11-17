@@ -133,3 +133,27 @@ test('the stalemate lesson has a stalemate trap next to the mates', () => {
   });
   assert.ok(outcomes.includes('mate') && outcomes.includes('stalemate'));
 });
+
+test('the server replays a finished lesson before recording it (checkLesson)', async () => {
+  const { checkLesson, stepRecords } = await import('../supabase/functions/_shared/learn-check.ts');
+  const { solveLesson } = await import('./learn-solve.ts');
+  for (const lesson of Object.values(LESSONS)) {
+    const steps = solveLesson(lesson);
+    assert.equal(checkLesson(lesson, steps), null, lesson.id);
+    assert.deepEqual(stepRecords(JSON.parse(JSON.stringify(steps))), steps, `${lesson.id}: survives the trip`);
+    // nothing done: refused
+    assert.notEqual(checkLesson(lesson, lesson.steps.map(() => ({ moves: [] }))), null, `${lesson.id}: empty`);
+    assert.notEqual(checkLesson(lesson, steps.slice(1)), null, `${lesson.id}: a step missing`);
+    // a wrong quiz answer
+    const q = lesson.steps.findIndex((s) => s.quiz);
+    if (q >= 0) {
+      const wrong = lesson.steps[q].quiz!.options.findIndex((o) => !o.correct);
+      assert.notEqual(checkLesson(lesson, steps.map((s, i) => (i === q ? { ...s, answer: wrong } : s))), null, `${lesson.id}: wrong answer`);
+    }
+    // a task's moves left out
+    const t = steps.findIndex((s) => s.moves.length);
+    if (t >= 0) assert.notEqual(checkLesson(lesson, steps.map((s, i) => (i === t ? { moves: [] } : s))), null, `${lesson.id}: task skipped`);
+  }
+  assert.equal(stepRecords('nope'), null);
+  assert.equal(stepRecords([{ moves: ['e2e4; drop'] }]), null);
+});

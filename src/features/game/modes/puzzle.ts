@@ -1,24 +1,10 @@
 import { t, tk } from '../../../i18n';
 import { Chess, type Color as Side, type Move, type PieceSymbol, type Square } from 'chess.js';
 import { Eye, FastForward, Info, Lightbulb, RotateCcw } from 'lucide-react';
-import {
-  PUZZLES_PER_MODULE,
-  answerAt,
-  guestMayPlay,
-  hintPenalty,
-  solution,
-  mates,
-  moduleOf,
-  playerSide,
-  replyAfter,
-  rightMove,
-  setupMove,
-  streakTier,
-  type Puzzle,
-  type PuzzleModule,
-} from '#shared/puzzles.ts';
+import { PUZZLES_PER_MODULE, guestMayPlay, hintPenalty, moduleOf, playerSide, streakTier, type PuzzleInfo, type PuzzleModule } from '#shared/puzzles.ts';
+import type { Marks } from '#shared/puzzle-attempt.ts';
+import type { NextGoal } from '#shared/puzzle-intent.ts';
 import { briefOf, nextText, type Brief } from '../../puzzles/brief';
-import { nextGoal } from '../../puzzles/intent';
 import { whyNot, type WhyNot } from '../../puzzles/whyNot';
 import { reviewReady } from '../../puzzles/review';
 import { stuckness } from '../../puzzles/stuck';
@@ -36,8 +22,6 @@ const PRAISE = [tk('Nice!'), tk('Exactly!'), tk('Sharp!'), tk('Great move!'), tk
 /** A cheer for a right move that has no lesson, different each move. */
 const praise = (n: number) => t(PRAISE[(n * 3 + Math.floor(Math.random() * 2)) % PRAISE.length]);
 const PIECE_NAMES: Record<string, string> = { p: tk('pawn'), n: tk('knight'), b: tk('bishop'), r: tk('rook'), q: tk('queen'), k: tk('king') };
-/** wrong moves in a row before the piece to move is shown (as a hint) */
-const MISSES_FOR_HINT = 3;
 /** the engine's effort for "why not?": quick, a few tenths of a second */
 const WHY_NODES = 80_000;
 const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -79,22 +63,30 @@ export interface PuzzleOptions {
 /**
  * A puzzle (docs/PLATFORM.md §4.2): the opponent's move sets it up, the player finds the
  * solution move by move and the opponent's replies are played back. A wrong move is shown
- * refuted by the engine, taken back and counts as a mistake. The server checks the solution
- * and pays the rewards. `moduleId` 'daily' plays today's daily puzzle.
+ * refuted by the engine, taken back and counts as a mistake. The app never has the solution
+ * (audit, November 2026): the server judges each move, sends the replies, the hints and what
+ * the next move is for, counts the mistakes and hints and pays the rewards. The solution
+ * comes only after a solve or a reveal, for the replay. `moduleId` 'daily' plays today's
+ * daily puzzle.
  */
 export class PuzzleMode implements Mode {
   private module: PuzzleModule;
   private index: number;
   private readonly isDaily: boolean;
-  private puzzle: Puzzle | null = null;
+  private puzzle: PuzzleInfo | null = null;
   private brief: Brief | null = null;
   private played: string[] = [];
   private mistakes = 0;
   private hints = 0;
-  /** what the board shows for the current move: the piece to move and the square it goes to */
+  /** what the board shows for the current move (from the server): the piece to move and the square it goes to */
   private shown = { piece: false, square: false };
-  /** wrong moves in a row on the current move */
-  private misses = 0;
+  private marks: Marks = { from: null, to: null };
+  /** what the next move is for (from the server) */
+  private nextGoal: NextGoal | null = null;
+  /** the whole line, once the server sent it (after a solve or a reveal) */
+  private line: string | null = null;
+  /** a move or hint is with the server */
+  private asking = false;
   private setupDone = false;
   private token = 0;
   private disposed = false;
@@ -132,7 +124,10 @@ export class PuzzleMode implements Mode {
     this.mistakes = 0;
     this.hints = 0;
     this.shown = { piece: false, square: false };
-    this.misses = 0;
+    this.marks = { from: null, to: null };
+    this.nextGoal = null;
+    this.line = null;
+    this.asking = false;
     this.setupDone = false;
     this.skip = false;
     this.puzzleMs = 0;
@@ -153,16 +148,16 @@ export class PuzzleMode implements Mode {
       this.module = moduleOf(d.module)!;
       this.index = d.index;
       daily = { day: d.day, streak: d.streak, result: null };
-      await api.puzzles.dailyStart();
     }
-    const [puzzles, progress] = await Promise.all([
+    const [puzzles, progress, opened] = await Promise.all([
       modulePuzzles(this.module.id),
       this.isDaily ? null : api.puzzles.progress().then((all) => all.find((m) => m.id === this.module.id) ?? null),
-      this.isDaily ? null : api.puzzles.start(this.module.id, this.index),
+      this.isDaily ? api.puzzles.dailyStart() : api.puzzles.start(this.module.id, this.index),
     ]);
     const puzzle = puzzles[this.index];
     if (!puzzle || this.disposed || token !== this.token) return;
     this.puzzle = puzzle;
+    this.nextGoal = opened.next;
     const brief = (this.brief = briefOf(puzzle, this.module.select.themes));
     const side = playerSide(puzzle);
     const until = progress?.reviewFrom[this.index] ?? null;
@@ -240,7 +235,7 @@ export class PuzzleMode implements Mode {
     if (this.setupDone) return;
     this.setupDone = true;
     this.warmEngine(); // loaded before the first wrong move needs it
-    const setup = setupMove(puzzle);
+    const setup = puzzle.setup;
     if (setup) {
       await sleep(350);
       if (this.disposed || token !== this.token) return;
@@ -264,73 +259,97 @@ export class PuzzleMode implements Mode {
     }
   }
 
+  /** The server's key for this puzzle's moves and hints. */
+  private get key(): string {
+    return this.isDaily ? 'daily' : this.module.id;
+  }
+
   private async onMove(move: Move, token: number): Promise<void> {
     const puzzle = this.puzzle;
     const { game } = this.ctx.engine;
     if (!puzzle || token !== this.token) return;
     game.arrows([]);
-    if (rightMove(puzzle, this.played, move.lan)) {
-      const mate = mates(puzzle, this.played, move.lan);
-      this.played.push(move.lan);
-      this.shown = { piece: false, square: false };
-      this.misses = 0;
-      this.moveMs = 0;
-      game.guide(null, null);
-      const why = this.brief?.lesson?.why[this.played.length - 1];
-      this.setPuzzle({ step: this.played.length, next: null, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
-      const reply = replyAfter(puzzle, this.played.length);
-      if (!reply || mate) return this.solved(token, mate);
-      await game.idle();
-      haptics.play(FEEL.right);
-      await sleep(why ? 700 : 350);
-      if (token !== this.token || this.disposed) return;
-      await game.sync([...game.history, reply]);
-      game.arrows([{ from: reply.slice(0, 2) as Square, to: reply.slice(2, 4) as Square, kind: 'line' }]);
-      this.showNext();
-      return;
-    }
-    // another move: the engine judges it first. As good as the puzzle's move (another way
-    // to the same goal) it is no mistake, just taken back. Otherwise it is shown refuted,
-    // taken back and counts as a mistake; the board shows where the right one ends (free),
-    // and three in a row also show the piece to move, which counts as a hint
-    // (docs/PLATFORM.md §4.2)
     const before = game.history.slice(0, -1);
     const fenBefore = new Chess(puzzle.fen);
     for (const m of before) fenBefore.move(toMove(m));
-    const answer = answerAt(puzzle, this.played.length)!;
-    const verdict = this.whyNot(fenBefore.fen(), move.lan, answer);
-    await game.idle();
-    // a phone takes well under a second; without an answer in time it counts as a mistake
-    const why = await Promise.race([verdict, sleep(6000).then(() => null)]);
-    if (token !== this.token || this.disposed || game.isOver) return;
-    if (why?.kind === 'alternative') {
+    // the server judges the move (it alone knows the solution); meanwhile the board takes no moves
+    game.hold(true);
+    this.asking = true;
+    // the engine's view of a wrong move, for the coach (started at once: the server may say so)
+    let why: Promise<WhyNot | null> | null = null;
+    let res;
+    try {
+      res = await api.puzzles.move(this.key, this.index, move.lan);
+    } catch (err) {
+      this.asking = false;
+      if (token !== this.token || this.disposed) return;
+      await game.idle();
+      await game.sync(before);
+      game.hold(false);
+      this.setPuzzle({ message: { tone: 'bad', text: err instanceof ApiError ? err.message : t('Could not reach the server. Check your connection.') } });
+      return;
+    }
+    this.asking = false;
+    if (token !== this.token || this.disposed) return;
+    this.mistakes = res.mistakes;
+    this.hints = res.hints;
+
+    if (res.kind === 'right') {
+      this.played.push(move.lan);
+      this.shown = { piece: false, square: false };
+      this.marks = { from: null, to: null };
+      this.moveMs = 0;
+      game.guide(null, null);
+      game.hold(false);
+      const why = this.brief?.lesson?.why[this.played.length - 1];
+      this.setPuzzle({ step: this.played.length, next: null, message: { tone: 'good', text: why ? t(why) : praise(this.played.length) } });
+      if (res.done) return this.solved(token, res.mate);
+      await game.idle();
+      haptics.play(FEEL.right);
+      await sleep(why ? 700 : 350);
+      if (token !== this.token || this.disposed || !res.reply) return;
+      await game.sync([...game.history, res.reply]);
+      game.arrows([{ from: res.reply.slice(0, 2) as Square, to: res.reply.slice(2, 4) as Square, kind: 'line' }]);
+      this.nextGoal = res.next;
+      this.showNext();
+      return;
+    }
+    // another move. As good as the puzzle's move (another way to the same goal, judged by the
+    // engine ahead of time) it is no mistake, just taken back. Otherwise it is shown refuted,
+    // taken back and counts as a mistake; the board shows where the right one ends (free),
+    // and three in a row also show the piece to move, which counts as a hint
+    // (docs/PLATFORM.md §4.2)
+    this.marks = res.marks;
+    this.shown = { piece: !!res.marks.from, square: !!res.marks.to };
+    if (res.kind === 'alternative') {
+      await game.idle();
       haptics.play(FEEL.right);
       this.setPuzzle({ message: { tone: 'good', text: t('A good move too! But this puzzle goes on with a different one: find it.') } });
       await sleep(1100);
       if (token !== this.token || this.disposed) return;
       await game.sync(before);
+      game.hold(false);
       if (token !== this.token || this.disposed) return;
-      this.shown = { ...this.shown, square: true };
       this.showGuide();
       this.setPuzzle({ message: { tone: 'good', text: `${t('A good move too! But this puzzle goes on with a different one: find it.')} ${t('It ends on the marked square.')}` } });
       return;
     }
-    this.mistakes++;
-    this.misses++;
-    const auto = this.misses >= MISSES_FOR_HINT && !this.shown.piece;
-    if (auto) this.hints++;
-    this.shown = { piece: this.shown.piece || auto, square: true };
+    why = this.whyNot(fenBefore.fen(), move.lan);
+    await game.idle();
+    // a phone takes well under a second; without an answer in time there is no explanation
+    const verdict = await Promise.race([why, sleep(6000).then(() => null)]);
+    if (token !== this.token || this.disposed || game.isOver) return;
+    const auto = res.autoHint;
     const goal = this.puzzle?.goal;
     const missed = goal ? t('{goal}: not this move.', { goal: t(goal) }) : t('Not this move.');
     const guideText = this.shown.piece ? t('Move the glowing piece to the marked square.') : t('The right move ends on the marked square.');
     haptics.play(FEEL.wrong);
-    const refute = why && 'reply' in why ? why.reply : null;
-    const whyText = why ? (why.kind === 'takes' ? t(TAKES_TEXT[why.piece]) : t(WHY_TEXT[why.kind])) : '';
+    const refute = verdict && 'reply' in verdict ? verdict.reply : null;
+    const whyText = verdict ? (verdict.kind === 'takes' ? t(TAKES_TEXT[verdict.piece]) : verdict.kind === 'alternative' ? '' : t(WHY_TEXT[verdict.kind])) : '';
     this.setPuzzle({ mistakes: this.mistakes, hints: this.hints, message: { tone: 'bad', text: refute ? `${missed} ${whyText}` : missed } });
     if (refute) {
       // play the opponent's answer, then take both moves back
       const { store } = this.ctx.engine;
-      game.hold(true);
       await sleep(300);
       if (token !== this.token || this.disposed) return;
       store.suppressEnd = true; // a mating answer ends the game on the board, not the puzzle
@@ -339,13 +358,13 @@ export class PuzzleMode implements Mode {
       await game.idle();
       await sleep(1600);
       store.suppressEnd = false;
-      game.hold(false);
       if (token !== this.token || this.disposed) return;
     } else {
-      await sleep(why ? 900 : 300);
+      await sleep(verdict ? 900 : 300);
       if (token !== this.token || this.disposed) return;
     }
     await game.sync(before);
+    game.hold(false);
     if (token !== this.token || this.disposed) return;
     this.showGuide();
     this.setPuzzle({
@@ -361,14 +380,17 @@ export class PuzzleMode implements Mode {
     return this.engine;
   }
 
-  /** The engine's verdict on a wrong move, or null where it can't run. */
-  private whyNot(fen: string, wrong: string, right: string): Promise<WhyNot | null> {
+  /**
+   * The engine's explanation of a move the server called a mistake, or null where it can't
+   * run. The app doesn't know the puzzle's move, so the engine's own best move is the yardstick.
+   */
+  private whyNot(fen: string, wrong: string): Promise<WhyNot | null> {
     const engine = this.warmEngine();
     if (!engine) return Promise.resolve(null);
     const run = this.engineQueue.then(async () => {
-      const r = await engine.search(fen, WHY_NODES, [right]);
+      const best = await engine.search(fen, WHY_NODES);
       const w = await engine.search(fen, WHY_NODES, [wrong.slice(0, 4) + (wrong[4] ?? '')]);
-      return whyNot(fen, wrong, r.score, w.score, w.pv[1]);
+      return whyNot(fen, wrong, Math.max(best.score, w.score), w.score, w.pv[1]);
     });
     this.engineQueue = run.catch(() => null);
     return run.catch(() => null);
@@ -376,33 +398,23 @@ export class PuzzleMode implements Mode {
 
   /** What the player's next move is for, on the coach card (puzzles/intent.ts). */
   private showNext(): void {
-    const puzzle = this.puzzle;
-    const answer = puzzle && answerAt(puzzle, this.played.length);
-    if (!puzzle || !answer) return this.setPuzzle({ next: null });
-    const chess = new Chess(puzzle.fen);
-    let last: Move | null = null;
-    for (const m of this.ctx.engine.game.history) last = chess.move(toMove(m));
-    const opening = this.module.id === 'openings' || chess.moveNumber() <= 10;
-    this.setPuzzle({ next: nextText(nextGoal(chess.fen(), answer, last, opening)) });
+    this.setPuzzle({ next: this.nextGoal ? nextText(this.nextGoal) : null });
   }
 
-  /** The marks for the current move: rings, or an arrow once both the piece and the square are known. */
+  /** The marks for the current move (the server's): rings, or an arrow once both the piece and the square are known. */
   private showGuide(): void {
-    const answer = this.puzzle && answerAt(this.puzzle, this.played.length);
-    if (!answer) return;
-    const from = answer.slice(0, 2) as Square;
-    const to = answer.slice(2, 4) as Square;
+    const { from, to } = this.marks;
     const { game } = this.ctx.engine;
-    const both = this.shown.piece && this.shown.square;
-    game.guide(this.shown.piece ? from : null, this.shown.square && !both ? to : null);
+    const both = !!from && !!to;
+    game.guide(from, both ? null : to);
     game.arrows(both ? [{ from, to, kind: 'hint' }] : []);
-    if (this.shown.piece) game.suggest(from, this.shown.square ? to : undefined); // lift it, as a hint does
+    if (from) game.suggest(from, to ?? undefined); // lift it, as a hint does
   }
 
-  private hintCost(puzzle: Puzzle): string {
+  private hintCost(puzzle: PuzzleInfo): string {
     // with Premium hints cost nothing (docs/PLATFORM.md §4.9)
     if (this.ctx.profile?.premium) return t('Hints are free with your Premium plan.');
-    return t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, solution(puzzle).length) });
+    return t('Hints so far: −{n} coins.', { n: hintPenalty(this.hints, puzzle.moves) });
   }
 
   private async solved(token: number, mate: boolean): Promise<void> {
@@ -415,15 +427,17 @@ export class PuzzleMode implements Mode {
     if (!game.isOver) await game.finish({ winner: store.get().mySide, reason: 'puzzle', title: t('Solved!'), text: t('Puzzle solved') });
     try {
       if (this.isDaily) {
-        const result = await api.puzzles.dailySolve(this.played, this.mistakes, this.hints);
+        const result = await api.puzzles.dailySolve();
         if (token !== this.token || this.disposed) return;
+        this.line = result.line;
         const d = this.view?.daily;
         if (d) this.setPuzzle({ saving: false, daily: { ...d, result } });
         await sleep(500);
         if (!result.already) haptics.play(streakFeel(Math.max(0, streakTier(result.streak.current))));
       } else {
-        const result = await api.puzzles.solve(this.module.id, this.index, this.played, this.mistakes, this.hints);
+        const result = await api.puzzles.solve(this.module.id, this.index);
         if (token !== this.token || this.disposed) return;
+        this.line = result.line;
         this.setPuzzle({ saving: false, result });
       }
       await this.ctx.refreshProfile();
@@ -432,18 +446,28 @@ export class PuzzleMode implements Mode {
     }
   }
 
-  /** First the piece to move (lifted on the board), then the square it goes to; each is shown once. */
-  private hint(): void {
+  /** First the piece to move (lifted on the board), then the square it goes to; each is shown once (from the server). */
+  private async hint(): Promise<void> {
     const puzzle = this.puzzle;
     const { game } = this.ctx.engine;
-    if (!puzzle || game.isOver || !this.canHint()) return;
-    const answer = answerAt(puzzle, this.played.length);
-    if (!answer) return;
-    const from = answer.slice(0, 2) as Square;
-    const piece = t(PIECE_NAMES[new Chess(game.fen).get(from)?.type ?? 'p']);
+    if (!puzzle || game.isOver || !this.canHint() || this.asking) return;
+    const token = this.token;
     const square = this.shown.piece; // the piece is known: the square comes next
-    this.hints++;
-    this.shown = square ? { piece: true, square: true } : { ...this.shown, piece: true };
+    this.asking = true;
+    let res;
+    try {
+      res = await api.puzzles.hint(this.key, this.index);
+    } catch (err) {
+      if (token === this.token) this.setPuzzle({ message: { tone: 'bad', text: err instanceof ApiError ? err.message : t('Could not reach the server. Check your connection.') } });
+      return;
+    } finally {
+      this.asking = false;
+    }
+    if (!res || token !== this.token || this.disposed) return;
+    this.hints = res.hints;
+    this.marks = res.marks;
+    this.shown = { piece: !!res.marks.from, square: !!res.marks.to };
+    const piece = t(PIECE_NAMES[(res.marks.from && new Chess(game.fen).get(res.marks.from)?.type) || 'p']);
     this.showGuide();
     haptics.play(FEEL.hint);
     const text = this.shown.square
@@ -471,7 +495,7 @@ export class PuzzleMode implements Mode {
     });
     if (!ok || token !== this.token || this.disposed) return;
     try {
-      await api.puzzles.reveal(this.module.id, this.index);
+      this.line = (await api.puzzles.reveal(this.module.id, this.index)).line;
     } catch (err) {
       toast(err instanceof ApiError ? err.message : t('Something went wrong. Please try again.'), { tone: 'danger' });
       return;
@@ -485,14 +509,14 @@ export class PuzzleMode implements Mode {
   private async replay(token = this.token): Promise<void> {
     const puzzle = this.puzzle;
     const { game, store } = this.ctx.engine;
-    if (!puzzle) return;
+    if (!puzzle || !this.line) return;
     this.skip = false;
     store.set({ showEnd: false });
     game.hold(true);
     game.guide(null, null);
     this.setPuzzle({ replaying: true, step: 0, next: null, message: { tone: 'info', text: t('Watch the solution, move by move.') } });
     const alive = () => token === this.token && !this.disposed;
-    const line = puzzle.moves.split(' ');
+    const line = this.line.split(' ');
     const first = puzzle.playerFirst ? 0 : 1;
     await game.sync([]);
     for (let i = 0; i < line.length && alive(); i++) {
@@ -586,7 +610,7 @@ export class PuzzleMode implements Mode {
   }
 
   act(id: string): void {
-    if (id === 'hint') this.hint();
+    if (id === 'hint') void this.hint();
     else if (id === 'brief') this.setPuzzle({ briefing: true });
     else if (id === 'go') void this.go(this.token);
     else if (id === 'retry') this.start(true);

@@ -26,7 +26,8 @@ import {
 } from '#shared/puzzles.ts';
 import { ITEMS } from '#shared/shop.ts';
 import { SHIELD_PRICE, hintsFree, moduleOpen, released, shieldCap } from '#shared/subscription.ts';
-import { modulePuzzles } from '../puzzleData';
+import { AttemptError, freshAttempt, nextOf, playMove, takeHint, type AttemptState } from '#shared/puzzle-attempt.ts';
+import { demoPuzzles } from '../puzzleData';
 import { ApiError, type DailySolve, type GuestClaim, type PuzzleModuleProgress, type PuzzlesService } from '../types';
 import { claimGuestLessons } from './learn';
 import { GUEST_ID, db, emit, now, save, session, wait, type MockPuzzleModule } from './db';
@@ -91,6 +92,31 @@ function useShields(day: string): number {
   return missed;
 }
 
+/** Open attempts, as the server's `puzzle_attempts` (in memory: a reload starts the puzzle again). */
+const attempts = new Map<string, AttemptState>();
+const attemptKey = (module: string, index: number) => `${who()}:${module}:${index}`;
+
+/** A puzzle with its solution and the other good moves (the demo back-end's copy). */
+async function full(module: string, index: number) {
+  const { puzzles: list, alternatives } = await demoPuzzles(module);
+  const puzzle = list[index];
+  if (!puzzle) throw new ApiError('bad_request', t('Something went wrong. Please try again.'));
+  return { puzzle, alternatives: alternatives[puzzle.id] };
+}
+
+/** The puzzle a move or hint is about: a module's, or today's daily puzzle (`module: 'daily'`). */
+function targetOf(module: string, index: number): { module: string; index: number; key: string } {
+  if (module !== 'daily') return { module, index, key: attemptKey(module, index) };
+  const d = dailyPuzzle(dayOf());
+  return { ...d, key: attemptKey(`daily:${dayOf()}`, d.index) };
+}
+
+function attemptOf(key: string): AttemptState {
+  const state = attempts.get(key);
+  if (!state) throw new ApiError('not_started', t('Something went wrong. Please try again.'));
+  return state;
+}
+
 export const puzzles: PuzzlesService = {
   async progress() {
     await wait(150, 300);
@@ -103,14 +129,45 @@ export const puzzles: PuzzlesService = {
     if (!p?.unlocked) throw new ApiError('locked', t('Unlock this module first.'));
     const next = p.stars.findIndex((s, i) => s === 0 && !p.seen[i]);
     if (next !== -1 && index > next) throw new ApiError('locked', t('Solve the puzzles before this one first.'));
+    const { puzzle } = await full(module, index);
+    attempts.set(attemptKey(module, index), freshAttempt());
+    return { next: nextOf(puzzle, [], module === 'openings') };
   },
 
-  async solve(module, index, moves, mistakes, hints) {
+  async move(module, index, uci) {
+    await wait(60, 140);
+    const at = targetOf(module, index);
+    const { puzzle, alternatives } = await full(at.module, at.index);
+    try {
+      const { state, outcome } = playMove(puzzle, alternatives, attemptOf(at.key), uci, at.module === 'openings');
+      attempts.set(at.key, state);
+      return { ...outcome, mistakes: state.mistakes, hints: state.hints };
+    } catch (err) {
+      if (err instanceof AttemptError) throw new ApiError(err.code === 'illegal' ? 'illegal_move' : 'solved', t('Something went wrong. Please try again.'));
+      throw err;
+    }
+  },
+
+  async hint(module, index) {
+    await wait(60, 140);
+    const at = targetOf(module, index);
+    const { puzzle } = await full(at.module, at.index);
+    const taken = takeHint(puzzle, attemptOf(at.key));
+    if (!taken) return null;
+    attempts.set(at.key, taken.state);
+    return { marks: taken.marks, hints: taken.state.hints };
+  },
+
+  async solve(module, index) {
     await wait(200, 400);
     guestLimit(module, index);
     const profile = player();
-    const puzzle = (await modulePuzzles(module))[index];
-    if (!puzzle || !solves(puzzle, moves)) throw new ApiError('wrong', t('That is not the solution.'));
+    const { puzzle } = await full(module, index);
+    const key = attemptKey(module, index);
+    const state = attemptOf(key);
+    if (!state.done || !solves(puzzle, state.played)) throw new ApiError('wrong', t('That is not the solution.'));
+    attempts.delete(key);
+    const { mistakes, hints } = state;
     const p = mine(who(), module);
     const earned = stars(mistakes, hints);
     // with Premium hints cost no coins (the stars still count them)
@@ -151,6 +208,7 @@ export const puzzles: PuzzlesService = {
       reviewFrom: reviewFrom(p.stars[index], p.tried[index]),
       solved,
       reward,
+      line: puzzle.moves,
     };
   },
 
@@ -161,7 +219,8 @@ export const puzzles: PuzzlesService = {
     if (p.stars[index] === 0) p.seen[index] = true;
     p.tried[index] = now();
     save();
-    return progress(who());
+    attempts.delete(attemptKey(module, index));
+    return { modules: progress(who()), line: (await full(module, index)).puzzle.moves };
   },
 
   async daily() {
@@ -190,19 +249,27 @@ export const puzzles: PuzzlesService = {
     return held + 1;
   },
 
-  async dailyStart() {},
+  async dailyStart() {
+    const at = targetOf('daily', 0);
+    const { puzzle } = await full(at.module, at.index);
+    attempts.set(at.key, freshAttempt());
+    return { next: nextOf(puzzle, [], at.module === 'openings') };
+  },
 
-  async dailySolve(moves, mistakes, hints): Promise<DailySolve> {
+  async dailySolve(): Promise<DailySolve> {
     await wait(200, 400);
     const profile = player();
     const day = dayOf();
-    const { module, index } = dailyPuzzle(day);
-    const puzzle = (await modulePuzzles(module))[index];
-    if (!puzzle || !solves(puzzle, moves)) throw new ApiError('wrong', t('That is not the solution.'));
+    const at = targetOf('daily', 0);
+    const { puzzle } = await full(at.module, at.index);
+    const state = attemptOf(at.key);
+    if (!state.done || !solves(puzzle, state.played)) throw new ApiError('wrong', t('That is not the solution.'));
+    attempts.delete(at.key);
+    const { mistakes, hints } = state;
     useShields(day);
     const d = (db.daily[who()] ??= { days: {}, streak: { current: 0, best: 0, lastDay: null } });
     const earned = stars(mistakes, hints);
-    if (d.days[day]) return { already: true, coins: 0, hintCost: 0, stars: earned, streak: { ...d.streak }, milestone: null };
+    if (d.days[day]) return { already: true, coins: 0, hintCost: 0, stars: earned, streak: { ...d.streak }, milestone: null, line: puzzle.moves };
     const paidHints = hintsFree(plan()) ? 0 : hints;
     const coins = dailyCoins(paidHints, solution(puzzle).length);
     d.days[day] = { stars: earned, coins };
@@ -224,6 +291,7 @@ export const puzzles: PuzzlesService = {
       stars: earned,
       streak: { ...d.streak },
       milestone: m ? { days: m.days, coins: m.coins, item } : null,
+      line: puzzle.moves,
     };
   },
 
