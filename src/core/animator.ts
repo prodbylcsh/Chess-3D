@@ -91,6 +91,17 @@ export class Animator {
     return () => this.removeFrame(fn);
   }
 
+  /**
+   * Drop every running tween without finishing it (a game left mid-animation): whatever
+   * awaits one never resumes, so stale work can't reach the next game. Frame callbacks
+   * stay (they belong to long-lived systems and stop themselves).
+   */
+  cancel(): void {
+    this.tweens = [];
+    this.bullet = null;
+    this.timeScale = 1;
+  }
+
   /** Dip into slow motion and smoothly recover. Times are in real seconds. */
   bulletTime(min = 0.2, hold = 0.35, release = 0.6, attack = 0.05): void {
     this.bullet = { elapsed: 0, min, attack, hold, release };

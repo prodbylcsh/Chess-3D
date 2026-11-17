@@ -1,7 +1,7 @@
 import type { PlanId } from '#shared/subscription.ts';
 import { t } from '../../i18n';
 import { useSyncExternalStore } from 'react';
-import type { Chess, Color as Side, PieceSymbol } from 'chess.js';
+import type { Chess, Color as Side, Move, PieceSymbol } from 'chess.js';
 import type { GameEnd, GameUi } from '../../game/ui';
 import type { DailySolve, LessonDone, MatchResult, PuzzleSolve, RankInfo, StreakView } from '../../api';
 import type { Brief } from '../puzzles/brief';
@@ -201,7 +201,7 @@ export function initialState(): GameState {
 export class GameStore implements GameUi {
   private state = initialState();
   private readonly listeners = new Set<() => void>();
-  private promotionResolve: ((p: PieceSymbol) => void) | null = null;
+  private promotionResolve: ((p: PieceSymbol | null) => void) | null = null;
   /** called once per finished game (modes hook in to record results) */
   onGameOver: (end: GameEnd) => void = () => {};
 
@@ -218,7 +218,10 @@ export class GameStore implements GameUi {
   }
 
   reset(patch: Partial<GameState> = {}): void {
+    // a choice still open belongs to the game being left: end its wait instead of dropping it
+    const resolve = this.promotionResolve;
     this.promotionResolve = null;
+    resolve?.(null);
     this.onGameOver = () => {};
     this.state = { ...initialState(), ...patch };
     for (const fn of this.listeners) fn();
@@ -226,8 +229,7 @@ export class GameStore implements GameUi {
 
   // ---------------------------------------------------------------- GameUi
 
-  update(chess: Chess, status = ''): void {
-    const history = chess.history({ verbose: true });
+  update(chess: Chess, history: readonly Move[], status = ''): void {
     const captured: Record<Side, PieceSymbol[]> = { w: [], b: [] };
     for (const m of history) if (m.captured) captured[m.color].push(m.captured);
     for (const s of ['w', 'b'] as Side[]) captured[s].sort((a, b) => VALUE[b] - VALUE[a]);
@@ -245,9 +247,17 @@ export class GameStore implements GameUi {
     if (busy !== this.state.busy || canUndo !== this.state.canUndo) this.set({ busy, canUndo });
   }
 
-  askPromotion(side: Side): Promise<PieceSymbol> {
+  askPromotion(side: Side): Promise<PieceSymbol | null> {
+    this.cancelPromotion();
     this.set({ promotion: side });
     return new Promise((resolve) => (this.promotionResolve = resolve));
+  }
+
+  cancelPromotion(): void {
+    const resolve = this.promotionResolve;
+    this.promotionResolve = null;
+    if (this.state.promotion) this.set({ promotion: null });
+    resolve?.(null);
   }
 
   choosePromotion(piece: PieceSymbol): void {

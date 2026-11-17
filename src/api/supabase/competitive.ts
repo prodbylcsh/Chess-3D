@@ -313,6 +313,8 @@ export function createCompetitive(
           throw new ApiError('wrong', t('That is not the solution.'));
         case 'not_started':
           throw new ApiError('not_started', t('Something went wrong. Please try again.'));
+        case 'day_changed':
+          throw new ApiError('day_changed', t('A new daily puzzle is out. Open it from Puzzles.'));
         case 'guest_limit':
         case 'guest':
           throw new ApiError('guest_limit', t('Create a free account to keep going.'));

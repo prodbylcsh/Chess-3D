@@ -19,8 +19,10 @@ export class OnlineError extends Error {
   }
 }
 
-/** How often a watched game is re-read in case realtime missed an update. */
+/** How often a watched game is re-read while realtime is not connected (it may have missed updates). */
 const WATCH_POLL_MS = 4000;
+/** …and while it is: only a safety net (realtime can drop an update without disconnecting). */
+const WATCH_POLL_CONNECTED_MS = 20_000;
 
 export interface Watcher<R = GameRow> {
   /** Every newer version of the game row, in order (also sent once on (re)connect). */
@@ -68,10 +70,17 @@ export class Online {
     return null;
   }
 
+  /**
+   * A game this player is in, or a waiting game they hold the link to (and, for an invite
+   * for one player, are that player). Waiting games can't be listed, only read by their id.
+   */
   async fetch(id: string): Promise<GameRow | null> {
     const { data, error } = await this.client.from('games').select('*').eq('id', id).maybeSingle();
     if (error) throw new OnlineError('network', error.message);
-    return data as GameRow | null;
+    if (data) return data as GameRow;
+    const waiting = await this.client.rpc('waiting_game', { p_id: id });
+    if (waiting.error) throw new OnlineError('network', waiting.error.message);
+    return ((waiting.data as GameRow[] | null) ?? [])[0] ?? null;
   }
 
   /** A game as spectators see it, or null when it does not exist or may not be watched. */
@@ -81,8 +90,9 @@ export class Online {
     return data as WatchRow | null;
   }
 
-  create(name: string, color: Side | 'random') {
-    return this.call({ action: 'create', name, color });
+  /** A new game; with `invite` (a user id), only that player may join it. */
+  create(name: string, color: Side | 'random', invite?: string) {
+    return this.call({ action: 'create', name, color, ...(invite ? { invite } : {}) });
   }
   join(id: string, name: string) {
     return this.call({ action: 'join', id, name });
@@ -135,10 +145,23 @@ export class Online {
 
   private follow<R extends { version: number }>(table: string, id: string, read: () => Promise<R | null>, watcher: Watcher<R>): () => void {
     let version = -1;
+    let connected = false;
+    let reading = false;
+    let lastRead = 0;
     const push = (row: R) => {
       if (row.version <= version) return;
       version = row.version;
       watcher.onRow(row);
+    };
+    /** Re-read the row, one request at a time. */
+    const catchUp = () => {
+      if (reading) return;
+      reading = true;
+      lastRead = Date.now();
+      void read()
+        .then((row) => row && push(row))
+        .catch(() => {})
+        .finally(() => (reading = false));
     };
     const channel = this.client
       .channel(`game:${id}`, { config: { presence: { key: this.userId } } })
@@ -147,15 +170,18 @@ export class Online {
         watcher.onPresence?.(new Set(Object.keys(channel.presenceState())));
       })
       .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') return;
+        connected = status === 'SUBSCRIBED';
+        if (!connected) return;
         void channel.track({ at: Date.now() });
         // catch up on anything that happened before (or while) we were disconnected
-        void read().then((row) => row && push(row)).catch(() => {});
+        catchUp();
       });
     // Safety net: realtime can miss updates, e.g. while Supabase restarts it for a project
-    // that was idle (the first game after a quiet spell). Re-read the row now and then;
-    // `push` ignores versions we already have.
-    const poll = setInterval(() => void read().then((row) => row && push(row)).catch(() => {}), WATCH_POLL_MS);
+    // that was idle (the first game after a quiet spell). Re-read the row now and then:
+    // often while realtime is down, rarely while it is up; `push` ignores versions we have.
+    const poll = setInterval(() => {
+      if (Date.now() - lastRead >= (connected ? WATCH_POLL_CONNECTED_MS : WATCH_POLL_MS) - 100) catchUp();
+    }, WATCH_POLL_MS);
     return () => {
       clearInterval(poll);
       void this.client.removeChannel(channel);

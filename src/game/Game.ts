@@ -70,6 +70,15 @@ export class Game {
   /** loading of the next game's items (`prepare`); `begin` waits for it */
   private preparing: Promise<void> = Promise.resolve();
   private introduced = false;
+  /**
+   * The game session: bumped by `close` and `abort`. Queued work, timers and replies
+   * started for an earlier session stop instead of reaching the board of the next one.
+   */
+  private session = 0;
+  /** queued board tasks not finished yet (moves, animations, resets) */
+  private working = 0;
+  /** the moves played, kept as they are made (chess.js rebuilds its history on every call) */
+  private played: Move[] = [];
   /** keyboard shortcuts only apply while the game screen is showing */
   active = false;
 
@@ -90,8 +99,10 @@ export class Game {
    */
   begin(seat: Seat | null, moves: string[] = [], start: string | null = null, options: { free?: boolean } = {}): Promise<void> {
     this.setBusy(true);
+    const session = this.session;
     return this.run(async () => {
       await this.preparing; // the players' piece sets and board
+      if (session !== this.session) return;
       this.seat = seat;
       this.start = start;
       this.free = !!options.free;
@@ -109,7 +120,55 @@ export class Game {
 
   /** Moves so far in UCI notation ("e2e4", "e7e8q"). */
   get history(): string[] {
-    return this.chess.history({ verbose: true }).map((m) => m.lan);
+    return this.played.map((m) => m.lan);
+  }
+
+  /** The game session's id: compare it after awaiting to tell whether the game was left meanwhile. */
+  get sessionId(): number {
+    return this.session;
+  }
+
+  /**
+   * End the game session (the game screen is left): queued work, a pending promotion choice
+   * and running animations are dropped and the board is emptied, so the next game shows
+   * only its own position. Models, templates and the renderer stay for the next game.
+   */
+  close(): void {
+    this.session++;
+    this.working = 0;
+    this.queue = Promise.resolve();
+    this.ui.cancelPromotion();
+    animator.cancel();
+    this.releaseSelection = null; // its piece goes with the board
+    this.stopCheck?.();
+    this.stopCheck = null;
+    this.selected = null;
+    this.targets = [];
+    this.view.clear();
+    this.choreo.clear();
+    this.chess.reset();
+    this.played = [];
+    this.seat = null;
+    this.start = null;
+    this.free = false;
+    this.over = false;
+    this.autoFlip = false;
+    const { controls } = this.stage;
+    controls.enabled = true; // a camera move may have stopped half-way
+    controls.autoRotate = false;
+    this.ui.hideGameOver();
+    this.setBusy(true);
+  }
+
+  /**
+   * Leave the current game for another one on the same screen (the next puzzle, a rematch).
+   * When nothing is running, the board stays so the next game can dissolve it as before;
+   * work still in flight (a move, a promotion choice) ends the session like `close`.
+   */
+  abort(): void {
+    if (this.working > 0) return this.close();
+    this.session++;
+    this.ui.cancelPromotion();
   }
 
   get fen(): string {
@@ -126,13 +185,15 @@ export class Game {
   }
 
   private async intro(moves: string[], side: Side): Promise<void> {
+    const session = this.session;
     this.clearBoardState();
     this.replay(moves);
     const pieces = this.view.rebuild(this.chess);
     for (const p of pieces) p.dissolve.uDissolve.value = 1.1;
-    this.ui.update(this.chess);
+    this.updateUi();
     this.setBusy(true);
     await this.stage.renderer.compileAsync(this.stage.scene, this.stage.camera);
+    if (session !== this.session) return;
     await Promise.all([this.introCamera(side), animator.wait(0.5).then(() => this.choreo.materialize(pieces))]);
     this.settle();
   }
@@ -241,10 +302,15 @@ export class Game {
   /** A free board (Learn): `side` moves again, as if the other side had passed. */
   keepTurn(side: Side): Promise<void> {
     return this.run(async () => {
-      if (this.free && this.chess.turn() !== side) this.chess.setTurn(side);
-      this.ui.update(this.chess);
+      if (this.free && this.chess.turn() !== side) this.passTo(side);
+      this.updateUi();
       this.setBusy(false);
     });
+  }
+
+  /** A free board: hand the move to `side` (chess.js records a null move, kept in `played` too). */
+  private passTo(side: Side): void {
+    if (this.chess.setTurn(side)) this.played.push(this.chess.history({ verbose: true }).at(-1)!);
   }
 
   /** Play a move on the board for the lesson, animated (on a free board, by whichever side's piece stands there). */
@@ -252,7 +318,7 @@ export class Game {
     return this.run(async () => {
       const from = uci.slice(0, 2) as Square;
       const piece = this.chess.get(from);
-      if (this.free && piece && piece.color !== this.chess.turn()) this.chess.setTurn(piece.color);
+      if (this.free && piece && piece.color !== this.chess.turn()) this.passTo(piece.color);
       this.setBusy(true);
       await this.play({ from, to: uci.slice(2, 4) as Square, promotion: uci[4] });
     });
@@ -321,14 +387,25 @@ export class Game {
     return !this.seat || (this.seat.active && this.seat.side === this.chess.turn());
   }
 
-  /** Queue board work behind anything already running. */
+  /** Queue board work behind anything already running (dropped if the session ends first). */
   private run(task: () => Promise<void>): Promise<void> {
-    const next = this.queue.then(task).catch((err) => {
-      console.error(err);
-      this.setBusy(false); // never leave the board locked
-    });
+    const session = this.session;
+    this.working++;
+    const next = this.queue
+      .then(() => (session === this.session ? task() : undefined))
+      .catch((err) => {
+        console.error(err);
+        if (session === this.session) this.setBusy(false); // never leave the board locked
+      })
+      .finally(() => {
+        if (session === this.session) this.working--;
+      });
     this.queue = next;
     return next;
+  }
+
+  private updateUi(status?: string): void {
+    this.ui.update(this.chess, this.played, status);
   }
 
   // ---------------------------------------------------------------- remote moves
@@ -336,7 +413,7 @@ export class Game {
   /** Bring the board to the server's move list: animate a single new move, rebuild on anything else. */
   sync(moves: string[]): Promise<void> {
     return this.run(async () => {
-      const local = this.chess.history({ verbose: true }).map((m) => m.lan);
+      const local = this.history;
       const extends1 = moves.length === local.length + 1 && local.every((m, i) => m === moves[i]);
       if (extends1) {
         const uci = moves.at(-1)!;
@@ -360,7 +437,7 @@ export class Game {
       if (this.over) return;
       this.deselect();
       this.clearCheck();
-      this.ui.update(this.chess, end.title);
+      this.updateUi(end.title);
       this.endGame(end);
     });
   }
@@ -414,8 +491,19 @@ export class Game {
 
   private async commit(candidates: Move[]): Promise<void> {
     this.setBusy(true);
+    const session = this.session;
     let promotion: PieceSymbol | undefined;
-    if (candidates[0].isPromotion()) promotion = await this.ui.askPromotion(this.chess.turn());
+    if (candidates[0].isPromotion()) {
+      const chosen = await this.ui.askPromotion(this.chess.turn());
+      if (session !== this.session) return;
+      if (!chosen) {
+        // the choice was cancelled: no move, the player picks again
+        this.deselect();
+        this.setBusy(false);
+        return;
+      }
+      promotion = chosen;
+    }
     const choice = candidates.find((m) => m.promotion === promotion) ?? candidates[0];
     await this.play(choice, (move) => this.seat?.send(move));
   }
@@ -436,8 +524,9 @@ export class Game {
     this.clearCheck();
 
     const move = this.chess.move({ from: choice.from, to: choice.to, promotion: choice.promotion });
+    this.played.push(move);
     onApplied?.(move);
-    this.ui.update(this.chess);
+    this.updateUi();
     this.setBusy(true);
 
     await this.choreo.play(move);
@@ -475,7 +564,7 @@ export class Game {
     const c = this.chess;
     const end = this.ending();
     if (end) {
-      this.ui.update(c, end.status);
+      this.updateUi(end.status);
       if (c.isCheckmate()) {
         const king = this.view.findKing(c.turn());
         if (king) {
@@ -499,7 +588,7 @@ export class Game {
     this.clearCheck();
     const c = this.chess;
     if (!c.inCheck()) {
-      this.ui.update(c);
+      this.updateUi();
       return;
     }
     const king = this.view.findKing(c.turn());
@@ -511,7 +600,7 @@ export class Game {
       sfx.check();
       haptics.play(this.isMine(c.turn()) ? FEEL.inCheck : FEEL.giveCheck);
     }
-    this.ui.update(c, t('Check!'));
+    this.updateUi(t('Check!'));
   }
 
   private pulseCheck(king: Piece): () => void {
@@ -539,22 +628,24 @@ export class Game {
     this.setBusy(false);
     this.stage.controls.autoRotate = true;
     this.stage.controls.autoRotateSpeed = 0.6;
+    const session = this.session;
     setTimeout(() => {
-      if (this.over) this.ui.gameOver(end);
+      if (this.over && session === this.session) this.ui.gameOver(end);
     }, 1400);
   }
 
   /** Take back the last move (local games only). */
   undo(): void {
-    if (this.busy || this.seat || this.chess.history().length === 0) return;
+    if (this.busy || this.seat || this.played.length === 0) return;
     this.deselect();
     this.clearCheck();
     this.chess.undo();
+    this.played.pop();
     this.over = false;
     this.stage.controls.autoRotate = false;
     this.ui.hideGameOver();
     this.view.rebuild(this.chess);
-    const last = this.chess.history({ verbose: true }).at(-1);
+    const last = this.played.at(-1);
     this.view.setLastMove(last?.from ?? null, last?.to ?? null);
     this.showCheckState(false);
     this.setBusy(false);
@@ -570,7 +661,7 @@ export class Game {
   private replay(moves: string[]): void {
     if (this.start) this.chess.load(this.start, { skipValidation: this.free });
     else this.chess.reset();
-    for (const uci of moves) this.chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+    this.played = moves.map((uci) => this.chess.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] }));
   }
 
   private clearBoardState(): void {
@@ -586,12 +677,12 @@ export class Game {
 
   /** After a reset or jump: highlight the last move and show check or a finished game. */
   private settle(): void {
-    const last = this.chess.history({ verbose: true }).at(-1);
+    const last = this.played.at(-1);
     this.view.setLastMove(last?.from ?? null, last?.to ?? null);
     this.showCheckState(false);
     const end = this.ending();
     if (end) {
-      this.ui.update(this.chess, end.status);
+      this.updateUi(end.status);
       this.endGame(end);
     } else {
       this.setBusy(false);
@@ -602,11 +693,12 @@ export class Game {
   private async resetBoard(moves: string[], side: Side): Promise<void> {
     this.setBusy(true);
     this.clearBoardState();
-    await this.choreo.dematerialize([...this.view.pieces.values()]);
+    const old = [...this.view.pieces.values()];
+    if (old.length) await this.choreo.dematerialize(old); // an emptied board (a new session) has nothing to dissolve
     this.replay(moves);
     const pieces = this.view.rebuild(this.chess);
     for (const p of pieces) p.dissolve.uDissolve.value = 1.1;
-    this.ui.update(this.chess);
+    this.updateUi();
     await Promise.all([this.faceSide(side, this.startDistance()), this.choreo.materialize(pieces)]);
     this.settle();
   }
@@ -616,13 +708,13 @@ export class Game {
     this.clearBoardState();
     this.replay(moves);
     this.view.rebuild(this.chess);
-    this.ui.update(this.chess);
+    this.updateUi();
     this.settle();
   }
 
   private setBusy(busy: boolean): void {
     this.busy = busy;
-    this.ui.setBusy(busy, this.chess.history().length > 0);
+    this.ui.setBusy(busy, this.played.length > 0);
     if (busy) this.stage.renderer.domElement.style.cursor = '';
   }
 

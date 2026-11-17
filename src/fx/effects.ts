@@ -33,6 +33,8 @@ export class Effects {
   private flashCursor = 0;
   private readonly ringGeometry = new THREE.PlaneGeometry(1, 1);
   private readonly orbGeometry = new THREE.SphereGeometry(1, 20, 14);
+  /** short-lived meshes in the scene (rings, orbs), removed when their tween ends or on `clear` */
+  private readonly transient = new Set<THREE.Mesh>();
 
   constructor(private readonly scene: THREE.Scene) {
     scene.add(this.sparks.points, this.dust.points, this.motes.points);
@@ -48,6 +50,25 @@ export class Effects {
       this.dust.update(dt);
       this.motes.update(time);
     });
+  }
+
+  /** End every running effect at once (the game screen was left mid-animation). */
+  clear(): void {
+    this.sparks.clear();
+    this.dust.clear();
+    for (const light of this.flashLights) light.intensity = 0;
+    for (const mesh of this.transient) this.removeTransient(mesh);
+  }
+
+  private addTransient(mesh: THREE.Mesh): void {
+    this.transient.add(mesh);
+    this.scene.add(mesh);
+  }
+
+  private removeTransient(mesh: THREE.Mesh): void {
+    if (!this.transient.delete(mesh)) return;
+    this.scene.remove(mesh);
+    (mesh.material as THREE.Material).dispose();
   }
 
   setViewport(pixelHeight: number, fov: number): void {
@@ -126,17 +147,14 @@ export class Effects {
     ring.position.set(at.x, layout.boardTop + 0.02, at.z);
     ring.scale.setScalar(radius * 2);
     ring.renderOrder = 15;
-    this.scene.add(ring);
+    this.addTransient(ring);
     void animator
       .tween(duration, (k, raw) => {
         material.uniforms.uRadius.value = 0.05 + k * 0.95;
         material.uniforms.uWidth.value = 0.3 * (1 - raw) + 0.05;
         material.uniforms.uAlpha.value = 1 - raw;
       }, ease.outCubic)
-      .then(() => {
-        this.scene.remove(ring);
-        material.dispose();
-      });
+      .then(() => this.removeTransient(ring));
   }
 
   /** Motes spiralling inwards towards a point (charging a spell). */
@@ -185,7 +203,7 @@ export class Effects {
     const material = new THREE.MeshBasicMaterial({ color: color.clone().multiplyScalar(14), toneMapped: true });
     const orb = new THREE.Mesh(this.orbGeometry, material);
     orb.scale.setScalar(size);
-    this.scene.add(orb);
+    this.addTransient(orb);
     const halo = color.clone().multiplyScalar(5);
 
     const ctrl = from.clone().lerp(to, 0.5);
@@ -213,8 +231,7 @@ export class Effects {
       }
       prev.copy(p);
     }, ease.inQuad);
-    this.scene.remove(orb);
-    material.dispose();
+    this.removeTransient(orb);
   }
 }
 

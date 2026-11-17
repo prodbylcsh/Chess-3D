@@ -145,6 +145,19 @@ export class Debris {
     return f;
   }
 
+  /** Remove all debris at once (the game screen was left). */
+  clear(): void {
+    for (const g of this.groups) this.remove(g);
+    this.groups.length = 0;
+  }
+
+  private remove(g: DebrisGroup): void {
+    for (const f of g.fragments) this.scene.remove(f.mesh);
+    for (const geo of g.geometries) geo.dispose();
+    g.material.dispose();
+    g.depth.dispose();
+  }
+
   private update(dt: number): void {
     const pieces = [...this.obstacles()];
     for (let gi = this.groups.length - 1; gi >= 0; gi--) {
@@ -157,10 +170,7 @@ export class Debris {
       const d = (g.age - SETTLE_TIME) / DISSOLVE_TIME;
       if (d > 0) g.uniforms.uDissolve.value = clamp(d, 0, 1) * 1.1;
       if (d >= 1) {
-        for (const f of g.fragments) this.scene.remove(f.mesh);
-        for (const geo of g.geometries) geo.dispose();
-        g.material.dispose();
-        g.depth.dispose();
+        this.remove(g);
         this.groups.splice(gi, 1);
       }
     }

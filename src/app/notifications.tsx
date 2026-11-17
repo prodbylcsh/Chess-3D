@@ -15,6 +15,9 @@ const BadgeContext = createContext<Badges>({ unreadMessages: 0, friendRequests: 
 
 export const useBadges = () => useContext(BadgeContext);
 
+/** How often the badges are re-counted in case realtime missed an event. */
+const BADGE_CHECK_MS = 45_000;
+
 /** Keeps the sidebar badges current and turns server events into notifications. */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { status, profile, refresh } = useSession();
@@ -33,19 +36,33 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Safety net for live updates that realtime missed (e.g. while it restarts after a quiet
-  // spell): re-count now and then, and refresh the screens only when something changed.
+  // spell): re-count now and then while the app is in view (and on coming back to it), one
+  // request at a time, and refresh the screens only when something changed.
   useEffect(() => {
     if (!ready) return;
-    const timer = setInterval(async () => {
-      const [conversations, requests] = await Promise.all([api.messages.conversations(), api.friends.requests()]).catch(() => [null, null]);
-      if (!conversations || !requests) return;
-      const unreadMessages = conversations.reduce((n, c) => n + c.unread, 0);
-      const friendRequests = requests.incoming.length;
-      setBadges((b) =>
-        b.unreadMessages === unreadMessages && b.friendRequests === friendRequests ? b : { unreadMessages, friendRequests, version: b.version + 1 },
-      );
-    }, 20_000);
-    return () => clearInterval(timer);
+    let checking = false;
+    const check = async () => {
+      if (checking || document.visibilityState === 'hidden') return;
+      checking = true;
+      try {
+        const [conversations, requests] = await Promise.all([api.messages.conversations(), api.friends.requests()]).catch(() => [null, null]);
+        if (!conversations || !requests) return;
+        const unreadMessages = conversations.reduce((n, c) => n + c.unread, 0);
+        const friendRequests = requests.incoming.length;
+        setBadges((b) =>
+          b.unreadMessages === unreadMessages && b.friendRequests === friendRequests ? b : { unreadMessages, friendRequests, version: b.version + 1 },
+        );
+      } finally {
+        checking = false;
+      }
+    };
+    const timer = setInterval(() => void check(), BADGE_CHECK_MS);
+    const onVisible = () => document.visibilityState === 'visible' && void check();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [ready]);
 
   useEffect(() => {

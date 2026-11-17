@@ -122,6 +122,23 @@ test('a paid webhook that arrives for a transaction the app never saw still cred
   assert.equal(await coins(bo.id), start + COIN_PACKS[0].coins);
 });
 
+test('a refund that arrives before the payment: the payment, when it comes, credits nothing', async () => {
+  const cy = await player('prf');
+  const start = await coins(cy.id);
+  // opened in the app, refunded before Paddle said it was paid
+  const { transactionId } = await call(cy.client, { action: 'checkout', pack: 'coins-35k', waiver: true });
+  assert.equal(await webhook({ event_type: 'adjustment.updated', data: { action: 'refund', status: 'approved', transaction_id: transactionId } }), 200);
+  assert.equal(await webhook(completed(transactionId, cy.id, 'coins-35k')), 200);
+  assert.equal(await coins(cy.id), start);
+  assert.equal((await call(cy.client, { action: 'status', transactionId })).status, 'refunded');
+  // never seen by the app: the chargeback first, then the payment
+  const direct = `txn_${run}_early_chargeback`;
+  assert.equal(await webhook({ event_type: 'adjustment.updated', data: { action: 'chargeback', status: 'approved', transaction_id: direct } }), 200);
+  assert.equal(await webhook(completed(direct, cy.id, 'coins-35k')), 200);
+  assert.equal(await webhook(completed(direct, cy.id, 'coins-35k')), 200);
+  assert.equal(await coins(cy.id), start);
+});
+
 test('only signed-in, onboarded players can buy; others cannot read purchases', async () => {
   const anon = createClient(URL, KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
   assert.equal((await call(anon, { action: 'checkout', pack: 'coins-15k', waiver: true })).code, 'unauthorized');

@@ -56,6 +56,13 @@ export class Choreographer {
     private readonly wardrobe: Wardrobe,
   ) {}
 
+  /** Stop every effect still running (the game screen was left mid-animation). */
+  clear(): void {
+    this.fx.clear();
+    this.debris.clear();
+    this.stage.calm();
+  }
+
   async play(move: Move): Promise<void> {
     const { view } = this;
     const mover = view.pieces.get(move.from);
@@ -575,7 +582,7 @@ export class Choreographer {
     const origin = piece.root.position.clone();
     let alive = true;
     animator.onFrame(() => {
-      if (!alive) return false;
+      if (!alive || !piece.root.parent) return false; // stopped, or the piece was cleared away
       piece.root.position.set(origin.x + rand(-amount, amount), origin.y, origin.z + rand(-amount, amount));
     });
     return () => {

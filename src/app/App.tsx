@@ -7,7 +7,6 @@ import { Onboarding } from '../features/onboarding/Onboarding';
 import { PlayHub } from '../features/play/PlayHub';
 import { ShopPage } from '../features/shop/ShopPage';
 import { CommunityPage } from '../features/community/CommunityPage';
-import { ModulePage } from '../features/puzzles/ModulePage';
 import { PuzzlesPage } from '../features/puzzles/PuzzlesPage';
 import { ChapterPage, LearnPage } from '../features/learn/LearnPage';
 import { MessagesPage } from '../features/messages/MessagesPage';
@@ -26,6 +25,8 @@ import { puzzlesChanged } from '../features/puzzles/guest';
 // the 3D game (three.js) is loaded only when a game starts
 const GamePage = lazy(() => import('../features/game/GamePage'));
 const JoinPage = lazy(() => import('../features/game/JoinPage'));
+// a module's 3D world map (three.js) too, only when a module is opened
+const ModulePage = lazy(() => import('../features/puzzles/ModulePage').then((m) => ({ default: m.ModulePage })));
 
 export function Splash({ label }: { label?: string }) {
   return (

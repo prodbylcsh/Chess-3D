@@ -57,10 +57,10 @@ function Menu({ onPick }: { onPick: (s: Step) => void }) {
 }
 
 /** Create a real online game (Supabase) and go to its waiting room. */
-async function createOnlineGame(name: string, color: 'w' | 'b' | 'random'): Promise<string> {
+async function createOnlineGame(name: string, color: 'w' | 'b' | 'random', invite?: string): Promise<string> {
   if (!online) throw new Error(t('Online play is not configured.'));
   await online.signIn();
-  const row = await online.create(name, color);
+  const row = await online.create(name, color, invite);
   return row.id;
 }
 
@@ -78,7 +78,8 @@ function Friends() {
   async function invite(f: FriendEntry) {
     setBusy(f.profile.id);
     try {
-      const id = await createOnlineGame(profile.username ?? 'Player', 'random');
+      // the invite is for this friend only (on the demo back-end, friends aren't real players)
+      const id = await createOnlineGame(profile.username ?? 'Player', 'random', api.demo.social ? undefined : f.profile.id);
       const conversation = await api.messages.open(f.profile.id);
       await api.messages.send(conversation.id, t("Let's play! ♟️"), { gameId: id });
       toast(

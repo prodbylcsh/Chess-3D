@@ -100,6 +100,20 @@ test('joining', () => {
 test('rematch swaps colours', () => {
   assert.equal(code(() => rules.rematch(game(), W)), 'not_finished');
   const over = apply(game(), rules.resign(game(), B));
-  assert.deepEqual(rules.rematch(over, W), { black_id: W, black_name: 'W' });
+  // only the opponent may take the rematch's free seat
+  assert.deepEqual(rules.rematch(over, W), { black_id: W, black_name: 'W', invited_id: B });
   assert.equal(code(() => rules.rematch(over, 'stranger')), 'not_a_player');
+  // an existing rematch is handed out only to the game's players
+  assert.equal(code(() => rules.checkRematch({ ...over, rematch_id: 'next' }, 'stranger')), 'not_a_player');
+  assert.equal(rules.checkRematch({ ...over, rematch_id: 'next' }, B), 'b');
+});
+
+test('an invite for one player: only they may join', () => {
+  const friend = '0b6f2f6e-3c1a-4f4e-9a55-0d3f1c2b9e10';
+  assert.equal(rules.newGame(W, 'W', 'w', friend).invited_id, friend);
+  assert.equal(rules.newGame(W, 'W', 'w').invited_id, undefined);
+  assert.equal(code(() => rules.newGame(W, 'W', 'w', 'not-a-uuid')), 'bad_request');
+  const waiting = game({ black_id: null, black_name: null, status: 'waiting', invited_id: friend });
+  assert.equal(code(() => rules.join(waiting, 'stranger', 'x')), 'not_invited');
+  assert.equal(rules.join(waiting, friend, 'Friend')?.status, 'active');
 });

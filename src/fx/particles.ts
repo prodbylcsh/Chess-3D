@@ -202,6 +202,12 @@ export class ParticleSystem {
     }
   }
 
+  /** Remove every live particle at once. */
+  clear(): void {
+    this.count = 0;
+    this.geometry.setDrawRange(0, 0);
+  }
+
   private kill(i: number): void {
     const last = --this.count;
     if (i === last) return;

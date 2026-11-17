@@ -136,20 +136,53 @@ async function playable(me: string, body: Record<string, unknown>, guest = false
   return { module, index, puzzle: PUZZLES[module.id][index], plan };
 }
 
+/** Attempts opened and left this long ago are cleared away. */
+const STALE_ATTEMPT_MS = 2 * 86_400_000;
+
+/**
+ * Open an attempt at one puzzle (`module` is "daily:<module>" for the daily puzzle, with its
+ * `day`). Each puzzle has its own attempt, so another tab's puzzle doesn't overwrite it.
+ */
+async function openAttempt(me: string, module: string, idx: number, day: string | null): Promise<string> {
+  const cleared = await admin.from('puzzle_attempts').delete().eq('player_id', me).lt('started_at', new Date(Date.now() - STALE_ATTEMPT_MS).toISOString());
+  if (cleared.error) throw cleared.error;
+  const { data, error } = await admin
+    .from('puzzle_attempts')
+    .upsert({ player_id: me, module, idx, day, id: crypto.randomUUID(), started_at: new Date().toISOString() }, { onConflict: 'player_id,module,idx' })
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data.id as string;
+}
+
+interface Attempt {
+  id: string;
+  started_at: string;
+  day: string | null;
+}
+
+/** The open attempt at this puzzle, if it was opened at least `minMs` ago. */
+async function attemptAt(me: string, module: string, idx: number, minMs: number): Promise<Attempt> {
+  const { data, error } = await admin.from('puzzle_attempts').select('id, started_at, day').eq('player_id', me).eq('module', module).eq('idx', idx).maybeSingle();
+  if (error) throw error;
+  if (!data || Date.now() - Date.parse(data.started_at) < minMs) throw fail('not_started', 'Open the puzzle first.', 409);
+  return data as Attempt;
+}
+
+/** Use up exactly this attempt (a newer one, opened meanwhile, stays). */
+async function consume(me: string, attempt: Attempt): Promise<void> {
+  const { error } = await admin.from('puzzle_attempts').delete().eq('player_id', me).eq('id', attempt.id);
+  if (error) throw error;
+}
+
 async function start(me: string, body: Record<string, unknown>, guest: boolean) {
   const { module, index } = await playable(me, body, guest);
-  const { error } = await admin.from('puzzle_attempts').upsert({ player_id: me, module: module.id, idx: index, started_at: new Date().toISOString() });
-  if (error) throw error;
-  return { ok: true };
+  return { ok: true, attempt: await openAttempt(me, module.id, index, null) };
 }
 
 async function solve(me: string, body: Record<string, unknown>, guest: boolean) {
   const { module, index, puzzle, plan } = await playable(me, body, guest);
-  const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
-  if (error) throw error;
-  if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_SOLVE_MS) {
-    throw fail('not_started', 'Open the puzzle first.', 409);
-  }
+  const attempt = await attemptAt(me, module.id, index, MIN_SOLVE_MS);
   const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
   if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
   const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
@@ -170,7 +203,7 @@ async function solve(me: string, body: Record<string, unknown>, guest: boolean) 
     p_review: REVIEW_AFTER_HOURS * 3600,
   });
   if (e2) throw e2;
-  await admin.from('puzzle_attempts').delete().eq('player_id', me);
+  await consume(me, attempt);
 
   let reward: { item: string | null; coins: number | null } | null = null;
   if (!guest && result.first && result.solved >= PUZZLES_PER_MODULE) {
@@ -204,20 +237,16 @@ const MIN_REVEAL_MS = 20_000;
 
 async function reveal(me: string, body: Record<string, unknown>, guest: boolean) {
   const { module, index } = await playable(me, body, guest);
-  const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
-  if (error) throw error;
-  if (!attempt || attempt.module !== module.id || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_REVEAL_MS) {
-    throw fail('not_started', 'Open the puzzle first.', 409);
-  }
+  const attempt = await attemptAt(me, module.id, index, MIN_REVEAL_MS);
   const { error: e2 } = await admin.rpc('reveal_puzzle', { p_player: me, p_module: module.id, p_idx: index });
   if (e2) throw e2;
-  await admin.from('puzzle_attempts').delete().eq('player_id', me);
+  await consume(me, attempt);
   return { modules: await progress(me) };
 }
 
 // ---------------------------------------------------------------- daily puzzle
 
-/** The attempt row of the daily puzzle (one attempt at a time, like the modules). */
+/** The daily puzzle's attempts are stored under "daily:<module>" with their day. */
 const DAILY = 'daily';
 
 /** Streak shields keep the streak over the days missed since the last one (when there are enough). */
@@ -277,10 +306,12 @@ async function reviewStart(me: string, body: Record<string, unknown>) {
 }
 
 async function dailyStart(me: string) {
-  const { module, index } = dailyPuzzle(dayOf());
-  const { error } = await admin.from('puzzle_attempts').upsert({ player_id: me, module: `${DAILY}:${module}`, idx: index, started_at: new Date().toISOString() });
-  if (error) throw error;
-  return { ok: true };
+  const day = dayOf();
+  const { module, index } = dailyPuzzle(day);
+  // an earlier day's daily attempt is over
+  const old = await admin.from('puzzle_attempts').delete().eq('player_id', me).like('module', `${DAILY}:%`).neq('day', day);
+  if (old.error) throw old.error;
+  return { ok: true, attempt: await openAttempt(me, `${DAILY}:${module}`, index, day) };
 }
 
 // milestones as the database gets them: the table, then every 100 days after 1000
@@ -290,11 +321,12 @@ async function dailySolve(me: string, body: Record<string, unknown>, guest: bool
   const day = dayOf();
   const { module, index } = dailyPuzzle(day);
   const puzzle = PUZZLES[module][index];
-  const { data: attempt, error } = await admin.from('puzzle_attempts').select('*').eq('player_id', me).maybeSingle();
+  // opened before midnight (UTC): that day's puzzle is over, the app offers the new one
+  const { data: any_, error } = await admin.from('puzzle_attempts').select('day').eq('player_id', me).like('module', `${DAILY}:%`);
   if (error) throw error;
-  if (!attempt || attempt.module !== `${DAILY}:${module}` || attempt.idx !== index || Date.now() - Date.parse(attempt.started_at) < MIN_SOLVE_MS) {
-    throw fail('not_started', 'Open the puzzle first.', 409);
-  }
+  if (any_.length && !any_.some((a) => a.day === day)) throw fail('day_changed', 'A new daily puzzle is out.', 409);
+  const attempt = await attemptAt(me, `${DAILY}:${module}`, index, MIN_SOLVE_MS);
+  if (attempt.day !== day) throw fail('day_changed', 'A new daily puzzle is out.', 409);
   const moves = Array.isArray(body.moves) && body.moves.every((m) => typeof m === 'string') ? (body.moves as string[]) : [];
   if (!solves(puzzle, moves)) throw fail('wrong', 'That is not the solution.', 409);
   const count = (n: unknown) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0)));
@@ -321,7 +353,7 @@ async function dailySolve(me: string, body: Record<string, unknown>, guest: bool
     p_item: item,
   });
   if (e2) throw e2;
-  await admin.from('puzzle_attempts').delete().eq('player_id', me);
+  await consume(me, attempt);
   return {
     ...(await whoAfter(me, guest, !!result.milestone?.item)),
     already: result.already,
@@ -365,6 +397,10 @@ async function claim(me: string, body: Record<string, unknown>) {
   const { data } = token ? await admin.auth.getUser(token) : { data: { user: null } };
   const guest = data.user;
   if (!guest?.is_anonymous || guest.id === me) return { claimed: null, player: (await ensurePlayer(admin, me)).player };
+  // a guest's progress goes to one account: the first to claim it (and it may retry)
+  const { data: owner, error: e0 } = await admin.rpc('bind_guest', { p_guest: guest.id, p_account: me });
+  if (e0) throw e0;
+  if (owner !== me) return { claimed: null, player: (await ensurePlayer(admin, me)).player };
   const [solves_, daily_, ledger_, streak_] = await Promise.all([
     admin.from('puzzle_solves').select('module, idx, stars').eq('player_id', guest.id).order('solved_at'),
     admin.from('puzzle_daily').select('day, module, idx, stars, coins').eq('player_id', guest.id).order('day'),

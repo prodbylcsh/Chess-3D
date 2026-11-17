@@ -213,6 +213,11 @@ class Marker {
  */
 export class BoardView {
   readonly pieces = new Map<Square, Piece>();
+  /**
+   * Every piece object still in the scene, also ones a running animation has taken out of
+   * `pieces` (a captured piece, a promoting pawn): `clear` removes them too.
+   */
+  private readonly inScene = new Set<Piece>();
   private readonly geometry = new THREE.PlaneGeometry(1, 1);
   private targetMarkers: Marker[] = [];
   private goalMarkers: Marker[] = [];
@@ -263,7 +268,25 @@ export class BoardView {
     this.dress(piece);
     this.scene.add(piece.root);
     this.pieces.set(square, piece);
+    for (const p of this.inScene) if (!p.root.parent) this.inScene.delete(p);
+    this.inScene.add(piece);
     return piece;
+  }
+
+  /** An empty board: no pieces, marks, arrows, stars or labels (a game was left). */
+  clear(): void {
+    for (const p of this.inScene) p.dispose();
+    this.inScene.clear();
+    this.pieces.clear();
+    this.clearTargets();
+    this.setSelected(null);
+    this.setLastMove(null, null);
+    this.setCheck(null);
+    this.setGuide(null, null);
+    this.setHover(null);
+    this.setGoals([]);
+    this.setArrows([]);
+    this.setLabels(false);
   }
 
   /** Throw away all piece objects and create them from the chess position. */

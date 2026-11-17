@@ -119,7 +119,8 @@ export class LearnMode implements Mode {
   private setLesson(patch: Partial<LessonView>): void {
     const { store } = this.ctx.engine;
     const now = store.get().lesson;
-    if (now) store.set({ lesson: { ...now, ...patch } });
+    // only while this lesson is the one on screen (a late reply must not touch the next lesson)
+    if (now && !this.disposed && now.lesson === this.lesson.id) store.set({ lesson: { ...now, ...patch } });
   }
 
   private get view(): LessonView | null {
@@ -266,16 +267,23 @@ export class LearnMode implements Mode {
 
   /** The last step done: the server records the lesson (and pays the chapter's reward once). */
   private async finish(): Promise<void> {
+    const token = this.token;
+    const current = () => !this.disposed && token === this.token;
     this.setLesson({ saving: true, error: null });
     try {
       const done = await api.learn.done(this.lesson.id);
+      if (!current()) {
+        // the lesson was left while saving: it is recorded, the coins still reach the profile
+        if (done.reward) await this.ctx.refreshProfile().catch(() => {});
+        return;
+      }
       this.setLesson({ saving: false, done });
       if (done.reward) {
         haptics.play(FEEL.solved);
         await this.ctx.refreshProfile().catch(() => {});
       }
     } catch (err) {
-      this.setLesson({ saving: false, error: err instanceof ApiError ? err.message : t('Could not save the lesson.') });
+      if (current()) this.setLesson({ saving: false, error: err instanceof ApiError ? err.message : t('Could not save the lesson.') });
     }
   }
 

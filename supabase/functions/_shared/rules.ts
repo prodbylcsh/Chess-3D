@@ -34,6 +34,8 @@ export interface GameRow {
   settled_at?: string | null;
   /** games with clocks: how long each move took (ms, from the side's turn starting), for fair play */
   move_ms?: number[] | null;
+  /** an invite for one player (a friend's invite, a rematch): only they may take the free seat */
+  invited_id?: string | null;
 }
 
 export type Patch = Partial<Omit<GameRow, 'id' | 'version'>>;
@@ -94,17 +96,26 @@ export function outcome(chess: Chess): { result: Result; reason: string } | null
   return null;
 }
 
-export function newGame(userId: string, name: unknown, color: unknown): Patch {
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * A new waiting game. `invited` (a user id) makes it an invite for that player only (a
+ * friend's invite); without it, anyone with the link may take the free seat.
+ */
+export function newGame(userId: string, name: unknown, color: unknown, invited?: unknown): Patch {
   const side: Side = color === 'w' || color === 'b' ? color : Math.random() < 0.5 ? 'w' : 'b';
-  return side === 'w'
-    ? { white_id: userId, white_name: cleanName(name) }
-    : { black_id: userId, black_name: cleanName(name) };
+  if (invited != null && (typeof invited !== 'string' || !UUID.test(invited) || invited === userId)) {
+    throw new RuleError('bad_request', 'Invalid invite.');
+  }
+  const seat: Patch = side === 'w' ? { white_id: userId, white_name: cleanName(name) } : { black_id: userId, black_name: cleanName(name) };
+  return invited ? { ...seat, invited_id: invited as string } : seat;
 }
 
 /** Take the empty seat. Returns null when the user is already seated (rejoin). */
 export function join(row: GameRow, userId: string, name: unknown): Patch | null {
   if (seatOf(row, userId)) return null;
   if (row.status !== 'waiting') throw new RuleError('game_full', 'This game already has two players.', 409);
+  if (row.invited_id && row.invited_id !== userId) throw new RuleError('not_invited', 'This invite is for another player.', 403);
   const patch: Patch = row.white_id
     ? { black_id: userId, black_name: cleanName(name) }
     : { white_id: userId, white_name: cleanName(name) };
@@ -185,12 +196,23 @@ export function declineDraw(row: GameRow, userId: string): Patch {
   return { draw_offer: null };
 }
 
-/** Seat for the requester in a rematch: colours swap. */
-export function rematch(row: GameRow, userId: string): Patch {
+/**
+ * May `userId` ask for (or take) this game's rematch? Only its players, once it is over.
+ * Checked before an existing rematch is handed out too.
+ */
+export function checkRematch(row: GameRow, userId: string): Side {
   if (row.kind && row.kind !== 'friend') throw new RuleError('no_rematch', 'Find a new game through matchmaking.', 409);
   const side = seatOf(row, userId);
   if (!side) throw new RuleError('not_a_player', 'You are not playing in this game.', 403);
   if (row.status !== 'finished') throw new RuleError('not_finished', 'The game is still in progress.', 409);
+  return side;
+}
+
+/** Seat for the requester in a rematch: colours swap, and only the opponent may join. */
+export function rematch(row: GameRow, userId: string): Patch {
+  const side = checkRematch(row, userId);
   const name = side === 'w' ? row.white_name : row.black_name;
-  return newGame(userId, name, other(side));
+  const opponent = side === 'w' ? row.black_id : row.white_id;
+  const seat = newGame(userId, name, other(side));
+  return opponent ? { ...seat, invited_id: opponent } : seat;
 }

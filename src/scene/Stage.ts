@@ -88,7 +88,35 @@ export class Stage {
     this.composer.addPass(new OutputPass());
 
     this.timer.connect(document);
-    new ResizeObserver(() => this.resize()).observe(container);
+    this.resizeObserver = new ResizeObserver(() => this.resize());
+    this.resizeObserver.observe(container);
+  }
+
+  private readonly resizeObserver: ResizeObserver;
+
+  /**
+   * Release the renderer and everything it holds on the GPU (an engine that failed to
+   * load). The stage can't be used afterwards.
+   */
+  dispose(): void {
+    this.pause();
+    this.loop = null;
+    this.resizeObserver.disconnect();
+    this.timer.disconnect();
+    this.controls.dispose();
+    this.scene.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.geometry.dispose();
+      for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) m.dispose();
+    });
+    this.scene.environment?.dispose();
+    this.tableTexture.dispose();
+    this.bloom.dispose();
+    this.composer.dispose();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    this.renderer.domElement.remove();
   }
 
   get pixelHeight(): number {
@@ -103,6 +131,11 @@ export class Stage {
   /** Add screen shake; amounts accumulate and decay (0..1). */
   shake(amount: number): void {
     this.trauma = Math.min(1, this.trauma + amount);
+  }
+
+  /** Stop any screen shake at once. */
+  calm(): void {
+    this.trauma = 0;
   }
 
   start(update: (dt: number) => void): void {

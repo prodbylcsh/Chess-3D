@@ -113,6 +113,35 @@ test('draw offers and resignation', async () => {
   assert.equal(resigned.result, '1-0');
 });
 
+test('waiting games: readable by their id, never listed; invites for one player', async () => {
+  const a = await player();
+  const b = await player();
+  const eve = await player();
+  const open = await a.create('A', 'w');
+  // the invite link (the id) reads it; nobody can list the games waiting for a player
+  assert.equal((await eve.fetch(open.id))?.status, 'waiting');
+  const listed = await eve.client.from('games').select('id').eq('status', 'waiting');
+  assert.deepEqual(listed.data, []);
+  const watched = await eve.client.from('game_watch').select('id').eq('id', open.id);
+  assert.deepEqual(watched.data, [], 'nor through the spectators\' copy');
+
+  // a friend's invite: only that player takes the seat
+  const invite = await a.create('A', 'w', b.userId);
+  assert.equal(invite.invited_id, b.userId);
+  await rejects(eve.join(invite.id, 'Eve'), 'not_invited');
+  assert.equal((await b.join(invite.id, 'B')).status, 'active');
+
+  // a rematch is for the opponent only, and only the game's players get it
+  const over = await b.resign(invite.id);
+  assert.equal(over.status, 'finished');
+  const next = await a.rematch(invite.id);
+  assert.equal(next.invited_id, b.userId);
+  await rejects(eve.rematch(invite.id), 'not_a_player');
+  await rejects(eve.join(next.id, 'Eve'), 'not_invited');
+  const again = await b.rematch(invite.id);
+  assert.equal(again.id, next.id);
+});
+
 test('clients cannot write the table directly', async () => {
   const a = await player();
   const { id } = await a.create('A', 'w');

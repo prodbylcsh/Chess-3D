@@ -31,6 +31,39 @@ How the user works:
 - **Personal data.** The operator's birth number must never be published. Only the name
   and address in the legal pages: Lukáš Schöbel, Oty Bubeníčka 1639/8, 104 00 Praha.
 
+## Platform audit fixes (17 November 2026, on the branch, not merged)
+
+The user shared an audit (revision `3ea6f24`) and asked for the fixes. Done:
+
+- **Game sessions** (`Game.close` / `Game.abort`, `GamePage`, `engine.ts`): leaving the game
+  screen drops queued board work, running tweens (`animator.cancel`), effects, debris and every
+  piece (`BoardView.clear`), so the next game shows only its own position. Models, templates
+  and the renderer stay cached. Switching modes on the same screen (next puzzle) keeps the
+  dissolve animation when nothing is running. Queued tasks, the game-over timer and Learn's
+  save reply check the session. A promotion choice left open resolves with `null` (no move);
+  it no longer blocks the next game. Rendering starts only on `attach`; a failed model load
+  disposes its stage. Checked in headless Chromium (move → leave → back; promotion dialog →
+  leave → back; leave mid-capture).
+- **History**: the controller keeps the played moves (`played`), chess.js' `history()` isn't
+  rebuilt on every update; `GameUi.update(chess, moves, status)`.
+- **Server**: rematch checks participation before handing out an existing one; waiting games
+  are read only by id (`waiting_game`), not listable (also not in `game_watch`); friend invites
+  and rematches are for one player (`games.invited_id`, `not_invited`); refunds before the
+  payment are kept (`payment_reversals`, advisory locks); puzzle attempts per puzzle with an id
+  and the daily day (`day_changed`); guest progress bound to one account (`guest_claims`).
+  Migrations `20261117090000_invites_reversals.sql`, `20261117100000_puzzle_attempts_claims.sql`.
+- **Speed**: the module page (world map, three.js) is lazy; the entry JS went from ~1.83 MB to
+  ~1.04 MB (no three.js). Model prefetch skips data-saver / slow lines. At most 8 HD shop models
+  cached. Game polling every 20 s while realtime is connected (4 s while not), badges every
+  45 s only while the app is visible. Vite 8.3.5 (the `picomatch` advisory has no fix yet; dev only).
+- Legal: Privacy (EN, CS) dated 17 November 2026 (invite recipient, early refunds, guest claim).
+
+**Not done (needs the user or devices):** skill rewards computed in the browser (puzzle
+mistakes/hints, lessons) and the browser analysis feeding MMR/coins and fair play need a
+product decision (server analysis costs money; or call them progress rewards); the classic set's
+textures (KTX2/smaller) and render cost (DPR, shadows, idle frame rate) change the look and need
+measuring on real phones first.
+
 ## New sets and boards (merged to `main` on 1 November 2026, the user's yes)
 
 Squash-merged (the branch carried three rounds of rebuilt models). The user uploaded 27 piece sets (`pieces/<set>/`, both colours, English or Czech file names)

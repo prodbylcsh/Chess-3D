@@ -14,7 +14,6 @@ import { t } from '../../i18n';
 import { Button, Coins, EmptyState, ProgressBar, Spinner, cx } from '../../ui/kit';
 import { timeUntil } from '../../ui/format';
 import { nextOpen, reviewReady, reviewWaiting } from './review';
-import { modelFor } from '../shop/ModelViewer';
 import { briefOf } from './brief';
 import { WORLD_THEMES } from './map/themes';
 import { World } from './map/World';
@@ -88,7 +87,8 @@ function ModuleWorld({ module, mine }: { module: PuzzleModule; mine: PuzzleModul
       w.select(i);
     };
     let live = true;
-    void modelFor(profile?.loadout.pieces ?? 'marble-set', false, 'n', 'w').then(
+    // the shop's model loader comes with the 3D view, not with the app's first load
+    void import('../shop/ModelViewer').then(({ modelFor }) => modelFor(profile?.loadout.pieces ?? 'marble-set', false, 'n', 'w')).then(
       (model) => live && w.setToken(model),
       () => {},
     );

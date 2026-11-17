@@ -1,6 +1,6 @@
 // Single entry point for every write to an online game.
 //
-// POST { action: 'create', name, color: 'w' | 'b' | 'random' }
+// POST { action: 'create', name, color: 'w' | 'b' | 'random', invite?: userId }  (invite: only that player may join)
 // POST { action: 'join', id, name }
 // POST { action: 'move', id, move: { from, to, promotion? } }
 // POST { action: 'resign' | 'offer_draw' | 'accept_draw' | 'decline_draw' | 'rematch', id }
@@ -81,7 +81,7 @@ const UPDATES: Record<string, Update> = {
 };
 
 async function handle(userId: string, body: Record<string, unknown>): Promise<GameRow> {
-  if (body.action === 'create') return insert(rules.newGame(userId, body.name, body.color));
+  if (body.action === 'create') return insert(rules.newGame(userId, body.name, body.color, body.invite));
 
   for (let attempt = 0; attempt < 4; attempt++) {
     const row = await load(body.id);
@@ -91,6 +91,8 @@ async function handle(userId: string, body: Record<string, unknown>): Promise<Ga
         return patch ? await save(row, patch) : row;
       }
       if (body.action === 'rematch') {
+        // only the game's players, before anything is handed out (an existing rematch too)
+        rules.checkRematch(row, userId);
         if (row.rematch_id) return await load(row.rematch_id);
         const next = await insert(rules.rematch(row, userId));
         try {

@@ -1,5 +1,7 @@
 // The 3D engine is created once (on the first game) and then moved in and out of
-// the game screen. While no game screen is showing, rendering is paused.
+// the game screen. While no game screen is showing, rendering is paused and the board
+// is empty: each visit is its own game session (Game.close), only the renderer, models
+// and templates are kept.
 import { animator } from '../../core/animator';
 import { Stage } from '../../scene/Stage';
 import { loadAssets } from '../../scene/assets';
@@ -36,13 +38,23 @@ export function loadEngine(container: HTMLElement, onProgress: (fraction: number
 
     const store = new GameStore();
     const stage = new Stage(host);
-    const fx = new Effects(stage.scene);
-    stage.onResize(() => fx.setViewport(stage.pixelHeight, stage.camera.fov));
     stage.onResize((w, h) => frameBesidePanel(stage, w, h));
+    // rendering starts with `attach`: a player who leaves while the set loads leaves no loop behind
     stage.start((dt) => animator.update(dt));
+    stage.pause();
 
-    const assets = await loadAssets(MODEL_URL, stage.renderer.capabilities.getMaxAnisotropy(), (p) => progressListener(p));
+    let assets;
+    try {
+      assets = await loadAssets(MODEL_URL, stage.renderer.capabilities.getMaxAnisotropy(), (p) => progressListener(p));
+    } catch (err) {
+      // the next try builds a new stage: release this one's WebGL context, observers and listeners
+      stage.dispose();
+      host.remove();
+      throw err;
+    }
     progressListener(1);
+    const fx = new Effects(stage.scene); // after loading: a failed try leaves no frame callbacks behind
+    stage.onResize(() => fx.setViewport(stage.pixelHeight, stage.camera.fov));
     const view = new BoardView(stage.scene, assets);
     const debris = new Debris(stage.scene, () => view.pieces.values());
     const wardrobe = new Wardrobe(stage, fx, assets);
@@ -102,6 +114,7 @@ export function attach(engine: Engine, container: HTMLElement): void {
 
 export function detach(engine: Engine): void {
   engine.game.active = false;
+  engine.game.close();
   engine.stage.pause();
   engine.host.remove();
 }

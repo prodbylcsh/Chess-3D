@@ -17,27 +17,62 @@ const PIECE_FILES: Record<PieceSymbol, string> = { k: 'king', q: 'queen', r: 'ro
 const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
 const cache = new Map<string, Promise<THREE.Object3D>>();
 
+/**
+ * Detailed models (`-hd`, the shop's 3D view) kept at most: looking through the shop would
+ * otherwise keep every set ever opened in memory. The models of the board are never evicted.
+ */
+const HD_KEEP = 8;
+const isHd = (url: string) => url.endsWith('-hd.glb');
+
 /** The model at a URL; parsed once, every caller gets the same object (clone it). */
 export function loadModel(url: string): Promise<THREE.Object3D> {
   let model = cache.get(url);
-  if (!model) {
-    model = loader.loadAsync(url).then((gltf) => {
-      gltf.scene.traverse((o) => {
-        const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        const material = mesh.material as THREE.MeshStandardMaterial;
-        for (const tex of [material.map, material.normalMap, material.roughnessMap, material.metalnessMap]) {
-          if (tex) tex.anisotropy = 8;
-        }
-      });
-      return gltf.scene;
-    });
-    model.catch(() => cache.delete(url)); // try again next time
+  if (model) {
+    // most recently used last (Map order), so the oldest detailed model goes first
+    cache.delete(url);
     cache.set(url, model);
+    return model;
   }
+  model = loader.loadAsync(url).then((gltf) => {
+    gltf.scene.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      const material = mesh.material as THREE.MeshStandardMaterial;
+      for (const tex of [material.map, material.normalMap, material.roughnessMap, material.metalnessMap]) {
+        if (tex) tex.anisotropy = 8;
+      }
+    });
+    return gltf.scene;
+  });
+  model.catch(() => cache.delete(url)); // try again next time
+  cache.set(url, model);
+  if (isHd(url)) evictHd();
   return model;
+}
+
+/** Drop the least recently used detailed models over `HD_KEEP`, freeing their GPU memory. */
+function evictHd(): void {
+  const hd = [...cache.keys()].filter(isHd);
+  for (const url of hd.slice(0, Math.max(0, hd.length - HD_KEEP))) {
+    const model = cache.get(url)!;
+    cache.delete(url);
+    // a clone still on screen shares these; three.js uploads them again if it draws them
+    void model.then(release, () => {});
+  }
+}
+
+function release(root: THREE.Object3D): void {
+  root.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    mesh.geometry.dispose();
+    for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+      for (const value of Object.values(material)) if (value instanceof THREE.Texture) value.dispose();
+      material.dispose();
+    }
+  });
 }
 
 /**

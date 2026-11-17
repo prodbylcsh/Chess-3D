@@ -138,7 +138,7 @@ username, rank) and the coin balance.
 | Casual | ✅ (M6) | Matchmaking against any online player. Pays coins, no MMR. |
 | Ranked | ⏸ built (M6), closed | Matchmaking against players of similar MMR. Changes MMR and pays coins. **Closed until the platform has enough players** (October 2026): the Play hub shows it with a "Soon" badge and the server refuses ranked searches. |
 | Tournaments | ⏸ | Coin entry fee, brackets. Later. |
-| Play a friend | 🟡 | Invite from the friends list (🟡 demo list), play on one device (✅), or create a link anyone can open (✅ live online). |
+| Play a friend | 🟡 | Invite from the friends list (🟡 demo list; the invite is for that friend only), play on one device (✅), or create a link anyone can open (✅ live online). A rematch is for the opponent only. |
 | Play vs AI | ✅ | Built-in engine with difficulty levels, runs in the browser. No MMR, no coins. |
 | Play for coins | ✅ (M6) | Both players stake the same amount; the winner takes the pot minus a fee. |
 
@@ -234,7 +234,11 @@ been blocked by them. Players always see their own games.
 `game_watch`, the spectators' copy of every game (the delayed moves, names, clocks, result,
 rematch; no draw offers), and `can_watch(white, black)` decides who may read it (row
 security; realtime follows it). The game row itself (`games`) is readable only by its
-players, and by anyone while it waits for its second player (the invite link). The rules
+players. A game waiting for its second player is read only by its id (`waiting_game`, the
+invite link): nobody can list waiting games, in `games` or in `game_watch` (spectators see a
+waiting game only when it is a rematch). A friend's invite and a rematch are for one player
+(`games.invited_id`): only they may take the free seat, and only a game's players get its
+rematch (audit, November 2026; migration `20261117090000_invites_reversals.sql`). The rules
 and numbers are in `_shared/spectate.ts`, which `tests/spectate.test.ts` compares with the
 SQL; `tests/spectate.e2e.ts` covers the delay, the settings, blocks and realtime.
 
@@ -435,7 +439,10 @@ Decided (October 2026):
 - **Progress:** the next level opens when the previous one is solved; solved levels can be
   replayed.
 - **Server checks** (`puzzles` function): a puzzle must be opened before it is solved
-  (`puzzle_attempts`), at least 2 seconds pass between the two, the moves must solve it,
+  (`puzzle_attempts`, one attempt per puzzle, so a second tab doesn't overwrite the first;
+  a solve or reveal uses up exactly the attempt it checked; the daily puzzle's attempt
+  carries its UTC day, and after midnight the app answers "A new daily puzzle is out"
+  instead of scoring the old one), at least 2 seconds pass between the two, the moves must solve it,
   levels go in order, and the coins, bonus, unlock and reward are paid in one transaction
   (`solve_puzzle`, `unlock_module`, `complete_module`; ledger reasons `puzzle`,
   `puzzle_bonus`, `puzzle_unlock`, `puzzle_reward`; reward items in `player_items` with
@@ -449,7 +456,9 @@ Decided (October 2026):
   the app keeps the guest's refresh token (`src/net/guest.ts`) and the `puzzles` function's
   `claim` replays the guest's solves into the account with the account's rules (a puzzle it
   solved already pays nothing; a bonus every 10 by its own count) and adds daily puzzles after
-  the account's last one to its streak; then the guest's rows are deleted. Guests are removed
+  the account's last one to its streak; then the guest's rows are deleted. A guest's progress
+  goes to one account only, the first to claim it (`guest_claims`); that account may retry a
+  claim that failed half-way, any other gets nothing. Guests are removed
   after 6 months without a game move or a puzzle (`cleanup_inactive`).
 
 ### 4.3 Learn ✅ (all 8 chapters, 41 lessons, October 2026)
@@ -582,7 +591,9 @@ Paddle's fee is 5% + $0.50 per payment, which is why the smallest pack is about 
 Before paying, the player ticks that they want the coins at once and lose the right of
 withdrawal once delivered (EU digital content). Refunds: within 14 days on request if the
 balance still holds all the pack's coins (they are removed), later only where the law
-requires; a refund or chargeback through Paddle removes the coins (down to zero).
+requires; a refund or chargeback through Paddle removes the coins (down to zero). Paddle's
+notifications can come in any order: a refund that arrives before the payment is kept
+(`payment_reversals`) and the payment then credits nothing (coins and Premium periods alike).
 Players under 18 need a parent's consent (Terms §6). Registered, onboarded players only.
 
 Price ranges per category (enforced by `tests/shop.test.ts`):
@@ -1231,12 +1242,14 @@ player_awards   player_id, award_id, earned_at, game_id  (✅; definitions in co
 Spectating (✅, 4.1): `game_watch` (the spectators' copy of each game, kept by a trigger on
 `games`, moves delayed in running ranked and coin games; readable where `can_watch` allows)
 and `profiles.watch` (everyone | friends | nobody). `games` itself is readable by its
-players, and by anyone while it waits for a second player.
+players; a waiting game only by its id (`waiting_game`). `games.invited_id`: an invite for
+one player (a friend's invite, a rematch).
 
 Puzzles (✅): `puzzle_solves` (player_id, module, idx, best stars, first solved_at),
 `puzzle_modules` (player_id, module, unlocked_at, completed_at, reward_item,
-reward_coins) and `puzzle_attempts` (the puzzle a player has open and since when; server
-only). Players read their own solves and modules; every write goes through the `puzzles`
+reward_coins), `puzzle_attempts` (each puzzle a player has open, since when, its id and,
+for the daily puzzle, its day; server only) and `guest_claims` (which account a guest's
+progress went to: one account per guest; server only). Players read their own solves and modules; every write goes through the `puzzles`
 function.
 
 Coins and MMR are only ever changed by server functions, in the same transaction that

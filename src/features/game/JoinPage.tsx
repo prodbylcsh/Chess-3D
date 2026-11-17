@@ -35,6 +35,8 @@ export default function JoinPage() {
         if (!r) return setProblem(t('This invite is no longer valid.'));
         // already playing in it, or it is full: go straight to the board
         if (online.sideOf(r) || r.status !== 'waiting') return navigate(`/game/online/${r.id}`, { replace: true });
+        // an invite for one player (a friend's invite, a rematch)
+        if (r.invited_id && r.invited_id !== online.userId) return setProblem(t('This invite is for another player. Sign in with the account it was sent to.'));
         setRow(r);
       } catch (err) {
         if (live) setProblem((err as Error).message);

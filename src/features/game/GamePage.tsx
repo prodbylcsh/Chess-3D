@@ -103,10 +103,14 @@ export default function GamePage({ watch = false }: { watch?: boolean }) {
   }, [engine, modeId, id, level, color, puzzleIndex, review, navigate]);
 
   useEffect(() => {
-    if (!mode) return;
+    if (!mode || !engine) return;
     mode.start();
-    return () => mode.dispose();
-  }, [mode]);
+    return () => {
+      mode.dispose();
+      // the next mode is a new game session: work the old one left running must not reach it
+      engine.game.abort();
+    };
+  }, [mode, engine]);
 
   // a match that no longer exists (e.g. after a reload on the demo back-end)
   useEffect(() => {
