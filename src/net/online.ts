@@ -21,8 +21,13 @@ export class OnlineError extends Error {
 
 /** How often a watched game is re-read while realtime is not connected (it may have missed updates). */
 const WATCH_POLL_MS = 4000;
-/** …and while it is: only a safety net (realtime can drop an update without disconnecting). */
-const WATCH_POLL_CONNECTED_MS = 20_000;
+/**
+ * …and while it is: only a safety net (realtime can drop an update without disconnecting),
+ * except in the first minute after connecting, when a realtime server woken from a quiet
+ * spell most often misses updates.
+ */
+const WATCH_POLL_CONNECTED_MS = 10_000;
+const WATCH_WARMUP_MS = 60_000;
 
 export interface Watcher<R = GameRow> {
   /** Every newer version of the game row, in order (also sent once on (re)connect). */
@@ -146,6 +151,7 @@ export class Online {
   private follow<R extends { version: number }>(table: string, id: string, read: () => Promise<R | null>, watcher: Watcher<R>): () => void {
     let version = -1;
     let connected = false;
+    let connectedAt = 0;
     let reading = false;
     let lastRead = 0;
     const push = (row: R) => {
@@ -172,6 +178,7 @@ export class Online {
       .subscribe((status) => {
         connected = status === 'SUBSCRIBED';
         if (!connected) return;
+        connectedAt = Date.now();
         void channel.track({ at: Date.now() });
         // catch up on anything that happened before (or while) we were disconnected
         catchUp();
@@ -180,7 +187,8 @@ export class Online {
     // that was idle (the first game after a quiet spell). Re-read the row now and then:
     // often while realtime is down, rarely while it is up; `push` ignores versions we have.
     const poll = setInterval(() => {
-      if (Date.now() - lastRead >= (connected ? WATCH_POLL_CONNECTED_MS : WATCH_POLL_MS) - 100) catchUp();
+      const relaxed = connected && Date.now() - connectedAt > WATCH_WARMUP_MS;
+      if (Date.now() - lastRead >= (relaxed ? WATCH_POLL_CONNECTED_MS : WATCH_POLL_MS) - 100) catchUp();
     }, WATCH_POLL_MS);
     return () => {
       clearInterval(poll);

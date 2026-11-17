@@ -54,7 +54,7 @@ The user shared an audit (revision `3ea6f24`) and asked for the fixes. Done:
   Migrations `20261117090000_invites_reversals.sql`, `20261117100000_puzzle_attempts_claims.sql`.
 - **Speed**: the module page (world map, three.js) is lazy; the entry JS went from ~1.83 MB to
   ~1.04 MB (no three.js). Model prefetch skips data-saver / slow lines. At most 8 HD shop models
-  cached. Game polling every 20 s while realtime is connected (4 s while not), badges every
+  cached. Game polling every 4 s while realtime is down and in the first minute, then 10 s, badges every
   45 s only while the app is visible. Vite 8.3.5 (the `picomatch` advisory has no fix yet; dev only).
 - Legal: Privacy (EN, CS) dated 17 November 2026 (invite recipient, early refunds, guest claim).
 
